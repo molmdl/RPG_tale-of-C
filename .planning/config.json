@@ -1,0 +1,38 @@
+{
+  "mode": "yolo",
+  "depth": "comprehensive",
+  "parallelization": true,
+  "commit_docs": true,
+  "model_profile": "quality",
+  "profiles": {
+    "active_profile": "quality",
+    "presets": {
+      "quality": {
+        "planning": "opencode/glm-4.7-free",
+        "execution": "opencode/glm-4.7-free",
+        "verification": "opencode/glm-4.7-free"
+      },
+      "balanced": {
+        "planning": "opencode/glm-4.7-free",
+        "execution": "opencode/minimax-m2.1-free",
+        "verification": "opencode/glm-4.7-free"
+      },
+      "budget": {
+        "planning": "opencode/minimax-m2.1-free",
+        "execution": "opencode/grok-code",
+        "verification": "opencode/minimax-m2.1-free"
+      }
+    },
+    "custom_overrides": {
+      "quality": {},
+      "balanced": {},
+      "budget": {}
+    },
+    "note": "opencode.json is pre-configured by the user with synthetic/hf:zai-org/GLM-5.2 for all gsd-* agents. Model profile here is nominal only; do not regenerate opencode.json without explicit user request."
+  },
+  "workflow": {
+    "research": true,
+    "plan_check": true,
+    "verifier": true
+  }
+}
