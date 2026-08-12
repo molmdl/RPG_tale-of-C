@@ -92,17 +92,69 @@ Explicitly excluded. Documented to prevent scope creep.
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
+Which phases cover which requirements. Updated during roadmap creation (2026-08-12). See `.planning/ROADMAP.md` for phase goals + success criteria.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| PLGN-01 | Phase 6 — Qt UI + MVP | Pending |
+| PLGN-02 | Phase 6 — Qt UI + MVP | Pending |
+| PLGN-03 | Phase 1 — Foundations & Citation Gate | Pending |
+| CHAR-01 | Phase 8 — Fatty Acid + Alcohol Characters | Pending |
+| CHAR-02 | Phase 6 — Qt UI + MVP | Pending |
+| STORY-01 | Phase 2 — Story Engine Core | Pending |
+| STORY-02 | Phase 8 — Fatty Acid + Alcohol Characters | Pending |
+| STORY-03 | Phase 7 — All Glucose Endings | Pending |
+| STORY-04 | Phase 2 — Story Engine Core | Pending |
+| STORY-05 | Phase 9 — Anaerobic + Full Cast | Pending |
+| STORY-06 | Phase 7 — All Glucose Endings | Pending |
+| STORY-07 | Phase 7 — All Glucose Endings | Pending |
+| EDIT-01 | Phase 4 — Editing + Protonation + Restore | Pending |
+| EDIT-02 | Phase 4 — Editing + Protonation + Restore | Pending |
+| EDIT-03 | Phase 4 — Editing + Protonation + Restore | Pending |
+| EDIT-04 | Phase 4 — Editing + Protonation + Restore | Pending |
+| EDIT-05 | Phase 4 — Editing + Protonation + Restore | Pending |
+| CAST-01 | Phase 9 — Anaerobic + Full Cast | Pending |
+| CAST-02 | Phase 3 — PyMOL cmd Layer | Pending |
+| CAST-03 | Phase 4 — Editing + Protonation + Restore | Pending |
+| CAST-04 | Phase 6 — Qt UI + MVP | Pending |
+| CAST-05 | Phase 6 — Qt UI + MVP | Pending |
+| SAVE-01 | Phase 2 — Story Engine Core | Pending |
+| SAVE-02 | Phase 2 — Story Engine Core | Pending |
+| ACH-01 | Phase 6 — Qt UI + MVP | Pending |
+| ACH-02 | Phase 6 — Qt UI + MVP | Pending |
+| DOC-01 | Phase 9 — Anaerobic + Full Cast | Pending |
+| DOC-02 | Phase 9 — Anaerobic + Full Cast | Pending |
+| DOC-03 | Phase 6 — Qt UI + MVP | Pending |
+| DOC-04 | Phase 1 — Foundations & Citation Gate | Pending |
+| CITE-01 | Phase 5 — Pre-Content Key Decisions (parallel) | Pending |
+| CITE-02 | Phase 1 — Foundations & Citation Gate | Pending |
 
 **Coverage:**
-- v1 requirements: 34 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 34 ⚠️
+- v1 requirements: 32 total (previously stated as 34 — corrected: PATH-01 and STAT-01 are v2, not v1)
+- Mapped to phases: 32 ✓
+- Unmapped: 0 ✓
+- No orphans, no duplicates ✓
+
+**Per-phase load:**
+- Phase 1: 3 reqs (PLGN-03, CITE-02, DOC-04)
+- Phase 2: 4 reqs (STORY-01, STORY-04, SAVE-01, SAVE-02)
+- Phase 3: 1 req (CAST-02)
+- Phase 4: 6 reqs (EDIT-01..05, CAST-03)
+- Phase 5: 1 req (CITE-01) — parallel track
+- Phase 5.1: 0 reqs (INSERTED design phase — story graph skeleton + MC-choice/edit-node integration contracts; enables STORY-01/03/06/07 + EDIT-04 downstream)
+- Phase 5.2: 0 reqs (INSERTED design phase — hero highlight + scene templates + cast-reveal convention; enables CHAR-02/CAST-05 downstream)
+- Phase 6: 8 reqs (PLGN-01, PLGN-02, CHAR-02, CAST-04, CAST-05, DOC-03, ACH-01, ACH-02)
+- Phase 7: 3 reqs (STORY-03, STORY-06, STORY-07)
+- Phase 8: 2 reqs (CHAR-01, STORY-02)
+- Phase 9: 4 reqs (STORY-05, CAST-01, DOC-01, DOC-02)
+- Phase 10: 0 reqs (polish phase completing prior content/engineering requirements; documentation finalization moved to Phase 11)
+- Phase 11: 0 reqs (documentation finalization/verification phase updating + verifying DOC-01, DOC-02 against shipped reality, per the Phase 10 0-requirement precedent)
+- Total mapped: 32 ✓ (across 14 phase rows; Phases 5.1, 5.2, 10, and 11 own 0 requirements — design/polish/finalization phases, per the established precedent)
+
+**Design-phase note (Phases 5.1 + 5.2):** These INSERTED phases own no requirements but produce reviewable design artifacts that Phases 6–9 implement/extend. They were added in revision (2026-08-12) to make the story graph topology + gameplay-integration contracts (5.1) and the 3D visual language (5.2) explicit before the overloaded first-Qt phase (Phase 6), directly addressing user concerns about story design, the MC-vs-editing distinction, editing↔story integration, and cast/hero representation.
+
+**Finalization-phase note (Phase 11):** Phase 11 owns no requirements but verifies + updates DOC-01, DOC-02 (created in Phase 9) against the final shipped game content. It was added in revision (2026-08-12) to separate documentation finalization + verification from Phase 10's content polish, making the docs-accuracy release gate an explicit phase rather than implicit in the polish phase. It is the LAST release gate before ship.
 
 ---
 *Requirements defined: 2026-08-12*
-*Last updated: 2026-08-12 after initial definition*
+*Last updated: 2026-08-12 after roadmap revision (Phase 11 inserted — documentation finalization + verification split out of Phase 10; 0-requirement finalization phase verifying DOC-01/DOC-02; no requirement remapping, coverage unchanged at 32/32)*
