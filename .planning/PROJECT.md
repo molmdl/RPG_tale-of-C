@@ -101,6 +101,9 @@ cast and scientifically validated chemistry as the plot.
 | Audience = educators + students | Drives two-layer text (dramatic + teaching) and seedable RNG for classroom reproducibility | — Pending |
 | Source approval = per-claim checkpoint | User chose the safest of three options; slowest but eliminates fabricated-science risk | — Pending |
 | Success measure for v1 = all endings reachable for all characters | User confirmed the most ambitious of three options | — Pending |
+| ATP/True-Ending carbon-fate reframing | Research (Pitfall 4) flagged a science conflict: a carbon atom in respiration exits as CO2, not as ATP carbon. The spec's "True ending = become ATP" needs reconciliation (e.g. hero *enables* ATP synthesis vs hero *is* ATP) before narrative authoring. Resolve at content-research phase. | — Pending |
+| C14-decay timescale framing | Research (Pitfall 9) flagged that C14 radioactive decay (half-life ~5730 yr) is a real bad-ending trigger but needs story-appropriate framing. Resolve at content-research phase. | — Pending |
+| Batch-by-source vs strict per-claim approval | Research (Pitfall 7) flagged per-claim approval as the timeline-dominating risk. Batch-by-source amortization could help, but the user chose per-claim checkpoint. Process decision: keep strict per-claim, or allow batching per source. | — Pending |
 
 ---
-*Last updated: 2026-08-12 after initialization*
+*Last updated: 2026-08-12 after research synthesis*
