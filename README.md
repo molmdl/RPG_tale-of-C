@@ -1,8 +1,11 @@
 # RPG: Tale of C
 
+> This is a vibe-coding project. While the human attempt to verify the source of all 
+> contents, if you find any issues please contact me.
+>
 > **⚠️ Under Development**
 > This project is in the early planning stage. No runnable plugin code exists yet.
-> See `.planning/ROADMAP.md` for the build plan.
+> See `.planning/ROADMAP.md` for the build plan and progress.
 
 ## Description
 
@@ -17,7 +20,9 @@ multiple possible fates for the hero await — every step brings them closer to 
 and every edit has consequences. Built for biochemistry educators and students:
 dramatic enough to engage, scientifically rigorous enough to teach.
 
-> *Featuring high-resolution, real protein models in our cast.*
+## Featuring
+
+* **High-resolution, real protein models in our cast.**
 
 ## Status
 
