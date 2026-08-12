@@ -1,4 +1,4 @@
-# C14: Tale of C
+# RPG: Tale of C
 
 > **⚠️ Under Development**
 > This project is in the early planning stage. No runnable plugin code exists yet.
@@ -6,7 +6,7 @@
 
 ## Description
 
-**C14: Tale of C** is a PyMOL 2.5.0 plugin that turns cellular respiration into a
+**RPG: Tale of C** is a PyMOL 2.5.0 plugin that turns cellular respiration into a
 role-playing game. The player controls a C14 atom — the hero — choosing a starting
 "character" (glucose, fatty acid, or alcohol) and guiding it through the respiratory
 pathway via text-based multiple choice, limited molecule editing, and visual

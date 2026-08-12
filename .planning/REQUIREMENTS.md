@@ -1,4 +1,4 @@
-# Requirements: C14: Tale of C
+# Requirements: RPG: Tale of C
 
 **Defined:** 2026-08-12
 **Core Value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP, storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.

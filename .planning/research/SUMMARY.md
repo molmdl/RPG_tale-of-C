@@ -1,6 +1,6 @@
-# Research Summary — C14: Tale of C
+# Research Summary — RPG: Tale of C
 
-**Project:** C14: Tale of C — A PyMOL 2.5.0 Respiratory-Pathway RPG Plugin
+**Project:** RPG: Tale of C — A PyMOL 2.5.0 Respiratory-Pathway RPG Plugin
 **Synthesized:** 2026-08-12
 **Inputs:** STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md (4 parallel research passes)
 **Overall confidence:** **HIGH** for engineering/architecture/API claims (source-verified against `tmp/pymol-src/`); **MEDIUM-HIGH** for feature landscape (verified comparators); **MEDIUM** for educational pedagogy; **gated** for all scientific content (every claim pending human per-claim approval per spec.md).
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-C14: Tale of C is a **PyMOL 2.5.0 desktop plugin** that teaches cellular respiration as a branching-narrative RPG. The player projects into a C14 atom (one of 3 starting characters: glucose, fatty acid, or alcohol — plus an anaerobic path) and navigates real pathway branch points toward 4 ending tiers (True / Good / Normal / Bad), with RNG-weighted stochastic steps (TCA shuffle) that are **seedable for classroom reproducibility**. The game's pedagogical thesis is *conceptual play + empathetic embodiment + risk-free experimentation with consequences* (Barab 2009 via Wikipedia MEDIUM), and its competitive gap is the **narrative + consequence + identification layer on top of curated, cited PDB content** — neither Reactome (a curated browser, not a game) nor Foldit (a citizen-science optimization game with leaderboards) occupies this space.
+RPG: Tale of C is a **PyMOL 2.5.0 desktop plugin** that teaches cellular respiration as a branching-narrative RPG. The player projects into a C14 atom (one of 3 starting characters: glucose, fatty acid, or alcohol — plus an anaerobic path) and navigates real pathway branch points toward 4 ending tiers (True / Good / Normal / Bad), with RNG-weighted stochastic steps (TCA shuffle) that are **seedable for classroom reproducibility**. The game's pedagogical thesis is *conceptual play + empathetic embodiment + risk-free experimentation with consequences* (Barab 2009 via Wikipedia MEDIUM), and its competitive gap is the **narrative + consequence + identification layer on top of curated, cited PDB content** — neither Reactome (a curated browser, not a game) nor Foldit (a citizen-science optimization game with leaderboards) occupies this space.
 
 **The recommended approach is `stdlib + pymol.Qt + pymol.Qt.utils + numpy + pymol.cmd` — ZERO new dependencies for v1.** Every gameplay requirement (text MC, molecule editing, PDB/PubChem fetch, scene restore, seedable RNG, JSON save/load, achievement board) is covered by what PyMOL 2.5.0 already ships. The standout discovery is `pymol.Qt.utils` (`AsyncFunc`, `MainThreadCaller`, `PopupOnException`, `getMonospaceFont`, `loadUi`) — shipped utilities that remove any need for a third-party async/concurrency library. Physiological-pH protonation is the one genuine gap (PyMOL's `h_add` is valence-only, not pH-aware), but the spec's **lookup-table edit-routing model absorbs it**: hardcode reaction-relevant protonation states as lookup-table entries (human-verified per-claim) instead of vendoring a protonation engine. This keeps the install trivial AND is scientifically safer than an automated pH engine. The architecture is a strict **3-tier testability layering** (pure-Python domain → `pymol.cmd` molecular layer → `pymol.Qt` UI layer) so ~70% of the codebase is unit-testable in WSL on Python 3.6.9, the `pymol.cmd` layer is headless-testable via `run-conda-pymol.bat -cq`, and only the Qt layer is human-verify-only.
 
@@ -218,6 +218,6 @@ Sibling project "bioCHEMeleon" tool-output logs — corroboration of 3.6.9 synta
 
 ---
 
-*Synthesis complete for: C14: Tale of C — PyMOL 2.5.0 Respiratory-Pathway RPG Plugin*
+*Synthesis complete for: RPG: Tale of C — PyMOL 2.5.0 Respiratory-Pathway RPG Plugin*
 *Synthesized: 2026-08-12*
 *Source files: STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md (4 parallel research passes)*

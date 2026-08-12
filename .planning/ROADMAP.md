@@ -1,4 +1,4 @@
-# Roadmap: C14 — Tale of C
+# Roadmap: RPG: Tale of C
 
 ## Overview
 
@@ -137,7 +137,7 @@ Plans:
 **Depends on**: Phases 2, 3, 4 (engine + molecular layer); Phase 5 (approved glucose content + resolved Key Decisions); Phase 5.1 (glucose story graph skeleton + integration contracts); Phase 5.2 (hero/cast representation convention + scene templates)
 **Requirements**: PLGN-01, PLGN-02, CHAR-02, CAST-04, CAST-05, DOC-03, ACH-01, ACH-02
 **Success Criteria** (what must be TRUE):
-  1. The plugin installs via Plugin Manager (package dir → .zip → startup/) and on PyMOL restart a "C14: Tale of C" menu item appears; the main window opens with character selection, story text, choice panel, and cast/help/save/load/achievement controls (human-verify)
+  1. The plugin installs via Plugin Manager (package dir → .zip → startup/) and on PyMOL restart a "RPG: Tale of C" menu item appears; the main window opens with character selection, story text, choice panel, and cast/help/save/load/achievement controls (human-verify)
   2. Starting a glucose game highlights the C14 hero atom in the loaded 3D structure (color + label), and as the player advances, specific residue representations appear at the relevant pathway stages (human-verify)
   3. The player can reach a True ending and a Bad ending for glucose via text multiple-choice; a save mid-game and load restores the exact session (story position + RNG state + loaded structures + view) (human-verify)
   4. On first play, a one-time bulk-download prompt fetches the large structures needed (with progress + cancel + retry + offline fallback that locks only affected characters); small/critical structures are bundled so the game starts instantly (human-verify)

@@ -76,7 +76,7 @@ The plugin is a **layered single-process application** running inside PyMOL's Py
 ```
 RPG_tale-of-C/
 ├── c14/                              # Plugin package (the installable unit)
-│   ├── __init__.py                   # __init_plugin__(app) -> addmenuitemqt('C14: Tale of C', ...)
+│   ├── __init__.py                   # __init_plugin__(app) -> addmenuitemqt('RPG: Tale of C', ...)
 │   ├── engine.py                     # GameEngine turn loop (pure-Py)
 │   ├── state.py                      # GameState + JSON (de)serialization (pure-Py)
 │   ├── rng.py                        # Seedable RngEngine (pure-Py)
@@ -699,5 +699,5 @@ This is a desktop educational plugin, not a web service. "Scaling" here means **
 - **Stat/XP model** (deferred to v2): if "luck that affects host condition" is validated scientifically, the architecture accommodates it as additional `GameState.flags` + `cond` expressions — no structural change needed.
 
 ---
-*Architecture research for: PyMOL-plugin branching-narrative RPG (C14: Tale of C)*
+*Architecture research for: PyMOL-plugin branching-narrative RPG (RPG: Tale of C)*
 *Researched: 2026-08-12*

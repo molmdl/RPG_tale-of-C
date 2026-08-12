@@ -1,6 +1,6 @@
 # Technology Stack
 
-**Project:** C14: Tale of C — PyMOL 2.5.0 respiratory-pathway RPG plugin
+**Project:** RPG: Tale of C — PyMOL 2.5.0 respiratory-pathway RPG plugin
 **Researched:** 2026-08-12
 **Overall confidence:** **HIGH** (core APIs verified line-by-line in `tmp/pymol-src/modules/pymol/`; only the PyMOL-bundled Python minor version and the optional-vendor protonation tools are MEDIUM/LOW)
 
@@ -84,7 +84,7 @@ Build a **package-style PyMOL plugin** (a directory with `__init__.py`) using **
 ### Discovery (how PyMOL finds plugins)
 - On startup, `plugins.initialize()` scans `startup.__path__` for (a) `.py` files and (b) directories containing `__init__.py`. Names starting with `.` or `_` are skipped (`__init__.py:384-385`).
 - For each found module, `PluginInfo.load()` does `__import__(mod_name)` then calls **`__init_plugin__(pmgapp)`** if present, else `__init__(pmgapp)` if it's a plain function (`__init__.py:320-324`).
-- **Modern contract:** define `def __init_plugin__(self):` at module top level; inside it call `from pymol.plugins import addmenuitemqt; addmenuitemqt('C14: Tale of C', launch_callback)`. This is exactly `dynoplot.py:445-447`.
+- **Modern contract:** define `def __init_plugin__(self):` at module top level; inside it call `from pymol.plugins import addmenuitemqt; addmenuitemqt('RPG: Tale of C', launch_callback)`. This is exactly `dynoplot.py:445-447`.
 
 ### Install paths (where the plugin lives)
 - **Linux:** `~/.pymol/startup/`
@@ -101,13 +101,13 @@ Build a **package-style PyMOL plugin** (a directory with `__init__.py`) using **
 1. Package the plugin as a directory `c14_tale_of_c/` whose top-level `__init__.py` defines `__init_plugin__`. Bundle submodules (`story/`, `game/`, `data/pdb/`, ...) inside it.
 2. Zip it as `c14_tale_of_c.zip` (zip must contain exactly one package dir with `__init__.py`; `installation.py:118-136` enforces "single package" — filter out `tests/` dirs if needed).
 3. In PyMOL GUI: **Plugin → Plugin Manager → "Install New" tab → "Browse..." (`b_local`) → select `c14_tale_of_c.zip`**. PyMOL extracts it to the user startup dir and calls `info.load(force=1)` (`managergui_qt.py:45`, `installation.py:342`).
-4. Menu item **"C14: Tale of C"** appears under the **Plugin** menu. Restart PyMOL if it doesn't show immediately.
+4. Menu item **"RPG: Tale of C"** appears under the **Plugin** menu. Restart PyMOL if it doesn't show immediately.
 5. **Developer shortcut (no zip):** copy/symlink the `c14_tale_of_c/` directory directly into `~/.pymol/startup/` (or `%APPDATA%\pymol\startup\`). PyMOL auto-discovers it on next launch. Best for iteration.
 
 ### Plugin metadata (optional but recommended)
 `PluginInfo.get_metadata()` (`__init__.py:193-210`) parses a `# Key: Value` header block at the top of the file. Add:
 ```python
-# Title: C14: Tale of C
+# Title: RPG: Tale of C
 # Version: 0.1.0
 # Author: <name>
 # Citation-Required: No

@@ -1,4 +1,4 @@
-# C14: Tale of C — A PyMOL Respiratory-Pathway RPG
+# RPG: Tale of C — A PyMOL Respiratory-Pathway RPG
 
 ## What This Is
 
