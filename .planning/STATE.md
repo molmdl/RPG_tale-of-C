@@ -5,32 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — Phase 1 verified ✓ (15/15 must-haves passed)
+**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — executing; Plan 01 done (Wave 1 foundation modules)
 
 ## Current Position
 
-Phase: 1 of 13 (Foundations & Testability Boundary + Citation Gate) — COMPLETE ✓
-Plan: 3 of 3 complete in current phase (01-01 + 01-02 + 01-03 all done — Wave 1 + Wave 2)
-Status: Phase complete + verified (15/15 must-haves passed; VERIFICATION.md status: passed)
-Last activity: 2026-08-13 — Completed quick task 001: resolved Pitfall 4 (C14/ATP carbon-fate conflict) via soul-jump reframing + cleanup across planning docs
+Phase: 2 of 13 (Story Engine Core — Architecture Proof in WSL)
+Plan: 1 of 5 complete in current phase (02-01 done — model + rng + state foundation; 02-02..02-05 remain)
+Status: In progress
+Last activity: 2026-08-13 — Completed 02-01-PLAN.md (story data model + RngEngine + GameState; 39 tests pass)
 
-Progress: [███░░░░░░░░] ~6% (3 plans complete; overall total TBD — most phases not yet planned)
+Progress: [████░░░░░░░] ~8% (4 plans complete; overall total TBD — most phases not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 19 min
-- Total execution time: 0.93 hours
+- Total plans completed: 4
+- Average duration: 15 min
+- Total execution time: 1.00 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundations & Citation Gate | 3/3 ✓ | 56 min | 19 min |
+| 2. Story Engine Core | 1/5 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (32 min), 01-03 (20 min), 01-02 (4 min)
+- Last 5 plans: 01-01 (32 min), 01-03 (20 min), 01-02 (4 min), 02-01 (4 min)
 - Trend: Wave 2 plans faster than Wave 1 (reference designs pre-verified on 3.6.9; near-verbatim adoption + read-only verification; no debugging needed)
 
 *Updated after each plan completion*
@@ -62,6 +63,10 @@ Recent decisions affecting current work:
 - [Execution 01-02]: CWD-independence proven via real `os.chdir(tempfile.mkdtemp())` in setUp — honest end-to-end proof, better than `mock.patch('os.getcwd')` which only proves the call site. Existence-of-fixture-from-foreign-CWD IS the proof; adopted near-verbatim from 01-RESEARCH-paths.md Pattern 2.
 - [Execution 01-02]: README.md satisfies DOC-04 already (verified, NOT modified) — 01-RESEARCH-paths.md read the 57-line file in full; banner + description + TBD: Installation/References/Cast all present. Read-only verification task produced no commit (no changes; respects CITE-01 gate and later-phase content ownership).
 - [Execution 01-02]: Bundled data lives inside `c14/data/` (ships in PyMOL Plugin Manager zip); distinct from repo-root `data/` (Plan 03's citations.json source/registry file, read at pre-ship time). Two directories, two roles — established early to avoid future confusion.
+- [Execution 02-01]: Plain classes (NOT @dataclass) for Node/Choice/MolAction/RngEngine/GameState — 3.6.9 has no dataclasses module (Phase 1 Pitfall 1); matches CitationRegistry precedent. ARCHITECTURE.md shows @dataclass but the plan explicitly overrides for 3.6 compat; field names/semantics kept near-verbatim.
+- [Execution 02-01]: MolAction is pure data (op/target/args) with NO pymol import — the testability-boundary carrier. The future c14/pymol_layer/molops.py (Phase 3/4) translates it to cmd.*. Domain tier never names a pymol type (ARCHITECTURE.md Pattern 1 / Anti-Pattern 1, enforced by the AST gate).
+- [Execution 02-01]: RngEngine random-mode picks seed via `secrets.randbits(31)` (3.6-safe stdlib) and records it on .seed for replay. Single random.Random per playthrough; ALL stochastic draws go through it (Anti-Pattern 7). get_state/set_state/from_state convert tuples<->lists for JSON; verified the exact next draw survives JSON round-trip on 3.6.9.
+- [Execution 02-01]: GameState stores seed + rng_state as plain data (does NOT hold a live RngEngine); the engine syncs rng.get_state() into state before save and rebuilds via RngEngine.from_state(seed, rng_state) on load. to_dict key order fixed to ARCHITECTURE.md GameState JSON for diff-stable saves; from_dict uses .get defaults for partial/older-save tolerance. finished=True (truthy bool) when ending reached, None while playing.
 
 ### Pending Todos
 
@@ -86,6 +91,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-13 (Quick task 001 — resolved Pitfall 4 via soul-jump reframing + cleanup across 8 planning docs)
-Stopped at: Quick task 001 complete — Pitfall 4 RESOLVED (electrons-as-soul → ATP via ETC after RNG-weighted TCA path); Pitfall 9 (C14 decay) still Pending. Phase 1 remains COMPLETE; ready for Phase 2.
+Last session: 2026-08-13 (Phase 2 Plan 01 — story data model + RngEngine + GameState foundation modules)
+Stopped at: Completed 02-01-PLAN.md — Wave 1 foundation (model/rng/state) in place; 39 tests pass; AST gate green. Ready for 02-02-PLAN.md (story graph loader).
 Resume file: None

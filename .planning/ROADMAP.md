@@ -59,7 +59,7 @@ Plans:
 **Plans**: 5 plans in 4 waves
 
 Plans:
-- [ ] 02-01-PLAN.md — Foundation: story data model (Node/Choice/MolAction) + RngEngine + GameState (Wave 1)
+- [x] 02-01-PLAN.md — Foundation: story data model (Node/Choice/MolAction) + RngEngine + GameState (Wave 1) ✓
 - [ ] 02-02-PLAN.md — Story graph loader + StoryInterpreter + minimal 2-node story (Wave 2)
 - [ ] 02-03-PLAN.md — Reachability checker + graph validator + citation gate refactor (Wave 2)
 - [ ] 02-04-PLAN.md — SaveStore + GameEngine turn loop with mock MolAction sink (Wave 3)
