@@ -15,7 +15,7 @@ rigorous enough to teach.
 ## Core Value
 
 The player experiences cellular respiration as a story with consequences — every
-choice and edit on the C14 hero either advances them toward a destiny (ATP, storage,
+choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage,
 CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the
 cast and scientifically validated chemistry as the plot.
 
@@ -30,7 +30,7 @@ cast and scientifically validated chemistry as the plot.
 - [ ] Plugin loads in PyMOL 2.5.0 via the modern `pymol.Qt` interface (PyQt5); no legacy `pmgqt`/Tk
 - [ ] Player can start a new game choosing one of 3 characters: glucose, fatty acid, alcohol
 - [ ] Anaerobic pathway is represented in the game structure (design pending research — see Key Decisions)
-- [ ] All 4 ending tiers reachable for each character: True (ATP), Good (fatty-acid storage / amino acid / etc.), Normal (CO2), Bad (lost connection / released from host / host death / radioactive decay / cycle-trapped)
+- [ ] All 4 ending tiers reachable for each character: True (hero's electrons/"soul" harvested into ATP via ETC after the RNG-weighted TCA path — carbon body released as CO2), Good (carbon body retained pre-oxidation — fatty-acid storage / amino acid / etc.), Normal (CO2 released without the full electron-harvest destiny arc), Bad (lost connection / released from host / host death / radioactive decay / cycle-trapped)
 - [ ] RNG-weighted stochastic steps for pathways known to shuffle (e.g. TCA cycle) — reproducible-seedable for teaching
 - [ ] Text-based multiple-choice gameplay drives the story forward
 - [ ] Limited molecule editing: player can make point mutations, substrate edits, and protonation-state changes
@@ -49,7 +49,7 @@ cast and scientifically validated chemistry as the plot.
 
 ### Out of Scope
 
-- **Stat/XP/leveling system** — deferred to v2. The scientifically-sound framing is "luck that affects host condition" rather than energy (since ATP is the True ending, energy can't double as XP). v1 focuses on the already-comprehensive content scope.
+- **Stat/XP/leveling system** — deferred to v2. The scientifically-sound framing is "luck that affects host condition" rather than energy (since the True ending is the hero's electrons being harvested into ATP, energy can't double as XP). v1 focuses on the already-comprehensive content scope.
 - **Real-time / multiplayer modes** — single-player turn-based only
 - **Non-respiratory pathways** (e.g. photosynthesis, urea cycle) — out of scope for this game's theme
 - **Full molecular-dynamics simulation** — representations are static/visual, not simulated trajectories
@@ -69,10 +69,10 @@ cast and scientifically validated chemistry as the plot.
 **Audience.** Biochemistry educators + students. Text must work on two layers: a dramatic layer (the C14 hero's journey, plain-language stakes) and a teaching layer (correct terminology, pathway logic, editable residues explained). Educators may run it in class, so the RNG should be seedable for reproducible demos.
 
 **Ending semantics (from spec.md, in story-like framing without bare scientific jargon):**
-- True ending — hero becomes ATP (the canonical "destiny fulfilled")
-- Good ending — hero is stored (fatty acid), built into amino acid, or similar productive fates
-- Normal ending — hero is released as CO2 (the unremarkable exit)
-- Bad ending — failure to reach a destination, RNG traps hero in a cycle long enough for the host to die, radioactive decay of C14, or the player breaks an important residue/enzyme and the host cannot survive
+- True ending — the hero's electrons (the narrative "soul") are fully harvested into ATP via the ETC → ATP synthase after completing the RNG-weighted TCA path (destiny fulfilled). The carbon body was released as CO2; the soul lives on as ATP energy. (Soul-jump reframing — resolves Pitfall 4; the C14 is a tracking label, not a fate determinant.)
+- Good ending — the carbon body is diverted to a productive fate (fatty-acid storage, amino acid synthesis, or similar) BEFORE oxidation, so the carbon itself is retained (no soul-jump needed)
+- Normal ending — the carbon is oxidized to CO2 and released WITHOUT the full electron-harvest / destiny arc (the unremarkable exit)
+- Bad ending — failure to reach a destination, RNG traps the hero in a cycle long enough for the host to die, radioactive decay of C14 (Pitfall 9 — framing still pending), or the player breaks an important residue/enzyme and the host cannot survive
 
 **Edit-routing model (settled during questioning).** The "limited edits" feature does NOT require a chemistry-correctness engine. The game holds a curated lookup table of known edits per enzyme/substrate context. A player edit that matches a known entry routes to the corresponding defined branch. A player edit that doesn't match falls through to the bad-ending pool ("lost connection" / "randomly released from host"). This keeps the validation logic tractable and the gameplay smooth.
 
@@ -96,14 +96,14 @@ cast and scientifically validated chemistry as the plot.
 | RNG-weighted stochastic steps (e.g. TCA shuffle) are v1 | Spec-mandated; user confirmed even single-character v1 needs RNG | — Pending |
 | Anaerobic path framing (host-condition branch / separate scenario / bad-ending trigger) deferred to research | All three options reasonable; needs storyline + research before deciding | — Pending |
 | Edit routing = lookup table + bad-ending fallback (not a chemistry engine) | Player-suggested simplification: unknown edits → "lost connection" / "released from host" bad endings; known edits → defined branches. Removes the hardest validation problem. | — Pending |
-| Stat/XP/leveling deferred to v2 | ATP is the True ending so energy can't be the XP currency; "luck that affects host condition" is the candidate model but needs scientific grounding. v1 already comprehensive. | — Pending |
+| Stat/XP/leveling deferred to v2 | The True ending is the hero's electrons ("soul") harvested into ATP, so energy can't double as the XP currency; "luck that affects host condition" is the candidate model but needs scientific grounding. v1 already comprehensive. | — Pending |
 | PDB acquisition = hybrid (bundle small/critical, one-time bulk download for large) | Balances plugin install size against not hitting the network on every encounter | — Pending |
 | Audience = educators + students | Drives two-layer text (dramatic + teaching) and seedable RNG for classroom reproducibility | — Pending |
 | Source approval = per-claim checkpoint | User chose the safest of three options; slowest but eliminates fabricated-science risk | — Pending |
 | Success measure for v1 = all endings reachable for all characters | User confirmed the most ambitious of three options | — Pending |
-| ATP/True-Ending carbon-fate reframing | Research (Pitfall 4) flagged a science conflict: a carbon atom in respiration exits as CO2, not as ATP carbon. The spec's "True ending = become ATP" needs reconciliation (e.g. hero *enables* ATP synthesis vs hero *is* ATP) before narrative authoring. Resolve at content-research phase. | — Pending |
+| ATP/True-Ending carbon-fate reframing | RESOLVED 2026-08-13 via the **soul-jump reframing**: the hero's *electrons* (the narrative "soul") are harvested into ATP via the ETC → ATP synthase after the RNG-weighted TCA path, while the carbon body is released as CO2. This preserves the dramatic True=ATP arc with scientific accuracy (a labeled carbon ≠ ATP carbon; electrons → proton pumping → ATP synthesis). Tied to the RNG TCA shuffle (the soul reaches ATP only via the RNG-weighted path). Good = carbon retained pre-oxidation; Normal = CO2 without full harvest; Bad = failure/cycle-trap/host-death/critical-residue-break. C14 is a tracking label, not a fate determinant. See PITFALLS.md Pitfall 4. (The spec's original "become ATP" line is annotated in-place in spec.md; the actual ETC/ATP-synthase chemistry claims still require per-claim citation approval in Phase 7+.) | — Resolved (soul-jump) |
 | C14-decay timescale framing | Research (Pitfall 9) flagged that C14 radioactive decay (half-life ~5730 yr) is a real bad-ending trigger but needs story-appropriate framing. Resolve at content-research phase. | — Pending |
 | Batch-by-source vs strict per-claim approval | Research (Pitfall 7) flagged per-claim approval as the timeline-dominating risk. Batch-by-source amortization could help, but the user chose per-claim checkpoint. Process decision: keep strict per-claim, or allow batching per source. | — Pending |
 
 ---
-*Last updated: 2026-08-12 after research synthesis*
+*Last updated: 2026-08-13 — Pitfall 4 (ATP/True-Ending carbon-fate) resolved via soul-jump reframing; see Key Decisions*

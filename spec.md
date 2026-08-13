@@ -12,7 +12,7 @@ A PyMOL-based role playing game of the path taken by C, every step brings them c
    * Refer to the biochemistry libretext to plan the plot and paths. **Seek my approval before you use any source. Any scientific knowledge must be cite, validated, and explicitly approved**
    * some RNG decided stuff for pathways that is know to have some probability shuffle, e.g. in the TCA cycle
    * True ending, good ending, normal ending and bad ending (convert to a story-like without saying the exact scientific word.) e.g. 
-      * the true end is end up as ATP
+       * the true end is end up as ATP  <!-- Pitfall 4 NOTE (2026-08-13): Resolved via the "soul-jump" reframing — the hero's ELECTRONS (not the carbon body) are harvested into ATP via the ETC after the RNG-weighted TCA path. See .planning/PROJECT.md Key Decisions. The carbon body is released as CO2. Pitfall 9 (C14 decay) remains separate/pending. -->
       * good ending can have more, e.g. end up as fatty acid storage, becomes amino acid, etc
       * normal end can be ending up as CO2
       * a bad ending can be from if failing to reach a destination or from RNG stay in a cycle long enough for the host organism passed or radioactive decay. Or, if a player make change to an important residue in the enzyme breaking the important pathway and the host cannot survive.
