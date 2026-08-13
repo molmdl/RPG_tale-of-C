@@ -72,8 +72,8 @@ class StoryInterpreter(object):
         # caller/player (the UI picks by index).
         return eligible
 
-    def enter_node(self, node, state, rng):
-        # type: (Node, object, object) -> list
+    def enter_node(self, node, state, rng, record_visit=True):
+        # type: (Node, object, object, bool) -> list
         """Enter ``node``: record the visit, emit on_enter MolActions, detect
         an ending.
 
@@ -84,8 +84,15 @@ class StoryInterpreter(object):
         the ending tier. ``rng`` is accepted for signature symmetry with future
         on_enter hooks that may draw (e.g. text-variant shuffles); this minimal
         version does not draw on entry.
+
+        ``record_visit`` (default True) controls whether the visit count is
+        bumped. The engine sets it to False on load-replay so re-entering the
+        current node to reconstruct the scene does NOT double-count visits
+        (ARCHITECTURE.md Pattern 6: the scene is a pure function of game state).
+        Ending detection runs regardless of ``record_visit``.
         """
-        state.record_visit(node.id)
+        if record_visit:
+            state.record_visit(node.id)
         actions = list(node.on_enter)
         if node.is_ending is not None:
             state.mark_finished(node.is_ending)
