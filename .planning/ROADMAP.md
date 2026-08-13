@@ -16,7 +16,7 @@ A 13-phase build order (11 integer milestones + 2 INSERTED decimal design phases
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundations & Testability Boundary + Citation Gate** — pure-Python plumbing + no-fabricated-science gate + path self-check (WSL-testable, no PyMOL/Qt)
-- [ ] **Phase 2: Story Engine Core (Architecture Proof in WSL)** — interpreter + engine + RNG + save/load on a minimal 2-node story with mocked MolActions
+- [x] **Phase 2: Story Engine Core (Architecture Proof in WSL)** — interpreter + engine + RNG + save/load on a minimal 2-node story with mocked MolActions ✓ COMPLETE (2026-08-13; 97 tests pass, demo exits 0, zero PyMOL/Qt in c14/)
 - [ ] **Phase 3: PyMOL cmd Layer + Asset Management (Headless)** — AssetManager + MolOps + api-sanity smoke against the real API surface
 - [ ] **Phase 4: Editing, Protonation & Restore Safety Net** — the highest technical-risk phase: apply_edit helper, backup/restore, curated protonation, edit routing
 - [ ] **Phase 5: Pre-Content Key Decisions & Source Approval** — PARALLEL track: 4 science-framing decisions + batch-by-source approval workflow (gates Phases 6–9 content)
@@ -62,8 +62,8 @@ Plans:
 - [x] 02-01-PLAN.md — Foundation: story data model (Node/Choice/MolAction) + RngEngine + GameState (Wave 1) ✓
 - [x] 02-02-PLAN.md — Story graph loader + StoryInterpreter + minimal 2-node story (Wave 2) ✓
 - [x] 02-03-PLAN.md — Reachability checker + graph validator + citation gate refactor (Wave 2) ✓
-- [ ] 02-04-PLAN.md — SaveStore + GameEngine turn loop with mock MolAction sink (Wave 3)
-- [ ] 02-05-PLAN.md — End-to-end integration test + runnable demo (architecture proof) (Wave 4)
+- [x] 02-04-PLAN.md — SaveStore + GameEngine turn loop with mock MolAction sink (Wave 3) ✓
+- [x] 02-05-PLAN.md — End-to-end integration test + runnable demo (architecture proof) (Wave 4) ✓
 
 ### Phase 3: PyMOL cmd Layer + Asset Management (Headless)
 **Goal**: The molecular layer is proven against the real PyMOL 2.5.0 API headlessly — structures load/fetch correctly, MolActions translate to the right `cmd.*` calls, and the known API pitfalls (the `cmd.create(obj,sele,1,1)` no-op, `cmd.fetch` async/CIF defaults) are surfaced and mitigated before any editing or UI code depends on them.

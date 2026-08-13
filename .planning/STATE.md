@@ -5,34 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — executing; Plans 01 + 02 + 03 + 04 done (Wave 2 + Wave 3: model/rng/state + graph+interpreter + validator/gate-refactor + SaveStore+GameEngine); 02-05 (integration test + runnable demo) remains
+**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — COMPLETE ✓ (all 5 plans done: model/rng/state + graph+interpreter + validator/gate-refactor + SaveStore+GameEngine + integration-test+demo). All 4 Phase 2 success criteria proven end-to-end in pure Python with zero PyMOL/Qt import; 97 tests pass; `python3.6 tools/demo_playthrough.py` runs the architecture proof and exits 0. Ready for `/gsd-verify-phase 2`. Next engineering: Phase 3 (PyMOL cmd Layer, headless) + parallel Phase 5 track.
 
 ## Current Position
 
-Phase: 2 of 13 (Story Engine Core — Architecture Proof in WSL)
-Plan: 4 of 5 complete in current phase (02-01 + 02-02 + 02-03 + 02-04 done; 02-05 remains)
-Status: In progress
-Last activity: 2026-08-13 — Completed 02-04-PLAN.md (SaveStore + GameEngine turn loop with save/load + on_enter replay; success criterion #3 proven, 80 tests pass)
+Phase: 2 of 13 (Story Engine Core — Architecture Proof in WSL) — COMPLETE ✓
+Plan: 5 of 5 complete in current phase (02-01 + 02-02 + 02-03 + 02-04 + 02-05 done)
+Status: Phase 2 complete — ready for /gsd-verify-phase 2
+Last activity: 2026-08-13 — Completed 02-05-PLAN.md (end-to-end integration test + runnable demo; all 4 Phase 2 success criteria proven, 97 tests pass, demo exits 0, AST gate clean — zero PyMOL/Qt in c14/)
 
-Progress: [██████░░░░] ~14% (7 plans complete; overall total TBD — most phases not yet planned)
+Progress: [████████░░] ~25% (8 plans complete of 8 planned; phases 3-13 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 15 min
-- Total execution time: 1.84 hours
+- Total plans completed: 8
+- Average duration: 14 min
+- Total execution time: 1.91 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundations & Citation Gate | 3/3 ✓ | 56 min | 19 min |
-| 2. Story Engine Core | 4/5 | 74 min | 19 min |
+| 2. Story Engine Core | 5/5 ✓ | 78 min | 16 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (4 min), 02-01 (4 min), 02-03 (7 min), 02-02 (14 min), 02-04 (49 min)
-- Trend: Wave 3 (02-04) slower than Wave 2 — the GameEngine is the integration point (wires 3 prior modules + interpreter edit + a Rule 1 bug fix for per-action MolAction dispatch to match the test done-criteria). Still pure-Python, stdlib only, near-verbatim ARCHITECTURE.md Pattern 6 adoption.
+- Last 5 plans: 02-01 (4 min), 02-03 (7 min), 02-02 (14 min), 02-04 (49 min), 02-05 (4 min)
+- Trend: 02-05 (the capstone) was fast (4 min) — pure additive (no source changes), wiring already-built modules end-to-end + a demo script; the 02-04 GameEngine integration was the heavy lift. Phase 2 GOAL achieved: full architecture proven in WSL with zero PyMOL/Qt import before any pymol_layer/ui code.
 
 *Updated after each plan completion*
 
@@ -78,6 +78,7 @@ Recent decisions affecting current work:
 - [Execution 02-04]: GameEngine is the turn loop (start/choose/_enter/save/load) wiring StoryInterpreter + GameState + RngEngine. It emits on_enter MolActions PER-ACTION to an injected molaction_sink (a callable taking a single MolAction) — never cmd.* (the testability boundary; a plain list .append is the test mock). Chose per-action dispatch because the plan's test done-criteria (len(sink)==2, sink[0].op with sink.append) required it; the plan's key_links prose ("callable(list)") conflicted with its own tests, so the tests won. Phase 4+ molops.apply(action) receives one action per call (the natural unit).
 - [Execution 02-04]: RNG-state sync — _enter() writes rng.get_state() into state after every entry and save() syncs before serializing; load() rebuilds the RngEngine via RngEngine.from_state(seed, rng_state) and replays the current node's on_enter with record_visit=False (no visit double-count). Exact-next-draw equivalence proven (test_rng_state_survives_save_load). Phase 2 success criterion #3 PROVEN (save/load restores an identical session by replaying on_enter); criterion #2 proven through the engine (the single seeded RngEngine carries through start->choose->save->load).
 - [Execution 02-04]: interpreter.enter_node gained a backward-compatible record_visit=True param (2-line additive edit) so load-replay can skip the visit bump. All 12 existing interpreter tests still pass (zero regression — Plan 02 forward-compatible contract honored).
+- [Execution 02-05]: Phase 2 GOAL ACHIEVED — 17-test integration suite (tests/test_integration.py) + runnable demo (tools/demo_playthrough.py) prove all 4 Phase 2 success criteria end-to-end in pure Python with zero PyMOL/Qt import. The integration test imports the FULL domain stack at module top (engine+graph+rng+state+persist+validate+model) and asserts 'pymol'/'PyQt5' not in sys.modules after a full playthrough — the testability boundary proven across the entire architecture, not just per-module. SC2 strongest proof: mid-playthrough save (before the weighted choice) -> load -> choose reaches the SAME ending as never saving (saved RNG position converges). SC4 orphaned-variant built via Node.from_dict on a copy of g.all_nodes(). The demo (seed 42, exits 0) is the human-visible proof twin. 97 tests pass; AST gate clean. No deviations (plan executed exactly as written; the per-action dispatch contract from 02-04 was pre-flagged and adapted correctly).
 
 ### Pending Todos
 
@@ -102,6 +103,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-13 (Phase 2 Plan 04 — SaveStore + GameEngine turn loop)
-Stopped at: Completed 02-04-PLAN.md — c14/persist.py (SaveStore: human-readable JSON save/load of GameState) + c14/engine.py (GameEngine: start/choose/_enter/save/load, per-action MolAction dispatch to injected sink, RNG-state sync + on_enter replay on load) + interpreter.enter_node record_visit param; success criterion #3 PROVEN, 80 tests pass, AST gate green. One Rule 1 fix (per-action dispatch to match test done-criteria). Ready for 02-05 (end-to-end integration test + runnable demo — last plan in Phase 2).
+Last session: 2026-08-13 (Phase 2 Plan 05 — end-to-end integration test + runnable demo; Phase 2 COMPLETE)
+Stopped at: Completed 02-05-PLAN.md — tests/test_integration.py (17 tests proving all 4 Phase 2 success criteria end-to-end: full playthrough + RNG determinism + save/load round-trip + reachability green/red + citation gate on multi-file story dir) + tools/demo_playthrough.py (runnable architecture proof, exits 0). 97 tests pass, AST gate green, zero PyMOL/Qt in c14/. Phase 2 GOAL achieved — ready for /gsd-verify-phase 2. Next engineering: Phase 3 (PyMOL cmd Layer, headless) + parallel Phase 5 track.
 Resume file: None
