@@ -10,10 +10,11 @@
 ## Description
 
 **RPG: Tale of C** is a PyMOL 2.5.0 plugin that turns cellular respiration into a
-role-playing game. The player controls a C14 atom — the hero — choosing a starting
-"character" (glucose, fatty acid, or alcohol) and guiding it through the respiratory
-pathway via text-based multiple choice, limited molecule editing, and visual
-representation of real protein structures sourced from the PDB.
+role-playing game. The player controls a carbon atom — the hero (tracked through the
+pathway as the isotope C14) — choosing a starting "character" (glucose, fatty acid, or
+alcohol) and guiding it through the respiratory pathway via text-based multiple choice,
+limited molecule editing, and visual representation of real protein structures sourced
+from the PDB.
 
 Branching storylines, RNG-weighted stochastic steps (e.g. the TCA cycle shuffle), and
 multiple possible fates for the hero await — every step brings them closer to destiny,

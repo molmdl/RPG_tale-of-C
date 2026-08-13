@@ -1,6 +1,8 @@
 # AGENTS.md
 
-PyMOL plugin project: an RPG game following a C14 atom through the respiratory pathway. Spec lives in `spec.md` (authoritative for plot, constraints, and the "do not install / do not make up citations" rules — read it first). Repo is in early stage: no plugin code yet, only spec + reference material.
+PyMOL plugin project: an RPG game following a carbon atom — the hero (tracked through the pathway as the isotope C14) — through the respiratory pathway. Spec lives in `spec.md` (authoritative for plot, constraints, and the "do not install / do not make up citations" rules — read it first). Repo is in early stage: no plugin code yet, only spec + reference material.
+
+> **Hero-identity note (anti-confusion):** the hero is a *carbon atom*; C14 is its *tracking isotope label*, not the hero's fate or identity. The spec's "true end = become ATP" is reconciled via the **soul-jump reframing** (the carbon's electrons — the narrative "soul" — flow via NADH/FADH2 → ETC → ATP synthase; the carbon body is shed as CO2; True ending = soul harvested into ATP, tied to the RNG TCA shuffle). See `.planning/PROJECT.md` Key Decisions (Pitfall 4, RESOLVED 2026-08-13). **Do not reintroduce** claims that the C14 carbon itself becomes ATP or enters oxidative phosphorylation — those are scientifically wrong. Pitfall 9 (C14 radioactive-decay timescale) remains a separate Pending decision.
 
 ## Environment — the WSL/Windows split (read first)
 
