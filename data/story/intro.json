@@ -1,0 +1,37 @@
+{
+  "nodes": {
+    "intro.start": {
+      "text_dramatic": "Your journey begins, little carbon atom.",
+      "text_teaching": "You are C14, a carbon isotope tracing the respiratory pathway.",
+      "claim_ids": ["placeholder-intro"],
+      "on_enter": [
+        {"op": "hide_all"},
+        {"op": "load", "target": "placeholder:structure", "args": {"object": "hero"}}
+      ],
+      "choices": [
+        {"label": "Proceed (luck decides)", "weight": 1.0, "goto": "intro.ending_good", "tags": ["rng:weighted"]},
+        {"label": "Proceed cautiously", "weight": 1.0, "goto": "intro.ending_bad", "tags": ["rng:weighted"]}
+      ]
+    },
+    "intro.ending_good": {
+      "text_dramatic": "You reached a good ending!",
+      "text_teaching": "This is a placeholder ending for architecture testing.",
+      "claim_ids": ["placeholder-good-ending"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "good",
+      "choices": []
+    },
+    "intro.ending_bad": {
+      "text_dramatic": "You reached a bad ending.",
+      "text_teaching": "This is a placeholder ending for architecture testing.",
+      "claim_ids": ["placeholder-bad-ending"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "bad",
+      "choices": []
+    }
+  }
+}
