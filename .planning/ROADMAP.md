@@ -99,7 +99,7 @@ Plans:
 **Depends on**: Nothing content-specific (runs in parallel with Phases 2–4); gates Phases 6–9
 **Requirements**: CITE-01
 **Success Criteria** (what must be TRUE):
-  1. The ATP/True-Ending carbon-fate reframing is resolved (one option chosen from the Pitfall 4 options) and documented in PROJECT.md Key Decisions, with the chosen framing's carbon-fate claim entered into `data/citations.json` as `approved`
+  1. The ATP/True-Ending carbon-fate reframing is RESOLVED via the soul-jump reframing (the hero's electrons/"soul" are harvested into ATP via the ETC after the RNG-weighted TCA path; the carbon body is released as CO2) and documented in PROJECT.md Key Decisions. The framing decision is DONE. (The actual ETC/ATP-synthase chemistry claims still require per-claim citation approval in Phase 7+ — that is a separate, later gate; this criterion is about the framing decision, which is complete.)
   2. The C14 radioactive-decay bad-ending timescale framing is resolved (drop / time-compress / reframe as teaching moment) and documented; if decay is kept, the half-life citation is approved
   3. The anaerobic-pathway framing is resolved (host-condition branch / separate scenario / bad-ending trigger) and documented in PROJECT.md Key Decisions
   4. The batch-by-source vs strict per-claim approval process is agreed with the human and documented; the claims registry holds the first batch of approved sources for the glucose critical-path enzymes + TCA RNG weights (front-loaded source approval)
@@ -168,7 +168,7 @@ Plans:
 - [ ] 07-01: TBD — likely glycolysis segment (glucose → pyruvate): nodes + branch points + citations + two-layer text
 - [ ] 07-02: TBD — likely pyruvate transition branch (→ acetyl-CoA vs → lactate): the key STORY-07 branch point
 - [ ] 07-03: TBD — likely TCA cycle: RNG-weighted stochastic nodes (STORY-03), weights approved per-claim
-- [ ] 07-04: TBD — likely ETC / oxidative phosphorylation: True-ending carbon fate
+- [ ] 07-04: TBD — likely ETC / oxidative phosphorylation: True-ending soul-jump (hero's electrons → ATP via ETC/ATP synthase)
 - [ ] 07-05: TBD — likely glucose bad-endings pool + edit-routing tie-ins
 - [ ] 07-06: TBD — likely two-layer text pass + reachability green (4/4 endings) + citation gate green
 

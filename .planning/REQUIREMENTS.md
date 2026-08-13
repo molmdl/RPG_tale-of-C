@@ -1,7 +1,7 @@
 # Requirements: RPG: Tale of C
 
 **Defined:** 2026-08-12
-**Core Value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP, storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
+**Core Value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
 
 ## v1 Requirements
 
@@ -21,7 +21,7 @@ Requirements for initial release. Each maps to roadmap phases. Cross-checked aga
 ### Pathway & Story
 
 - [ ] **STORY-01**: A branching narrative graph (DAG of nodes) drives the story forward via text-based multiple choice at each pathway branch point
-- [ ] **STORY-02**: All 4 ending tiers are reachable for each character: True (ATP), Good (fatty-acid storage / amino acid / etc.), Normal (CO2), Bad (lost connection / released from host / host death / cycle-trapped / radioactive decay)
+- [ ] **STORY-02**: All 4 ending tiers are reachable for each character: True (hero's electrons/"soul" harvested into ATP via the ETC after the RNG-weighted TCA path — carbon body released as CO2), Good (carbon body retained pre-oxidation — fatty-acid storage / amino acid / etc.), Normal (CO2 released without the full electron-harvest destiny arc), Bad (lost connection / released from host / host death / cycle-trapped / radioactive decay)
 - [ ] **STORY-03**: RNG-weighted stochastic steps are implemented for pathways known to shuffle (e.g. TCA cycle), with scientifically grounded (not invented) weights approved via per-claim checkpoint
 - [ ] **STORY-04**: RNG is seedable for classroom reproducibility: a fixed-seed (demo) mode and a random (play) mode are both available
 - [ ] **STORY-05**: Anaerobic pathway is represented in the game structure (framing pending research — see PROJECT.md Key Decisions)
