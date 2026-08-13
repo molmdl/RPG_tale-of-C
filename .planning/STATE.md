@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — COMPLETE ✓ (all 5 plans done: model/rng/state + graph+interpreter + validator/gate-refactor + SaveStore+GameEngine + integration-test+demo). All 4 Phase 2 success criteria proven end-to-end in pure Python with zero PyMOL/Qt import; 97 tests pass; `python3.6 tools/demo_playthrough.py` runs the architecture proof and exits 0. Ready for `/gsd-verify-phase 2`. Next engineering: Phase 3 (PyMOL cmd Layer, headless) + parallel Phase 5 track.
+**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — COMPLETE ✓ + VERIFIED (4/4 success criteria, 31/31 truths, 21/21 artifacts, 17/17 key_links; VERIFICATION.md status: passed). All 5 plans done; 97 tests pass; `python3.6 tools/demo_playthrough.py` runs the architecture proof and exits 0; zero PyMOL/Qt in c14/. Next engineering: Phase 3 (PyMOL cmd Layer, headless) + parallel Phase 5 track.
 
 ## Current Position
 
-Phase: 2 of 13 (Story Engine Core — Architecture Proof in WSL) — COMPLETE ✓
+Phase: 2 of 13 (Story Engine Core — Architecture Proof in WSL) — COMPLETE ✓ + VERIFIED (passed)
 Plan: 5 of 5 complete in current phase (02-01 + 02-02 + 02-03 + 02-04 + 02-05 done)
-Status: Phase 2 complete — ready for /gsd-verify-phase 2
-Last activity: 2026-08-13 — Completed 02-05-PLAN.md (end-to-end integration test + runnable demo; all 4 Phase 2 success criteria proven, 97 tests pass, demo exits 0, AST gate clean — zero PyMOL/Qt in c14/)
+Status: Phase 2 complete + verified (4/4 success criteria; VERIFICATION.md status: passed; 97 tests pass; demo exits 0)
+Last activity: 2026-08-13 — Phase 2 verified (VERIFICATION.md: passed, 31/31 truths, 21/21 artifacts, 17/17 key_links). All 5 plans complete; requirements STORY-01, STORY-04, SAVE-01, SAVE-02 marked Complete.
 
 Progress: [████████░░] ~25% (8 plans complete of 8 planned; phases 3-13 not yet planned)
 
@@ -103,6 +103,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-13 (Phase 2 Plan 05 — end-to-end integration test + runnable demo; Phase 2 COMPLETE)
-Stopped at: Completed 02-05-PLAN.md — tests/test_integration.py (17 tests proving all 4 Phase 2 success criteria end-to-end: full playthrough + RNG determinism + save/load round-trip + reachability green/red + citation gate on multi-file story dir) + tools/demo_playthrough.py (runnable architecture proof, exits 0). 97 tests pass, AST gate green, zero PyMOL/Qt in c14/. Phase 2 GOAL achieved — ready for /gsd-verify-phase 2. Next engineering: Phase 3 (PyMOL cmd Layer, headless) + parallel Phase 5 track.
+Last session: 2026-08-13 (Phase 2 execution + verification — all 5 plans complete, VERIFICATION.md status: passed)
+Stopped at: Phase 2 COMPLETE + VERIFIED (4/4 success criteria; 31/31 truths, 21/21 artifacts, 17/17 key_links; 97 tests pass; demo exits 0; zero PyMOL/Qt in c14/). Requirements STORY-01, STORY-04, SAVE-01, SAVE-02 marked Complete. Next: Phase 3 (PyMOL cmd Layer, headless) and/or the parallel Phase 5 track (Key Decisions — 3 still pending).
 Resume file: None

@@ -101,10 +101,10 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 | PLGN-03 | Phase 1 — Foundations & Citation Gate | Complete |
 | CHAR-01 | Phase 8 — Fatty Acid + Alcohol Characters | Pending |
 | CHAR-02 | Phase 6 — Qt UI + MVP | Pending |
-| STORY-01 | Phase 2 — Story Engine Core | Pending |
+| STORY-01 | Phase 2 — Story Engine Core | Complete |
 | STORY-02 | Phase 8 — Fatty Acid + Alcohol Characters | Pending |
 | STORY-03 | Phase 7 — All Glucose Endings | Pending |
-| STORY-04 | Phase 2 — Story Engine Core | Pending |
+| STORY-04 | Phase 2 — Story Engine Core | Complete |
 | STORY-05 | Phase 9 — Anaerobic + Full Cast | Pending |
 | STORY-06 | Phase 7 — All Glucose Endings | Pending |
 | STORY-07 | Phase 7 — All Glucose Endings | Pending |
@@ -118,8 +118,8 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 | CAST-03 | Phase 4 — Editing + Protonation + Restore | Pending |
 | CAST-04 | Phase 6 — Qt UI + MVP | Pending |
 | CAST-05 | Phase 6 — Qt UI + MVP | Pending |
-| SAVE-01 | Phase 2 — Story Engine Core | Pending |
-| SAVE-02 | Phase 2 — Story Engine Core | Pending |
+| SAVE-01 | Phase 2 — Story Engine Core | Complete |
+| SAVE-02 | Phase 2 — Story Engine Core | Complete |
 | ACH-01 | Phase 6 — Qt UI + MVP | Pending |
 | ACH-02 | Phase 6 — Qt UI + MVP | Pending |
 | DOC-01 | Phase 9 — Anaerobic + Full Cast | Pending |
