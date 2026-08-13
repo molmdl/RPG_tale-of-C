@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — executing; Plans 01 + 03 done (Wave 2: model/rng/state + validator/gate-refactor); 02-02 in parallel (graph+interpreter)
+**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — executing; Plans 01 + 02 + 03 done (Wave 2: model/rng/state + graph+interpreter + validator/gate-refactor); 02-04, 02-05 remain
 
 ## Current Position
 
 Phase: 2 of 13 (Story Engine Core — Architecture Proof in WSL)
-Plan: 2 of 5 complete in current phase (02-01 + 02-03 done; 02-02 in progress in parallel; 02-04, 02-05 remain)
+Plan: 3 of 5 complete in current phase (02-01 + 02-02 + 02-03 done; 02-04, 02-05 remain)
 Status: In progress
-Last activity: 2026-08-13 — Completed 02-03-PLAN.md (graph validator + reachability checker + citation gate refactor; 65 tests pass)
+Last activity: 2026-08-13 — Completed 02-02-PLAN.md (StoryGraph loader + StoryInterpreter; full walk proven in pure Python, 65 tests pass)
 
-Progress: [█████░░░░░░] ~10% (5 plans complete; overall total TBD — most phases not yet planned)
+Progress: [█████░░░░░░] ~12% (6 plans complete; overall total TBD — most phases not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 13 min
-- Total execution time: 1.12 hours
+- Total plans completed: 6
+- Average duration: 14 min
+- Total execution time: 1.35 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundations & Citation Gate | 3/3 ✓ | 56 min | 19 min |
-| 2. Story Engine Core | 2/5 | 11 min | 6 min |
+| 2. Story Engine Core | 3/5 | 25 min | 8 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (32 min), 01-03 (20 min), 01-02 (4 min), 02-01 (4 min), 02-03 (7 min)
+- Last 5 plans: 01-03 (20 min), 01-02 (4 min), 02-01 (4 min), 02-03 (7 min), 02-02 (14 min)
 - Trend: Wave 2 plans faster than Wave 1 (reference designs pre-verified on 3.6.9; near-verbatim adoption + read-only verification; no debugging needed)
 
 *Updated after each plan completion*
@@ -71,6 +71,9 @@ Recent decisions affecting current work:
 - [Execution 02-03]: collect_claim_ids does its OWN minimal file loading (does NOT import c14.story.graph) so Plan 03 stays independent of Plan 02 for parallel execution. Accepts a file (backward-compat with Phase 1 fixtures) OR a directory (manifest.json + merge files). The minor manifest-reading overlap with graph.py is an acceptable trade for module independence.
 - [Execution 02-03]: check_reachability skips edges to nonexistent nodes (graceful — can't reach what doesn't exist); validate_graph flags them as dangling_divert (structural). Separation of concerns: reachability checker reports reach; validator reports structure. Missing-start_id returns is_ok=False (graceful, no crash).
 - [Execution 02-03]: Citation gate surgical refactor complete — inline collect_referenced_claim_ids replaced by c14.story.validate.collect_claim_ids; gate core logic (registry cross-ref, [MISSING]/[UNAPPROVED] report, 0/1/2 exit codes) UNCHANGED; --story accepts file OR directory. All 12 existing tests pass (zero regression — Phase 1 forward-compatible contract honored: the walker was isolated in one function precisely so this swap is surgical).
+- [Execution 02-02]: StoryGraph.load(story_dir) injects the JSON object key as the node's `id` field before Node.from_dict (which requires d["id"]) — keeps the {nodes: {id: {claim_ids}}} shape the Phase 1 citation gate story-walker reads, without duplicating the id inside each node body. Loader is CWD-independent (explicit story_dir arg); all_nodes() returns the {id: Node} dict (NOT a list) as the Plan 03/05 contract.
+- [Execution 02-02]: StoryInterpreter (ARCHITECTURE.md Pattern 2 near-verbatim) emits pure-data MolAction lists from enter_node — NEVER cmd.* (testability boundary proven by a full walk with a mock sink + `'pymol' not in sys.modules`). pick_choice: weighted -> single Choice via rng.random()*total + cumulative sum (single injected RngEngine, Anti-Pattern 7); non-weighted -> eligible list. _cond: restricted-namespace {flags,char,counters,visits} eval with no builtins, trusted-content model, fail-safe False on any exception.
+- [Execution 02-02]: Phase 2 success criterion #1 PROVEN — minimal story (intro.start -> 2 weighted choices -> 2 endings) loads and the interpreter walks it (enter -> weighted pick -> advance -> enter ending) in pure Python with a mock MolAction sink and zero pymol import. RNG determinism through the walk holds (same seed -> same ending; diff seeds diverge) — criterion #2 partially proven (full save/load determinism in Plan 05).
 
 ### Pending Todos
 
@@ -95,6 +98,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-13 (Phase 2 Plan 03 — graph validator + reachability checker + citation gate refactor)
-Stopped at: Completed 02-03-PLAN.md — c14/story/validate.py (check_reachability/validate_graph/collect_claim_ids) + refactored tools/check_citations.py; 65 tests pass; AST gate green. 02-02 ran in parallel (graph.py + data/story/ committed; interpreter in progress). Ready for 02-04/02-05.
+Last session: 2026-08-13 (Phase 2 Plan 02 — StoryGraph loader + StoryInterpreter)
+Stopped at: Completed 02-02-PLAN.md — c14/story/graph.py + c14/story/interpreter.py + data/story/{manifest,intro}.json; full walk (intro→weighted choice→ending) proven in pure Python with a mock MolAction sink, zero pymol import; 65 tests pass; AST gate green. 02-03 (validate) ran in parallel and is also complete. Ready for 02-04 (engine) / 02-05 (persist).
 Resume file: None
