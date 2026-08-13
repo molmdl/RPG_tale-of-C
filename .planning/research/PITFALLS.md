@@ -97,6 +97,8 @@ This is one instance of a broader class: **PyMOL 2.5.0 API behaves differently t
 
 ### Pitfall 4: The spec's "true ending = become ATP" conflicts with carbon-fate biochemistry
 
+> **✅ RESOLVED (2026-08-13) via the soul-jump reframing.** The human adopted: the hero's *electrons* (the narrative "soul") are harvested into ATP via the ETC → ATP synthase after the RNG-weighted TCA path, while the carbon body is released as CO2 (via pyruvate dehydrogenase + TCA decarboxylations). This preserves the dramatic True=ATP arc with scientific accuracy — a labeled carbon never enters oxidative phosphorylation or becomes ATP carbon; only its electrons continue. Tied to the RNG TCA shuffle (the soul reaches ATP only via the RNG-weighted path). Ending semantics: True = soul (electrons) harvested into ATP; Good = carbon body retained pre-oxidation (fatty-acid/amino-acid); Normal = CO2 without full electron harvest; Bad = failure/cycle-trap/host-death/critical-residue-break. C14 is treated as a tracking label only, not a fate determinant. See PROJECT.md Key Decisions. The original pitfall text below is retained for provenance. **Pitfall 9 (C14 decay timescale) remains Pending and is NOT resolved here.**
+
 **Severity:** CRITICAL — design-level science conflict that blocks True-Ending authoring; the project's "no fabricated science" rule and "spec is authoritative" rule collide here, so it must be resolved by the human early.
 
 **What goes wrong:**
