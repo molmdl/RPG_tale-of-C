@@ -56,10 +56,14 @@ Plans:
   2. The RngEngine produces identical outcomes given the same seed across two runs and different outcomes given a different seed; both "fixed-seed (demo)" and "random (play)" modes are exercisable (unit-tested)
   3. A save serializes GameState (current node, character, flags, RNG seed + state, visit counts, edit history) to a human-readable JSON file, and load restores an identical session by replaying the current node's on_enter MolActions
   4. A reachability checker (pure Python) runs on the toy graph and reports which endings are reachable — green on a well-formed graph, red on one with an orphaned ending — establishing the "all endings reachable" invariant as a verifiable check
-**Plans**: TBD (likely 3–4 plans)
+**Plans**: 5 plans in 4 waves
 
 Plans:
-- [ ] 02-01: TBD
+- [ ] 02-01-PLAN.md — Foundation: story data model (Node/Choice/MolAction) + RngEngine + GameState (Wave 1)
+- [ ] 02-02-PLAN.md — Story graph loader + StoryInterpreter + minimal 2-node story (Wave 2)
+- [ ] 02-03-PLAN.md — Reachability checker + graph validator + citation gate refactor (Wave 2)
+- [ ] 02-04-PLAN.md — SaveStore + GameEngine turn loop with mock MolAction sink (Wave 3)
+- [ ] 02-05-PLAN.md — End-to-end integration test + runnable demo (architecture proof) (Wave 4)
 
 ### Phase 3: PyMOL cmd Layer + Asset Management (Headless)
 **Goal**: The molecular layer is proven against the real PyMOL 2.5.0 API headlessly — structures load/fetch correctly, MolActions translate to the right `cmd.*` calls, and the known API pitfalls (the `cmd.create(obj,sele,1,1)` no-op, `cmd.fetch` async/CIF defaults) are surfaced and mitigated before any editing or UI code depends on them.
@@ -289,7 +293,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations & Citation Gate | 3/3 ✓ | Complete | 2026-08-13 |
-| 2. Story Engine Core | 0/TBD | Not started | - |
+| 2. Story Engine Core | 0/5 | Planned | - |
 | 3. PyMOL cmd Layer | 0/TBD | Not started | - |
 | 4. Editing + Protonation + Restore | 0/TBD | Not started | - |
 | 5. Pre-Content Key Decisions (parallel) | 0/TBD | Not started | - |
