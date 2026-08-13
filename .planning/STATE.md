@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-08-12)
 ## Current Position
 
 Phase: 1 of 13 (Foundations & Testability Boundary + Citation Gate)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 complete in current phase (01-01 + 01-03 done; 01-02 running in parallel — Wave 2)
 Status: In progress
-Last activity: 2026-08-13 — Completed 01-01-PLAN.md (c14/ package skeleton + AST testability gate + .gitignore fix)
+Last activity: 2026-08-13 — Completed 01-03-PLAN.md (citation registry loader + pre-ship gate + fixtures + tests)
 
-Progress: [█░░░░░░░░░] ~2% (1 plan complete; overall total TBD — most phases not yet planned)
+Progress: [██░░░░░░░░] ~4% (2 plans complete; overall total TBD — most phases not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 32 min
-- Total execution time: 0.53 hours
+- Total plans completed: 2
+- Average duration: 26 min
+- Total execution time: 0.87 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Foundations & Citation Gate | 1/3 | 32 min | 32 min |
+| 1. Foundations & Citation Gate | 2/3 | 52 min | 26 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (32 min)
-- Trend: baseline established
+- Last 5 plans: 01-01 (32 min), 01-03 (20 min)
+- Trend: 01-03 faster than 01-01 (reference designs pre-verified on 3.6.9; no debugging needed)
 
 *Updated after each plan completion*
 
@@ -51,6 +51,13 @@ Recent decisions affecting current work:
 - [Execution 01-01]: AST-based import gate (tools/check_imports.py) adopted over grep — 0 false positives on comments/strings, catches aliased `import pymol.cmd as c`. Strict-ban policy: flags any pymol/PyQt5 Import/ImportFrom including inside TYPE_CHECKING guards. Directory location = tier (c14/ root scanned; pymol_layer/ + ui/ excluded).
 - [Execution 01-01]: c14/__init__.py stays pure-Python in Phase 1 (zero pymol/PyQt5 imports); __init_plugin__ deferred to Phase 6 (lazy-delegate to c14/ui/plugin_entry.py per research Pattern 1).
 - [Execution 01-01]: Python 3.6 stdlib only — unittest (pytest not installed); subprocess uses stdout/stderr=PIPE not capture_output (3.7+); py_compile + unittest paired (Pitfall 3: py_compile necessary but not sufficient).
+- [Execution 01-03]: Citation gate predicate is `approval_status == "approved"` (strict equality), NOT `!= "pending"` — research Pitfall 6: `!= "pending"` would erroneously pass a `rejected` claim. A rejected claim fails identically to a pending one (no special case). Verified by the rejected fixture (exit 1, status 'rejected').
+- [Execution 01-03]: Keep all three approval_status values {pending, approved, rejected} in the enum — `rejected` records provenance (why a claim was refused) rather than silently deleting. Phase 1 success criterion (names only pending/approved) fully satisfied by the `== "approved"` test.
+- [Execution 01-03]: `object_pairs_hook` duplicate-key detection in CitationRegistry.load (~6 lines) — without it, json.load silently last-wins on duplicate claim_id keys, clobbering an approval/rejection. Verified raising on 3.6.9 (Pitfall 3).
+- [Execution 01-03]: Three-way exit codes (0=pass / 1=missing-or-unapproved / 2=config-load-error) for the citation gate — lets CI distinguish "broken fixtures/tooling" (exit 2) from "genuinely unapproved science" (exit 1). Phase 1 success criterion only requires non-zero on fail; the split is a clean-to-have the plan adopted.
+- [Execution 01-03]: `data/citations.json` lives at REPO ROOT `data/` (content source file, read at pre-ship time by the gate), NOT `c14/data/` (bundled runtime asset that ships in the plugin zip). Distinct directories with distinct roles — established early to avoid future confusion.
+- [Execution 01-03]: Registry shipped as JSON object (`data/citations.json`), NOT JSONL (`data/claims.jsonl`) — research Pitfall 2: O(1) lookup, structural dup-key prevention, matches authoritative ARCHITECTURE.md. The `.jsonl` references in earlier research are superseded.
+- [Execution 01-03]: Story-walker (`collect_referenced_claim_ids`) isolated in one function in `tools/check_citations.py` — Phase 2 swaps it for `c14.story.validate.collect_claim_ids("data/story/")` with zero changes to the gate's core logic (forward-compatible contract).
 
 ### Pending Todos
 
@@ -69,6 +76,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-13 (Phase 1 Plan 01 execution)
-Stopped at: Completed 01-01-PLAN.md — c14/ skeleton + AST gate + .gitignore fix committed
+Last session: 2026-08-13 (Phase 1 Plan 03 execution — Wave 2, parallel with 01-02)
+Stopped at: Completed 01-03-PLAN.md — citation registry loader + pre-ship gate + 6 fixtures + 12-test suite committed
 Resume file: None
