@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — executing; Plan 01 done (Wave 1 foundation modules)
+**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — executing; Plans 01 + 03 done (Wave 2: model/rng/state + validator/gate-refactor); 02-02 in parallel (graph+interpreter)
 
 ## Current Position
 
 Phase: 2 of 13 (Story Engine Core — Architecture Proof in WSL)
-Plan: 1 of 5 complete in current phase (02-01 done — model + rng + state foundation; 02-02..02-05 remain)
+Plan: 2 of 5 complete in current phase (02-01 + 02-03 done; 02-02 in progress in parallel; 02-04, 02-05 remain)
 Status: In progress
-Last activity: 2026-08-13 — Completed 02-01-PLAN.md (story data model + RngEngine + GameState; 39 tests pass)
+Last activity: 2026-08-13 — Completed 02-03-PLAN.md (graph validator + reachability checker + citation gate refactor; 65 tests pass)
 
-Progress: [████░░░░░░░] ~8% (4 plans complete; overall total TBD — most phases not yet planned)
+Progress: [█████░░░░░░] ~10% (5 plans complete; overall total TBD — most phases not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 15 min
-- Total execution time: 1.00 hours
+- Total plans completed: 5
+- Average duration: 13 min
+- Total execution time: 1.12 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundations & Citation Gate | 3/3 ✓ | 56 min | 19 min |
-| 2. Story Engine Core | 1/5 | 4 min | 4 min |
+| 2. Story Engine Core | 2/5 | 11 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (32 min), 01-03 (20 min), 01-02 (4 min), 02-01 (4 min)
+- Last 5 plans: 01-01 (32 min), 01-03 (20 min), 01-02 (4 min), 02-01 (4 min), 02-03 (7 min)
 - Trend: Wave 2 plans faster than Wave 1 (reference designs pre-verified on 3.6.9; near-verbatim adoption + read-only verification; no debugging needed)
 
 *Updated after each plan completion*
@@ -67,6 +67,10 @@ Recent decisions affecting current work:
 - [Execution 02-01]: MolAction is pure data (op/target/args) with NO pymol import — the testability-boundary carrier. The future c14/pymol_layer/molops.py (Phase 3/4) translates it to cmd.*. Domain tier never names a pymol type (ARCHITECTURE.md Pattern 1 / Anti-Pattern 1, enforced by the AST gate).
 - [Execution 02-01]: RngEngine random-mode picks seed via `secrets.randbits(31)` (3.6-safe stdlib) and records it on .seed for replay. Single random.Random per playthrough; ALL stochastic draws go through it (Anti-Pattern 7). get_state/set_state/from_state convert tuples<->lists for JSON; verified the exact next draw survives JSON round-trip on 3.6.9.
 - [Execution 02-01]: GameState stores seed + rng_state as plain data (does NOT hold a live RngEngine); the engine syncs rng.get_state() into state before save and rebuilds via RngEngine.from_state(seed, rng_state) on load. to_dict key order fixed to ARCHITECTURE.md GameState JSON for diff-stable saves; from_dict uses .get defaults for partial/older-save tolerance. finished=True (truthy bool) when ending reached, None while playing.
+- [Execution 02-03]: Duck-typed _choices/_goto/_is_ending helpers (hasattr() dispatch) make check_reachability/validate_graph work on BOTH Node objects (node.choices/.goto/.is_ending) and raw JSON dicts (node.get('choices')/['goto']/['is_ending']) — single algorithm code path, no duplication. Lets the same validator serve the loader's Node objects and the gate's raw JSON fixtures.
+- [Execution 02-03]: collect_claim_ids does its OWN minimal file loading (does NOT import c14.story.graph) so Plan 03 stays independent of Plan 02 for parallel execution. Accepts a file (backward-compat with Phase 1 fixtures) OR a directory (manifest.json + merge files). The minor manifest-reading overlap with graph.py is an acceptable trade for module independence.
+- [Execution 02-03]: check_reachability skips edges to nonexistent nodes (graceful — can't reach what doesn't exist); validate_graph flags them as dangling_divert (structural). Separation of concerns: reachability checker reports reach; validator reports structure. Missing-start_id returns is_ok=False (graceful, no crash).
+- [Execution 02-03]: Citation gate surgical refactor complete — inline collect_referenced_claim_ids replaced by c14.story.validate.collect_claim_ids; gate core logic (registry cross-ref, [MISSING]/[UNAPPROVED] report, 0/1/2 exit codes) UNCHANGED; --story accepts file OR directory. All 12 existing tests pass (zero regression — Phase 1 forward-compatible contract honored: the walker was isolated in one function precisely so this swap is surgical).
 
 ### Pending Todos
 
@@ -91,6 +95,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-13 (Phase 2 Plan 01 — story data model + RngEngine + GameState foundation modules)
-Stopped at: Completed 02-01-PLAN.md — Wave 1 foundation (model/rng/state) in place; 39 tests pass; AST gate green. Ready for 02-02-PLAN.md (story graph loader).
+Last session: 2026-08-13 (Phase 2 Plan 03 — graph validator + reachability checker + citation gate refactor)
+Stopped at: Completed 02-03-PLAN.md — c14/story/validate.py (check_reachability/validate_graph/collect_claim_ids) + refactored tools/check_citations.py; 65 tests pass; AST gate green. 02-02 ran in parallel (graph.py + data/story/ committed; interpreter in progress). Ready for 02-04/02-05.
 Resume file: None
