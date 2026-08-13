@@ -19,17 +19,18 @@ The gate imports ``c14.citations.CitationRegistry`` (the loader) via a
 not in ``c14/``, so it must put the repo root on ``sys.path`` to import the
 package without install.
 
-Phase 1 scope: the story walker (``collect_referenced_claim_ids``) is inline
-and walks a single ``--story`` JSON's ``nodes`` dict. Phase 2 refactors this
-single function into ``c14.story.validate.collect_claim_ids("data/story/")``
-once the real multi-file story graph lands. The gate's core logic (registry
-load + is_approved check + report + exit) is unchanged by that refactor.
+Phase 2 refactor complete: the story walker now lives in
+``c14.story.validate.collect_claim_ids`` (imported below). It accepts a single
+``.json`` file (backward-compatible with the Phase 1 fixtures) OR a story
+directory (reads ``manifest.json`` + merges the listed files). The gate's
+core logic (registry load + is_approved check + report + exit) is unchanged
+by the refactor -- only the walker was swapped, per the Phase 1
+forward-compatible contract.
 
 See .planning/phases/01-foundations-testability-citation-gate/01-RESEARCH-citations.md
 Investigation Point 3 for the full reference design.
 """
 import argparse
-import json
 import os
 import sys
 
@@ -37,36 +38,7 @@ import sys
 # Resolves repo root from __file__ so the script runs regardless of CWD.
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from c14.citations import CitationRegistry  # noqa: E402  (sys.path setup above)
-
-
-def collect_referenced_claim_ids(story_path):
-    """Load a story JSON file and return ``{node_id: [claim_id, ...]}``.
-
-    Phase 1: walks the ``nodes`` dict inline. Phase 2 refactors this into
-    ``c14.story.validate.collect_claim_ids("data/story/")`` for the
-    multi-file manifest. Forward-compatible: the fixture uses the same node
-    shape (``{"nodes": {id: {"claim_ids": [...]}}}``) as the real graph.
-
-    Raises ``ValueError`` on bad schema (non-dict nodes, non-dict node entry)
-    or malformed JSON (``json.JSONDecodeError`` is a ``ValueError`` subclass).
-    Nodes with no ``claim_ids`` key contribute an empty list (valid -- a
-    purely narrative node).
-    """
-    with open(story_path, "r") as f:
-        story = json.load(f)
-    nodes = story.get("nodes", {})
-    if not isinstance(nodes, dict):
-        raise ValueError(
-            "story JSON must have a 'nodes' object; got {}".format(type(nodes).__name__)
-        )
-    referenced = {}
-    for node_id, node in nodes.items():
-        if not isinstance(node, dict):
-            raise ValueError(
-                "node {!r} must be an object; got {}".format(node_id, type(node).__name__)
-            )
-        referenced[node_id] = list(node.get("claim_ids", []))
-    return referenced
+from c14.story.validate import collect_claim_ids  # noqa: E402  (sys.path setup above)
 
 
 def run_gate(story_path, registry_path):
@@ -79,8 +51,8 @@ def run_gate(story_path, registry_path):
     # 1. Load + validate registry (raises ValueError on malformed/bad schema)
     registry = CitationRegistry.load(registry_path)
 
-    # 2. Collect referenced claim_ids from the story
-    referenced = collect_referenced_claim_ids(story_path)
+    # 2. Collect referenced claim_ids from the story (file OR directory)
+    referenced = collect_claim_ids(story_path)
 
     # 3. Check each referenced claim_id: must EXIST and be 'approved'
     missing = []     # list of (node_id, claim_id)
@@ -129,7 +101,8 @@ def main():
                     "claim_ids are 'approved' in the registry; exits 1 if any "
                     "are missing or not approved; exits 2 on config/load errors."
     )
-    parser.add_argument("--story", required=True, help="Path to story JSON file")
+    parser.add_argument("--story", required=True,
+                        help="Path to story JSON file OR story directory (with manifest.json)")
     parser.add_argument("--registry", required=True, help="Path to citation registry JSON file")
     args = parser.parse_args()
 
