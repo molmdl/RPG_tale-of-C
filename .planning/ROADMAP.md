@@ -43,9 +43,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans in 2 waves
 
 Plans:
-- [ ] 01-01-PLAN.md — Package skeleton + AST testability gate + .gitignore fix (Wave 1)
-- [ ] 01-02-PLAN.md — Path resolution (c14/paths.py) + README DOC-04 verification (Wave 2)
-- [ ] 01-03-PLAN.md — Citation registry (c14/citations.py) + pre-ship gate (tools/check_citations.py) + fixtures + tests (Wave 2)
+- [x] 01-01-PLAN.md — Package skeleton + AST testability gate + .gitignore fix (Wave 1) ✓
+- [x] 01-02-PLAN.md — Path resolution (c14/paths.py) + README DOC-04 verification (Wave 2) ✓
+- [x] 01-03-PLAN.md — Citation registry (c14/citations.py) + pre-ship gate (tools/check_citations.py) + fixtures + tests (Wave 2) ✓
 
 ### Phase 2: Story Engine Core (Architecture Proof in WSL)
 **Goal**: The entire game architecture is proven end-to-end in WSL — a minimal 2-node story is playable (intro → weighted choice → ending) with mocked MolActions, RNG determinism is verified, and save/load round-trips — before any PyMOL/Qt code is written. This is the architecture proof point that de-risks everything downstream.

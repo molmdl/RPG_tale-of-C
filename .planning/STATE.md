@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP, storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 1 — Foundations & Testability Boundary + Citation Gate
+**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — Phase 1 verified ✓ (15/15 must-haves passed)
 
 ## Current Position
 
-Phase: 1 of 13 (Foundations & Testability Boundary + Citation Gate)
+Phase: 1 of 13 (Foundations & Testability Boundary + Citation Gate) — COMPLETE ✓
 Plan: 3 of 3 complete in current phase (01-01 + 01-02 + 01-03 all done — Wave 1 + Wave 2)
-Status: Phase complete
-Last activity: 2026-08-13 — Completed 01-02-PLAN.md (c14.paths resolver + CWD-independence test + DOC-04 verification)
+Status: Phase complete + verified (15/15 must-haves passed; VERIFICATION.md status: passed)
+Last activity: 2026-08-13 — Phase 1 verification passed; ROADMAP + REQUIREMENTS updated (PLGN-03, CITE-02, DOC-04 → Complete); ready for Phase 2
 
 Progress: [███░░░░░░░░] ~6% (3 plans complete; overall total TBD — most phases not yet planned)
 

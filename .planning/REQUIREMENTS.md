@@ -11,7 +11,7 @@ Requirements for initial release. Each maps to roadmap phases. Cross-checked aga
 
 - [ ] **PLGN-01**: Plugin loads in PyMOL 2.5.0 via the modern `pymol.Qt` interface (PyQt5) with a menu entry, using the `__init_plugin__` + `addmenuitemqt` pattern (no legacy `pmgqt`/Tk)
 - [ ] **PLGN-02**: Plugin is installable via Plugin Manager (package dir → .zip → startup/) and bundles small/critical PDB structures within the package
-- [ ] **PLGN-03**: Plugin code targets Python 3.6 syntax universally (WSL test env = 3.6.9; pure-Python modules stay import-clean of `pymol`/`PyQt5` for unit testability)
+- [x] **PLGN-03**: Plugin code targets Python 3.6 syntax universally (WSL test env = 3.6.9; pure-Python modules stay import-clean of `pymol`/`PyQt5` for unit testability) ✓ Phase 1
 
 ### Characters & Starting Points
 
@@ -56,12 +56,12 @@ Requirements for initial release. Each maps to roadmap phases. Cross-checked aga
 - [ ] **DOC-01**: Repo-root README includes a dramatic cast list (protein name, PDB ID, resolution) and a dramatic slogan (e.g. "featuring high-resolution, real protein models in our cast")
 - [ ] **DOC-02**: In-game help text includes the dramatic cast list + slogan
 - [ ] **DOC-03**: In-game help includes molecule-editing pointers and/or PyMOL wiki links
-- [ ] **DOC-04**: Initial minimal README.md with "Under Development" banner, description, and TBD placeholder sections (Installation Instructions, References, etc.)
+- [x] **DOC-04**: Initial minimal README.md with "Under Development" banner, description, and TBD placeholder sections (Installation Instructions, References, etc.) ✓ Phase 1
 
 ### Scientific Integrity
 
 - [ ] **CITE-01**: Every scientific claim and citation (DOIs, PDB IDs, pathway facts, RNG weights, protonation defaults) is verified against an approved source and explicitly human-approved via per-claim checkpoint before landing in code/content
-- [ ] **CITE-02**: A citation registry maps each claim_id to source + approval_status; a pre-ship check blocks release on any `pending`/missing claim (no-fabricated-science rule enforced architecturally, not by discipline)
+- [x] **CITE-02**: A citation registry maps each claim_id to source + approval_status; a pre-ship check blocks release on any `pending`/missing claim (no-fabricated-science rule enforced architecturally, not by discipline) ✓ Phase 1
 
 ## v2 Requirements
 
@@ -98,7 +98,7 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 |-------------|-------|--------|
 | PLGN-01 | Phase 6 — Qt UI + MVP | Pending |
 | PLGN-02 | Phase 6 — Qt UI + MVP | Pending |
-| PLGN-03 | Phase 1 — Foundations & Citation Gate | Pending |
+| PLGN-03 | Phase 1 — Foundations & Citation Gate | Complete |
 | CHAR-01 | Phase 8 — Fatty Acid + Alcohol Characters | Pending |
 | CHAR-02 | Phase 6 — Qt UI + MVP | Pending |
 | STORY-01 | Phase 2 — Story Engine Core | Pending |
@@ -125,9 +125,9 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 | DOC-01 | Phase 9 — Anaerobic + Full Cast | Pending |
 | DOC-02 | Phase 9 — Anaerobic + Full Cast | Pending |
 | DOC-03 | Phase 6 — Qt UI + MVP | Pending |
-| DOC-04 | Phase 1 — Foundations & Citation Gate | Pending |
+| DOC-04 | Phase 1 — Foundations & Citation Gate | Complete |
 | CITE-01 | Phase 5 — Pre-Content Key Decisions (parallel) | Pending |
-| CITE-02 | Phase 1 — Foundations & Citation Gate | Pending |
+| CITE-02 | Phase 1 — Foundations & Citation Gate | Complete |
 
 **Coverage:**
 - v1 requirements: 32 total (previously stated as 34 — corrected: PATH-01 and STAT-01 are v2, not v1)
@@ -157,4 +157,4 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 
 ---
 *Requirements defined: 2026-08-12*
-*Last updated: 2026-08-12 after roadmap revision (Phase 11 inserted — documentation finalization + verification split out of Phase 10; 0-requirement finalization phase verifying DOC-01/DOC-02; no requirement remapping, coverage unchanged at 32/32)*
+*Last updated: 2026-08-13 after Phase 1 completion (PLGN-03, CITE-02, DOC-04 marked Complete — 3/32 v1 requirements delivered)*
