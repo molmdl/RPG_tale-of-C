@@ -66,18 +66,20 @@ Plans:
 - [x] 02-05-PLAN.md — End-to-end integration test + runnable demo (architecture proof) (Wave 4) ✓
 
 ### Phase 3: PyMOL cmd Layer + Asset Management (Headless)
-**Goal**: The molecular layer is proven against the real PyMOL 2.5.0 API headlessly — structures load/fetch correctly, MolActions translate to the right `cmd.*` calls, and the known API pitfalls (the `cmd.create(obj,sele,1,1)` no-op, `cmd.fetch` async/CIF defaults) are surfaced and mitigated before any editing or UI code depends on them.
+**Goal**: The molecular layer is proven against the real PyMOL 2.5.0 API headlessly — structures load/fetch correctly, MolActions translate to the right `cmd.*` calls, and the known API pitfalls (the `cmd.create` incomplete-multi-state-backup + destructive-self-copy trap [empirically corrected from the "no-op" claim], `cmd.fetch` async/CIF/cwd defaults) are surfaced and mitigated before any editing or UI code depends on them.
 **Depends on**: Phase 1 (path conventions); Phase 2 (MolAction model)
 **Requirements**: CAST-02
 **Success Criteria** (what must be TRUE):
-  1. An api-sanity headless smoke (via `run-conda-pymol.bat -cq`) exercises each `cmd.*` call the game will use (load, fetch, show, hide, select, zoom, color, delete, create-for-backup) with post-condition assertions (e.g. `count_atoms > 0` after load) and passes with exit code 0
+  1. An api-sanity headless smoke (via `run-conda-pymol.bat -cq`) exercises each `cmd.*` call the game will use (load, fetch, show, hide, select, zoom, color, delete, create-for-backup) with post-condition assertions (e.g. `count_atoms > 0` after load) and "passes" via a `SMOKE_RESULT: PASS` stdout sentinel grepped by the bash harness (REINTERPRETED from "exit code 0" — the bat ALWAYS returns 0 because `call conda deactivate` overwrites `%ERRORLEVEL%`; 03-RESEARCH.md Gotcha #1)
   2. AssetManager resolves a bundled PDB and a fetched PubChem substrate (`cmd.fetch` with `type='cid'`, `async_=0`, explicit `path=<plugin data dir>`) to local files, loading each into a non-empty PyMOL object (verified by `count_atoms`) — downloads land in the plugin data dir regardless of cwd
-  3. MolOps translates a queued MolAction list (hide_all, load, show, zoom, color) to the correct `cmd.*` sequence, and a headless smoke confirms the resulting object has the expected representation visible (asserted via `count_atoms` on the shown selection)
+  3. MolOps translates a queued MolAction list (hide_all, load, show, zoom, color) to the correct `cmd.*` sequence, and a headless smoke confirms the resulting object has the expected representation visible (asserted via `count_atoms` on the shown selection — the `rep <name>` selection keyword)
   4. Every `cmd.*` call introduced carries a `file:line` source-citation comment referencing `tmp/pymol-src/modules/pymol/` (the "read the source first" convention is established)
-**Plans**: TBD (likely 2–3 plans; `/gsd-research-phase` NOT needed — APIs verified line-by-line in STACK.md)
+**Plans**: 3 plans in 3 waves
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — Headless harness + api-sanity smoke + source-citation convention [GATE] (Wave 1)
+- [ ] 03-02-PLAN.md — AssetManager (load_bundled/fetch_pubchem/fetch_pdb + MockCmd unit tests + headless smoke) (Wave 2)
+- [ ] 03-03-PLAN.md — MolOps (MolAction→cmd.* per-action dispatch + citations + NotImplementedError for Phase 4 + headless smoke) (Wave 3)
 
 ### Phase 4: Editing, Protonation & Restore Safety Net
 **Goal**: The highest technical-risk feature — limited molecule editing with a restore safety net — works headlessly: the `alter`→`sort` silent-corruption trap is mitigated by a single sanctioned helper, backups/restore survive any edit, protonation defaults are curated variants (no pH engine), and edit routing (known→branch, unknown→bad-ending pool) is demonstrable end-to-end.
@@ -294,7 +296,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 |-------|----------------|--------|-----------|
 | 1. Foundations & Citation Gate | 3/3 ✓ | Complete | 2026-08-13 |
 | 2. Story Engine Core | 5/5 ✓ | Complete | 2026-08-13 |
-| 3. PyMOL cmd Layer | 0/TBD | Not started | - |
+| 3. PyMOL cmd Layer | 0/3 | Not started | - |
 | 4. Editing + Protonation + Restore | 0/TBD | Not started | - |
 | 5. Pre-Content Key Decisions (parallel) | 0/TBD | Not started | - |
 | 5.1 Story Graph Design (INSERTED) | 0/TBD | Not started | - |
