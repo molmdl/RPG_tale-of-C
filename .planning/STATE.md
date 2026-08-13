@@ -5,34 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — executing; Plans 01 + 02 + 03 done (Wave 2: model/rng/state + graph+interpreter + validator/gate-refactor); 02-04, 02-05 remain
+**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — executing; Plans 01 + 02 + 03 + 04 done (Wave 2 + Wave 3: model/rng/state + graph+interpreter + validator/gate-refactor + SaveStore+GameEngine); 02-05 (integration test + runnable demo) remains
 
 ## Current Position
 
 Phase: 2 of 13 (Story Engine Core — Architecture Proof in WSL)
-Plan: 3 of 5 complete in current phase (02-01 + 02-02 + 02-03 done; 02-04, 02-05 remain)
+Plan: 4 of 5 complete in current phase (02-01 + 02-02 + 02-03 + 02-04 done; 02-05 remains)
 Status: In progress
-Last activity: 2026-08-13 — Completed 02-02-PLAN.md (StoryGraph loader + StoryInterpreter; full walk proven in pure Python, 65 tests pass)
+Last activity: 2026-08-13 — Completed 02-04-PLAN.md (SaveStore + GameEngine turn loop with save/load + on_enter replay; success criterion #3 proven, 80 tests pass)
 
-Progress: [█████░░░░░░] ~12% (6 plans complete; overall total TBD — most phases not yet planned)
+Progress: [██████░░░░] ~14% (7 plans complete; overall total TBD — most phases not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 14 min
-- Total execution time: 1.35 hours
+- Total plans completed: 7
+- Average duration: 15 min
+- Total execution time: 1.84 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundations & Citation Gate | 3/3 ✓ | 56 min | 19 min |
-| 2. Story Engine Core | 3/5 | 25 min | 8 min |
+| 2. Story Engine Core | 4/5 | 74 min | 19 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (20 min), 01-02 (4 min), 02-01 (4 min), 02-03 (7 min), 02-02 (14 min)
-- Trend: Wave 2 plans faster than Wave 1 (reference designs pre-verified on 3.6.9; near-verbatim adoption + read-only verification; no debugging needed)
+- Last 5 plans: 01-02 (4 min), 02-01 (4 min), 02-03 (7 min), 02-02 (14 min), 02-04 (49 min)
+- Trend: Wave 3 (02-04) slower than Wave 2 — the GameEngine is the integration point (wires 3 prior modules + interpreter edit + a Rule 1 bug fix for per-action MolAction dispatch to match the test done-criteria). Still pure-Python, stdlib only, near-verbatim ARCHITECTURE.md Pattern 6 adoption.
 
 *Updated after each plan completion*
 
@@ -74,6 +74,10 @@ Recent decisions affecting current work:
 - [Execution 02-02]: StoryGraph.load(story_dir) injects the JSON object key as the node's `id` field before Node.from_dict (which requires d["id"]) — keeps the {nodes: {id: {claim_ids}}} shape the Phase 1 citation gate story-walker reads, without duplicating the id inside each node body. Loader is CWD-independent (explicit story_dir arg); all_nodes() returns the {id: Node} dict (NOT a list) as the Plan 03/05 contract.
 - [Execution 02-02]: StoryInterpreter (ARCHITECTURE.md Pattern 2 near-verbatim) emits pure-data MolAction lists from enter_node — NEVER cmd.* (testability boundary proven by a full walk with a mock sink + `'pymol' not in sys.modules`). pick_choice: weighted -> single Choice via rng.random()*total + cumulative sum (single injected RngEngine, Anti-Pattern 7); non-weighted -> eligible list. _cond: restricted-namespace {flags,char,counters,visits} eval with no builtins, trusted-content model, fail-safe False on any exception.
 - [Execution 02-02]: Phase 2 success criterion #1 PROVEN — minimal story (intro.start -> 2 weighted choices -> 2 endings) loads and the interpreter walks it (enter -> weighted pick -> advance -> enter ending) in pure Python with a mock MolAction sink and zero pymol import. RNG determinism through the walk holds (same seed -> same ending; diff seeds diverge) — criterion #2 partially proven (full save/load determinism in Plan 05).
+- [Execution 02-04]: SaveStore is a thin pure-data layer (json.dump indent=2 + GameState.from_dict; parent-dir creation + trailing newline). It does NOT replay MolActions and does NOT save .pse (Anti-Pattern 5); the ENGINE owns the on_enter replay on load (Pattern 6). Human-readable, diff-friendly saves (Decision D2).
+- [Execution 02-04]: GameEngine is the turn loop (start/choose/_enter/save/load) wiring StoryInterpreter + GameState + RngEngine. It emits on_enter MolActions PER-ACTION to an injected molaction_sink (a callable taking a single MolAction) — never cmd.* (the testability boundary; a plain list .append is the test mock). Chose per-action dispatch because the plan's test done-criteria (len(sink)==2, sink[0].op with sink.append) required it; the plan's key_links prose ("callable(list)") conflicted with its own tests, so the tests won. Phase 4+ molops.apply(action) receives one action per call (the natural unit).
+- [Execution 02-04]: RNG-state sync — _enter() writes rng.get_state() into state after every entry and save() syncs before serializing; load() rebuilds the RngEngine via RngEngine.from_state(seed, rng_state) and replays the current node's on_enter with record_visit=False (no visit double-count). Exact-next-draw equivalence proven (test_rng_state_survives_save_load). Phase 2 success criterion #3 PROVEN (save/load restores an identical session by replaying on_enter); criterion #2 proven through the engine (the single seeded RngEngine carries through start->choose->save->load).
+- [Execution 02-04]: interpreter.enter_node gained a backward-compatible record_visit=True param (2-line additive edit) so load-replay can skip the visit bump. All 12 existing interpreter tests still pass (zero regression — Plan 02 forward-compatible contract honored).
 
 ### Pending Todos
 
@@ -98,6 +102,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-13 (Phase 2 Plan 02 — StoryGraph loader + StoryInterpreter)
-Stopped at: Completed 02-02-PLAN.md — c14/story/graph.py + c14/story/interpreter.py + data/story/{manifest,intro}.json; full walk (intro→weighted choice→ending) proven in pure Python with a mock MolAction sink, zero pymol import; 65 tests pass; AST gate green. 02-03 (validate) ran in parallel and is also complete. Ready for 02-04 (engine) / 02-05 (persist).
+Last session: 2026-08-13 (Phase 2 Plan 04 — SaveStore + GameEngine turn loop)
+Stopped at: Completed 02-04-PLAN.md — c14/persist.py (SaveStore: human-readable JSON save/load of GameState) + c14/engine.py (GameEngine: start/choose/_enter/save/load, per-action MolAction dispatch to injected sink, RNG-state sync + on_enter replay on load) + interpreter.enter_node record_visit param; success criterion #3 PROVEN, 80 tests pass, AST gate green. One Rule 1 fix (per-action dispatch to match test done-criteria). Ready for 02-05 (end-to-end integration test + runnable demo — last plan in Phase 2).
 Resume file: None
