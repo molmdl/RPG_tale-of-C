@@ -1,8 +1,8 @@
 Pymol-script-repo
-./Pymol-script-repo/**
 
 *.env
 *.pyc
+__pycache__/
 *.npy
 *.npz
 
@@ -10,6 +10,6 @@ Pymol-script-repo
 **/auth.json
 
 #./dev_env_note.txt
-./3rd_party_lib/**
+3rd_party_lib/
 tmp
 biochemeleon.zip
