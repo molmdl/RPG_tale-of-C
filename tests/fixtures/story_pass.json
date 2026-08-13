@@ -1,0 +1,14 @@
+{
+  "nodes": {
+    "fixture.intro": {
+      "text": "PLACEHOLDER: intro node for citation gate fixture.",
+      "claim_ids": ["placeholder-claim-1"],
+      "choices": [{"text": "continue", "to": "fixture.ending"}]
+    },
+    "fixture.ending": {
+      "text": "PLACEHOLDER: ending node for citation gate fixture.",
+      "claim_ids": ["placeholder-claim-2"],
+      "is_ending": "true"
+    }
+  }
+}

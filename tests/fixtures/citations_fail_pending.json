@@ -1,0 +1,18 @@
+{
+  "placeholder-claim-1": {
+    "claim": "PLACEHOLDER: claim one for fixture.",
+    "source_type": "placeholder",
+    "source": "TBD",
+    "approval_status": "approved",
+    "approved_by": "fixture",
+    "approval_date": "2026-08-13",
+    "notes": "PLACEHOLDER fixture claim."
+  },
+  "placeholder-claim-2": {
+    "claim": "PLACEHOLDER: claim two for fixture -- pending approval.",
+    "source_type": "placeholder",
+    "source": "TBD",
+    "approval_status": "pending",
+    "notes": "PLACEHOLDER fixture: simulates an unapproved claim awaiting human checkpoint."
+  }
+}
