@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-08-12)
 ## Current Position
 
 Phase: 1 of 13 (Foundations & Testability Boundary + Citation Gate)
-Plan: 2 of 3 complete in current phase (01-01 + 01-03 done; 01-02 running in parallel — Wave 2)
-Status: In progress
-Last activity: 2026-08-13 — Completed 01-03-PLAN.md (citation registry loader + pre-ship gate + fixtures + tests)
+Plan: 3 of 3 complete in current phase (01-01 + 01-02 + 01-03 all done — Wave 1 + Wave 2)
+Status: Phase complete
+Last activity: 2026-08-13 — Completed 01-02-PLAN.md (c14.paths resolver + CWD-independence test + DOC-04 verification)
 
-Progress: [██░░░░░░░░] ~4% (2 plans complete; overall total TBD — most phases not yet planned)
+Progress: [███░░░░░░░░] ~6% (3 plans complete; overall total TBD — most phases not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 26 min
-- Total execution time: 0.87 hours
+- Total plans completed: 3
+- Average duration: 19 min
+- Total execution time: 0.93 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Foundations & Citation Gate | 2/3 | 52 min | 26 min |
+| 1. Foundations & Citation Gate | 3/3 ✓ | 56 min | 19 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (32 min), 01-03 (20 min)
-- Trend: 01-03 faster than 01-01 (reference designs pre-verified on 3.6.9; no debugging needed)
+- Last 5 plans: 01-01 (32 min), 01-03 (20 min), 01-02 (4 min)
+- Trend: Wave 2 plans faster than Wave 1 (reference designs pre-verified on 3.6.9; near-verbatim adoption + read-only verification; no debugging needed)
 
 *Updated after each plan completion*
 
@@ -58,6 +58,10 @@ Recent decisions affecting current work:
 - [Execution 01-03]: `data/citations.json` lives at REPO ROOT `data/` (content source file, read at pre-ship time by the gate), NOT `c14/data/` (bundled runtime asset that ships in the plugin zip). Distinct directories with distinct roles — established early to avoid future confusion.
 - [Execution 01-03]: Registry shipped as JSON object (`data/citations.json`), NOT JSONL (`data/claims.jsonl`) — research Pitfall 2: O(1) lookup, structural dup-key prevention, matches authoritative ARCHITECTURE.md. The `.jsonl` references in earlier research are superseded.
 - [Execution 01-03]: Story-walker (`collect_referenced_claim_ids`) isolated in one function in `tools/check_citations.py` — Phase 2 swaps it for `c14.story.validate.collect_claim_ids("data/story/")` with zero changes to the gate's core logic (forward-compatible contract).
+- [Execution 01-02]: c14.paths.data_path() is a pure `__file__`-relative resolver (NO existence check) — separation of concerns; callers handle FileNotFoundError; supports "compute where a future file would go". selfcheck() DOES check existence (raises FileNotFoundError) — the fail-loud layout invariant for plugin load (Pitfall 1 mitigation, Phase 6+ caller). Return type pathlib.Path; str(path) coerces for PyMOL cmd.* string-path APIs.
+- [Execution 01-02]: CWD-independence proven via real `os.chdir(tempfile.mkdtemp())` in setUp — honest end-to-end proof, better than `mock.patch('os.getcwd')` which only proves the call site. Existence-of-fixture-from-foreign-CWD IS the proof; adopted near-verbatim from 01-RESEARCH-paths.md Pattern 2.
+- [Execution 01-02]: README.md satisfies DOC-04 already (verified, NOT modified) — 01-RESEARCH-paths.md read the 57-line file in full; banner + description + TBD: Installation/References/Cast all present. Read-only verification task produced no commit (no changes; respects CITE-01 gate and later-phase content ownership).
+- [Execution 01-02]: Bundled data lives inside `c14/data/` (ships in PyMOL Plugin Manager zip); distinct from repo-root `data/` (Plan 03's citations.json source/registry file, read at pre-ship time). Two directories, two roles — established early to avoid future confusion.
 
 ### Pending Todos
 
@@ -70,12 +74,12 @@ Issues that affect future work:
 - [Phase 5]: 4 science-framing Key Decisions (ATP/True-Ending carbon-fate reframing — Pitfall 4; C14-decay timescale — Pitfall 9; anaerobic framing; batch-vs-per-claim approval) gate content authoring. The roadmapper has NOT resolved these (they are HOW decisions for the human). They are flagged as Phase 5 tasks. Start this track early — it is the timeline-domininating risk (Pitfall 7). The ATP/True-Ending + anaerobic decisions specifically gate Phase 5.1 (Story Graph Design).
 - [Phase 5.1 / 5.2 (INSERTED)]: Two design phases gate Phase 6. Phase 5.1 (Story Graph Design) needs Phase 2 + the Phase 5 ATP decision; it produces the glucose skeleton + MC-choice/edit-node integration contracts (resolves the user's story-design / MC-vs-editing / editing↔story concerns). Phase 5.2 (Representation Design) needs Phase 3 + 5.1; it produces the hero-highlight + scene-template convention (resolves the user's cast/hero-representation concern). Both are review-checkpoints, not requirement-delivery phases.
 - [Phase 4]: Highest technical-risk phase — the `alter`→`sort` silent-corruption trap (Pitfall 6) and `cmd.create` no-op trap (Pitfall 3) bite here. Address on day one of Phase 4 with the `apply_edit` helper + backup-snapshot pattern.
-- [Phase 6]: First human-verify milestone — Qt/GUI cannot be exercised from WSL (Pitfall 2). Manual GUI test matrix begins here. Now implements the reviewed Phase 5.1 + 5.2 design artifacts rather than inventing them inline.
+- [Phase 6]: First human-verify milestone — Qt/GUI cannot be exercised from WSL (Pitfall 2). Manual GUI test matrix begins here. Now implements the reviewed Phase 5.1 + 5.2 design artifacts rather than inventing them inline. Plugin loader should also call `c14.paths.selfcheck()` at startup (Pitfall 1 mitigation — fail loud on broken bundled layout); the helper is designed for this and the Phase 1 test is the first caller.
 - [Phase 11]: Documentation finalization + verification is the LAST release gate, after Phase 10's content polish. It depends on Phase 10 being complete (playtest-driven content changes settled) so docs reflect final shipped content. It owns 0 new requirements — verifies/updates DOC-01, DOC-02 against shipped reality.
 - [Coverage]: REQUIREMENTS.md previously stated "34 total" v1 requirements; actual enumerated v1 set is 32 (PATH-01, STAT-01 are v2). Traceability uses 32. The 5.1/5.2/11 phases own 0 requirements — coverage unchanged at 32/32.
 
 ## Session Continuity
 
-Last session: 2026-08-13 (Phase 1 Plan 03 execution — Wave 2, parallel with 01-02)
-Stopped at: Completed 01-03-PLAN.md — citation registry loader + pre-ship gate + 6 fixtures + 12-test suite committed
+Last session: 2026-08-13 (Phase 1 Plan 02 execution — Wave 2, parallel with 01-03; both now complete)
+Stopped at: Completed 01-02-PLAN.md — c14.paths resolver + CWD-independence test + DOC-04 verification. Phase 1 is now COMPLETE (all 3 plans done: 01-01 + 01-02 + 01-03).
 Resume file: None

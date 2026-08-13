@@ -15,7 +15,7 @@ A 13-phase build order (11 integer milestones + 2 INSERTED decimal design phases
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundations & Testability Boundary + Citation Gate** — pure-Python plumbing + no-fabricated-science gate + path self-check (WSL-testable, no PyMOL/Qt)
+- [x] **Phase 1: Foundations & Testability Boundary + Citation Gate** — pure-Python plumbing + no-fabricated-science gate + path self-check (WSL-testable, no PyMOL/Qt)
 - [ ] **Phase 2: Story Engine Core (Architecture Proof in WSL)** — interpreter + engine + RNG + save/load on a minimal 2-node story with mocked MolActions
 - [ ] **Phase 3: PyMOL cmd Layer + Asset Management (Headless)** — AssetManager + MolOps + api-sanity smoke against the real API surface
 - [ ] **Phase 4: Editing, Protonation & Restore Safety Net** — the highest technical-risk phase: apply_edit helper, backup/restore, curated protonation, edit routing
@@ -288,7 +288,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundations & Citation Gate | 0/TBD | Not started | - |
+| 1. Foundations & Citation Gate | 3/3 ✓ | Complete | 2026-08-13 |
 | 2. Story Engine Core | 0/TBD | Not started | - |
 | 3. PyMOL cmd Layer | 0/TBD | Not started | - |
 | 4. Editing + Protonation + Restore | 0/TBD | Not started | - |
