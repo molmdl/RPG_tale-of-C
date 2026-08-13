@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-08-12)
 Phase: 1 of 13 (Foundations & Testability Boundary + Citation Gate) — COMPLETE ✓
 Plan: 3 of 3 complete in current phase (01-01 + 01-02 + 01-03 all done — Wave 1 + Wave 2)
 Status: Phase complete + verified (15/15 must-haves passed; VERIFICATION.md status: passed)
-Last activity: 2026-08-13 — Phase 1 verification passed; ROADMAP + REQUIREMENTS updated (PLGN-03, CITE-02, DOC-04 → Complete); ready for Phase 2
+Last activity: 2026-08-13 — Completed quick task 001: resolved Pitfall 4 (C14/ATP carbon-fate conflict) via soul-jump reframing + cleanup across planning docs
 
 Progress: [███░░░░░░░░] ~6% (3 plans complete; overall total TBD — most phases not yet planned)
 
@@ -78,8 +78,14 @@ Issues that affect future work:
 - [Phase 11]: Documentation finalization + verification is the LAST release gate, after Phase 10's content polish. It depends on Phase 10 being complete (playtest-driven content changes settled) so docs reflect final shipped content. It owns 0 new requirements — verifies/updates DOC-01, DOC-02 against shipped reality.
 - [Coverage]: REQUIREMENTS.md previously stated "34 total" v1 requirements; actual enumerated v1 set is 32 (PATH-01, STAT-01 are v2). Traceability uses 32. The 5.1/5.2/11 phases own 0 requirements — coverage unchanged at 32/32.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 001 | Resolve Pitfall 4 (C14/ATP carbon-fate conflict) — adopt soul-jump reframing (electrons-as-soul → ETC → ATP, tied to RNG TCA shuffle) + cleanup wrong claims across planning docs | 2026-08-13 | 7b6119c | [001-resolve-pitfall-4-c14-atp-carbon-fate-co](./quick/001-resolve-pitfall-4-c14-atp-carbon-fate-co/) |
+
 ## Session Continuity
 
-Last session: 2026-08-13 (Phase 1 Plan 02 execution — Wave 2, parallel with 01-03; both now complete)
-Stopped at: Completed 01-02-PLAN.md — c14.paths resolver + CWD-independence test + DOC-04 verification. Phase 1 is now COMPLETE (all 3 plans done: 01-01 + 01-02 + 01-03).
+Last session: 2026-08-13 (Quick task 001 — resolved Pitfall 4 via soul-jump reframing + cleanup across 8 planning docs)
+Stopped at: Quick task 001 complete — Pitfall 4 RESOLVED (electrons-as-soul → ATP via ETC after RNG-weighted TCA path); Pitfall 9 (C14 decay) still Pending. Phase 1 remains COMPLETE; ready for Phase 2.
 Resume file: None
