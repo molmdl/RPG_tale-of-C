@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-08-12)
 ## Current Position
 
 Phase: 1 of 13 (Foundations & Testability Boundary + Citation Gate)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-08-12 — Roadmap revised (split documentation finalization + verification OUT of Phase 10 into Phase 11; Phase 10 keeps polish/playtest/accessibility/test-matrix/citation-gate; Phase 11 owns docs update + final docs verification as last release gate; 13 phases total, 32 v1 requirements mapped, coverage unchanged)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-08-13 — Completed 01-01-PLAN.md (c14/ package skeleton + AST testability gate + .gitignore fix)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] ~2% (1 plan complete; overall total TBD — most phases not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 32 min
+- Total execution time: 0.53 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 1. Foundations & Citation Gate | 1/3 | 32 min | 32 min |
 
 **Recent Trend:**
-- Last 5 plans: —
-- Trend: —
+- Last 5 plans: 01-01 (32 min)
+- Trend: baseline established
 
 *Updated after each plan completion*
 
@@ -48,6 +48,9 @@ Recent decisions affecting current work:
 - [Roadmap]: Content is a marathon across Phases 7–9 (glucose → fatty acid + alcohol → anaerobic + full cast), dominated by per-claim approval throughput (Pitfall 7), not engineering difficulty.
 - [Roadmap]: Content phases 7/8/9 are NOT split into more phases despite the heavy per-claim citation load. Instead each uses granular per-pathway-segment plans (5–7 for P7, 4–6 for P8, 4–5 for P9). Rationale: (a) per-claim approval is orthogonal to phase structure — the human approves claims individually regardless; (b) already at top of comprehensive depth (12 phases), splitting would exceed range; (c) content segments are sequential (continuity), so phases buy no parallelism; (d) phase-level verifier marginal value is low for content (citation gate already enforced at build time); (e) plans give the per-segment review cadence the user wants with less ceremony. See ROADMAP.md "Content Phase Plan Granularity".
 - [Roadmap]: Phase 11 (Documentation Finalization & Verification) split OUT of Phase 10 per user feedback. Phase 10 keeps polish, playtest-driven edit-table expansion, accessibility, full manual GUI test matrix, pre-ship citation gate. Phase 11 owns: update README + in-game help to match final shipped content (cast list, slogan, PDB IDs + resolutions), verify all docs reflect shipped game, final docs verification as the last release gate. Phase 11 owns 0 new requirements (verifies/updates DOC-01, DOC-02 created in Phase 9, per the Phase 10 0-requirement precedent). Phase 11 depends on Phase 10 (content polish settled before docs finalization) — it is the LAST release gate before ship.
+- [Execution 01-01]: AST-based import gate (tools/check_imports.py) adopted over grep — 0 false positives on comments/strings, catches aliased `import pymol.cmd as c`. Strict-ban policy: flags any pymol/PyQt5 Import/ImportFrom including inside TYPE_CHECKING guards. Directory location = tier (c14/ root scanned; pymol_layer/ + ui/ excluded).
+- [Execution 01-01]: c14/__init__.py stays pure-Python in Phase 1 (zero pymol/PyQt5 imports); __init_plugin__ deferred to Phase 6 (lazy-delegate to c14/ui/plugin_entry.py per research Pattern 1).
+- [Execution 01-01]: Python 3.6 stdlib only — unittest (pytest not installed); subprocess uses stdout/stderr=PIPE not capture_output (3.7+); py_compile + unittest paired (Pitfall 3: py_compile necessary but not sufficient).
 
 ### Pending Todos
 
@@ -66,6 +69,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-12 (roadmap creation)
-Stopped at: Roadmap created; ready to plan Phase 1
+Last session: 2026-08-13 (Phase 1 Plan 01 execution)
+Stopped at: Completed 01-01-PLAN.md — c14/ skeleton + AST gate + .gitignore fix committed
 Resume file: None
