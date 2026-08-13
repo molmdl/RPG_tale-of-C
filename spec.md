@@ -1,6 +1,6 @@
 # Aim
 
-Develop a PyMOL plugn as an RPG game of the hero, a C14, for their path taken in the respiratory pathway.
+Develop a PyMOL plugn as an RPG game of the hero, for their path taken in the respiratory pathway.
 
 # Description of the game
 
