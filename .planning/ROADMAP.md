@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundations & Testability Boundary + Citation Gate** — pure-Python plumbing + no-fabricated-science gate + path self-check (WSL-testable, no PyMOL/Qt)
 - [x] **Phase 2: Story Engine Core (Architecture Proof in WSL)** — interpreter + engine + RNG + save/load on a minimal 2-node story with mocked MolActions ✓ COMPLETE (2026-08-13; 97 tests pass, demo exits 0, zero PyMOL/Qt in c14/)
 - [x] **Phase 3: PyMOL cmd Layer + Asset Management (Headless)** — AssetManager + MolOps + api-sanity smoke against the real API surface ✓ COMPLETE (2026-08-14; all 4 SCs delivered: api-sanity smoke via SMOKE_RESULT sentinel, AssetManager resolves bundled+fetched substrates, MolOps translates MolAction->cmd.* per-action, source-citation convention; 123 tests pass)
-- [x] **Phase 4: Editing, Protonation & Restore Safety Net** — the highest technical-risk phase: apply_edit helper, backup/restore, curated protonation, edit routing ✓ COMPLETE (2026-08-14; all 5 SCs delivered: SC1 alter->sort mitigated + AST gate + headless byres proof, SC2 backup/restore round-trip for 3 edit types, SC3 EditRouter routing, SC4 protonation switch, SC5 coverage scan; 198 tests pass; 2 headless smokes green)
+- [x] **Phase 4: Editing, Protonation & Restore Safety Net** — the highest technical-risk phase: apply_edit helper, backup/restore, curated protonation, edit routing ✓ COMPLETE + VERIFIED (2026-08-15; all 5 SCs delivered + verified: SC1 alter->sort mitigated + AST gate + headless byres proof, SC2 backup/restore round-trip for 3 edit types, SC3 EditRouter routing, SC4 protonation switch, SC5 coverage scan; 198 tests pass; 2 headless smokes green; VERIFICATION.md status: passed)
 - [ ] **Phase 5: Pre-Content Key Decisions & Source Approval** — PARALLEL track: 4 science-framing decisions + batch-by-source approval workflow (gates Phases 6–9 content)
 - [ ] **Phase 5.1: Story Graph Design — Glucose Skeleton + Integration Contracts (INSERTED)** — designs the real glucose story graph topology + the MC-choice-point and edit-node integration contracts as reviewable artifacts; validated by the reachability checker
 - [ ] **Phase 5.2: Cast & Hero Representation Design — Visual Language + Scene Templates (INSERTED)** — designs the C14 hero highlight convention + per-stage scene templates + cast-reveal convention; headless-prototyped on placeholder structures
@@ -301,7 +301,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 | 1. Foundations & Citation Gate | 3/3 ✓ | Complete | 2026-08-13 |
 | 2. Story Engine Core | 5/5 ✓ | Complete | 2026-08-13 |
 | 3. PyMOL cmd Layer | 3/3 ✓ | Complete | 2026-08-14 |
-| 4. Editing + Protonation + Restore | 5/5 ✓ | Complete | 2026-08-14 |
+| 4. Editing + Protonation + Restore | 5/5 ✓ | Complete | 2026-08-15 |
 | 5. Pre-Content Key Decisions (parallel) | 0/TBD | Not started | - |
 | 5.1 Story Graph Design (INSERTED) | 0/TBD | Not started | - |
 | 5.2 Representation Design (INSERTED) | 0/TBD | Not started | - |

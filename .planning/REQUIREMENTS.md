@@ -30,17 +30,17 @@ Requirements for initial release. Each maps to roadmap phases. Cross-checked aga
 
 ### Molecule Editing
 
-- [ ] **EDIT-01**: Player can make point mutations (swap one residue in an enzyme's active site)
-- [ ] **EDIT-02**: Player can make substrate edits (add/remove a group on the small molecule)
-- [ ] **EDIT-03**: Player can change protonation state of catalytic residues / substrate
-- [ ] **EDIT-04**: Edit routing uses a lookup table: known edits map to defined branches; unknown edits fall through to the bad-ending pool ("lost connection" / "released from host")
-- [ ] **EDIT-05**: "Reveal correct 3D model" / restore safety net lets the player recover a pre-edit snapshot without restarting (keeps gameplay smooth)
+- [x] **EDIT-01**: Player can make point mutations (swap one residue in an enzyme's active site) ✓ Phase 4
+- [x] **EDIT-02**: Player can make substrate edits (add/remove a group on the small molecule) ✓ Phase 4
+- [x] **EDIT-03**: Player can change protonation state of catalytic residues / substrate ✓ Phase 4
+- [x] **EDIT-04**: Edit routing uses a lookup table: known edits map to defined branches; unknown edits fall through to the bad-ending pool ("lost connection" / "released from host") ✓ Phase 4
+- [x] **EDIT-05**: "Reveal correct 3D model" / restore safety net lets the player recover a pre-edit snapshot without restarting (keeps gameplay smooth) ✓ Phase 4
 
 ### Molecular Cast & Representation
 
 - [ ] **CAST-01**: Protein "cast" of ~20+ enzymes sourced from the PDB, each with PDB ID + resolution + citation, verified via per-claim checkpoint
 - [x] **CAST-02**: Small-molecule substrates (the C14 hero + intermediates) are 3D models from PubChem (via `cmd.fetch type='cid'/'sid'`) or PDB (via `cmd.fetch type='pdb'`) ✓ Phase 3
-- [ ] **CAST-03**: Protonation defaults to physiological pH or reaction-relevant states; user-adjustable (curated variants via `cmd.alter` resn + targeted H add/remove, since `h_add` is valence-only not pH-aware)
+- [x] **CAST-03**: Protonation defaults to physiological pH or reaction-relevant states; user-adjustable (curated variants via `cmd.alter` resn + targeted H add/remove, since `h_add` is valence-only not pH-aware) ✓ Phase 4
 - [ ] **CAST-04**: Large PDB structures are fetched via a one-time bulk download prompt before first play (hybrid bundle-small + bulk-download-large model)
 - [ ] **CAST-05**: Specific residue representations are shown as the game proceeds to relevant stages (using `cmd.show`/`cmd.hide`/`cmd.select` scene pattern)
 
@@ -108,14 +108,14 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 | STORY-05 | Phase 9 — Anaerobic + Full Cast | Pending |
 | STORY-06 | Phase 7 — All Glucose Endings | Pending |
 | STORY-07 | Phase 7 — All Glucose Endings | Pending |
-| EDIT-01 | Phase 4 — Editing + Protonation + Restore | Pending |
-| EDIT-02 | Phase 4 — Editing + Protonation + Restore | Pending |
-| EDIT-03 | Phase 4 — Editing + Protonation + Restore | Pending |
-| EDIT-04 | Phase 4 — Editing + Protonation + Restore | Pending |
-| EDIT-05 | Phase 4 — Editing + Protonation + Restore | Pending |
+| EDIT-01 | Phase 4 — Editing + Protonation + Restore | Complete |
+| EDIT-02 | Phase 4 — Editing + Protonation + Restore | Complete |
+| EDIT-03 | Phase 4 — Editing + Protonation + Restore | Complete |
+| EDIT-04 | Phase 4 — Editing + Protonation + Restore | Complete |
+| EDIT-05 | Phase 4 — Editing + Protonation + Restore | Complete |
 | CAST-01 | Phase 9 — Anaerobic + Full Cast | Pending |
 | CAST-02 | Phase 3 — PyMOL cmd Layer | Complete |
-| CAST-03 | Phase 4 — Editing + Protonation + Restore | Pending |
+| CAST-03 | Phase 4 — Editing + Protonation + Restore | Complete |
 | CAST-04 | Phase 6 — Qt UI + MVP | Pending |
 | CAST-05 | Phase 6 — Qt UI + MVP | Pending |
 | SAVE-01 | Phase 2 — Story Engine Core | Complete |
@@ -157,4 +157,4 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 
 ---
 *Requirements defined: 2026-08-12*
-*Last updated: 2026-08-13 after Phase 1 completion (PLGN-03, CITE-02, DOC-04 marked Complete — 3/32 v1 requirements delivered)*
+*Last updated: 2026-08-15 after Phase 4 completion (EDIT-01..05, CAST-03 marked Complete — 10/32 v1 requirements delivered; Phase 1=3, Phase 2=4, Phase 3=1, Phase 4=6)*
