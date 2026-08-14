@@ -39,7 +39,7 @@ Requirements for initial release. Each maps to roadmap phases. Cross-checked aga
 ### Molecular Cast & Representation
 
 - [ ] **CAST-01**: Protein "cast" of ~20+ enzymes sourced from the PDB, each with PDB ID + resolution + citation, verified via per-claim checkpoint
-- [ ] **CAST-02**: Small-molecule substrates (the C14 hero + intermediates) are 3D models from PubChem (via `cmd.fetch type='cid'/'sid'`) or PDB (via `cmd.fetch type='pdb'`)
+- [x] **CAST-02**: Small-molecule substrates (the C14 hero + intermediates) are 3D models from PubChem (via `cmd.fetch type='cid'/'sid'`) or PDB (via `cmd.fetch type='pdb'`) ✓ Phase 3
 - [ ] **CAST-03**: Protonation defaults to physiological pH or reaction-relevant states; user-adjustable (curated variants via `cmd.alter` resn + targeted H add/remove, since `h_add` is valence-only not pH-aware)
 - [ ] **CAST-04**: Large PDB structures are fetched via a one-time bulk download prompt before first play (hybrid bundle-small + bulk-download-large model)
 - [ ] **CAST-05**: Specific residue representations are shown as the game proceeds to relevant stages (using `cmd.show`/`cmd.hide`/`cmd.select` scene pattern)
@@ -114,7 +114,7 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 | EDIT-04 | Phase 4 — Editing + Protonation + Restore | Pending |
 | EDIT-05 | Phase 4 — Editing + Protonation + Restore | Pending |
 | CAST-01 | Phase 9 — Anaerobic + Full Cast | Pending |
-| CAST-02 | Phase 3 — PyMOL cmd Layer | Pending |
+| CAST-02 | Phase 3 — PyMOL cmd Layer | Complete |
 | CAST-03 | Phase 4 — Editing + Protonation + Restore | Pending |
 | CAST-04 | Phase 6 — Qt UI + MVP | Pending |
 | CAST-05 | Phase 6 — Qt UI + MVP | Pending |

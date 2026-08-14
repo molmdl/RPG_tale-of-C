@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 3 — PyMOL cmd Layer + Asset Management (Headless) — COMPLETE ✓. All 3 plans done (03-01 GATE + 03-02 AssetManager + 03-03 MolOps). The WSL->Windows headless bridge is proven, the harness contract (SMOKE_RESULT sentinel) is established, AssetManager resolves bundled/fetched substrates (cwd-independent), and MolOps translates MolAction->cmd.* per-action (8 ops implemented; edit/protonate/restore raise NotImplementedError = explicit Phase 4 boundary). All 4 Phase 3 success criteria delivered (SC #1/#2/#3/#4). 123 tests pass; AST gate clean. Next: Phase 4 (Editing, Protonation & Restore Safety Net — highest technical-risk phase; the alter->sort trap bites here). Phase 2 remains complete+verified (97 tests, demo exits 0, zero PyMOL/Qt in c14/).
+**Current focus:** Phase 3 — PyMOL cmd Layer + Asset Management (Headless) — COMPLETE ✓ + VERIFIED (4/4 success criteria, 9/9 artifacts, 9/9 key_links; VERIFICATION.md status: passed). All 3 plans done (03-01 GATE + 03-02 AssetManager + 03-03 MolOps). The WSL->Windows headless bridge is proven, the harness contract (SMOKE_RESULT sentinel) is established, AssetManager resolves bundled/fetched substrates (cwd-independent), and MolOps translates MolAction->cmd.* per-action (8 ops implemented; edit/protonate/restore raise NotImplementedError = explicit Phase 4 boundary). 123 tests pass; AST gate clean; 3/3 headless smokes green. Next engineering: Phase 4 (Editing, Protonation & Restore Safety Net — highest technical-risk phase; the alter->sort trap bites here) + parallel Phase 5 track (3 Key Decisions still pending). Phase 2 remains complete+verified (97 tests, demo exits 0, zero PyMOL/Qt in c14/).
 
 ## Current Position
 
-Phase: 3 of 13 (PyMOL cmd Layer + Asset Management — Headless) — COMPLETE
-Plan: 3 of 3 complete in current phase (03-01 + 03-02 + 03-03 done) ✓
-Status: Phase 3 complete — 03-03 MolOps done (per-action dispatch + inject-cmd+AssetManager + NotImplementedError Phase 4 boundary + 18 MockCmd/MockAssets unit tests + headless smoke 6/6 PASS)
-Last activity: 2026-08-14 — Completed 03-03-PLAN.md (MolOps: 18 unit tests pass; headless smoke 6/6 stages PASS — molops_scene_rep_visible rep-sticks=3 proves SC #3; molops_show_as_atomic + molops_delete_post bonus stages PASS)
+Phase: 3 of 13 (PyMOL cmd Layer + Asset Management — Headless) — COMPLETE ✓ + VERIFIED (passed)
+Plan: 3 of 3 complete in current phase (03-01 + 03-02 + 03-03 done)
+Status: Phase 3 complete + verified (4/4 success criteria; VERIFICATION.md status: passed; 123 tests pass; 3/3 headless smokes green; AST gate clean)
+Last activity: 2026-08-14 — Phase 3 verified (VERIFICATION.md: passed, 4/4 must-haves, 9/9 artifacts, 9/9 key_links). All 3 plans complete; requirement CAST-02 marked Complete.
 
 Progress: [██████████] ~36% (11 plans complete of 11 planned in phases 1-3; phases 4-13 not yet planned)
 
@@ -116,6 +116,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-14 (Phase 3 execution — all 3 plans complete: 03-01 GATE + 03-02 AssetManager + 03-03 MolOps)
-Stopped at: Completed 03-03-PLAN.md (MolOps: 18 MockCmd/MockAssets unit tests pass; headless smoke 6/6 stages PASS — molops_scene_rep_visible rep-sticks=3 proves SC #3; show_as_atomic + delete_post bonus stages PASS). Phase 3 is COMPLETE (all 4 success criteria delivered). Next: Phase 4 (Editing, Protonation & Restore Safety Net — highest technical-risk phase; the alter->sort silent-corruption trap bites here; address on day one with the apply_edit helper + backup-snapshot pattern).
+Last session: 2026-08-14 (Phase 3 execution + verification — all 3 plans complete, VERIFICATION.md status: passed)
+Stopped at: Phase 3 COMPLETE + VERIFIED (4/4 success criteria, 9/9 artifacts, 9/9 key_links; VERIFICATION.md: passed; 123 tests pass; 3/3 headless smokes green; AST gate clean). Requirements CAST-02 marked Complete. Next: Phase 4 (Editing, Protonation & Restore Safety Net — highest technical-risk phase; the alter->sort silent-corruption trap bites here; address on day one with the apply_edit helper + backup-snapshot pattern) and/or the parallel Phase 5 track (3 Key Decisions still pending).
 Resume file: None
