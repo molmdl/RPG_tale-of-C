@@ -60,12 +60,14 @@ Qt binds to a windowing system. WSL has no display server attached to the Window
 
 ---
 
-### Pitfall 3: `cmd.create(obj, selection, 1, 1)` is a SILENT NO-OP (and other API surprises)
+### Pitfall 3: cmd.create pitfalls — 1,1 drops multi-state; self-copy is destructive (use default args)
 
 **Severity:** HIGH — silent failures with no error/warning; bounded to specific API calls but each instance can block a feature for hours if undiagnosed.
 
 **What goes wrong:**
-Code written from memory or older examples calls `cmd.create(obj, seg, 1, 1)` expecting "copy state 1 into a new object." It does nothing visible. The signature is actually `create(name, selection, source_state=0, target_state=0, ...)` (`creating.py:960-962`). Passing `1, 1` means `source_state=1, target_state=1` — copy state 1 **into state 1 of the same object**, a self-copy. No error, no warning, no result. AGENTS.md flags this as a real discovery from a prior spike.
+Code written from memory or older examples calls `cmd.create(obj, seg, 1, 1)` expecting "copy state 1 into a new object." The signature is actually `create(name, selection, source_state=0, target_state=0, ...)` (`creating.py:960`). Passing `1, 1` means `source_state=1, target_state=1`.
+
+> **EMPIRICALLY CORRECTED 2026-08-14 (Phase 3 research):** the original "silent no-op" claim (below) did NOT reproduce for a new-target backup. `cmd.create(backup, src, 1, 1)` on a single-state source gives full atoms (single state) — NOT a no-op. The REAL gotchas (confirmed empirically with a 2-state source) are: (a) `create(backup, src, 1, 1)` copies ONLY state 1 → loses states 2+ (incomplete backup for multi-state objects — silent data loss; the "restore" safety net would then restore an incomplete object); (b) `create(obj, obj, 1, 1)` self-copy (target name == source object) is DESTRUCTIVE — raises `CmdException('Failed to Create Object')` AND corrupts/deletes the source; (c) the WORKING backup is `cmd.create(backup_name, source_name)` with DEFAULT args (`source_state=0, target_state=0` = copy ALL states) — exactly what `ARCHITECTURE.md:304` recommends. See 03-RESEARCH.md §2 cmd.create.
 
 This is one instance of a broader class: **PyMOL 2.5.0 API behaves differently than citations/examples suggest**, and the only authoritative reference is the bundled source at `tmp/pymol-src/modules/pymol/`.
 
@@ -79,7 +81,7 @@ This is one instance of a broader class: **PyMOL 2.5.0 API behaves differently t
 - Wrap critical `cmd.*` calls and check return values / `cmd.count_atoms` afterwards to confirm the effect.
 - Maintain a small `api-sanity` headless smoke that exercises each `cmd.*` call the game uses, with assertions on the post-condition. Run it via `run-conda-pymol.bat -cq` whenever touching the cmd-interfacing layer.
 - Known traps to pre-empt (all verified in source):
-  - `cmd.create` self-copy no-op (above).
+  - `cmd.create` 1,1 copies only state 1 (incomplete multi-state backup); `create(obj,obj)` self-copy is DESTRUCTIVE. Working backup = `cmd.create(backup, source)` default args (all states).
   - `cmd.alter` **requires `cmd.sort` afterward** or subsequent `create`/`byres` operations are confounded (explicit WARNING, `editing.py:1457-1460`). This is critical for the editing feature.
   - `cmd.fetch` defaults to **CIF**, not PDB (changed in 1.7.6; `importing.py:1346`). Code that parses PDB-specific records will silently get CIF.
   - `cmd.fetch` is **async by default in interactive mode** (`importing.py:1382-1383`); pass `async_=0` to block. Fetch-then-operate races otherwise.
@@ -172,7 +174,7 @@ The "limited molecule editing" feature lets the player mutate residues / edit su
 **How to avoid:**
 - **Wrap every edit in a helper** `apply_edit(selection, expression)` that always calls `cmd.sort(object)` after `cmd.alter(...)` and `cmd.rebuild()` if representations need updating. Make the helper the only sanctioned way to alter.
 - **Unit-test the helper** headlessly: alter a residue, sort, then `byres` select and assert the expected atoms are returned.
-- **Snapshot before edit.** Before any player edit, `cmd.create(obj + "_backup", obj)` (with `source_state=0, target_state=0` to copy all states correctly — see Pitfall 3 on the no-op trap). The "restore correct 3D model" button reloads from this backup. Never try to reverse an edit in-place.
+- **Snapshot before edit.** Before any player edit, `cmd.create(obj + "_backup", obj)` with DEFAULT args (`source_state=0, target_state=0` = copy all states — see Pitfall 3 on the corrected `cmd.create` behavior; do NOT pass `1,1` which drops multi-state). The "restore correct 3D model" button reloads from this backup. Never try to reverse an edit in-place.
 - **Prefer the mutagenesis wizard for residue substitution** (it handles sidechain replacement, bump-checking, caps) — but note it can't run with a movie loaded (`mutagenesis.py:47-48`) and needs `PYMOL_DATA` set (`mutagenesis.py:58`). Validate the env supports it before relying on it.
 
 **Warning signs:**
@@ -393,7 +395,7 @@ Mapping each pitfall to the rough phase (per project context: scaffolding, conte
 |---------|------------------|--------------|
 | 1. WSL/Windows path resolution | Scaffolding | Path-self-check passes on plugin load in a fresh shell; `cmd.fetch` with explicit `path=` lands files in the plugin data dir (assert via `count_atoms`). |
 | 2. Qt untestable from WSL | Scaffolding | Logic-layer modules import-clean under `python3.6` with no `pymol.Qt`; unit tests run green in WSL; manual GUI test matrix exists and is run pre-merge for Qt-touching PRs. |
-| 3. `cmd.create` no-op + API surprises | Scaffolding + Editing | `api-sanity` headless smoke runs (each `cmd.*` call has a post-condition assert); every new `cmd.*` call has a `file:line` source citation in a comment. |
+| 3. `cmd.create` 1,1 multi-state drop + API surprises | Scaffolding + Editing | `api-sanity` headless smoke runs (each `cmd.*` call has a post-condition assert); every new `cmd.*` call has a `file:line` source citation in a comment. |
 | 4. ATP-as-true-ending science conflict | Content-authoring (start) | First content-milestone output is an approved reframing of the True Ending; claims registry has an `approved` entry for the chosen carbon-fate claim. |
 | 5. `cmd.fetch` races/CIF/offline | Scaffolding + UI | All fetch calls use `async_=0, type=, path=`; manifest-driven bulk download has progress/cancel/retry; offline-fallback locks only affected characters (manual test). |
 | 6. `alter` without `sort` | Editing | `apply_edit` helper is the only sanctioned alter path (grep finds no bare `cmd.alter`); helper has headless unit tests; restore-from-backup works for every edit type (manual GUI test). |
@@ -405,7 +407,7 @@ Mapping each pitfall to the rough phase (per project context: scaffolding, conte
 ## Sources
 
 **Verified against bundled PyMOL 2.5.0 source (`tmp/pymol-src/modules/pymol/`, read-only):**
-- `creating.py:960-962, 1002-1003` — `cmd.create` signature, no-op on `1,1`; `copy_properties` unsupported in open-source.
+- `creating.py:960-962, 1002-1003` — `cmd.create` signature; EMPIRICALLY CORRECTED 2026-08-14: `1,1` copies only state 1 (incomplete multi-state backup, NOT a no-op); `create(obj,obj)` self-copy is DESTRUCTIVE; default args copy all states (working backup). `copy_properties` unsupported in open-source.
 - `editing.py:1424-1473` — `cmd.alter` signature + the sort-after-alter WARNING at lines 1457-1460.
 - `editing.py:1490-1533` — `cmd.iterate` including the Python-callback form (new in 2.5) at lines 1512-1515.
 - `importing.py:1323-1394` — `cmd.fetch` signature, async-default behavior (`1382-1383`), `fetch_path` default (`1379-1381`), CIF default (`1346`), network/firewall note (`1367-1368`).

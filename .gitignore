@@ -13,3 +13,8 @@ __pycache__/
 3rd_party_lib/
 tmp
 biochemeleon.zip
+
+# Runtime cache for fetched (downloaded) molecular structures -- machine-specific,
+# regenerable, possibly large. NOT committed. (Bundled fixtures in
+# c14/data/assets/bundled/ ARE committed -- they ship in the plugin zip.)
+c14/data/assets/downloaded/
