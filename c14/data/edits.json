@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "bad_ending_pool": ["bad.lost_connection", "bad.released_from_host"],
+  "enzymes": {
+    "fixture_enzyme_1": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 1", "args": {"new_res": "GLY"}},
+          "branch_node": "fixture.branch_1",
+          "claim_id": "PLACEHOLDER_PHASE5"
+        }
+      ]
+    }
+  }
+}

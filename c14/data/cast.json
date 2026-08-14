@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "enzymes": [
+    {"id": "fixture_enzyme_1", "label": "Fixture Enzyme 1 (placeholder)", "fixture": "_edit_smoke.pdb", "claim_id": "PLACEHOLDER_PHASE5"}
+  ]
+}
