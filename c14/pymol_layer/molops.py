@@ -1,4 +1,5 @@
-# c14/pymol_layer/molops.py -- Phase 3 Plan 03-03 MolOps.
+# c14/pymol_layer/molops.py -- Phase 3 Plan 03-03 MolOps + Phase 4 Plan 04-05
+# edit/restore/protonate delegation.
 #
 # Translates a MolAction (the pure-data carrier from c14/story/model.py) into
 # the right cmd.* call, per-action (ONE MolAction per apply() call -- the
@@ -6,16 +7,23 @@
 # `for action in actions: self.molaction_sink(action)` and the Phase 4+
 # controller calls `molops.apply(action)` per action).
 #
-# DESIGN -- 3-tier testability pattern (inject cmd + AssetManager):
-#   * cmd AND asset_manager are INJECTED via the constructor (NOT imported at
-#     module top). This keeps the module importable in pure WSL python3.6 with
-#     no pymol installed, so the per-action dispatch logic is unit-testable
-#     with a MockCmd/MockAssets (tests/test_molops.py).
+# DESIGN -- 3-tier testability pattern (inject cmd + AssetManager + EditOps +
+# ProtonationManager):
+#   * cmd AND asset_manager AND editops AND protonation are INJECTED via the
+#     constructor (NOT imported at module top). This keeps the module
+#     importable in pure WSL python3.6 with no pymol installed, so the
+#     per-action dispatch logic is unit-testable with a MockCmd/MockAssets/
+#     MockEditOps/MockProtonationManager (tests/test_molops.py).
 #   * The REAL cmd.* calls (hide/show/show_as/select/zoom/color/delete) are
 #     verified by tools/molops_smoke.py (headless via tools/run_headless.sh
 #     -- the WSL->Windows PyMOL bridge), NOT by unit tests. Unit tests prove
 #     the per-op dispatch mapping; the smoke proves the real API contract +
 #     the `rep` keyword "representation visible" post-condition (SC #3).
+#   * The edit/restore/protonate branches DELEGATE to the injected EditOps
+#     (04-01) + ProtonationManager (04-03) -- NO direct cmd.alter/h_add here
+#     (the alter gate allowlist stays at edit_ops.py only). The REAL cmd.*
+#     contract for these branches is verified by tools/edit_smoke.py +
+#     tools/protonation_smoke.py (04-05 headless smokes).
 #
 # GATE EXCLUSION: lives in c14/pymol_layer/ which tools/check_imports.py
 # excludes via SKIP_DIRS = {"pymol_layer","ui","__pycache__"} -- the domain
@@ -34,12 +42,17 @@
 # comment on the line directly above -- the source-citation convention
 # established by Plan 03-01 (success criterion #4). Line numbers pinned to
 # PyMOL 2.5.0. The `load` op delegates to AssetManager (no direct cmd.* call
-# here -- the citations live in asset_manager.py).
+# here -- the citations live in asset_manager.py). The edit/restore/protonate
+# branches delegate to EditOps/ProtonationManager (no direct cmd.* call here
+# either -- the citations live in edit_ops.py/protonation.py). molops.py has
+# NO cmd.alter (the alter gate allowlist stays at edit_ops.py only -- SC1).
 """MolOps -- translates a MolAction into the right cmd.* call, per-action.
 
-Inject ``cmd`` (and an ``AssetManager``) so the per-action dispatch logic is
-unit-testable in pure WSL python3.6 with a MockCmd/MockAssets (the real cmd.*
-calls are verified by tools/molops_smoke.py, not unit tests).
+Inject ``cmd`` (and optional ``AssetManager`` + ``EditOps`` +
+``ProtonationManager``) so the per-action dispatch logic is unit-testable in
+pure WSL python3.6 with mocks (the real cmd.* calls are verified by
+tools/molops_smoke.py + tools/edit_smoke.py + tools/protonation_smoke.py,
+not unit tests).
 
 Per-action dispatch (the 02-04 contract): ``apply(action)`` takes ONE
 MolAction per call. The engine emits ``for action in actions:
@@ -59,27 +72,42 @@ Implemented ops (Phase 3):
                     no AssetManager was injected.
   * delete       -> cmd.delete(target)
 
-Phase 4 boundary (explicit):
-  * edit / protonate / restore / unknown  -> raise NotImplementedError. These
-    are NOT implemented in Phase 3; the NotImplementedError makes the
-    boundary explicit so a stray MolAction never silently no-ops.
+Phase 4 implemented (delegated -- Plan 04-05):
+  * edit        -> delegates to EditOps (point_mutation /
+                   substrate_remove_group / substrate_add_group /
+                   protonation_change per args["edit_type"]). Raises
+                   RuntimeError if no EditOps was injected; ValueError for an
+                   unknown edit_type.
+  * protonate   -> delegates to ProtonationManager.apply_variant (per
+                   args["variant_id"]). Raises RuntimeError if no
+                   ProtonationManager was injected.
+  * restore     -> delegates to EditOps.restore (per action.target). Raises
+                   RuntimeError if no EditOps was injected.
+  * unknown ops -> still raise NotImplementedError (a stray op fails loudly --
+                   the boundary is preserved for genuinely unknown ops).
 """
 from c14.story.model import MolAction  # MolAction is pure data (no pymol) -- OK to import here
 
 
 class MolOps(object):
-    """Translates MolAction -> cmd.* calls. Inject ``cmd`` (and an AssetManager)
-    so the dispatch logic is unit-testable in pure WSL python3.6 with a MockCmd;
-    the real cmd.* calls are verified by tools/molops_smoke.py (headless).
+    """Translates MolAction -> cmd.* calls. Inject ``cmd`` (and optional
+    ``AssetManager`` + ``EditOps`` + ``ProtonationManager``) so the dispatch
+    logic is unit-testable in pure WSL python3.6 with mocks; the real cmd.*
+    calls are verified by tools/molops_smoke.py + the 04-05 smokes (headless).
 
     Per-action dispatch: apply(action) takes ONE MolAction per call (the 02-04
-    contract: the engine emits for action in actions: sink(action)). edit/
-    protonate/restore raise NotImplementedError (explicit Phase 4 boundary).
+    contract: the engine emits for action in actions: sink(action)). The
+    edit/restore/protonate branches delegate to the injected EditOps /
+    ProtonationManager (Phase 4 Plan 04-05 -- no more NotImplementedError for
+    these 3 ops); unknown ops still raise NotImplementedError (a stray op
+    fails loudly).
     """
 
-    def __init__(self, cmd, asset_manager=None):
+    def __init__(self, cmd, asset_manager=None, editops=None, protonation=None):
         self._cmd = cmd
-        self._assets = asset_manager  # may be None if no 'load' ops are dispatched
+        self._assets = asset_manager    # may be None if no 'load' ops are dispatched
+        self._editops = editops         # may be None if no 'edit'/'restore' ops are dispatched
+        self._protonation = protonation  # may be None if no 'protonate' ops are dispatched
 
     def apply(self, action):
         op = action.op
@@ -114,9 +142,58 @@ class MolOps(object):
         elif op == "delete":
             # src: tmp/pymol-src/modules/pymol/commanding.py:496 cmd.delete
             self._cmd.delete(action.target)
+        elif op == "edit":
+            # Phase 4 (04-05): delegate to EditOps. Dispatches on
+            # args["edit_type"] to one of the 4 convenience methods. Raises
+            # RuntimeError if no EditOps was injected (backward-compatible:
+            # MolOps(cmd) with no editops still fails loudly, but with
+            # RuntimeError instead of NotImplementedError). molops.py has NO
+            # cmd.alter here -- the alter gate allowlist stays at edit_ops.py
+            # (SC1); the sanctioned-alter path is EditOps.apply_edit, which
+            # the convenience methods call internally.
+            if self._editops is None:
+                raise RuntimeError("molops.edit requires an EditOps (editops=None)")
+            et = action.args.get("edit_type")
+            if et == "point_mutation":
+                self._editops.point_mutation(
+                    action.target, action.args["sele"], action.args["new_resn"])
+            elif et == "substrate_remove_group":
+                self._editops.substrate_remove_group(
+                    action.target, action.args["group_sele"])
+            elif et == "substrate_add_group":
+                self._editops.substrate_add_group(
+                    action.target, action.args["frag_atom_sele"],
+                    action.args["target_atom_sele"])
+            elif et == "protonation_change":
+                self._editops.protonation_change(
+                    action.target, action.args["sele"], action.args["new_resn"],
+                    action.args.get("h_ops"))
+            else:
+                raise ValueError(
+                    "molops.edit: unknown edit_type {!r}".format(et))
+        elif op == "protonate":
+            # Phase 4 (04-05): delegate to ProtonationManager.apply_variant.
+            # Raises RuntimeError if no ProtonationManager was injected.
+            # ProtonationManager delegates its alter/h_add to edit_ops
+            # (no direct cmd.alter here -- SC1 gate holds).
+            if self._protonation is None:
+                raise RuntimeError(
+                    "molops.protonate requires a ProtonationManager (protonation=None)")
+            self._protonation.apply_variant(
+                action.target, action.args["variant_id"])
+        elif op == "restore":
+            # Phase 4 (04-05): delegate to EditOps.restore. Raises RuntimeError
+            # if no EditOps was injected. EditOps.restore looks up the handle
+            # registered by the most recent apply_edit (the EDIT-05 safety net).
+            if self._editops is None:
+                raise RuntimeError("molops.restore requires an EditOps (editops=None)")
+            self._editops.restore(action.target)
         else:
+            # Genuinely unknown op -- still fails loudly with NotImplementedError
+            # (the Phase 4 boundary is preserved for ops molops doesn't know
+            # about; edit/protonate/restore are now implemented above).
             raise NotImplementedError(
-                "molops: unknown op {!r} (edit/protonate/restore are Phase 4)".format(op))
+                "molops: unknown op {!r}".format(op))
 
     def apply_all(self, actions):
         """Convenience: dispatch a sequence of MolActions one at a time.
