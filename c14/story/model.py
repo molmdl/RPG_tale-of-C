@@ -79,6 +79,91 @@ class MolAction(object):
             self.op, self.target, self.args)
 
 
+class EditIntent(object):
+    """A player's edit intent -- the routing INPUT (player -> EditRouter).
+
+    Pure data, like MolAction, but a SEPARATE type: MolAction is the execution
+    carrier (engine -> molops); EditIntent is the routing carrier (player ->
+    router) and carries the enzyme_id lookup key MolAction lacks.
+
+    Attributes:
+        op: edit category. One of "point_mutation" | "substrate_edit" |
+            "protonation_change" (the EDIT-01/02/03 categories -- FINER than
+            MolAction's single "edit" op, because the lookup table matches on
+            these categories).
+        target: residue/atom selector or object name (e.g. "resi 57 and chain A"
+            for a point mutation; "substrate" for a substrate edit). Matched
+            verbatim against the table signature after normalization.
+        args: op-specific parameters (e.g. {"new_res": "ALA"} for a point
+            mutation; {"group": "-OH", "action": "add"} for a substrate edit;
+            {"resn": "HIP"} for a protonation change). Defaults to {}.
+        enzyme_id: the enzyme/substrate context id for lookup (e.g.
+            "hexokinase" or "pdb:1TNR"). The current story node determines this
+            (Phase 5.1 edit-node contract); the controller passes it.
+    """
+
+    def __init__(self, op, target=None, args=None, enzyme_id=None):
+        # type: (str, str, dict, str) -> None
+        self.op = op
+        self.target = target
+        self.args = args if args is not None else {}
+        self.enzyme_id = enzyme_id
+
+    def signature(self):
+        # type: () -> dict
+        """Return the canonical match dict: {"op","target","args"}.
+
+        Deterministic: target is whitespace-stripped + lowercased; args values
+        are stringified via _norm_val; keys are the raw op/target/args (no
+        enzyme_id -- the enzyme_id is the lookup BUCKET, not part of the
+        per-edit signature). Compared with == against edits.json "signature"
+        entries (dict equality is order-independent on 3.6.9 -- verified).
+        """
+        return {
+            "op": self.op,
+            "target": (self.target or "").strip().lower(),
+            "args": {k: _norm_val(v) for k, v in (self.args or {}).items()},
+        }
+
+    @classmethod
+    def from_dict(cls, d):
+        # type: (dict) -> EditIntent
+        return cls(d["op"], d.get("target"), d.get("args"), d.get("enzyme_id"))
+
+    def to_dict(self):
+        # type: () -> dict
+        return {"op": self.op, "target": self.target,
+                "args": self.args, "enzyme_id": self.enzyme_id}
+
+    def __eq__(self, other):
+        if not isinstance(other, EditIntent):
+            return NotImplemented
+        return (self.op == other.op and self.target == other.target
+                and self.args == other.args
+                and self.enzyme_id == other.enzyme_id)
+
+    def __ne__(self, other):
+        r = self.__eq__(other)
+        return r if r is NotImplemented else not r
+
+    def __repr__(self):
+        return "EditIntent(op={!r}, target={!r}, enzyme_id={!r})".format(
+            self.op, self.target, self.enzyme_id)
+
+
+def _norm_val(v):
+    # type: (object) -> str
+    """Normalize a signature value to a deterministic string.
+
+    Scalars -> str(v).strip(); nested dicts/lists -> json.dumps(sort_keys=True)
+    so dict-key order never breaks equality (Pitfall 6).
+    """
+    if isinstance(v, dict) or isinstance(v, list):
+        import json
+        return json.dumps(v, sort_keys=True)
+    return str(v).strip()
+
+
 class Choice(object):
     """A player-selectable choice on a Node.
 
