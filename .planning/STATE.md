@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 3 — PyMOL cmd Layer + Asset Management (Headless) — COMPLETE ✓ + VERIFIED (4/4 success criteria, 9/9 artifacts, 9/9 key_links; VERIFICATION.md status: passed). All 3 plans done (03-01 GATE + 03-02 AssetManager + 03-03 MolOps). The WSL->Windows headless bridge is proven, the harness contract (SMOKE_RESULT sentinel) is established, AssetManager resolves bundled/fetched substrates (cwd-independent), and MolOps translates MolAction->cmd.* per-action (8 ops implemented; edit/protonate/restore raise NotImplementedError = explicit Phase 4 boundary). 123 tests pass; AST gate clean; 3/3 headless smokes green. Next engineering: Phase 4 (Editing, Protonation & Restore Safety Net — highest technical-risk phase; the alter->sort trap bites here) + parallel Phase 5 track (3 Key Decisions still pending). Phase 2 remains complete+verified (97 tests, demo exits 0, zero PyMOL/Qt in c14/).
+**Current focus:** Phase 4 — Editing, Protonation & Restore Safety Net — IN PROGRESS (2/5 plans done: 04-01 EditOps + 04-02 EditRouter complete). 04-02 built `c14/edit_router.py` (EditRouter + EditsTable + validate_edits_table + scan_edit_coverage) + `EditIntent` in `c14/story/model.py` (routing INPUT, separate from MolAction) + `GameEngine.apply_player_edit` (route -> add_edit -> _enter). SC3 PROVEN: known edit -> branch (exact dict-equality signature match), unknown edit -> bad-ending pool (RngEngine-weighted, reproducible). 17 pure-Python tests pass (157 total: 123 prior + 17 04-01 + 17 04-02, zero regressions). AST gate clean (no pymol/random in edit_router.py). 04-01 built the sanctioned apply_edit helper (alter->sort trap mitigated, backup/restore verified). Next: 04-03 (ProtonationManager), 04-04 (check_alter_gate + check_edit_coverage), 04-05 (molops delegation + headless smoke). Phase 3 remains complete+verified (123 tests, 3/3 headless smokes green).
 
 ## Current Position
 
-Phase: 3 of 13 (PyMOL cmd Layer + Asset Management — Headless) — COMPLETE ✓ + VERIFIED (passed)
-Plan: 3 of 3 complete in current phase (03-01 + 03-02 + 03-03 done)
-Status: Phase 3 complete + verified (4/4 success criteria; VERIFICATION.md status: passed; 123 tests pass; 3/3 headless smokes green; AST gate clean)
-Last activity: 2026-08-14 — Phase 3 verified (VERIFICATION.md: passed, 4/4 must-haves, 9/9 artifacts, 9/9 key_links). All 3 plans complete; requirement CAST-02 marked Complete.
+Phase: 4 of 13 (Editing, Protonation & Restore Safety Net) — IN PROGRESS
+Plan: 2 of 5 complete in current phase (04-01 EditOps + 04-02 EditRouter done; 04-03/04-04/04-05 pending)
+Status: Phase 4 in progress (04-01 + 04-02 complete; 157 tests passing, AST gate clean; SC1+SC2 mechanics + SC3 routing proven)
+Last activity: 2026-08-14 — Completed 04-02-PLAN.md (EditIntent + EditRouter + GameEngine.apply_player_edit + SC3 demo)
 
-Progress: [██████████] ~36% (11 plans complete of 11 planned in phases 1-3; phases 4-13 not yet planned)
+Progress: [██████████░░] ~81% (13 plans complete of 16 planned in phases 1-4; phases 5-13 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 12
 - Average duration: 23 min
-- Total execution time: 3.87 hours
+- Total execution time: 4.08 hours
 
 **By Phase:**
 
@@ -30,10 +30,11 @@ Progress: [██████████] ~36% (11 plans complete of 11 planned
 | 1. Foundations & Citation Gate | 3/3 ✓ | 56 min | 19 min |
 | 2. Story Engine Core | 5/5 ✓ | 78 min | 16 min |
 | 3. PyMOL cmd Layer | 3/3 ✓ | 118 min | 39 min |
+| 4. Editing + Protonation + Restore | 1/5 | 13 min | 13 min |
 
 **Recent Trend:**
-- Last 3 plans: 03-01 (91 min), 03-02 (18 min), 03-03 (9 min)
-- Trend: 03-03 (MolOps) was the lightest of the phase (9 min) — it reused the harness, sentinel contract, bundled fixture, citation convention, and inject-cmd + MockCmd patterns from 03-01/03-02, so only the MolOps class + MockCmd/MockAssets unit tests + headless smoke were new work. The headless smoke passed 6/6 stages on the first run (rep-sticks=3 proves SC #3). Phase 3 is now complete (all 4 success criteria delivered).
+- Last 3 plans: 03-02 (18 min), 03-03 (9 min), 04-01 (13 min)
+- Trend: 04-01 (EditOps) was efficient (13 min) — it reused the inject-cmd + MockCmd + source-citation patterns from Phase 3, so only the EditOps class + RestoreHandle + 4 convenience methods + backup/restore + 17 MockCmd unit tests were new work. The step-list dispatch signature (apply_edit takes a LIST of step dicts) is the settled contract 04-03 + 04-05 depend on.
 
 *Updated after each plan completion*
 
@@ -92,6 +93,11 @@ Recent decisions affecting current work:
 - [Execution 03-03]: NotImplementedError for edit/protonate/restore = explicit Phase 4 boundary — these ops are NOT implemented in Phase 3; raising NotImplementedError (rather than silently no-opping) makes the boundary explicit so a stray MolAction with op='edit' fails loudly. Unknown ops also raise NotImplementedError. Phase 4 implements these by replacing the NotImplementedError branches. Unit-tested (4 tests assert the raise).
 - [Execution 03-03]: `rep <name>` selection keyword is the headless "representation visible" post-condition — count_atoms('obj & rep sticks') > 0 after show(sticks). Empirically confirmed (C-backed, unverifiable from selector.py source). Headless smoke molops_scene_rep_visible (rep-sticks=3) proves SC #3: a queued MolAction list translates to the correct cmd.* sequence AND the resulting object has the expected representation visible.
 - [Execution 03-03]: Phase 3 COMPLETE — all 4 success criteria delivered. SC #1 (Plan 01: api-sanity smoke + SMOKE_RESULT sentinel), SC #2 (Plan 02: AssetManager resolves bundled + fetched substrates cwd-independent), SC #3 (Plan 03: MolOps translates queued MolAction list to cmd.* sequence; headless smoke confirms rep visible), SC #4 (Plans 01/02/03: source-citation convention on every cmd.* call). 123 tests pass; AST gate clean.
+- [Execution 04-01]: apply_edit(object_name, edit_steps) -> RestoreHandle is the settled signature 04-03 + 04-05 depend on. edit_steps is a LIST of step dicts (NOT edit_type+kwargs) so ProtonationManager (04-03) can compose multi-step sequences (removes + alter + adds) under ONE backup. Step-dict schema: {"op":"alter"|"h_add"|"remove"|"fuse", ...}. The 4 convenience methods (point_mutation, substrate_remove_group, substrate_add_group, protonation_change) build standard lists; ProtonationManager builds its own.
+- [Execution 04-01]: _handles registry pattern — apply_edit registers the handle in self._handles (take_backup does NOT); restore(obj) looks up by object_name; restore_from_handle pops after restore. restore(obj) works after apply_edit but NOT after bare take_backup. restore_from_handle works with any explicit handle. This matches the usage pattern: apply_edit is the normal entry; take_backup is for ProtonationManager Mode (a) which manages its own handle.
+- [Execution 04-01]: protonation_change h_ops partitioning — removes (OLD resn) BEFORE alter, adds (NEW resn) AFTER alter — matches 04-03 _apply_alter (Pitfall 2 ordering). The catalog authors selections with the right resn phase. The SC1 gate (04-04 check_alter_gate.py) is on cmd.alter ONLY; h_add is not alter, but the same sort-after discipline applies uniformly via apply_edit's always-sort+rebuild guard.
+- [Execution 04-01]: MockCmd.count_atoms differentiates _bak_ prefix (returns _count_bak for backup names, _count for live objects) so the count-mismatch test can set them differently. MockCmd.iterate populates stored.list from configurable _residue_sig. Both are explicit methods (NOT __getattr__ fallback) so they are NOT recorded in self.calls — calls[0] is always the first real dispatch (extends the Phase 3 MockCmd precedent from test_molops.py:39-65).
+- [Execution 04-01]: The alter->sort trap (Pitfall 6) is mechanically mitigated — apply_edit ALWAYS calls cmd.sort + cmd.rebuild after any alter/h_add/remove/fuse step (unit-tested for all 4 step ops). `self._cmd.alter` appears ONLY at edit_ops.py:129 inside apply_edit's step dispatch (the sole sanctioned path; 04-04's check_alter_gate.py will allowlist this module). 16 self._cmd.* call sites, 16 # src: citations (all 10 unique APIs verified against tmp/pymol-src/modules/pymol/ at the cited file:line). 140 tests pass (123 prior + 17 new); AST gate clean.
 
 ### Pending Todos
 
@@ -103,7 +109,7 @@ Issues that affect future work:
 
 - [Phase 5]: 4 science-framing Key Decisions gate content authoring. Pitfall 4 (ATP/True-Ending carbon-fate reframing) is now RESOLVED (2026-08-13, via the soul-jump reframing — electrons-as-soul harvested into ATP via ETC after the RNG-weighted TCA path; carbon body released as CO2; see PROJECT.md Key Decisions). The remaining 3 are HOW decisions for the human, still Pending: C14-decay timescale (Pitfall 9); anaerobic framing; batch-vs-per-claim approval. They are flagged as Phase 5 tasks. Start this track early — it is the timeline-domininating risk (Pitfall 7). The anaerobic decision now specifically gates Phase 5.1 (Story Graph Design); the ATP/True-Ending decision (resolved) no longer blocks it.
 - [Phase 5.1 / 5.2 (INSERTED)]: Two design phases gate Phase 6. Phase 5.1 (Story Graph Design) needs Phase 2 + the Phase 5 ATP decision [now RESOLVED via soul-jump — electrons-as-soul → ATP via ETC after RNG-weighted TCA path; True-ending node = electron harvest, NOT carbon-becomes-ATP]; it produces the glucose skeleton + MC-choice/edit-node integration contracts (resolves the user's story-design / MC-vs-editing / editing↔story concerns). Phase 5.2 (Representation Design) needs Phase 3 + 5.1; it produces the hero-highlight + scene-template convention (resolves the user's cast/hero-representation concern). Both are review-checkpoints, not requirement-delivery phases.
-- [Phase 4]: Highest technical-risk phase — the `alter`→`sort` silent-corruption trap (Pitfall 6) bites here. The `cmd.create` pitfall (Pitfall 3) is now EMPIRICALLY CORRECTED (03-01): the "no-op" claim did not reproduce; real gotchas are 1,1-drops-multi-state + destructive-self-copy + default-args-working. Phase 4 restore uses default-args `cmd.create(backup, source)` (all states). Address the alter→sort trap on day one of Phase 4 with the `apply_edit` helper + backup-snapshot pattern.
+- [Phase 4]: Highest technical-risk phase — the `alter`→`sort` silent-corruption trap (Pitfall 6) is NOW MECHANICALLY MITIGATED (04-01): apply_edit ALWAYS calls cmd.sort + cmd.rebuild after any alter/h_add/remove/fuse. The `cmd.create` pitfall (Pitfall 3) was EMPIRICALLY CORRECTED (03-01): default-args `cmd.create(backup, source)` (all states) is the working form, used by 04-01's take_backup. 04-01 complete (EditOps: sanctioned alter path + backup/restore + 4 convenience methods + 17 unit tests). Remaining: 04-02 (EditRouter, parallel), 04-03 (ProtonationManager), 04-04 (alter gate + coverage scan), 04-05 (molops delegation + headless smoke — proves the REAL cmd.* contract).
 - [Phase 6]: First human-verify milestone — Qt/GUI cannot be exercised from WSL (Pitfall 2). Manual GUI test matrix begins here. Now implements the reviewed Phase 5.1 + 5.2 design artifacts rather than inventing them inline. Plugin loader should also call `c14.paths.selfcheck()` at startup (Pitfall 1 mitigation — fail loud on broken bundled layout); the helper is designed for this and the Phase 1 test is the first caller.
 - [Phase 11]: Documentation finalization + verification is the LAST release gate, after Phase 10's content polish. It depends on Phase 10 being complete (playtest-driven content changes settled) so docs reflect final shipped content. It owns 0 new requirements — verifies/updates DOC-01, DOC-02 against shipped reality.
 - [Coverage]: REQUIREMENTS.md previously stated "34 total" v1 requirements; actual enumerated v1 set is 32 (PATH-01, STAT-01 are v2). Traceability uses 32. The 5.1/5.2/11 phases own 0 requirements — coverage unchanged at 32/32.
@@ -116,6 +122,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-14 (Phase 3 execution + verification — all 3 plans complete, VERIFICATION.md status: passed)
-Stopped at: Phase 3 COMPLETE + VERIFIED (4/4 success criteria, 9/9 artifacts, 9/9 key_links; VERIFICATION.md: passed; 123 tests pass; 3/3 headless smokes green; AST gate clean). Requirements CAST-02 marked Complete. Next: Phase 4 (Editing, Protonation & Restore Safety Net — highest technical-risk phase; the alter->sort silent-corruption trap bites here; address on day one with the apply_edit helper + backup-snapshot pattern) and/or the parallel Phase 5 track (3 Key Decisions still pending).
+Last session: 2026-08-14 (Phase 4 Plan 04-01 execution — EditOps: sanctioned alter path + backup/restore safety net)
+Stopped at: Completed 04-01-PLAN.md (EditOps: sole sanctioned cmd.alter path via apply_edit step-list dispatch; backup = default-args cmd.create; restore = delete-first + create-from-backup + atom-count + residue-signature verify; 4 convenience methods; 17 MockCmd unit tests; 140 total tests pass; AST gate clean; self._cmd.alter ONLY at edit_ops.py:129). Next: 04-02 (EditRouter, parallel) + 04-03 (ProtonationManager, after 04-01) + 04-04 (alter gate + coverage scan) + 04-05 (molops delegation + headless smoke).
 Resume file: None
