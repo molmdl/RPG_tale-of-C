@@ -97,7 +97,7 @@ Plans:
 - [x] 04-01-PLAN.md — EditOps (sanctioned apply_edit + RestoreHandle + backup/restore + 4 convenience methods) + unit tests [SC1+SC2 mechanics] (Wave 1) ✓
 - [x] 04-02-PLAN.md — EditIntent + EditRouter + EditsTable + validate_edits_table + GameEngine.apply_player_edit + SC3 fixture bundle + tests [SC3] (Wave 1, parallel with 04-01) ✓
 - [x] 04-03-PLAN.md — ProtonationManager + protonation_catalog (curated variants, PLACEHOLDER claim_ids) + unit tests [SC4 + EDIT-05 for protonation] (Wave 2, after 04-01) ✓
-- [ ] 04-04-PLAN.md — check_alter_gate (AST) + check_edit_coverage + placeholder cast.json/edits.json manifests + _edit_smoke.pdb/_his_smoke.pdb fixtures [SC1 enforcement + SC5] (Wave 2, parallel with 04-03, after 04-01)
+- [x] 04-04-PLAN.md — check_alter_gate (AST) + check_edit_coverage + placeholder cast.json/edits.json manifests + _edit_smoke.pdb/_his_smoke.pdb fixtures [SC1 enforcement + SC5] (Wave 2, parallel with 04-03, after 04-01) ✓
 - [ ] 04-05-PLAN.md — molops edit/restore/protonate delegation (replaces NotImplementedError) + headless edit_smoke (SC1 byres + SC2 round-trip) + protonation_smoke (SC4) [integration] (Wave 3, after 04-01+04-03+04-04)
 
 ### Phase 5: Pre-Content Key Decisions & Source Approval
@@ -301,7 +301,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 | 1. Foundations & Citation Gate | 3/3 ✓ | Complete | 2026-08-13 |
 | 2. Story Engine Core | 5/5 ✓ | Complete | 2026-08-13 |
 | 3. PyMOL cmd Layer | 3/3 ✓ | Complete | 2026-08-14 |
-| 4. Editing + Protonation + Restore | 3/5 | In progress | - |
+| 4. Editing + Protonation + Restore | 4/5 | In progress | - |
 | 5. Pre-Content Key Decisions (parallel) | 0/TBD | Not started | - |
 | 5.1 Story Graph Design (INSERTED) | 0/TBD | Not started | - |
 | 5.2 Representation Design (INSERTED) | 0/TBD | Not started | - |
