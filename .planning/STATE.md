@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 3 — PyMOL cmd Layer + Asset Management (Headless) — IN PROGRESS. Plan 03-01 (GATE: headless harness + api-sanity smoke + source-citation convention) COMPLETE ✓ — the WSL->Windows headless bridge is proven (10 cmd.* stages all green via SMOKE_RESULT sentinel), the harness contract is established for Plans 02+03, and the cmd.create pitfall is empirically corrected. Next: Plan 03-02 (AssetManager) + 03-03 (MolOps). Phase 2 remains complete+verified (97 tests, demo exits 0, zero PyMOL/Qt in c14/).
+**Current focus:** Phase 3 — PyMOL cmd Layer + Asset Management (Headless) — IN PROGRESS. Plans 03-01 (GATE: headless harness + api-sanity smoke + source-citation convention) + 03-02 (AssetManager: inject-cmd + Pitfall 5 mitigations + MockCmd unit tests + headless smoke) COMPLETE ✓ — the WSL->Windows headless bridge is proven (10+4 cmd.* stages green via SMOKE_RESULT sentinel), the harness contract is established, AssetManager resolves bundled PDB + fetched PubChem/PDB substrates to non-empty PyMOL objects (cwd-independent), and the inject-cmd testability pattern is carried into the pymol layer. Next: Plan 03-03 (MolOps — MolAction->cmd.* dispatch, delegates `load` to AssetManager). Phase 2 remains complete+verified (97 tests, demo exits 0, zero PyMOL/Qt in c14/).
 
 ## Current Position
 
 Phase: 3 of 13 (PyMOL cmd Layer + Asset Management — Headless) — IN PROGRESS
-Plan: 1 of 3 complete in current phase (03-01 done; 03-02 + 03-03 next)
-Status: In progress — 03-01 GATE plan complete (headless bridge proven; harness + sentinel + citation convention established; cmd.create pitfall corrected)
-Last activity: 2026-08-14 — Completed 03-01-PLAN.md (api-sanity smoke PASSED: 10/10 stages green via SMOKE_RESULT sentinel; 22 source-citations; bundled fixture + run_headless.sh + gitignore delivered)
+Plan: 2 of 3 complete in current phase (03-01 + 03-02 done; 03-03 next)
+Status: In progress — 03-02 AssetManager complete (inject-cmd + Pitfall 5 mitigations + MockCmd unit tests + headless smoke 4/4 PASS)
+Last activity: 2026-08-14 — Completed 03-02-PLAN.md (AssetManager: 8 MockCmd unit tests pass; headless smoke 4/4 stages PASS — load_bundled=3 atoms, fetch_pubchem=21 atoms, file_landed=abs dir, fetch_pdb=327 atoms)
 
-Progress: [█████████░] ~30% (9 plans complete of 11 planned in phases 1-3; phases 4-13 not yet planned)
+Progress: [██████████] ~33% (10 plans complete of 11 planned in phases 1-3; phases 4-13 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 25 min
-- Total execution time: 3.42 hours
+- Total plans completed: 10
+- Average duration: 24 min
+- Total execution time: 3.72 hours
 
 **By Phase:**
 
@@ -29,11 +29,11 @@ Progress: [█████████░] ~30% (9 plans complete of 11 planned 
 |-------|-------|-------|----------|
 | 1. Foundations & Citation Gate | 3/3 ✓ | 56 min | 19 min |
 | 2. Story Engine Core | 5/5 ✓ | 78 min | 16 min |
-| 3. PyMOL cmd Layer | 1/3 | 91 min | 91 min |
+| 3. PyMOL cmd Layer | 2/3 | 109 min | 55 min |
 
 **Recent Trend:**
-- Last 3 plans: 02-05 (4 min), 03-01 (91 min), [03-02 next]
-- Trend: 03-01 (the Phase 3 GATE) was the heaviest single plan so far (91 min) — it empirically proved the WSL->Windows headless bridge, established the SMOKE_RESULT sentinel + source-citation contracts, and corrected the cmd.create pitfall. The 91 min includes context loading (reading 03-RESEARCH.md + all context files) + file creation + the headless smoke run (network fetches). Plans 02+03 are lighter (reuse the harness + convention).
+- Last 3 plans: 02-05 (4 min), 03-01 (91 min), 03-02 (18 min)
+- Trend: 03-02 (AssetManager) was lighter than 03-01 (18 min vs 91 min) — it reused the harness, sentinel contract, bundled fixture, and citation convention from 03-01, so only the AssetManager class + MockCmd unit tests + headless smoke were new work. The headless smoke passed 4/4 stages with network available (load_bundled=3 atoms, fetch_pubchem=21 atoms, fetch_pdb=327 atoms). Plan 03-03 (MolOps) should be similarly light (reuses the same patterns).
 
 *Updated after each plan completion*
 
@@ -85,6 +85,9 @@ Recent decisions affecting current work:
 - [Execution 03-01]: delete post-condition MUST use ?-prefix — bare count_atoms("deleted_obj") RAISES CmdException('Invalid selection name'); count_atoms("?"+name) returns 0 (safe). The ? is PyMOL's existing-objects-only selector prefix (used throughout source, e.g. creating.py:1001).
 - [Execution 03-01]: Source-citation convention established — every cmd.* call carries `# src: tmp/pymol-src/modules/pymol/<file>.py:<line> cmd.<name>` on the line directly above it (22 citations in api_sanity_smoke.py; greppable via `grep -rn "# src: tmp/pymol-src"`). Line numbers pinned to PyMOL 2.5.0 (all 12 verified against tmp/pymol-src/modules/pymol/). Plans 02+03 must follow this for AssetManager + MolOps.
 - [Execution 03-01]: Bundled (c14/data/assets/bundled/, committed, ships in plugin zip) vs Downloaded (c14/data/assets/downloaded/, gitignored, runtime cache) asset directory split. cmd.fetch skips download if file exists (importing.py:1211-1213) = free idempotent cache. Verified: check-ignore downloaded/ -> path; check-ignore bundled/ -> nothing.
+- [Execution 03-02]: Inject-cmd testability pattern carried into the pymol layer — AssetManager imports only os + c14.paths (NO pymol at module top); cmd is constructor-injected (`def __init__(self, cmd): self._cmd = cmd`). The module is importable in pure WSL python3.6 with no pymol installed; MockCmd unit tests verify dispatch/path/args; the headless smoke (tools/asset_smoke.py) injects the REAL pymol.cmd to verify the actual API contract. Plan 03 MolOps reuses this pattern (MolOps(cmd, asset_manager)).
+- [Execution 03-02]: Pitfall 5 mitigations baked into every fetch call — AssetManager.fetch_pubchem/fetch_pdb ALWAYS pass type= (NOT the CIF default — Pitfall 5a), async_=0 (sync — Pitfall 5c defense), path=<abs downloaded dir> (NOT cwd — Pitfall 5b). Downloads land in c14/data/assets/downloaded/ regardless of cwd (confirmed by the headless smoke's fetch_pubchem_file_landed stage: file at abs path). cmd.load returns None (importing.py:635) — count_atoms > 0 is the only reliable non-empty post-condition.
+- [Execution 03-02]: MockCmd.count_atoms is an explicit method (NOT __getattr__ fallback) — so the post-condition probe is NOT recorded in self.calls; calls[0] is always the dispatched load/fetch op. Set mock._count=0 to exercise the RuntimeError branch; mock._count=3 for the success path. This MockCmd pattern is reusable for Plan 03 MolOps dispatch tests.
 
 ### Pending Todos
 
@@ -109,6 +112,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-14 (Phase 3 execution — Plan 03-01 GATE complete: headless bridge proven, harness + sentinel + citation convention established)
-Stopped at: Completed 03-01-PLAN.md (api-sanity smoke PASSED: 10/10 cmd.* stages green via SMOKE_RESULT sentinel; 22 source-citations; tools/run_headless.sh + bundled _smoke.pdb + gitignore delivered; PITFALLS.md Pitfall 3 empirically corrected). Next: Plan 03-02 (AssetManager) + 03-03 (MolOps), both reuse this harness.
+Last session: 2026-08-14 (Phase 3 execution — Plans 03-01 GATE + 03-02 AssetManager complete)
+Stopped at: Completed 03-02-PLAN.md (AssetManager: inject-cmd + Pitfall 5 mitigations; 8 MockCmd unit tests pass; headless smoke 4/4 stages PASS — load_bundled=3 atoms, fetch_pubchem=21 atoms, file_landed=abs dir, fetch_pdb=327 atoms; 3 source-citations). Next: Plan 03-03 (MolOps — MolAction->cmd.* dispatch, delegates `load` to AssetManager; reuses inject-cmd + MockCmd + headless smoke patterns).
 Resume file: None
