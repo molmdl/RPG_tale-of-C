@@ -77,7 +77,7 @@ Plans:
 **Plans**: 3 plans in 3 waves
 
 Plans:
-- [ ] 03-01-PLAN.md — Headless harness + api-sanity smoke + source-citation convention [GATE] (Wave 1)
+- [x] 03-01-PLAN.md — Headless harness + api-sanity smoke + source-citation convention [GATE] (Wave 1) ✓
 - [ ] 03-02-PLAN.md — AssetManager (load_bundled/fetch_pubchem/fetch_pdb + MockCmd unit tests + headless smoke) (Wave 2)
 - [ ] 03-03-PLAN.md — MolOps (MolAction→cmd.* per-action dispatch + citations + NotImplementedError for Phase 4 + headless smoke) (Wave 3)
 
@@ -296,7 +296,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 |-------|----------------|--------|-----------|
 | 1. Foundations & Citation Gate | 3/3 ✓ | Complete | 2026-08-13 |
 | 2. Story Engine Core | 5/5 ✓ | Complete | 2026-08-13 |
-| 3. PyMOL cmd Layer | 0/3 | Not started | - |
+| 3. PyMOL cmd Layer | 1/3 | In progress | - |
 | 4. Editing + Protonation + Restore | 0/TBD | Not started | - |
 | 5. Pre-Content Key Decisions (parallel) | 0/TBD | Not started | - |
 | 5.1 Story Graph Design (INSERTED) | 0/TBD | Not started | - |

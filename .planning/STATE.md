@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 2 — Story Engine Core (Architecture Proof in WSL) — COMPLETE ✓ + VERIFIED (4/4 success criteria, 31/31 truths, 21/21 artifacts, 17/17 key_links; VERIFICATION.md status: passed). All 5 plans done; 97 tests pass; `python3.6 tools/demo_playthrough.py` runs the architecture proof and exits 0; zero PyMOL/Qt in c14/. Next engineering: Phase 3 (PyMOL cmd Layer, headless) + parallel Phase 5 track.
+**Current focus:** Phase 3 — PyMOL cmd Layer + Asset Management (Headless) — IN PROGRESS. Plan 03-01 (GATE: headless harness + api-sanity smoke + source-citation convention) COMPLETE ✓ — the WSL->Windows headless bridge is proven (10 cmd.* stages all green via SMOKE_RESULT sentinel), the harness contract is established for Plans 02+03, and the cmd.create pitfall is empirically corrected. Next: Plan 03-02 (AssetManager) + 03-03 (MolOps). Phase 2 remains complete+verified (97 tests, demo exits 0, zero PyMOL/Qt in c14/).
 
 ## Current Position
 
-Phase: 2 of 13 (Story Engine Core — Architecture Proof in WSL) — COMPLETE ✓ + VERIFIED (passed)
-Plan: 5 of 5 complete in current phase (02-01 + 02-02 + 02-03 + 02-04 + 02-05 done)
-Status: Phase 2 complete + verified (4/4 success criteria; VERIFICATION.md status: passed; 97 tests pass; demo exits 0)
-Last activity: 2026-08-13 — Phase 2 verified (VERIFICATION.md: passed, 31/31 truths, 21/21 artifacts, 17/17 key_links). All 5 plans complete; requirements STORY-01, STORY-04, SAVE-01, SAVE-02 marked Complete.
+Phase: 3 of 13 (PyMOL cmd Layer + Asset Management — Headless) — IN PROGRESS
+Plan: 1 of 3 complete in current phase (03-01 done; 03-02 + 03-03 next)
+Status: In progress — 03-01 GATE plan complete (headless bridge proven; harness + sentinel + citation convention established; cmd.create pitfall corrected)
+Last activity: 2026-08-14 — Completed 03-01-PLAN.md (api-sanity smoke PASSED: 10/10 stages green via SMOKE_RESULT sentinel; 22 source-citations; bundled fixture + run_headless.sh + gitignore delivered)
 
-Progress: [████████░░] ~25% (8 plans complete of 8 planned; phases 3-13 not yet planned)
+Progress: [█████████░] ~30% (9 plans complete of 11 planned in phases 1-3; phases 4-13 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 14 min
-- Total execution time: 1.91 hours
+- Total plans completed: 9
+- Average duration: 25 min
+- Total execution time: 3.42 hours
 
 **By Phase:**
 
@@ -29,10 +29,11 @@ Progress: [████████░░] ~25% (8 plans complete of 8 planned; 
 |-------|-------|-------|----------|
 | 1. Foundations & Citation Gate | 3/3 ✓ | 56 min | 19 min |
 | 2. Story Engine Core | 5/5 ✓ | 78 min | 16 min |
+| 3. PyMOL cmd Layer | 1/3 | 91 min | 91 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (4 min), 02-03 (7 min), 02-02 (14 min), 02-04 (49 min), 02-05 (4 min)
-- Trend: 02-05 (the capstone) was fast (4 min) — pure additive (no source changes), wiring already-built modules end-to-end + a demo script; the 02-04 GameEngine integration was the heavy lift. Phase 2 GOAL achieved: full architecture proven in WSL with zero PyMOL/Qt import before any pymol_layer/ui code.
+- Last 3 plans: 02-05 (4 min), 03-01 (91 min), [03-02 next]
+- Trend: 03-01 (the Phase 3 GATE) was the heaviest single plan so far (91 min) — it empirically proved the WSL->Windows headless bridge, established the SMOKE_RESULT sentinel + source-citation contracts, and corrected the cmd.create pitfall. The 91 min includes context loading (reading 03-RESEARCH.md + all context files) + file creation + the headless smoke run (network fetches). Plans 02+03 are lighter (reuse the harness + convention).
 
 *Updated after each plan completion*
 
@@ -79,6 +80,11 @@ Recent decisions affecting current work:
 - [Execution 02-04]: RNG-state sync — _enter() writes rng.get_state() into state after every entry and save() syncs before serializing; load() rebuilds the RngEngine via RngEngine.from_state(seed, rng_state) and replays the current node's on_enter with record_visit=False (no visit double-count). Exact-next-draw equivalence proven (test_rng_state_survives_save_load). Phase 2 success criterion #3 PROVEN (save/load restores an identical session by replaying on_enter); criterion #2 proven through the engine (the single seeded RngEngine carries through start->choose->save->load).
 - [Execution 02-04]: interpreter.enter_node gained a backward-compatible record_visit=True param (2-line additive edit) so load-replay can skip the visit bump. All 12 existing interpreter tests still pass (zero regression — Plan 02 forward-compatible contract honored).
 - [Execution 02-05]: Phase 2 GOAL ACHIEVED — 17-test integration suite (tests/test_integration.py) + runnable demo (tools/demo_playthrough.py) prove all 4 Phase 2 success criteria end-to-end in pure Python with zero PyMOL/Qt import. The integration test imports the FULL domain stack at module top (engine+graph+rng+state+persist+validate+model) and asserts 'pymol'/'PyQt5' not in sys.modules after a full playthrough — the testability boundary proven across the entire architecture, not just per-module. SC2 strongest proof: mid-playthrough save (before the weighted choice) -> load -> choose reaches the SAME ending as never saving (saved RNG position converges). SC4 orphaned-variant built via Node.from_dict on a copy of g.all_nodes(). The demo (seed 42, exits 0) is the human-visible proof twin. 97 tests pass; AST gate clean. No deviations (plan executed exactly as written; the per-action dispatch contract from 02-04 was pre-flagged and adapted correctly).
+- [Execution 03-01]: Headless bridge verdict via STDOUT sentinel, NOT exit code — run-conda-pymol.bat ALWAYS returns 0 (`call conda deactivate` overwrites %ERRORLEVEL%; PyMOL's parsing.run_file swallows exceptions). SC #1's "exit code 0" reinterpreted as "SMOKE_RESULT: PASS sentinel present". The harness (tools/run_headless.sh) greps ^SMOKE_RESULT: PASS (presence=pass, absence=fail — stricter than grepping FAIL which falsely passes if the smoke crashes before printing the sentinel). Every later headless test (Plans 02+03) reuses this contract.
+- [Execution 03-01]: cmd.create pitfall EMPIRICALLY CORRECTED — the "silent no-op" claim (PITFALLS.md Pitfall 3) did NOT reproduce for a new-target backup. Real gotchas: (a) create(bak,src,1,1) copies ONLY state 1 → incomplete multi-state backup (silent data loss); (b) create(obj,obj) self-copy is DESTRUCTIVE (raises CmdException + corrupts source); (c) default-args cmd.create(backup,source) (source_state=0,target_state=0=ALL states) is the working form — matches ARCHITECTURE.md:304. PITFALLS.md updated (5 targeted edits). Phase 4 restore uses default-args create.
+- [Execution 03-01]: delete post-condition MUST use ?-prefix — bare count_atoms("deleted_obj") RAISES CmdException('Invalid selection name'); count_atoms("?"+name) returns 0 (safe). The ? is PyMOL's existing-objects-only selector prefix (used throughout source, e.g. creating.py:1001).
+- [Execution 03-01]: Source-citation convention established — every cmd.* call carries `# src: tmp/pymol-src/modules/pymol/<file>.py:<line> cmd.<name>` on the line directly above it (22 citations in api_sanity_smoke.py; greppable via `grep -rn "# src: tmp/pymol-src"`). Line numbers pinned to PyMOL 2.5.0 (all 12 verified against tmp/pymol-src/modules/pymol/). Plans 02+03 must follow this for AssetManager + MolOps.
+- [Execution 03-01]: Bundled (c14/data/assets/bundled/, committed, ships in plugin zip) vs Downloaded (c14/data/assets/downloaded/, gitignored, runtime cache) asset directory split. cmd.fetch skips download if file exists (importing.py:1211-1213) = free idempotent cache. Verified: check-ignore downloaded/ -> path; check-ignore bundled/ -> nothing.
 
 ### Pending Todos
 
@@ -90,7 +96,7 @@ Issues that affect future work:
 
 - [Phase 5]: 4 science-framing Key Decisions gate content authoring. Pitfall 4 (ATP/True-Ending carbon-fate reframing) is now RESOLVED (2026-08-13, via the soul-jump reframing — electrons-as-soul harvested into ATP via ETC after the RNG-weighted TCA path; carbon body released as CO2; see PROJECT.md Key Decisions). The remaining 3 are HOW decisions for the human, still Pending: C14-decay timescale (Pitfall 9); anaerobic framing; batch-vs-per-claim approval. They are flagged as Phase 5 tasks. Start this track early — it is the timeline-domininating risk (Pitfall 7). The anaerobic decision now specifically gates Phase 5.1 (Story Graph Design); the ATP/True-Ending decision (resolved) no longer blocks it.
 - [Phase 5.1 / 5.2 (INSERTED)]: Two design phases gate Phase 6. Phase 5.1 (Story Graph Design) needs Phase 2 + the Phase 5 ATP decision [now RESOLVED via soul-jump — electrons-as-soul → ATP via ETC after RNG-weighted TCA path; True-ending node = electron harvest, NOT carbon-becomes-ATP]; it produces the glucose skeleton + MC-choice/edit-node integration contracts (resolves the user's story-design / MC-vs-editing / editing↔story concerns). Phase 5.2 (Representation Design) needs Phase 3 + 5.1; it produces the hero-highlight + scene-template convention (resolves the user's cast/hero-representation concern). Both are review-checkpoints, not requirement-delivery phases.
-- [Phase 4]: Highest technical-risk phase — the `alter`→`sort` silent-corruption trap (Pitfall 6) and `cmd.create` no-op trap (Pitfall 3) bite here. Address on day one of Phase 4 with the `apply_edit` helper + backup-snapshot pattern.
+- [Phase 4]: Highest technical-risk phase — the `alter`→`sort` silent-corruption trap (Pitfall 6) bites here. The `cmd.create` pitfall (Pitfall 3) is now EMPIRICALLY CORRECTED (03-01): the "no-op" claim did not reproduce; real gotchas are 1,1-drops-multi-state + destructive-self-copy + default-args-working. Phase 4 restore uses default-args `cmd.create(backup, source)` (all states). Address the alter→sort trap on day one of Phase 4 with the `apply_edit` helper + backup-snapshot pattern.
 - [Phase 6]: First human-verify milestone — Qt/GUI cannot be exercised from WSL (Pitfall 2). Manual GUI test matrix begins here. Now implements the reviewed Phase 5.1 + 5.2 design artifacts rather than inventing them inline. Plugin loader should also call `c14.paths.selfcheck()` at startup (Pitfall 1 mitigation — fail loud on broken bundled layout); the helper is designed for this and the Phase 1 test is the first caller.
 - [Phase 11]: Documentation finalization + verification is the LAST release gate, after Phase 10's content polish. It depends on Phase 10 being complete (playtest-driven content changes settled) so docs reflect final shipped content. It owns 0 new requirements — verifies/updates DOC-01, DOC-02 against shipped reality.
 - [Coverage]: REQUIREMENTS.md previously stated "34 total" v1 requirements; actual enumerated v1 set is 32 (PATH-01, STAT-01 are v2). Traceability uses 32. The 5.1/5.2/11 phases own 0 requirements — coverage unchanged at 32/32.
@@ -103,6 +109,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-13 (Phase 2 execution + verification — all 5 plans complete, VERIFICATION.md status: passed)
-Stopped at: Phase 2 COMPLETE + VERIFIED (4/4 success criteria; 31/31 truths, 21/21 artifacts, 17/17 key_links; 97 tests pass; demo exits 0; zero PyMOL/Qt in c14/). Requirements STORY-01, STORY-04, SAVE-01, SAVE-02 marked Complete. Next: Phase 3 (PyMOL cmd Layer, headless) and/or the parallel Phase 5 track (Key Decisions — 3 still pending).
+Last session: 2026-08-14 (Phase 3 execution — Plan 03-01 GATE complete: headless bridge proven, harness + sentinel + citation convention established)
+Stopped at: Completed 03-01-PLAN.md (api-sanity smoke PASSED: 10/10 cmd.* stages green via SMOKE_RESULT sentinel; 22 source-citations; tools/run_headless.sh + bundled _smoke.pdb + gitignore delivered; PITFALLS.md Pitfall 3 empirically corrected). Next: Plan 03-02 (AssetManager) + 03-03 (MolOps), both reuse this harness.
 Resume file: None
