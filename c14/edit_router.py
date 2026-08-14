@@ -186,13 +186,17 @@ def validate_edits_table(edits_table, story_nodes):
     """
     issues = []
     table = edits_table.to_dict()
-    # Global pool checks.
+    # Global pool checks (emptiness is an error here -- it's the ultimate
+    # fallback for any enzyme without a per-enzyme override).
     gpool = table.get("bad_ending_pool", [])
     issues.extend(_check_pool(gpool, "global", story_nodes))
-    # Per-enzyme checks.
+    # Per-enzyme checks. A per-enzyme pool that is ABSENT or EMPTY is NOT an
+    # error -- it means "fall back to the global pool" (OVERRIDE semantics).
+    # Only non-empty per-enzyme pools are checked for dangling/non-ending nodes.
     for eid, e in table.get("enzymes", {}).items():
-        per_pool = e.get("bad_ending_pool", [])
-        issues.extend(_check_pool(per_pool, eid, story_nodes))
+        per_pool = e.get("bad_ending_pool")
+        if per_pool:  # non-empty per-enzyme override -> validate its nodes
+            issues.extend(_check_pool(per_pool, eid, story_nodes))
         seen = set()
         for entry in e.get("edits", []):
             bn = entry.get("branch_node")
