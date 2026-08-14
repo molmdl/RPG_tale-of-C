@@ -198,13 +198,22 @@ class ProtonationManager(object):
         adds (NEW resn) AFTER alter. The catalog authors selections with the
         correct resn phase; _apply_alter partitions h_ops by op and reorders.
 
+        SELECTION SCOPING (Pitfall 9 backup-independence fix): each h_op sele
+        is scoped to ``target`` (``"{target} and {h_op_sele}"``) so the
+        remove/h_add steps do NOT affect the backup object (_bak_<target>) or
+        other loaded objects. Without scoping, a bare ``"resn HIS and name
+        HE2"`` would match atoms in ALL objects including the backup, corrupting
+        it (the backup's HE2 would be removed, breaking the SC2 round-trip).
+
         Translation: the catalog h_ops use "add" (human-readable); the edit_ops
         step dict uses "h_add" (the edit_ops step op). This translation happens
         here: op="add" -> {"op":"h_add","sele":...}.
         """
         # 1. removes: op="remove" h_ops -> {"op":"remove","sele":...} steps
-        #    (run BEFORE alter while resn is still the OLD resn).
-        removes = [{"op": "remove", "sele": h["sele"]}
+        #    (run BEFORE alter while resn is still the OLD resn). Scoped to
+        #    target so the backup is not corrupted.
+        removes = [{"op": "remove",
+                    "sele": "{0} and {1}".format(target, h["sele"])}
                    for h in spec.get("h_ops", []) if h["op"] == "remove"]
         # 2. alter: the resn rename (sele=target; in Phase 4 target IS the
         #    object name + the residue key -- the alter applies to the whole
@@ -212,9 +221,10 @@ class ProtonationManager(object):
         alter = [{"op": "alter", "sele": target,
                   "expr": "resn='{}'".format(spec["resn"])}]
         # 3. adds: op="add" h_ops -> {"op":"h_add","sele":...} steps
-        #    (run AFTER alter while resn is the NEW resn). Translation:
-        #    catalog "add" -> edit_ops step "h_add".
-        adds = [{"op": "h_add", "sele": h["sele"]}
+        #    (run AFTER alter while resn is the NEW resn). Scoped to target.
+        #    Translation: catalog "add" -> edit_ops step "h_add".
+        adds = [{"op": "h_add",
+                 "sele": "{0} and {1}".format(target, h["sele"])}
                 for h in spec.get("h_ops", []) if h["op"] == "add"]
         # 4. steps = removes + alter + adds (Pitfall 2 ordering).
         steps = removes + alter + adds

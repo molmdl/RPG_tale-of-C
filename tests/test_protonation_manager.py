@@ -198,11 +198,13 @@ class TestApplyVariantAlter(unittest.TestCase):
 
     def test_apply_variant_alter_routes_through_edit_ops(self):
         """apply_variant('HIS','HIS_HID') calls mock_edit.apply_edit('HIS',
-        steps) with steps = [remove('resn HIS and name HE2'),
-        alter('HIS', "resn='HID'"), h_add('resn HID and name ND1')] in THIS
-        ORDER (removes -> alter -> adds -- Pitfall 2). Assert mock_edit.
-        apply_edit was called; assert mock_cmd.alter was NOT called directly
-        (sanctioned-alter gate)."""
+        steps) with steps = [remove('HIS and resn HIS and name HE2'),
+        alter('HIS', "resn='HID'"), h_add('HIS and resn HID and name ND1')]
+        in THIS ORDER (removes -> alter -> adds -- Pitfall 2). The h_ops
+        selections are SCOPED to the target (``"{target} and {h_op_sele}"``)
+        so the remove/h_add do NOT affect the backup object (Pitfall 9
+        backup-independence fix). Assert mock_edit.apply_edit was called;
+        assert mock_cmd.alter was NOT called directly (sanctioned-alter gate)."""
         self.pm.apply_variant("HIS", "HIS_HID")
         # apply_edit was called exactly once with target "HIS".
         self.assertEqual(len(self.mock_edit._apply_edit_calls), 1)
@@ -211,12 +213,14 @@ class TestApplyVariantAlter(unittest.TestCase):
         # The steps list has exactly 3 entries: remove, alter, h_add.
         self.assertEqual(len(steps), 3)
         self.assertEqual(steps[0]["op"], "remove")
-        self.assertEqual(steps[0]["sele"], "resn HIS and name HE2")
+        # Selections are scoped to the target ("HIS and ...") so the backup
+        # (_bak_HIS) is not corrupted by the remove/h_add steps.
+        self.assertEqual(steps[0]["sele"], "HIS and resn HIS and name HE2")
         self.assertEqual(steps[1]["op"], "alter")
         self.assertEqual(steps[1]["sele"], "HIS")
         self.assertEqual(steps[1]["expr"], "resn='HID'")
         self.assertEqual(steps[2]["op"], "h_add")
-        self.assertEqual(steps[2]["sele"], "resn HID and name ND1")
+        self.assertEqual(steps[2]["sele"], "HIS and resn HID and name ND1")
         # mock_cmd.alter was NOT called directly (sanctioned-alter gate).
         alter_calls = [c for c in self.mock_cmd.calls if c[0] == "alter"]
         self.assertEqual(alter_calls, [],
