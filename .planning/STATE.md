@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 3 — PyMOL cmd Layer + Asset Management (Headless) — IN PROGRESS. Plans 03-01 (GATE: headless harness + api-sanity smoke + source-citation convention) + 03-02 (AssetManager: inject-cmd + Pitfall 5 mitigations + MockCmd unit tests + headless smoke) COMPLETE ✓ — the WSL->Windows headless bridge is proven (10+4 cmd.* stages green via SMOKE_RESULT sentinel), the harness contract is established, AssetManager resolves bundled PDB + fetched PubChem/PDB substrates to non-empty PyMOL objects (cwd-independent), and the inject-cmd testability pattern is carried into the pymol layer. Next: Plan 03-03 (MolOps — MolAction->cmd.* dispatch, delegates `load` to AssetManager). Phase 2 remains complete+verified (97 tests, demo exits 0, zero PyMOL/Qt in c14/).
+**Current focus:** Phase 3 — PyMOL cmd Layer + Asset Management (Headless) — COMPLETE ✓. All 3 plans done (03-01 GATE + 03-02 AssetManager + 03-03 MolOps). The WSL->Windows headless bridge is proven, the harness contract (SMOKE_RESULT sentinel) is established, AssetManager resolves bundled/fetched substrates (cwd-independent), and MolOps translates MolAction->cmd.* per-action (8 ops implemented; edit/protonate/restore raise NotImplementedError = explicit Phase 4 boundary). All 4 Phase 3 success criteria delivered (SC #1/#2/#3/#4). 123 tests pass; AST gate clean. Next: Phase 4 (Editing, Protonation & Restore Safety Net — highest technical-risk phase; the alter->sort trap bites here). Phase 2 remains complete+verified (97 tests, demo exits 0, zero PyMOL/Qt in c14/).
 
 ## Current Position
 
-Phase: 3 of 13 (PyMOL cmd Layer + Asset Management — Headless) — IN PROGRESS
-Plan: 2 of 3 complete in current phase (03-01 + 03-02 done; 03-03 next)
-Status: In progress — 03-02 AssetManager complete (inject-cmd + Pitfall 5 mitigations + MockCmd unit tests + headless smoke 4/4 PASS)
-Last activity: 2026-08-14 — Completed 03-02-PLAN.md (AssetManager: 8 MockCmd unit tests pass; headless smoke 4/4 stages PASS — load_bundled=3 atoms, fetch_pubchem=21 atoms, file_landed=abs dir, fetch_pdb=327 atoms)
+Phase: 3 of 13 (PyMOL cmd Layer + Asset Management — Headless) — COMPLETE
+Plan: 3 of 3 complete in current phase (03-01 + 03-02 + 03-03 done) ✓
+Status: Phase 3 complete — 03-03 MolOps done (per-action dispatch + inject-cmd+AssetManager + NotImplementedError Phase 4 boundary + 18 MockCmd/MockAssets unit tests + headless smoke 6/6 PASS)
+Last activity: 2026-08-14 — Completed 03-03-PLAN.md (MolOps: 18 unit tests pass; headless smoke 6/6 stages PASS — molops_scene_rep_visible rep-sticks=3 proves SC #3; molops_show_as_atomic + molops_delete_post bonus stages PASS)
 
-Progress: [██████████] ~33% (10 plans complete of 11 planned in phases 1-3; phases 4-13 not yet planned)
+Progress: [██████████] ~36% (11 plans complete of 11 planned in phases 1-3; phases 4-13 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 24 min
-- Total execution time: 3.72 hours
+- Total plans completed: 11
+- Average duration: 23 min
+- Total execution time: 3.87 hours
 
 **By Phase:**
 
@@ -29,11 +29,11 @@ Progress: [██████████] ~33% (10 plans complete of 11 planned
 |-------|-------|-------|----------|
 | 1. Foundations & Citation Gate | 3/3 ✓ | 56 min | 19 min |
 | 2. Story Engine Core | 5/5 ✓ | 78 min | 16 min |
-| 3. PyMOL cmd Layer | 2/3 | 109 min | 55 min |
+| 3. PyMOL cmd Layer | 3/3 ✓ | 118 min | 39 min |
 
 **Recent Trend:**
-- Last 3 plans: 02-05 (4 min), 03-01 (91 min), 03-02 (18 min)
-- Trend: 03-02 (AssetManager) was lighter than 03-01 (18 min vs 91 min) — it reused the harness, sentinel contract, bundled fixture, and citation convention from 03-01, so only the AssetManager class + MockCmd unit tests + headless smoke were new work. The headless smoke passed 4/4 stages with network available (load_bundled=3 atoms, fetch_pubchem=21 atoms, fetch_pdb=327 atoms). Plan 03-03 (MolOps) should be similarly light (reuses the same patterns).
+- Last 3 plans: 03-01 (91 min), 03-02 (18 min), 03-03 (9 min)
+- Trend: 03-03 (MolOps) was the lightest of the phase (9 min) — it reused the harness, sentinel contract, bundled fixture, citation convention, and inject-cmd + MockCmd patterns from 03-01/03-02, so only the MolOps class + MockCmd/MockAssets unit tests + headless smoke were new work. The headless smoke passed 6/6 stages on the first run (rep-sticks=3 proves SC #3). Phase 3 is now complete (all 4 success criteria delivered).
 
 *Updated after each plan completion*
 
@@ -88,6 +88,10 @@ Recent decisions affecting current work:
 - [Execution 03-02]: Inject-cmd testability pattern carried into the pymol layer — AssetManager imports only os + c14.paths (NO pymol at module top); cmd is constructor-injected (`def __init__(self, cmd): self._cmd = cmd`). The module is importable in pure WSL python3.6 with no pymol installed; MockCmd unit tests verify dispatch/path/args; the headless smoke (tools/asset_smoke.py) injects the REAL pymol.cmd to verify the actual API contract. Plan 03 MolOps reuses this pattern (MolOps(cmd, asset_manager)).
 - [Execution 03-02]: Pitfall 5 mitigations baked into every fetch call — AssetManager.fetch_pubchem/fetch_pdb ALWAYS pass type= (NOT the CIF default — Pitfall 5a), async_=0 (sync — Pitfall 5c defense), path=<abs downloaded dir> (NOT cwd — Pitfall 5b). Downloads land in c14/data/assets/downloaded/ regardless of cwd (confirmed by the headless smoke's fetch_pubchem_file_landed stage: file at abs path). cmd.load returns None (importing.py:635) — count_atoms > 0 is the only reliable non-empty post-condition.
 - [Execution 03-02]: MockCmd.count_atoms is an explicit method (NOT __getattr__ fallback) — so the post-condition probe is NOT recorded in self.calls; calls[0] is always the dispatched load/fetch op. Set mock._count=0 to exercise the RuntimeError branch; mock._count=3 for the success path. This MockCmd pattern is reusable for Plan 03 MolOps dispatch tests.
+- [Execution 03-03]: MolOps.apply(action) takes ONE MolAction per call (the 02-04 per-action dispatch contract) — the engine emits `for action in actions: sink(action)`; the Phase 4+ controller calls molops.apply(action) per action. apply_all(actions) is a thin convenience loop. The unit boundary is per-action apply. 8 ops implemented (hide_all/show/show_as/select_focus/zoom/color/load/delete); load delegates to AssetManager (no direct cmd.* call); load without AssetManager raises RuntimeError.
+- [Execution 03-03]: NotImplementedError for edit/protonate/restore = explicit Phase 4 boundary — these ops are NOT implemented in Phase 3; raising NotImplementedError (rather than silently no-opping) makes the boundary explicit so a stray MolAction with op='edit' fails loudly. Unknown ops also raise NotImplementedError. Phase 4 implements these by replacing the NotImplementedError branches. Unit-tested (4 tests assert the raise).
+- [Execution 03-03]: `rep <name>` selection keyword is the headless "representation visible" post-condition — count_atoms('obj & rep sticks') > 0 after show(sticks). Empirically confirmed (C-backed, unverifiable from selector.py source). Headless smoke molops_scene_rep_visible (rep-sticks=3) proves SC #3: a queued MolAction list translates to the correct cmd.* sequence AND the resulting object has the expected representation visible.
+- [Execution 03-03]: Phase 3 COMPLETE — all 4 success criteria delivered. SC #1 (Plan 01: api-sanity smoke + SMOKE_RESULT sentinel), SC #2 (Plan 02: AssetManager resolves bundled + fetched substrates cwd-independent), SC #3 (Plan 03: MolOps translates queued MolAction list to cmd.* sequence; headless smoke confirms rep visible), SC #4 (Plans 01/02/03: source-citation convention on every cmd.* call). 123 tests pass; AST gate clean.
 
 ### Pending Todos
 
@@ -112,6 +116,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-14 (Phase 3 execution — Plans 03-01 GATE + 03-02 AssetManager complete)
-Stopped at: Completed 03-02-PLAN.md (AssetManager: inject-cmd + Pitfall 5 mitigations; 8 MockCmd unit tests pass; headless smoke 4/4 stages PASS — load_bundled=3 atoms, fetch_pubchem=21 atoms, file_landed=abs dir, fetch_pdb=327 atoms; 3 source-citations). Next: Plan 03-03 (MolOps — MolAction->cmd.* dispatch, delegates `load` to AssetManager; reuses inject-cmd + MockCmd + headless smoke patterns).
+Last session: 2026-08-14 (Phase 3 execution — all 3 plans complete: 03-01 GATE + 03-02 AssetManager + 03-03 MolOps)
+Stopped at: Completed 03-03-PLAN.md (MolOps: 18 MockCmd/MockAssets unit tests pass; headless smoke 6/6 stages PASS — molops_scene_rep_visible rep-sticks=3 proves SC #3; show_as_atomic + delete_post bonus stages PASS). Phase 3 is COMPLETE (all 4 success criteria delivered). Next: Phase 4 (Editing, Protonation & Restore Safety Net — highest technical-risk phase; the alter->sort silent-corruption trap bites here; address on day one with the apply_edit helper + backup-snapshot pattern).
 Resume file: None
