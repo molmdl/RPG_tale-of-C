@@ -1,0 +1,31 @@
+{
+  "nodes": {
+    "edit.start": {
+      "text_dramatic": "You stand before a placeholder enzyme.",
+      "claim_ids": ["placeholder-start"],
+      "on_enter": [{"op": "hide_all"}],
+      "choices": []
+    },
+    "edit.placeholder_branch": {
+      "text_dramatic": "Your modeled edit takes effect.",
+      "claim_ids": ["placeholder-edit-1"],
+      "on_enter": [{"op": "edit", "target": "resi 57 and chain A", "args": {"edit_type": "point_mutation", "sele": "resi 57 and chain A", "new_resn": "ALA"}}],
+      "is_ending": "good",
+      "choices": []
+    },
+    "bad.lost_connection": {
+      "text_dramatic": "Lost connection to the host.",
+      "claim_ids": ["placeholder-bad-lost"],
+      "on_enter": [{"op": "hide_all"}],
+      "is_ending": "bad",
+      "choices": []
+    },
+    "bad.released_from_host": {
+      "text_dramatic": "Released from the host.",
+      "claim_ids": ["placeholder-bad-released"],
+      "on_enter": [{"op": "hide_all"}],
+      "is_ending": "bad",
+      "choices": []
+    }
+  }
+}

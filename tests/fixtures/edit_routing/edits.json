@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "bad_ending_pool": ["bad.lost_connection", "bad.released_from_host"],
+  "enzymes": {
+    "placeholder_enzyme": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 57 and chain a", "args": {"new_res": "ALA"}},
+          "branch_node": "edit.placeholder_branch",
+          "claim_id": "placeholder-edit-1"
+        }
+      ]
+    }
+  }
+}

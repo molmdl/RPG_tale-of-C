@@ -36,7 +36,8 @@ from c14.story.interpreter import StoryInterpreter
 from c14.rng import RngEngine
 from c14.state import GameState
 from c14.persist import SaveStore
-from c14.story.model import MolAction  # noqa: F401 (docstring reference)
+from c14.story.model import MolAction, EditIntent  # noqa: F401 (docstring refs)
+from c14.edit_router import EditRoutingError  # noqa: F401 (raised by route(); docstring ref)
 
 
 class TurnResult(object):
@@ -71,13 +72,20 @@ class GameEngine(object):
     (constructed at ``start`` / rebuilt at ``load``). It delegates graph
     walking to the stateless ``StoryInterpreter`` (conditions, weighted picks,
     effects, on_enter emission, visit recording, ending detection).
+
+    An optional ``edit_router`` (Phase 4) enables ``apply_player_edit``: route
+    a player's :class:`~c14.story.model.EditIntent` to a story node (known ->
+    branch, unknown -> bad-ending pool), record it in ``edits_history``, and
+    enter the routed node. When ``None`` (default), edit-routing is disabled --
+    ``start``/``choose``/``save``/``load`` work unchanged (backward-compatible).
     """
 
-    def __init__(self, graph, molaction_sink=None):
-        # type: (StoryGraph, object) -> None
+    def __init__(self, graph, molaction_sink=None, edit_router=None):
+        # type: (StoryGraph, object, object) -> None
         self.graph = graph
         self.interpreter = StoryInterpreter()
         self.molaction_sink = molaction_sink
+        self.edit_router = edit_router
         self.state = None
         self.rng = None
 
@@ -123,6 +131,34 @@ class GameEngine(object):
             choice = pick
         self.interpreter.apply_effects(choice, self.state)
         return self._enter(choice.goto)
+
+    def apply_player_edit(self, edit_intent, enzyme_id):
+        # type: (EditIntent, str) -> TurnResult
+        """Route a player edit + enter the routed node (the SC3 entry point).
+
+        1. ``node_id = self.edit_router.route(edit_intent, enzyme_id, self.rng)``
+        2. ``self.state.add_edit({"enzyme": enzyme_id, "intent": edit_intent.to_dict(), "route": node_id})``
+        3. ``return self._enter(node_id)``  (reuse existing _enter: on_enter
+           MolActions flow to the existing ``molaction_sink``).
+
+        The edit APPLICATION (backup + alter + sort + rebuild) is NOT done here
+        -- it's the apply_edit helper's job (pymol_layer), triggered by the
+        routed branch's ``on_enter`` MolAction("edit",...). This method is pure
+        routing + entry; it stays WSL-unit-testable (no PyMOL).
+
+        Raises ``RuntimeError`` if no ``edit_router`` was injected. Raises
+        :class:`~c14.edit_router.EditRoutingError` if the bad-ending pool is
+        empty.
+        """
+        if self.edit_router is None:
+            raise RuntimeError("GameEngine has no edit_router; cannot apply edits")
+        node_id = self.edit_router.route(edit_intent, enzyme_id, self.rng)
+        self.state.add_edit({
+            "enzyme": enzyme_id,
+            "intent": edit_intent.to_dict(),
+            "route": node_id,
+        })
+        return self._enter(node_id)
 
     def _enter(self, node_id, record_visit=True):
         # type: (str, bool) -> TurnResult
