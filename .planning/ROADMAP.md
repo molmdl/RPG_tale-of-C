@@ -91,10 +91,14 @@ Plans:
   3. EditRouter routes a known edit (matching an `edits.json` entry) to its defined story branch, and routes an unknown edit to the bad-ending pool — demonstrated headlessly with fixture edit intents
   4. ProtonationManager applies a curated protonation variant (load pre-built structure OR `cmd.alter` resn + targeted `h_add`/`remove`) for at least one approved example, and a user-adjustable switch between curated variants is exercisable
   5. A per-enzyme minimum-coverage scan asserts every cast enzyme represented so far has ≥1 known-edit entry + the restore path (scan is green on the current enzyme set)
-**Plans**: TBD (likely 3–4 plans; `/gsd-research-phase` recommended for per-residue protonation variant sets + edit-table coverage criteria)
+**Plans**: 5 plans in 3 waves
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md — EditOps (sanctioned apply_edit + RestoreHandle + backup/restore + 4 convenience methods) + unit tests [SC1+SC2 mechanics] (Wave 1)
+- [ ] 04-02-PLAN.md — EditIntent + EditRouter + EditsTable + validate_edits_table + GameEngine.apply_player_edit + SC3 fixture bundle + tests [SC3] (Wave 1, parallel with 04-01)
+- [ ] 04-03-PLAN.md — ProtonationManager + protonation_catalog (curated variants, PLACEHOLDER claim_ids) + unit tests [SC4 + EDIT-05 for protonation] (Wave 2, after 04-01)
+- [ ] 04-04-PLAN.md — check_alter_gate (AST) + check_edit_coverage + placeholder cast.json/edits.json manifests + _edit_smoke.pdb/_his_smoke.pdb fixtures [SC1 enforcement + SC5] (Wave 2, parallel with 04-03, after 04-01)
+- [ ] 04-05-PLAN.md — molops edit/restore/protonate delegation (replaces NotImplementedError) + headless edit_smoke (SC1 byres + SC2 round-trip) + protonation_smoke (SC4) [integration] (Wave 3, after 04-01+04-03+04-04)
 
 ### Phase 5: Pre-Content Key Decisions & Source Approval
 **Goal**: The four science-framing decisions that block content authoring are resolved by the human, the per-claim approval workflow is operationalized (batch-by-source agreed), and the first set of sources for the glucose critical-path + TCA weights is pre-approved — unblocking the content phases. This is a PARALLEL track that runs alongside Phases 2–4 (engineering on placeholder content) and gates Phases 6–9 content.
