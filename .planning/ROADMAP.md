@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Story Engine Core (Architecture Proof in WSL)** — interpreter + engine + RNG + save/load on a minimal 2-node story with mocked MolActions ✓ COMPLETE (2026-08-13; 97 tests pass, demo exits 0, zero PyMOL/Qt in c14/)
 - [x] **Phase 3: PyMOL cmd Layer + Asset Management (Headless)** — AssetManager + MolOps + api-sanity smoke against the real API surface ✓ COMPLETE (2026-08-14; all 4 SCs delivered: api-sanity smoke via SMOKE_RESULT sentinel, AssetManager resolves bundled+fetched substrates, MolOps translates MolAction->cmd.* per-action, source-citation convention; 123 tests pass)
 - [x] **Phase 4: Editing, Protonation & Restore Safety Net** — the highest technical-risk phase: apply_edit helper, backup/restore, curated protonation, edit routing ✓ COMPLETE + VERIFIED (2026-08-15; all 5 SCs delivered + verified: SC1 alter->sort mitigated + AST gate + headless byres proof, SC2 backup/restore round-trip for 3 edit types, SC3 EditRouter routing, SC4 protonation switch, SC5 coverage scan; 198 tests pass; 2 headless smokes green; VERIFICATION.md status: passed)
-- [ ] **Phase 5: Pre-Content Key Decisions & Source Approval** — PARALLEL track: 4 science-framing decisions + batch-by-source approval workflow (gates Phases 6–9 content)
+- [x] **Phase 5: Pre-Content Key Decisions & Source Approval** — PARALLEL track: 4 science-framing decisions + batch-by-source approval workflow (gates Phases 6–9 content) ✓ COMPLETE (2026-08-15; all 5 SCs delivered + verified: SC1 soul-jump metaphor=metamorphosis, SC2 C14-decay DROP, SC3 anaerobic framing=(d)+invariant=(i)+host=mammal, SC4 hybrid workflow+first batch approved, SC5 gate operational on real data; 5/5 VERIFICATION.md status: passed)
 - [ ] **Phase 5.1: Story Graph Design — Glucose Skeleton + Integration Contracts (INSERTED)** — designs the real glucose story graph topology + the MC-choice-point and edit-node integration contracts as reviewable artifacts; validated by the reachability checker
 - [ ] **Phase 5.2: Cast & Hero Representation Design — Visual Language + Scene Templates (INSERTED)** — designs the C14 hero highlight convention + per-stage scene templates + cast-reveal convention; headless-prototyped on placeholder structures
 - [ ] **Phase 6: Qt UI + Minimal Playable MVP (Glucose + True+Bad)** — FIRST human-verify milestone; UI as thin adapter over proven engine + molecular layer + reviewed design artifacts
@@ -113,11 +113,11 @@ Plans:
 **Plans**: 5 plans in 5 waves (the 4 decisions are independent for the human but sequenced across waves because all document to PROJECT.md Key Decisions — sequential file ownership avoids merge conflicts; the workflow implementation + first-batch approval depend on the workflow decision)
 
 Plans:
-- [ ] 05-01-PLAN.md — SC#1 confirmation (ATP soul-jump docs verified) + SC#2 C14-decay framing decision (checkpoint:decision) + documentation in PROJECT.md (Wave 1)
-- [ ] 05-02-PLAN.md — SC#3 anaerobic framing decision + invariant re-wording sub-decision + host-organism sub-decision (checkpoint:decision) + documentation in PROJECT.md/REQUIREMENTS.md/spec.md (Wave 2, after 05-01)
-- [ ] 05-03-PLAN.md — SC#4 source-approval workflow decision + high-stakes taxonomy (checkpoint:decision) + documentation in PROJECT.md (Wave 3, after 05-02)
-- [ ] 05-04-PLAN.md — SC#4 schema implementation (data/sources.json + extended data/citations.json) + populate PENDING first-batch candidate sources/seed claims for glucose critical-path + TCA RNG weights (auto, no approval) (Wave 4, after 05-03)
-- [ ] 05-05-PLAN.md — SC#4/SC#5 first-batch human approval (checkpoint:human-verify) + record decisions in registry + run Phase 1 gate to prove SC#5 operational on real data (Wave 5, after 05-04)
+- [x] 05-01-PLAN.md — SC#1 confirmation (ATP soul-jump docs verified) + SC#2 C14-decay framing decision (checkpoint:decision) + documentation in PROJECT.md (Wave 1) ✓
+- [x] 05-02-PLAN.md — SC#3 anaerobic framing decision + invariant re-wording sub-decision + host-organism sub-decision (checkpoint:decision) + documentation in PROJECT.md/REQUIREMENTS.md/spec.md (Wave 2, after 05-01) ✓
+- [x] 05-03-PLAN.md — SC#4 source-approval workflow decision + high-stakes taxonomy (checkpoint:decision) + documentation in PROJECT.md (Wave 3, after 05-02) ✓
+- [x] 05-04-PLAN.md — SC#4 schema implementation (data/sources.json + extended data/citations.json) + populate PENDING first-batch candidate sources/seed claims for glucose critical-path + TCA RNG weights (auto, no approval) (Wave 4, after 05-03) ✓
+- [x] 05-05-PLAN.md — SC#4/SC#5 first-batch human approval (checkpoint:human-verify) + record decisions in registry + run Phase 1 gate to prove SC#5 operational on real data (Wave 5, after 05-04) ✓
 
 ### Phase 5.1: Story Graph Design — Glucose Skeleton + Integration Contracts (INSERTED)
 **Goal**: The real glucose story graph is designed as a reviewable JSON skeleton — every node, edge, choice point (mapped to a real pathway branch point), RNG-weighted node, edit-allowed node (with routing target), and ending attachment is specified and validated — AND the two integration contracts that connect the story to gameplay are defined: (a) the **choice-point contract** (how a text multiple-choice selection maps to a graph edge) and (b) the **edit-node contract** (which story nodes allow edits, what EditIntent each player-edit-action generates, and how the EditRouter's known/unknown outcome routes back into the graph). This de-risks Phases 6–7 by making the story structure + gameplay integration explicit design artifacts before any UI or cited content is built on top — directly resolving the user's concerns about story design, the MC-vs-editing distinction, and how editing relates to the story.
@@ -306,7 +306,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 | 2. Story Engine Core | 5/5 ✓ | Complete | 2026-08-13 |
 | 3. PyMOL cmd Layer | 3/3 ✓ | Complete | 2026-08-14 |
 | 4. Editing + Protonation + Restore | 5/5 ✓ | Complete | 2026-08-15 |
-| 5. Pre-Content Key Decisions (parallel) | 0/5 | Not started (planned) | - |
+| 5. Pre-Content Key Decisions (parallel) | 5/5 ✓ | Complete | 2026-08-15 |
 | 5.1 Story Graph Design (INSERTED) | 0/TBD | Not started | - |
 | 5.2 Representation Design (INSERTED) | 0/TBD | Not started | - |
 | 6. Qt UI + MVP (Glucose + True+Bad) | 0/TBD | Not started | - |

@@ -126,7 +126,7 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 | DOC-02 | Phase 9 — Anaerobic + Full Cast | Pending |
 | DOC-03 | Phase 6 — Qt UI + MVP | Pending |
 | DOC-04 | Phase 1 — Foundations & Citation Gate | Complete |
-| CITE-01 | Phase 5 — Pre-Content Key Decisions (parallel) | Pending |
+| CITE-01 | Phase 5 — Pre-Content Key Decisions (parallel); content delivery spans Phases 7-9 | In Progress (Phase 5 operationalized: hybrid workflow agreed, gate proven on real approved data, first batch of 5 claims + 4 sources approved; full requirement satisfied as content phases author + approve all claims) |
 | CITE-02 | Phase 1 — Foundations & Citation Gate | Complete |
 
 **Coverage:**
@@ -157,4 +157,4 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 
 ---
 *Requirements defined: 2026-08-12*
-*Last updated: 2026-08-15 — SC#3 anaerobic framing resolved (option d) + invariant re-worded (aerobic-scoped, i) + host = mammal/human; STORY-02 v1-scope parenthetical appended; STORY-05 framing updated. (Prior: Phase 4 completion — EDIT-01..05, CAST-03 marked Complete — 10/32 v1 requirements delivered)*
+*Last updated: 2026-08-15 — Phase 5 COMPLETE + VERIFIED (all 5 SCs delivered; CITE-01 operationalized: hybrid workflow agreed, gate proven on real approved data, first batch of 5 claims + 4 sources approved; LEHNINGER rejected per license + swapped to LibreTexts Jakubowski Ch 16 for the 2 high-stakes TCA RNG claims; CITE-01 marked In Progress — full requirement satisfied across Phases 7-9 as content is authored + approved). (Prior: SC#3 anaerobic framing resolved; Phase 4 completion — EDIT-01..05, CAST-03 marked Complete — 10/32 v1 requirements delivered)*
