@@ -21,10 +21,10 @@ Requirements for initial release. Each maps to roadmap phases. Cross-checked aga
 ### Pathway & Story
 
 - [ ] **STORY-01**: A branching narrative graph (DAG of nodes) drives the story forward via text-based multiple choice at each pathway branch point
-- [ ] **STORY-02**: All 4 ending tiers are reachable for each character: True (hero's electrons/"soul" harvested into ATP via the ETC after the RNG-weighted TCA path — carbon body released as CO2), Good (carbon body retained pre-oxidation — fatty-acid storage / amino acid / etc.), Normal (CO2 released without the full electron-harvest destiny arc), Bad (lost connection / released from host / host death / cycle-trapped / radioactive decay)
+- [ ] **STORY-02**: All 4 ending tiers are reachable for each character: True (hero's electrons/"soul" harvested into ATP via the ETC after the RNG-weighted TCA path — carbon body released as CO2), Good (carbon body retained pre-oxidation — fatty-acid storage / amino acid / etc.), Normal (CO2 released without the full electron-harvest destiny arc), Bad (lost connection / released from host / host death / cycle-trapped / radioactive decay) (v1 scope: aerobically, 1 True + several Normal/Good + many Bad endings are reachable per character; anaerobically the True ending is biochemically unreachable (no O2 → no ETC) — the reachable subset is Normal/Good/Bad only AND is character-specific: glucose reaches the 3-ending fermentation branch (lactic=Good, ethanolic=Normal, crisis=Bad) while FA + alcohol reach only the Bad-ending trigger. Per the ETC/O2 finding + the user-confirmed ending-count distribution documented in Plan 01 + the framing-d anaerobic reachability.)
 - [ ] **STORY-03**: RNG-weighted stochastic steps are implemented for pathways known to shuffle (e.g. TCA cycle), with scientifically grounded (not invented) weights approved via per-claim checkpoint
 - [ ] **STORY-04**: RNG is seedable for classroom reproducibility: a fixed-seed (demo) mode and a random (play) mode are both available
-- [ ] **STORY-05**: Anaerobic pathway is represented in the game structure (framing pending research — see PROJECT.md Key Decisions)
+- [ ] **STORY-05**: Anaerobic pathway is represented in the game structure (framing = (d) choice-for-glucose + bad-for-FA/ALC (resolved Phase 5); host = mammal/human (lactic fermentation))
 - [ ] **STORY-06**: Every story node carries two-layer text: a dramatic layer (C14 hero's journey, plain-language stakes) and a teaching layer (correct terminology, pathway logic, editable residues explained)
 - [ ] **STORY-07**: Choice points map to real pathway branch points (e.g. pyruvate → acetyl-CoA vs → lactate), not invented branches
 
@@ -157,4 +157,4 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 
 ---
 *Requirements defined: 2026-08-12*
-*Last updated: 2026-08-15 after Phase 4 completion (EDIT-01..05, CAST-03 marked Complete — 10/32 v1 requirements delivered; Phase 1=3, Phase 2=4, Phase 3=1, Phase 4=6)*
+*Last updated: 2026-08-15 — SC#3 anaerobic framing resolved (option d) + invariant re-worded (aerobic-scoped, i) + host = mammal/human; STORY-02 v1-scope parenthetical appended; STORY-05 framing updated. (Prior: Phase 4 completion — EDIT-01..05, CAST-03 marked Complete — 10/32 v1 requirements delivered)*
