@@ -4,37 +4,47 @@
     "url": "https://chem.libretexts.org/Bookshelves/Biological_Chemistry/Supplemental_Modules_(Biological_Chemistry)/Metabolism",
     "license": "CC BY-NC-SA 4.0",
     "source_type": "educational_open_textbook",
-    "approval_status": "pending",
-    "notes": "Hub verified live 2026-08-15; exact glycolysis subpage URL to confirm at approval time."
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-08-15",
+    "notes": "Hub verified live 2026-08-15; exact glycolysis subpage URL to confirm at approval time. Approved by human 2026-08-15 (first batch)."
   },
   "LIBRETEXTS-METAB-TCA": {
-    "reference": "LibreTexts Biological Chemistry / Metabolism / Pyruvate Dehydrogenase + Citric Acid Cycle",
-    "url": "https://chem.libretexts.org/Bookshelves/Biological_Chemistry/Supplemental_Modules_(Biological_Chemistry)/Metabolism",
-    "license": "CC BY-NC-SA 4.0",
+    "reference": "LibreTexts: Jakubowski & Flatt, Fundamentals of Biochemistry Vol. II (Bioenergetics and Metabolism), Ch 16 The Citric Acid Cycle",
+    "url": "https://bio.libretexts.org/Bookshelves/Biochemistry/Fundamentals_of_Biochemistry_(Jakubowski_and_Flatt)/02%3A_Unit_II-_Bioenergetics_and_Metabolism/16%3A_The_Citric_Acid_Cycle",
+    "license": "CC BY-SA 4.0",
     "source_type": "educational_open_textbook",
-    "approval_status": "pending",
-    "notes": "Hub verified live 2026-08-15; exact Pyruvate Dehydrogenase + Citric Acid Cycle subpage URLs to confirm at approval time."
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-08-15",
+    "notes": "Hub verified live 2026-08-15; exact Citric Acid Cycle chapter URL confirmed 2026-08-15 during Plan 05-05 (Fundamentals of Biochemistry Vol. II, Ch 16). The load-bearing prochirality + aconitase-discrimination mechanism is in section 16.02 'Reactions of the Citric Acid Cycle' at https://bio.libretexts.org/Bookshelves/Biochemistry/Fundamentals_of_Biochemistry_(Jakubowski_and_Flatt)/02%3A_Unit_II-_Bioenergetics_and_Metabolism/16%3A_The_Citric_Acid_Cycle/16.02%3A__Reactions_of_the_Citric_Acid_Cycle (citrate synthase forms (S)-citryl-CoA; aconitase 180-degree flip of cis-aconitate = discrimination between citrate's two carboxymethyl groups). License is CC BY-SA 4.0 per the Vol. II cover page metadata (the subpage itself shows 'not declared' - a metadata gap; the volume license governs). Approved by human 2026-08-15 (first batch); this source REPLACES the rejected LEHNINGER-CH-CITRIC_ACID_CYCLE for the 2 high-stakes TCA RNG claims."
   },
   "LEHNINGER-CH-CITRIC_ACID_CYCLE": {
     "reference": "Lehninger Principles of Biochemistry (Nelson & Cox), Citric Acid Cycle chapter",
     "source_type": "print_textbook",
-    "approval_status": "pending",
-    "notes": "CANDIDATE — human to confirm edition + exact chapter number before approving. No ISBN asserted."
+    "approval_status": "rejected",
+    "approved_by": "human",
+    "approved_date": "2026-08-15",
+    "review_notes": "Rejected per user request 2026-08-15 — avoid print-textbook license issues. Replaced by the LibreTexts Citric Acid Cycle chapter (LIBRETEXTS-METAB-TCA = Jakubowski & Flatt, Fundamentals of Biochemistry Vol. II, Ch 16) which covers the citrate-prochirality + aconitase-discrimination mechanism grounding the 2 high-stakes TCA RNG claims. Provenance retained (NOT deleted) — a rejected source fails the gate identically to a pending one (no Pitfall 6 regression)."
   },
   "PDB-4PFK": {
     "reference": "RCSB PDB 4PFK (phosphofructokinase, G. stearothermophilus, 2.40 Å)",
     "url": "https://www.rcsb.org/structure/4PFK",
     "pdb_doi": "10.2210/pdb4PFK/pdb",
     "source_type": "structural_database_entry",
-    "approval_status": "pending",
-    "notes": "VERIFIED at rcsb.org 2026-08-15 — structure exists, resolution + citation read from the RCSB page. Evans/Farrants/Hudson 1981, Philos Trans R Soc London ser B 293:53-62, DOI 10.1098/rstb.1981.0059, PubMed 6115424."
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-08-15",
+    "notes": "VERIFIED at rcsb.org 2026-08-15 — structure exists, resolution + citation read from the RCSB page. Evans/Farrants/Hudson 1981, Philos Trans R Soc London ser B 293:53-62, DOI 10.1098/rstb.1981.0059, PubMed 6115424. Approved by human 2026-08-15 (first batch)."
   },
   "PDB-1CSC": {
     "reference": "RCSB PDB 1CSC (citrate synthase, Gallus gallus, 1.70 Å)",
     "url": "https://www.rcsb.org/structure/1CSC",
     "pdb_doi": "10.2210/pdb1CSC/pdb",
     "source_type": "structural_database_entry",
-    "approval_status": "pending",
-    "notes": "VERIFIED at rcsb.org 2026-08-15. Karpusas/Holland/Remington 1991, Biochemistry 30:6024-6031, DOI 10.1021/bi00238a028, PubMed 2043640."
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-08-15",
+    "notes": "VERIFIED at rcsb.org 2026-08-15. Karpusas/Holland/Remington 1991, Biochemistry 30:6024-6031, DOI 10.1021/bi00238a028, PubMed 2043640. Approved by human 2026-08-15 (first batch)."
   }
 }

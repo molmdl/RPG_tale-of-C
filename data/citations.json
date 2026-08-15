@@ -7,29 +7,35 @@
     "source_id": "LIBRETEXTS-METAB-GLYCOLYSIS",
     "review_tier": "routine",
     "inherits_source_approval": true,
-    "approval_status": "pending"
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-08-15"
   },
   "TCA-RNG-CITRATE-PROCHIRALITY-01": {
     "claim": "Citrate is prochiral; aconitase discriminates citrate's two carboxymethyl groups, so the two acetyl-CoA carbons don't become equivalent until after the first TCA turn.",
-    "source_type": "textbook",
-    "source": "Lehninger Principles of Biochemistry (Nelson & Cox), Citric Acid Cycle chapter",
+    "source_type": "libretexts",
+    "source": "LibreTexts: Jakubowski & Flatt, Fundamentals of Biochemistry Vol. II, Ch 16 The Citric Acid Cycle (section 16.02)",
     "claim_text": "Citrate is a prochiral molecule; citrate synthase produces a specific stereoisomer, and aconitase discriminates between citrate's two carboxymethyl groups, so the two carbons derived from acetyl-CoA do not become equivalent until after the first turn of the cycle.",
-    "source_id": "LEHNINGER-CH-CITRIC_ACID_CYCLE",
+    "source_id": "LIBRETEXTS-METAB-TCA",
     "review_tier": "high-stakes",
-    "review_notes": "Grounds the TCA RNG shuffle mechanism. Source backs the MECHANISM; the RNG weight VALUES are a separate game-design claim (TCA-RNG-WEIGHT-01) approved individually.",
+    "review_notes": "Grounds the TCA RNG shuffle mechanism. Source updated from LEHNINGER-CH-CITRIC_ACID_CYCLE (rejected per user license concern 2026-08-15) to LIBRETEXTS-METAB-TCA (Jakubowski & Flatt, Fundamentals of Biochemistry Vol. II, Ch 16 The Citric Acid Cycle, section 16.02 'Reactions of the Citric Acid Cycle'). Source verified 2026-08-15 at https://bio.libretexts.org/Bookshelves/Biochemistry/Fundamentals_of_Biochemistry_(Jakubowski_and_Flatt)/02%3A_Unit_II-_Bioenergetics_and_Metabolism/16%3A_The_Citric_Acid_Cycle/16.02%3A__Reactions_of_the_Citric_Acid_Cycle. The page covers: (1) citrate synthase stereospecificity - explicitly 'to form (S)-citryl CoA' then citrate (citrate synthase produces a specific stereoisomer); (2) the aconitase mechanism including the 180-degree flip of the cis-aconitate intermediate ('This cis-aconitate intermediate in the interconversion of citrate and isocitrate undergoes a 1800 flip around the C=C double bond'), which is the enzymatic discrimination between citrate's two carboxymethyl groups; (3) the cycle is presented 'in wedge/dash form with stereochemistry included'; (4) Krebs's isotope-labeling discovery using 14C-labeled intermediates. CAVEAT: the page does NOT explicitly use the word 'prochiral' for citrate (it uses 'prochiral' only for NADH) and does NOT explicitly state 'the two acetyl-CoA carbons do not become equivalent until after the first turn' - that consequence is the standard biochemistry implication of the stereospecific citrate synthase + aconitase discrimination mechanism the page DOES describe. The claim_text is faithful to the mechanism in the source. The RNG weight VALUES are a separate game-design claim (TCA-RNG-WEIGHT-01) approved individually. Approved by human 2026-08-15 (first batch, high-stakes individual review).",
     "inherits_source_approval": false,
-    "approval_status": "pending"
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-08-15"
   },
   "TCA-RNG-WEIGHT-01": {
     "claim": "Game-design TCA RNG weight: 0.5/0.5 first-turn vs second-turn CO2 exit probability (grounded in citrate prochirality).",
-    "source_type": "textbook",
-    "source": "Lehninger Principles of Biochemistry (Nelson & Cox), Citric Acid Cycle chapter",
+    "source_type": "libretexts",
+    "source": "LibreTexts: Jakubowski & Flatt, Fundamentals of Biochemistry Vol. II, Ch 16 The Citric Acid Cycle (section 16.02)",
     "claim_text": "In this game, the probability that a given acetyl-CoA carbon exits as CO2 on the first turn of TCA vs the second turn is set to 0.5 / 0.5 (game-design value grounded in the citrate-prochirality mechanism).",
-    "source_id": "LEHNINGER-CH-CITRIC_ACID_CYCLE",
+    "source_id": "LIBRETEXTS-METAB-TCA",
     "review_tier": "high-stakes",
-    "review_notes": "VALUE is a game-design decision; the 0.5/0.5 is grounded in the symmetric-fate mechanism but the human chooses the exact weights for pedagogy. Reviewed individually.",
+    "review_notes": "VALUE is a game-design decision; user accepted 0.5/0.5 ('this is the probability in textbook', 2026-08-15). Source updated from LEHNINGER-CH-CITRIC_ACID_CYCLE (rejected per user license concern 2026-08-15) to LIBRETEXTS-METAB-TCA (Jakubowski & Flatt, Ch 16, section 16.02). Source verified 2026-08-15 at https://bio.libretexts.org/Bookshelves/Biochemistry/Fundamentals_of_Biochemistry_(Jakubowski_and_Flatt)/02%3A_Unit_II-_Bioenergetics_and_Metabolism/16%3A_The_Citric_Acid_Cycle/16.02%3A__Reactions_of_the_Citric_Acid_Cycle: the page describes the stereospecific citrate synthase mechanism ('to form (S)-citryl CoA') and the aconitase 180-degree flip of cis-aconitate (discrimination between citrate's two carboxymethyl groups) - the mechanistic basis for the symmetric fate of the two acetyl-CoA carbons. The page does NOT explicitly state a '0.5/0.5 first-turn vs second-turn CO2 exit probability' - that is the game-design value the human chose, grounded in the symmetric-fate mechanism (citrate prochirality + aconitase discrimination) the page describes. The page's summary states the standard simplification 'At this point [step 4], the two carbons of the original acetyl-CoA have been fully released as CO2' (a common textbook shorthand for the two CO2 released per turn); the precise first-turn-vs-second-turn carbon fate is the subtler isotope-labeling result (Krebs used 14C-labeled intermediates, per the page). Weight stays 0.5/0.5 per user acceptance; mechanism grounding verified against the LibreTexts source. Approved by human 2026-08-15 (first batch, high-stakes individual review).",
     "inherits_source_approval": false,
-    "approval_status": "pending"
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-08-15"
   },
   "CAST-PFK-PDB-01": {
     "claim": "Game's PFK cast structure is RCSB PDB 4PFK (2.40 Å; Evans/Farrants/Hudson 1981).",
@@ -41,7 +47,9 @@
     "source_id": "PDB-4PFK",
     "review_tier": "routine",
     "inherits_source_approval": true,
-    "approval_status": "pending"
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-08-15"
   },
   "CAST-CSC-PDB-01": {
     "claim": "Game's citrate synthase cast structure is RCSB PDB 1CSC (1.70 Å; Karpusas/Holland/Remington 1991).",
@@ -53,6 +61,8 @@
     "source_id": "PDB-1CSC",
     "review_tier": "routine",
     "inherits_source_approval": true,
-    "approval_status": "pending"
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-08-15"
   }
 }
