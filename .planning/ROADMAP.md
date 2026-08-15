@@ -110,10 +110,14 @@ Plans:
   3. The anaerobic-pathway framing is resolved (host-condition branch / separate scenario / bad-ending trigger) and documented in PROJECT.md Key Decisions
   4. The batch-by-source vs strict per-claim approval process is agreed with the human and documented; the claims registry holds the first batch of approved sources for the glucose critical-path enzymes + TCA RNG weights (front-loaded source approval)
   5. CITE-01's per-claim checkpoint is operational: no scientific claim lands in code/content without a corresponding `approved` entry in the registry (enforced by the Phase 1 pre-ship gate at build time)
-**Plans**: TBD (likely 2–4 plans, one per decision + the workflow setup; the 4 decisions are independent and can be resolved in parallel by the human)
+**Plans**: 5 plans in 5 waves (the 4 decisions are independent for the human but sequenced across waves because all document to PROJECT.md Key Decisions — sequential file ownership avoids merge conflicts; the workflow implementation + first-batch approval depend on the workflow decision)
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md — SC#1 confirmation (ATP soul-jump docs verified) + SC#2 C14-decay framing decision (checkpoint:decision) + documentation in PROJECT.md (Wave 1)
+- [ ] 05-02-PLAN.md — SC#3 anaerobic framing decision + invariant re-wording sub-decision + host-organism sub-decision (checkpoint:decision) + documentation in PROJECT.md/REQUIREMENTS.md/spec.md (Wave 2, after 05-01)
+- [ ] 05-03-PLAN.md — SC#4 source-approval workflow decision + high-stakes taxonomy (checkpoint:decision) + documentation in PROJECT.md (Wave 3, after 05-02)
+- [ ] 05-04-PLAN.md — SC#4 schema implementation (data/sources.json + extended data/citations.json) + populate PENDING first-batch candidate sources/seed claims for glucose critical-path + TCA RNG weights (auto, no approval) (Wave 4, after 05-03)
+- [ ] 05-05-PLAN.md — SC#4/SC#5 first-batch human approval (checkpoint:human-verify) + record decisions in registry + run Phase 1 gate to prove SC#5 operational on real data (Wave 5, after 05-04)
 
 ### Phase 5.1: Story Graph Design — Glucose Skeleton + Integration Contracts (INSERTED)
 **Goal**: The real glucose story graph is designed as a reviewable JSON skeleton — every node, edge, choice point (mapped to a real pathway branch point), RNG-weighted node, edit-allowed node (with routing target), and ending attachment is specified and validated — AND the two integration contracts that connect the story to gameplay are defined: (a) the **choice-point contract** (how a text multiple-choice selection maps to a graph edge) and (b) the **edit-node contract** (which story nodes allow edits, what EditIntent each player-edit-action generates, and how the EditRouter's known/unknown outcome routes back into the graph). This de-risks Phases 6–7 by making the story structure + gameplay integration explicit design artifacts before any UI or cited content is built on top — directly resolving the user's concerns about story design, the MC-vs-editing distinction, and how editing relates to the story.
@@ -302,7 +306,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 | 2. Story Engine Core | 5/5 ✓ | Complete | 2026-08-13 |
 | 3. PyMOL cmd Layer | 3/3 ✓ | Complete | 2026-08-14 |
 | 4. Editing + Protonation + Restore | 5/5 ✓ | Complete | 2026-08-15 |
-| 5. Pre-Content Key Decisions (parallel) | 0/TBD | Not started | - |
+| 5. Pre-Content Key Decisions (parallel) | 0/5 | Not started (planned) | - |
 | 5.1 Story Graph Design (INSERTED) | 0/TBD | Not started | - |
 | 5.2 Representation Design (INSERTED) | 0/TBD | Not started | - |
 | 6. Qt UI + MVP (Glucose + True+Bad) | 0/TBD | Not started | - |
