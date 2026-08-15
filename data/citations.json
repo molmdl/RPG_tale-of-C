@@ -1,1 +1,58 @@
-{}
+{
+  "GLY-PFK-01": {
+    "claim": "PFK-1 catalyzes the committed, rate-limiting step of glycolysis.",
+    "source_type": "libretexts",
+    "source": "LibreTexts Biological Chemistry / Metabolism / Glycolysis",
+    "claim_text": "Phosphofructokinase-1 catalyzes the committed, rate-limiting step of glycolysis: fructose-6-phosphate + ATP -> fructose-1,6-bisphosphate + ADP.",
+    "source_id": "LIBRETEXTS-METAB-GLYCOLYSIS",
+    "review_tier": "routine",
+    "inherits_source_approval": true,
+    "approval_status": "pending"
+  },
+  "TCA-RNG-CITRATE-PROCHIRALITY-01": {
+    "claim": "Citrate is prochiral; aconitase discriminates citrate's two carboxymethyl groups, so the two acetyl-CoA carbons don't become equivalent until after the first TCA turn.",
+    "source_type": "textbook",
+    "source": "Lehninger Principles of Biochemistry (Nelson & Cox), Citric Acid Cycle chapter",
+    "claim_text": "Citrate is a prochiral molecule; citrate synthase produces a specific stereoisomer, and aconitase discriminates between citrate's two carboxymethyl groups, so the two carbons derived from acetyl-CoA do not become equivalent until after the first turn of the cycle.",
+    "source_id": "LEHNINGER-CH-CITRIC_ACID_CYCLE",
+    "review_tier": "high-stakes",
+    "review_notes": "Grounds the TCA RNG shuffle mechanism. Source backs the MECHANISM; the RNG weight VALUES are a separate game-design claim (TCA-RNG-WEIGHT-01) approved individually.",
+    "inherits_source_approval": false,
+    "approval_status": "pending"
+  },
+  "TCA-RNG-WEIGHT-01": {
+    "claim": "Game-design TCA RNG weight: 0.5/0.5 first-turn vs second-turn CO2 exit probability (grounded in citrate prochirality).",
+    "source_type": "textbook",
+    "source": "Lehninger Principles of Biochemistry (Nelson & Cox), Citric Acid Cycle chapter",
+    "claim_text": "In this game, the probability that a given acetyl-CoA carbon exits as CO2 on the first turn of TCA vs the second turn is set to 0.5 / 0.5 (game-design value grounded in the citrate-prochirality mechanism).",
+    "source_id": "LEHNINGER-CH-CITRIC_ACID_CYCLE",
+    "review_tier": "high-stakes",
+    "review_notes": "VALUE is a game-design decision; the 0.5/0.5 is grounded in the symmetric-fate mechanism but the human chooses the exact weights for pedagogy. Reviewed individually.",
+    "inherits_source_approval": false,
+    "approval_status": "pending"
+  },
+  "CAST-PFK-PDB-01": {
+    "claim": "Game's PFK cast structure is RCSB PDB 4PFK (2.40 Å; Evans/Farrants/Hudson 1981).",
+    "source_type": "pdb",
+    "source": "RCSB PDB 4PFK (phosphofructokinase, G. stearothermophilus, 2.40 Å)",
+    "pdb_id": "4PFK",
+    "resolution_angstrom": 2.40,
+    "claim_text": "The game's PFK cast structure is RCSB PDB entry 4PFK (2.40 Å resolution; Evans, Farrants, Hudson 1981).",
+    "source_id": "PDB-4PFK",
+    "review_tier": "routine",
+    "inherits_source_approval": true,
+    "approval_status": "pending"
+  },
+  "CAST-CSC-PDB-01": {
+    "claim": "Game's citrate synthase cast structure is RCSB PDB 1CSC (1.70 Å; Karpusas/Holland/Remington 1991).",
+    "source_type": "pdb",
+    "source": "RCSB PDB 1CSC (citrate synthase, Gallus gallus, 1.70 Å)",
+    "pdb_id": "1CSC",
+    "resolution_angstrom": 1.70,
+    "claim_text": "The game's citrate synthase cast structure is RCSB PDB entry 1CSC (1.70 Å resolution; Karpusas, Holland, Remington 1991).",
+    "source_id": "PDB-1CSC",
+    "review_tier": "routine",
+    "inherits_source_approval": true,
+    "approval_status": "pending"
+  }
+}
