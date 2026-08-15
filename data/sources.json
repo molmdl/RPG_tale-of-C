@@ -1,0 +1,40 @@
+{
+  "LIBRETEXTS-METAB-GLYCOLYSIS": {
+    "reference": "LibreTexts Biological Chemistry / Metabolism / Glycolysis",
+    "url": "https://chem.libretexts.org/Bookshelves/Biological_Chemistry/Supplemental_Modules_(Biological_Chemistry)/Metabolism",
+    "license": "CC BY-NC-SA 4.0",
+    "source_type": "educational_open_textbook",
+    "approval_status": "pending",
+    "notes": "Hub verified live 2026-08-15; exact glycolysis subpage URL to confirm at approval time."
+  },
+  "LIBRETEXTS-METAB-TCA": {
+    "reference": "LibreTexts Biological Chemistry / Metabolism / Pyruvate Dehydrogenase + Citric Acid Cycle",
+    "url": "https://chem.libretexts.org/Bookshelves/Biological_Chemistry/Supplemental_Modules_(Biological_Chemistry)/Metabolism",
+    "license": "CC BY-NC-SA 4.0",
+    "source_type": "educational_open_textbook",
+    "approval_status": "pending",
+    "notes": "Hub verified live 2026-08-15; exact Pyruvate Dehydrogenase + Citric Acid Cycle subpage URLs to confirm at approval time."
+  },
+  "LEHNINGER-CH-CITRIC_ACID_CYCLE": {
+    "reference": "Lehninger Principles of Biochemistry (Nelson & Cox), Citric Acid Cycle chapter",
+    "source_type": "print_textbook",
+    "approval_status": "pending",
+    "notes": "CANDIDATE — human to confirm edition + exact chapter number before approving. No ISBN asserted."
+  },
+  "PDB-4PFK": {
+    "reference": "RCSB PDB 4PFK (phosphofructokinase, G. stearothermophilus, 2.40 Å)",
+    "url": "https://www.rcsb.org/structure/4PFK",
+    "pdb_doi": "10.2210/pdb4PFK/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "pending",
+    "notes": "VERIFIED at rcsb.org 2026-08-15 — structure exists, resolution + citation read from the RCSB page. Evans/Farrants/Hudson 1981, Philos Trans R Soc London ser B 293:53-62, DOI 10.1098/rstb.1981.0059, PubMed 6115424."
+  },
+  "PDB-1CSC": {
+    "reference": "RCSB PDB 1CSC (citrate synthase, Gallus gallus, 1.70 Å)",
+    "url": "https://www.rcsb.org/structure/1CSC",
+    "pdb_doi": "10.2210/pdb1CSC/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "pending",
+    "notes": "VERIFIED at rcsb.org 2026-08-15. Karpusas/Holland/Remington 1991, Biochemistry 30:6024-6031, DOI 10.1021/bi00238a028, PubMed 2043640."
+  }
+}
