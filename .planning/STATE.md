@@ -9,17 +9,17 @@ See: .planning/PROJECT.md (updated 2026-08-12)
 
 ## Current Position
 
-Phase: 4 of 13 (Editing, Protonation & Restore Safety Net) — COMPLETE ✓ + VERIFIED (passed)
-Plan: 5 of 5 complete in current phase (04-01 EditOps + 04-02 EditRouter + 04-03 ProtonationManager + 04-04 alter gate/coverage scan/fixtures + 04-05 molops delegation + headless smokes done)
-Status: Phase 4 complete + verified (5/5 success criteria; VERIFICATION.md status: passed; 198 tests pass; alter gate + import gate + coverage scan all green; 2 headless smokes PASS)
-Last activity: 2026-08-15 — Phase 4 verified (VERIFICATION.md: passed, 5/5 must-haves, 9/9 artifacts, 9/9 key_links). All 5 plans complete; requirements EDIT-01..05 + CAST-03 marked Complete (10/32 v1 requirements delivered).
+Phase: 5 of 13 (Pre-Content Key Decisions & Source Approval)
+Plan: 1 of 5 complete in current phase (05-01 SC#1 metaphor + SC#2 decay-DROP + ending distribution done; 05-02 invariants, 05-03 [anaerobic/batch decisions], 05-04 registry populate, 05-05 review remain)
+Status: In progress (05-01 complete; SC#1 metaphor = metamorphosis/sense-moves-with-electron; SC#2 decay DROPPED; ending distribution 1 True + several Normal/Good + many Bad; NUBASE2020/C14-TIME-01 eliminated from downstream)
+Last activity: 2026-08-15 — Completed 05-01-PLAN.md (SC#1 soul-jump metaphor decided as metamorphosis [caterpillar→butterfly, hero transforms not dies]; SC#2 C14-decay resolved via DROP [cycle-trap-until-host-death is sole timescale bad-ending]; ending-count distribution documented; PROJECT.md rows 104/105 + new ending-distribution row + spec.md line 18 Pitfall 9 NOTE annotation). Phase 4 remains COMPLETE + VERIFIED (198 tests; all gates green).
 
-Progress: [████████████████] 100% of phases 1-4 (16 plans complete of 16 planned; phases 5-13 not yet planned)
+Progress: [█████████████████░░░░] ~81% (17 plans complete of 21 planned across phases 1-5; phases 5.1/5.2 + 6-13 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 26 min
 - Total execution time: 6.85 hours
 
@@ -31,6 +31,7 @@ Progress: [████████████████] 100% of phases 1-4 
 | 2. Story Engine Core | 5/5 ✓ | 78 min | 16 min |
 | 3. PyMOL cmd Layer | 3/3 ✓ | 118 min | 39 min |
 | 4. Editing + Protonation + Restore | 5/5 ✓ | 250 min | 50 min |
+| 5. Pre-Content Key Decisions | 1/5 | 2 min | 2 min |
 
 **Recent Trend:**
 - Last 3 plans: 04-03 (7 min), 04-04 (189 min), 04-05 (29 min)
@@ -114,6 +115,7 @@ Recent decisions affecting current work:
 - [Execution 04-05]: molops edit/restore/protonate delegation — the 3 NotImplementedError branches are replaced with delegation to EditOps (edit: dispatches on args["edit_type"] to point_mutation/substrate_remove_group/substrate_add_group/protonation_change; restore: editops.restore(target)) + ProtonationManager (protonate: pm.apply_variant(target, variant_id)). Constructor gains editops=None + protonation=None optional params (backward-compatible: MolOps(cmd) still works; missing helper -> RuntimeError, NOT NotImplementedError). Unknown ops STILL raise NotImplementedError (stray op fails loudly). Unknown edit_type raises ValueError. molops.py has NO cmd.alter (delegates; alter gate stays at edit_ops.py). 198 tests pass (191 prior + 7 net new: 11 new delegation tests - 4 removed NotImplementedError tests).
 - [Execution 04-05]: h_ops selection scoping fix (Rule 1 bug) — ProtonationManager._apply_alter was NOT scoping h_ops selections to the target object, so cmd.remove("resn HIS and name HE2") also removed HE2 from the backup (_bak_HIS), corrupting it (restore atom-count mismatch). Fixed: _apply_alter now prepends target to each h_op sele ("{target} and {h_op_sele}"). This was NOT catchable by MockCmd unit tests (MockCmd records the sele string but doesn't execute it against real atoms/backups) — the headless smoke with REAL pymol.cmd surfaced it. Validates the 3-tier testability pattern: unit tests prove dispatch mapping, headless smokes prove the real API contract.
 - [Execution 04-05]: Phase 4 COMPLETE — all 5 SCs delivered. SC1 (alter->sort mitigated + AST gate + headless byres proof: post-edit byres returns 10 atoms, no silent corruption), SC2 (backup/restore round-trip for point_mutation + substrate_remove_group + protonation_change, headlessly proven: atom count + residue signature restored), SC3 (EditRouter routing, 04-02), SC4 (ProtonationManager applies HID + switches HIE + restores HIS, headlessly proven: resn + H count + current_variant tracked), SC5 (per-enzyme coverage scan green). 198 tests pass; alter gate + import gate + coverage scan all GREEN; 2 headless smokes (edit + protonation) PASS.
+- [Execution 05-01]: SC#1 soul-jump METAPHOR decided (human, checkpoint:decision) = option (b) sense-moves-with-electron, REFRAMED as metamorphosis (caterpillar→butterfly): the hero is the carbon and transforms (carbon body shed as CO2 = chrysalis stage), not dies; narrative POV/sense follows the electrons onward ("my electrons power the cell"); the "soul" is narrative attention, not a physical identity. Carbon-fate SCIENCE unchanged (electrons → ETC → ATP; carbon → CO2). SC#2 C14-decay DROP confirmed (drop=yes): radioactive decay removed as a bad-ending trigger; cycle-trap-until-host-death (spec.md line 18) is the sole timescale bad-ending; no NUBASE2020/C14-TIME-01 needed. Ending distribution documented: 1 True + several Normal/Good + many Bad per character (asymmetric, user-confirmed 2026-08-15) — affects Phase 5.1 graph topology. PROJECT.md rows 104 (metaphor) + 105 (RESOLVED via DROP) + new ending-distribution row + spec.md line 18 Pitfall 9 NOTE annotation. Downstream: Plan 05-02 invariant re-wording incorporates the distribution; Plan 05-04/05 must NOT populate/review NUBASE2020-C14 + C14-TIME-01; Phase 5.1 reachability checker must confirm ≥1 Bad-ending trigger reachable per character WITHOUT decay; True-ending text uses metamorphosis framing (not "hero dies").
 
 ### Pending Todos
 
@@ -123,7 +125,7 @@ None yet.
 
 Issues that affect future work:
 
-- [Phase 5]: 4 science-framing Key Decisions gate content authoring. Pitfall 4 (ATP/True-Ending carbon-fate reframing) is now RESOLVED (2026-08-13, via the soul-jump reframing — electrons-as-soul harvested into ATP via ETC after the RNG-weighted TCA path; carbon body released as CO2; see PROJECT.md Key Decisions). The remaining 3 are HOW decisions for the human, still Pending: C14-decay timescale (Pitfall 9); anaerobic framing; batch-vs-per-claim approval. They are flagged as Phase 5 tasks. Start this track early — it is the timeline-domininating risk (Pitfall 7). The anaerobic decision now specifically gates Phase 5.1 (Story Graph Design); the ATP/True-Ending decision (resolved) no longer blocks it.
+- [Phase 5]: 4 science-framing Key Decisions gate content authoring. Pitfall 4 (ATP/True-Ending carbon-fate reframing) is RESOLVED (2026-08-13, via the soul-jump reframing) AND its metaphor sub-decision is now decided (2026-08-15, metamorphosis/sense-moves-with-electron — see PROJECT.md row 104). Pitfall 9 (C14-decay) is now RESOLVED (2026-08-15, via DROP — radioactive decay removed as a bad-ending trigger; cycle-trap-until-host-death is the sole timescale bad-ending; no NUBASE2020/C14-TIME-01 needed; see PROJECT.md row 105). The remaining 2 are HOW decisions for the human, still Pending: anaerobic framing; batch-vs-per-claim approval. They are flagged as Phase 5 tasks (handled by 05-03). Start this track early — it is the timeline-domininating risk (Pitfall 7). The anaerobic decision specifically gates Phase 5.1 (Story Graph Design); the ATP/True-Ending + C14-decay decisions (both resolved) no longer block it.
 - [Phase 5.1 / 5.2 (INSERTED)]: Two design phases gate Phase 6. Phase 5.1 (Story Graph Design) needs Phase 2 + the Phase 5 ATP decision [now RESOLVED via soul-jump — electrons-as-soul → ATP via ETC after RNG-weighted TCA path; True-ending node = electron harvest, NOT carbon-becomes-ATP]; it produces the glucose skeleton + MC-choice/edit-node integration contracts (resolves the user's story-design / MC-vs-editing / editing↔story concerns). Phase 5.2 (Representation Design) needs Phase 3 + 5.1; it produces the hero-highlight + scene-template convention (resolves the user's cast/hero-representation concern). Both are review-checkpoints, not requirement-delivery phases.
 - [Phase 4]: COMPLETE — all 5 SCs delivered. The `alter`→`sort` silent-corruption trap (Pitfall 6) is MECHANICALLY MITIGATED (04-01: apply_edit ALWAYS calls cmd.sort + cmd.rebuild) + MACHINE-CHECKED (04-04: AST gate enforces cmd.alter ONLY in edit_ops.py) + HEADLESSLY PROVEN (04-05: post-edit byres returns expected atoms, no silent corruption). The `cmd.create` pitfall (Pitfall 3) was EMPIRICALLY CORRECTED (03-01): default-args `cmd.create(backup, source)` (all states) is the working form. The h_ops selection scoping bug was FIXED (04-05: selections now scoped to target to prevent backup corruption). 198 tests pass; alter gate + import gate + coverage scan all GREEN; 2 headless smokes PASS. Phase 4 is the highest technical-risk phase — it is now COMPLETE.
 - [Phase 6]: First human-verify milestone — Qt/GUI cannot be exercised from WSL (Pitfall 2). Manual GUI test matrix begins here. Now implements the reviewed Phase 5.1 + 5.2 design artifacts rather than inventing them inline. Plugin loader should also call `c14.paths.selfcheck()` at startup (Pitfall 1 mitigation — fail loud on broken bundled layout); the helper is designed for this and the Phase 1 test is the first caller.
@@ -138,6 +140,6 @@ Issues that affect future work:
 
 ## Session Continuity
 
-Last session: 2026-08-15 (Phase 4 execution + verification — all 5 plans complete, VERIFICATION.md status: passed)
-Stopped at: Phase 4 COMPLETE + VERIFIED (5/5 success criteria, 9/9 artifacts, 9/9 key_links; VERIFICATION.md: passed; 198 tests pass; alter gate + import gate + coverage scan all green; 2 headless smokes PASS). Requirements EDIT-01..05 + CAST-03 marked Complete (10/32 v1 requirements delivered). Next: Phase 5 (Pre-Content Key Decisions & Source Approval — PARALLEL track; 3 Key Decisions still pending: C14-decay, anaerobic framing, batch-vs-per-claim approval) and/or Phase 5.1 (Story Graph Design — needs Phase 2 + ATP decision [resolved]; can start before Phase 5 fully done).
+Last session: 2026-08-15 (Phase 5 plan 05-01 — SC#1 metaphor + SC#2 decay-DROP + ending distribution documented)
+Stopped at: Completed 05-01-PLAN.md (Phase 5, Plan 1 of 5). SC#1 metaphor = metamorphosis/sense-moves-with-electron (caterpillar→butterfly; hero transforms not dies); SC#2 decay DROPPED (cycle-trap-until-host-death is sole timescale bad-ending); ending distribution = 1 True + several Normal/Good + many Bad. NUBASE2020/C14-TIME-01 eliminated. Next: Plan 05-02 (invariant re-wording incorporating the distribution), 05-03 (anaerobic + batch-vs-per-claim decisions), 05-04 (registry populate — NO NUBASE2020-C14/C14-TIME-01), 05-05 (review — remove NUBASE2020-C14/C14-TIME-01). Phase 4 remains COMPLETE + VERIFIED (198 tests).
 Resume file: None
