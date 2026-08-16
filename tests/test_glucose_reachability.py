@@ -31,8 +31,8 @@ class TestGlucoseReachability(unittest.TestCase):
         5 TCA enzymes, 3 ETC complexes). See 05.1-EXPANSION-SUMMARY.md."""
         g = StoryGraph.load(self._story_dir)
         nodes = g.all_nodes()
-        self.assertEqual(len(nodes), 41,
-                         "glucose skeleton has 41 nodes after glycolysis + LDH + TCA expansion")
+        self.assertEqual(len(nodes), 43,
+                         "glucose skeleton has 43 nodes after the full tiered-completeness expansion")
         self.assertEqual(g.start_node(), "intro.select",
                          "manifest start is intro.select")
 

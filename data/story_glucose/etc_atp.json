@@ -22,17 +22,42 @@
         {"op": "hide_all"}
       ],
       "choices": [
-        {"label": "Continue down the chain", "goto": "etc.complex_ii_iii_iv"},
+        {"label": "Continue down the chain", "goto": "etc.complex_ii"},
         {"label": "Try to edit Complex I", "goto": "edit.prompt", "tags": ["edit:offer"]}
       ]
     },
-    "etc.complex_ii_iii_iv": {
-      "text_dramatic": "TBD — the chain continues; Complex IV hands your electrons to O2, forming water.",
-      "text_teaching": "",
+    "etc.complex_ii": {
+      "text_dramatic": "TBD — Complex II (succinate dehydrogenase) catches you: succinate becomes fumarate, and FADH2 carries your electrons onward. The bridge between TCA and ETC.",
+      "text_teaching": "TBD — Phase 7 teaching text: Complex II (succinate dehydrogenase, SdhABCD) oxidizes succinate to fumarate (the TCA step 6, repeated here as the FADH2 entry point to the ETC) and passes electrons to ubiquinone. NO PDB LOAD: narrative-only node (PDB 1ZOY is a candidate, pending Phase 7 approval).",
       "claim_ids": ["PLACEHOLDER_PHASE7_ETC"],
       "tags": ["stage:etc"],
       "on_enter": [
         {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "etc.complex_iii"}
+      ]
+    },
+    "etc.complex_iii": {
+      "text_dramatic": "TBD — Complex III runs the Q-cycle: ubiquinol hands electrons to cytochrome c, and more protons pump across the membrane.",
+      "text_teaching": "TBD — Phase 7 teaching text: Complex III (cytochrome bc1 complex) runs the Q-cycle: oxidizes ubiquinol (QH2), reduces cytochrome c, and pumps protons. NO PDB LOAD: narrative-only node (PDB 1BGY is a candidate, pending Phase 7 approval).",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ETC"],
+      "tags": ["stage:etc"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "etc.complex_iv"}
+      ]
+    },
+    "etc.complex_iv": {
+      "text_dramatic": "TBD — Complex IV (cytochrome c oxidase) hands your electrons to O2 — oxygen, the terminal acceptor. Water is born; the aerobic-only path reaches its anchor.",
+      "text_teaching": "TBD — Phase 7 teaching text: Complex IV (cytochrome c oxidase) transfers electrons from cytochrome c to O2, reducing O2 to H2O. O2 is the terminal electron acceptor — grounds the aerobic-only True ending (no O2 -> no Complex IV -> no ETC -> no ATP synthase). PDB 1OCC is a CANDIDATE structure pending Phase 7 approval.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ETC"],
+      "tags": ["stage:etc"],
+      "on_enter": [
+        {"op": "hide_all"},
+        {"op": "load", "target": "pdb:1OCC", "args": {"object": "complex_iv"}}
       ],
       "choices": [
         {"label": "Continue to ATP synthase", "goto": "etc.atp_synthase"}
