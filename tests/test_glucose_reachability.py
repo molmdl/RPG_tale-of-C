@@ -4,6 +4,10 @@ Proves the Phase 2 reachability checker guards REAL content: all 4 ending
 tiers (true/good/normal/bad) are reachable from intro.select via choice.goto
 chains (GREEN), and a deliberately-orphaned variant is flagged RED.
 
+The skeleton grew from 34 to 43 nodes in the Phase 5.1 tiered-completeness
+expansion (Plan 05.1-EXPANSION). The ending distribution is UNCHANGED
+(1T+3G+2N+5B = 11 endings); only path nodes were added.
+
 Pure Python 3.6 stdlib only. NO pymol/PyQt5. Mirrors the proven pattern in
 tests/test_integration.py:336-362 (the toy-graph SC2 tests).
 """
@@ -19,16 +23,25 @@ GLUCOSE_STORY_DIR = os.path.join(HERE, "..", "data", "story_glucose")
 
 
 class TestGlucoseReachability(unittest.TestCase):
-    """SC2: the reachability checker on the real 34-node glucose skeleton."""
+    """SC2: the reachability checker on the real 43-node glucose skeleton.
+
+    The skeleton grew from 34 nodes to 43 nodes in the Phase 5.1 tiered-
+    completeness expansion (see 05.1-EXPANSION-SUMMARY.md): +1
+    gly.pyruvate_kinase, +1 anaer.ldh, +5 TCA enzymes (isocitrate_dh,
+    akg_dh, succinyl_coa_synthetase, fumarase, malate_dh), +3 ETC complexes
+    (complex_ii, complex_iii, complex_iv), -1 removed etc.complex_ii_iii_iv.
+    Ending distribution is UNCHANGED: still 1T+3G+2N+5B = 11 endings (the
+    expansion adds path nodes, not endings)."""
 
     def setUp(self):
         self._story_dir = GLUCOSE_STORY_DIR
 
-    def test_manifest_loads_all_34_nodes(self):
+    def test_manifest_loads_all_43_nodes(self):
         """The manifest lists 7 files; StoryGraph.load merges them with no
-        duplicate-id ValueError. Node count grows as the skeleton is expanded
-        (Phase 5.1 tiered-completeness expansion adds pyruvate_kinase, LDH,
-        5 TCA enzymes, 3 ETC complexes). See 05.1-EXPANSION-SUMMARY.md."""
+        duplicate-id ValueError. 43 nodes = 40 story nodes + fa.stub +
+        alc.stub + edit.prompt. (Was 34 before the tiered-completeness
+        expansion added 9 net nodes: +1 pyruvate_kinase, +1 anaer.ldh,
+        +5 TCA enzymes, +3 ETC complexes, -1 removed etc.complex_ii_iii_iv.)"""
         g = StoryGraph.load(self._story_dir)
         nodes = g.all_nodes()
         self.assertEqual(len(nodes), 43,
