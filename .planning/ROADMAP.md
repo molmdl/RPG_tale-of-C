@@ -130,10 +130,15 @@ Plans:
   3. The **choice-point contract** is documented: for each choice node, the skeleton specifies the player-facing options, the edge each selects, and the MolActions fired on traversal — making the "text MC → graph edge" integration an explicit, reviewable spec (not implicit in interpreter code)
   4. The **edit-node contract** is documented: the skeleton marks which story nodes allow edits, the EditIntent each player-edit-action generates, and the branch/bad-ending node the EditRouter routes to (known → defined branch node, unknown → bad-ending pool node) — making the "editing ↔ story" integration an explicit, reviewable spec
   5. Every node is explicitly classified as MC-choice, edit-allowed, both, or neither — resolving the "which is multiple choice, which is editing" question as a per-node design decision, not an emergent property of the implementation
-**Plans**: TBD (likely 2–3 plans; `/gsd-research-phase` NOT needed — design on already-resolved framings, but human review of the branch-point mapping against spec.md is required)
+**Plans**: 6 plans in 3 waves (3 parallel skeleton-authoring plans in Wave 1; manifest+SC2-tests + design-doc parallel in Wave 2; human-review checkpoint in Wave 3). `/gsd-research-phase` NOT needed — design on already-resolved framings (two parallel research tracks completed: pathway topology + graph contracts). Human review of the branch-point mapping against spec.md is required (Plan 06 checkpoint).
 
 Plans:
-- [ ] 05.1-01: TBD
+- [ ] 05.1-01-PLAN.md — Early-path skeleton (intro + glycolysis + pyruvate branch + anaerobic 3-ending) (Wave 1)
+- [ ] 05.1-02-PLAN.md — TCA + ETC skeleton (RNG shuffle + soul-jump arc + True ending + Normal branch) (Wave 1)
+- [ ] 05.1-03-PLAN.md — Endings skeleton (Good + Normal + Bad endings + edit.prompt stub) (Wave 1)
+- [ ] 05.1-04-PLAN.md — Manifest + SC2 reachability validation (green/red tests on the real skeleton) (Wave 2)
+- [ ] 05.1-05-PLAN.md — 05.1-DESIGN.md (choice-point contract SC3 + edit-node contract SC4 + SC5 classification) (Wave 2)
+- [ ] 05.1-06-PLAN.md — Human review checkpoint (branch-point mapping + contracts + open questions) (Wave 3)
 
 ### Phase 5.2: Cast & Hero Representation Design — Visual Language + Scene Templates (INSERTED)
 **Goal**: The 3D representation language is designed as a reviewable artifact — the C14 hero highlight convention (how the player sees "their" atom in any structure), the per-stage-type scene templates (which residues are shown, in what representation, with what zoom/color), and the cast-reveal convention (how an enzyme appears when first encountered) — headless-prototyped on placeholder/bundled structures, so Phase 6 implements an already-reviewed visual design rather than inventing it inside the overloaded first-Qt phase. This directly resolves the user's concern about cast representation and hero representation.
