@@ -1,0 +1,98 @@
+{
+  "nodes": {
+    "tca.entry": {
+      "text_dramatic": "TBD — acetyl-CoA condenses with oxaloacetate; the cycle begins.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_TCA"],
+      "tags": ["stage:tca"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "tca.citrate_synthase"}
+      ]
+    },
+    "tca.citrate_synthase": {
+      "text_dramatic": "TBD — citrate synthase forms (S)-citryl-CoA, then citrate.",
+      "text_teaching": "TBD — Phase 7 teaching text citing the approved prochirality claim.",
+      "claim_ids": ["CAST-CSC-PDB-01", "TCA-RNG-CITRATE-PROCHIRALITY-01"],
+      "tags": ["stage:tca", "edit:enzyme:tca.citrate_synthase"],
+      "on_enter": [
+        {"op": "hide_all"},
+        {"op": "load", "target": "pdb:1CSC", "args": {"object": "citrate_synthase"}}
+      ],
+      "choices": [
+        {"label": "Continue to aconitase", "goto": "tca.aconitase"},
+        {"label": "Try to edit citrate synthase", "goto": "edit.prompt", "tags": ["edit:offer"]}
+      ]
+    },
+    "tca.aconitase": {
+      "text_dramatic": "TBD — aconitase flips cis-aconitate 180 degrees; your two carbons are distinguished.",
+      "text_teaching": "TBD — Phase 7 teaching text citing the approved prochirality claim (the Ogston hypothesis).",
+      "claim_ids": ["TCA-RNG-CITRATE-PROCHIRALITY-01"],
+      "tags": ["stage:tca", "edit:enzyme:tca.aconitase"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue to the shuffle", "goto": "tca.shuffle"},
+        {"label": "Try to edit aconitase", "goto": "edit.prompt", "tags": ["edit:offer"]}
+      ]
+    },
+    "tca.shuffle": {
+      "text_dramatic": "TBD — the great wheel spins. First turn or second turn?",
+      "text_teaching": "TBD — Phase 7 teaching text citing the approved RNG weight + prochirality claims.",
+      "claim_ids": ["TCA-RNG-WEIGHT-01", "TCA-RNG-CITRATE-PROCHIRALITY-01"],
+      "tags": ["stage:tca", "edit:enzyme:tca.aconitase", "rng:weighted"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "The wheel spins — first-turn CO2 exit", "weight": 0.5, "goto": "tca.co2_turn1", "tags": ["rng:weighted"]},
+        {"label": "The wheel spins — second-turn CO2 exit", "weight": 0.5, "goto": "tca.co2_turn2", "tags": ["rng:weighted"]},
+        {"label": "Try to edit aconitase", "goto": "edit.prompt", "tags": ["edit:offer"]},
+        {"label": "The cycle has spun too long — the host fades", "goto": "bad.cycle_trap_host_death", "cond": "visits.get('tca.shuffle', 0) > 5", "tags": ["cycle_trap"]}
+      ]
+    },
+    "tca.co2_turn1": {
+      "text_dramatic": "TBD — one of your carbons leaves as a breath of CO2 on the first turn.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_TCA"],
+      "tags": ["stage:tca"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "The cycle turns again", "goto": "tca.shuffle"},
+        {"label": "Continue onward — the soul calls", "goto": "tca.divert_to_good"}
+      ]
+    },
+    "tca.co2_turn2": {
+      "text_dramatic": "TBD — your other carbon leaves on the second turn.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_TCA"],
+      "tags": ["stage:tca"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "The cycle turns again", "goto": "tca.shuffle"},
+        {"label": "Continue onward — the soul calls", "goto": "tca.divert_to_good"}
+      ]
+    },
+    "tca.divert_to_good": {
+      "text_dramatic": "TBD — stay in the cycle and follow the soul, or divert to a productive fate?",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_TCA"],
+      "tags": ["stage:tca"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Follow the soul to the ETC", "goto": "etc.entry"},
+        {"label": "Divert to fatty-acid storage (your carbon body lives on)", "goto": "end.good.fatty_acid", "tags": ["divert:fatty_acid"]},
+        {"label": "Divert to amino-acid synthesis (become a building block)", "goto": "end.good.amino_acid", "tags": ["divert:amino_acid"]}
+      ]
+    }
+  }
+}
