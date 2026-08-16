@@ -28,11 +28,12 @@
     },
     "tca.aconitase": {
       "text_dramatic": "TBD — aconitase flips cis-aconitate 180 degrees; your two carbons are distinguished.",
-      "text_teaching": "TBD — Phase 7 teaching text citing the approved prochirality claim (the Ogston hypothesis).",
+      "text_teaching": "TBD — Phase 7 teaching text citing the approved prochirality claim (the Ogston hypothesis). NOTE: human mitochondrial ACO2 (UniProt Q99798) has NO PDB structure (verified via UniProt REST, 0 cross-refs). Bovine mitochondrial aconitase 1ACO (2.05 A, the classic Ogston-hypothesis teaching structure) is a candidate for Phase 7 approval. Using pdb:TBD_ACONITASE placeholder until a structure is approved.",
       "claim_ids": ["TCA-RNG-CITRATE-PROCHIRALITY-01"],
       "tags": ["stage:tca", "edit:enzyme:tca.aconitase"],
       "on_enter": [
-        {"op": "hide_all"}
+        {"op": "hide_all"},
+        {"op": "load", "target": "pdb:TBD_ACONITASE", "args": {"object": "aconitase"}}
       ],
       "choices": [
         {"label": "Continue to the shuffle", "goto": "tca.shuffle"},
@@ -64,12 +65,74 @@
       ],
       "choices": [
         {"label": "The cycle turns again", "goto": "tca.shuffle"},
-        {"label": "Continue onward — the soul calls", "goto": "tca.divert_to_good"}
+        {"label": "Continue onward — the soul calls", "goto": "tca.isocitrate_dh"}
       ]
     },
     "tca.co2_turn2": {
       "text_dramatic": "TBD — your other carbon leaves on the second turn.",
       "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_TCA"],
+      "tags": ["stage:tca"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "The cycle turns again", "goto": "tca.shuffle"},
+        {"label": "Continue onward — the soul calls", "goto": "tca.isocitrate_dh"}
+      ]
+    },
+    "tca.isocitrate_dh": {
+      "text_dramatic": "TBD — isocitrate dehydrogenase strikes: isocitrate becomes alpha-ketoglutarate, and your first carbon flies off as CO2. This is the rate-limiting step of the TCA cycle.",
+      "text_teaching": "TBD — Phase 7 teaching text: isocitrate dehydrogenase (IDH3A, NAD+-dependent) oxidizes isocitrate to alpha-ketoglutarate, releasing the FIRST CO2 of the TCA cycle and producing NADH. Rate-limiting, regulatory step. PDB 5GRF is a CANDIDATE structure (IDH3A) pending Phase 7 approval.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_TCA"],
+      "tags": ["stage:tca"],
+      "on_enter": [
+        {"op": "hide_all"},
+        {"op": "load", "target": "pdb:5GRF", "args": {"object": "isocitrate_dh"}}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "tca.akg_dh"}
+      ]
+    },
+    "tca.akg_dh": {
+      "text_dramatic": "TBD — alpha-ketoglutarate dehydrogenase strikes next: alpha-KG becomes succinyl-CoA, and your second carbon leaves as CO2. The cycle has now shed both acetyl carbons.",
+      "text_teaching": "TBD — Phase 7 teaching text: alpha-ketoglutarate dehydrogenase (alpha-KGDH) oxidizes alpha-KG to succinyl-CoA, releasing the SECOND CO2 of the TCA cycle and producing NADH. Mechanistically homologous to PDH (same 3-subunit E1-E2-E3 architecture, same TPP/lipoamide/FAD cofactors). NO PDB LOAD: narrative-only node per Decision 2 (alpha-KG DH = narrative-only, no PDB).",
+      "claim_ids": ["PLACEHOLDER_PHASE7_TCA"],
+      "tags": ["stage:tca"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "tca.succinyl_coa_synthetase"}
+      ]
+    },
+    "tca.succinyl_coa_synthetase": {
+      "text_dramatic": "TBD — succinyl-CoA synthetase harvests the thioester bond: succinyl-CoA becomes succinate, and a substrate-level phosphorylation makes GTP. The only TCA step that makes ATP-equivalent directly.",
+      "text_teaching": "TBD — Phase 7 teaching text: succinyl-CoA synthetase (SCS) converts succinyl-CoA to succinate, coupling the thioester-bond hydrolysis to GDP -> GTP phosphorylation (the ONLY substrate-level phosphorylation in the TCA cycle). NO PDB LOAD: narrative-only node.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_TCA"],
+      "tags": ["stage:tca"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "tca.fumarase"}
+      ]
+    },
+    "tca.fumarase": {
+      "text_dramatic": "TBD — fumarase hydrates fumarate to malate, adding water across the double bond. Your carbon skeleton keeps turning.",
+      "text_teaching": "TBD — Phase 7 teaching text: fumarase (fumarate hydratase) reversibly hydrates fumarate to L-malate (stereospecific). NO PDB LOAD: narrative-only node.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_TCA"],
+      "tags": ["stage:tca"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "tca.malate_dh"}
+      ]
+    },
+    "tca.malate_dh": {
+      "text_dramatic": "TBD — malate dehydrogenase oxidizes malate back to oxaloacetate, regenerating the cycle's acceptor and producing one more NADH. The wheel is whole again.",
+      "text_teaching": "TBD — Phase 7 teaching text: malate dehydrogenase oxidizes L-malate to oxaloacetate (OAA), regenerating the OAA that condenses with the next acetyl-CoA to start the cycle anew, and producing the third NADH of one TCA turn. NO PDB LOAD: narrative-only node.",
       "claim_ids": ["PLACEHOLDER_PHASE7_TCA"],
       "tags": ["stage:tca"],
       "on_enter": [
