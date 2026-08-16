@@ -19,7 +19,8 @@
       "claim_ids": ["PLACEHOLDER_PHASE7"],
       "tags": ["stage:pyruvate", "edit:enzyme:pyr.pdh"],
       "on_enter": [
-        {"op": "hide_all"}
+        {"op": "hide_all"},
+        {"op": "load", "target": "pdb:2OZL", "args": {"object": "pdh"}}
       ],
       "choices": [
         {"label": "Continue into the TCA cycle", "goto": "tca.entry"},
@@ -35,9 +36,22 @@
         {"op": "hide_all"}
       ],
       "choices": [
-        {"label": "Lactic fermentation (stay as lactate)", "goto": "anaer.lactic", "tags": ["fermentation:lactic"]},
+        {"label": "Lactic fermentation (stay as lactate)", "goto": "anaer.ldh", "tags": ["fermentation:lactic"]},
         {"label": "Ethanolic fermentation (CO2 + ethanol)", "goto": "anaer.ethanolic", "tags": ["fermentation:ethanolic"]},
         {"label": "The energy runs out — crisis", "goto": "anaer.crisis", "tags": ["fermentation:crisis"]}
+      ]
+    },
+    "anaer.ldh": {
+      "text_dramatic": "TBD — lactate dehydrogenase catches you: pyruvate becomes lactate, and NADH is oxidized back to NAD+ so glycolysis can keep running.",
+      "text_teaching": "TBD — Phase 7 teaching text: LDH (lactate dehydrogenase) reduces pyruvate to lactate, regenerating NAD+ from NADH so anaerobic glycolysis can continue. This is the mammalian fermentation step (exam-worthy). PDB 5W8J is a CANDIDATE structure pending Phase 7 approval.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ANAEROBIC"],
+      "tags": ["stage:anaerobic"],
+      "on_enter": [
+        {"op": "hide_all"},
+        {"op": "load", "target": "pdb:5W8J", "args": {"object": "ldh"}}
+      ],
+      "choices": [
+        {"label": "Continue to the lactate ending", "goto": "anaer.lactic"}
       ]
     },
     "anaer.lactic": {
