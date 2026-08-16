@@ -39,12 +39,25 @@
       ]
     },
     "gly.fbp_to_pyruvate": {
-      "text_dramatic": "TBD — the rest of glycolysis unfolds; net 2 ATP, 2 NADH.",
-      "text_teaching": "",
+      "text_dramatic": "TBD — aldolase splits the C6 into two C3 trioses; the chain races through TPI, GAPDH, PGK, PGAM, and ENO to reach PEP. Net so far: 2 ATP, 2 NADH.",
+      "text_teaching": "TBD — Phase 7 teaching text covering steps 4-9 (aldolase, TPI, GAPDH, PGK, PGAM, ENO) up to PEP.",
       "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS"],
       "tags": ["stage:glycolysis"],
       "on_enter": [
         {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "gly.pyruvate_kinase"}
+      ]
+    },
+    "gly.pyruvate_kinase": {
+      "text_dramatic": "TBD — pyruvate kinase strikes: PEP becomes pyruvate, and the second substrate-level ATP is born.",
+      "text_teaching": "TBD — Phase 7 teaching text: pyruvate kinase transfers PEP's phosphate to ADP, yielding pyruvate + ATP (the 2nd substrate-level phosphorylation of glycolysis; irreversible, regulatory step). PDB 7FS3 is a CANDIDATE structure pending human approval.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS"],
+      "tags": ["stage:glycolysis"],
+      "on_enter": [
+        {"op": "hide_all"},
+        {"op": "load", "target": "pdb:7FS3", "args": {"object": "pyruvate_kinase"}}
       ],
       "choices": [
         {"label": "Continue", "goto": "gly.pyruvate"}

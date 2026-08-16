@@ -26,12 +26,13 @@ class TestGlucoseReachability(unittest.TestCase):
 
     def test_manifest_loads_all_34_nodes(self):
         """The manifest lists 7 files; StoryGraph.load merges them with no
-        duplicate-id ValueError. 34 nodes = 31 story nodes + fa.stub +
-        alc.stub + edit.prompt."""
+        duplicate-id ValueError. Node count grows as the skeleton is expanded
+        (Phase 5.1 tiered-completeness expansion adds pyruvate_kinase, LDH,
+        5 TCA enzymes, 3 ETC complexes). See 05.1-EXPANSION-SUMMARY.md."""
         g = StoryGraph.load(self._story_dir)
         nodes = g.all_nodes()
-        self.assertEqual(len(nodes), 34,
-                         "glucose skeleton has 34 nodes (31 story + 3 stubs)")
+        self.assertEqual(len(nodes), 35,
+                         "glucose skeleton has 35 nodes after glycolysis expansion")
         self.assertEqual(g.start_node(), "intro.select",
                          "manifest start is intro.select")
 
