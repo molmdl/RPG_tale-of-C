@@ -2,9 +2,9 @@
 
 ## Overview
 
-A 13-phase build order (11 integer milestones + 2 INSERTED decimal design phases at 5.1/5.2) that front-loads the project's hardest invariants (testability boundary + no-fabricated-science gate + path resolution), proves the whole architecture end-to-end in WSL on a toy story BEFORE any PyMOL/Qt code, then layers the PyMOL `cmd` molecular layer (headless-testable) and finally the Qt UI (human-verify). The critical path is **engineering on placeholder content racing in parallel** with a **human source-approval + science-framing decision track** (Phase 5) that gates all content authoring. **Two design phases (5.1 Story Graph Design, 5.2 Cast & Hero Representation Design) sit between the Phase 5 decisions and the Phase 6 MVP**: they make the *story graph topology + gameplay-integration contracts* and the *3D visual language* explicit, reviewable artifacts before any Qt UI or cited content is built on top — so Phase 6 implements an already-reviewed design rather than inventing one inside the already-overloaded first-Qt phase. Content is a marathon spanning Phases 7–9 (glucose first, then fatty acid + alcohol, then anaerobic + full ~20+ cast), each phase dominated by per-claim approval throughput rather than engineering difficulty — these phases stay at 3 (not split further) and instead use granular per-pathway-segment plans (see "Content Phase Plan Granularity" below) because the per-claim approval bottleneck is orthogonal to phase structure. Phase 10 is playtest-driven polish (content/engineering finalization); Phase 11 is documentation finalization + verification — the last release gate, ensuring all user-facing docs match the shipped game. Depth = comprehensive.
+A 14-phase build order (12 integer milestones + 2 INSERTED decimal design phases at 5.1/5.2) that front-loads the project's hardest invariants (testability boundary + no-fabricated-science gate + path resolution), proves the whole architecture end-to-end in WSL on a toy story BEFORE any PyMOL/Qt code, then layers the PyMOL `cmd` molecular layer (headless-testable) and finally the Qt UI (human-verify). The critical path is **engineering on placeholder content racing in parallel** with a **human source-approval + science-framing decision track** (Phase 5) that gates all content authoring. **Two design phases (5.1 Story Graph Design, 5.2 Cast & Hero Representation Design) sit between the Phase 5 decisions and the Phase 6 MVP**: they make the *story graph topology + gameplay-integration contracts* and the *3D visual language* explicit, reviewable artifacts before any Qt UI or cited content is built on top — so Phase 6 implements an already-reviewed design rather than inventing one inside the already-overloaded first-Qt phase. Content is a marathon spanning Phases 7–9 (glucose first, then fatty acid + alcohol, then anaerobic + full ~20+ cast), each phase dominated by per-claim approval throughput rather than engineering difficulty — these phases stay at 3 (not split further) and instead use granular per-pathway-segment plans (see "Content Phase Plan Granularity" below) because the per-claim approval bottleneck is orthogonal to phase structure. Phase 10 is playtest-driven polish (content/engineering finalization); Phase 11 is documentation finalization + verification — the last release gate, ensuring all user-facing docs match the shipped game. Depth = comprehensive.
 
-**Depth:** comprehensive (8–12 phases) — this roadmap has 13 (11 integer + 2 INSERTED decimal design phases; slightly above the comprehensive ceiling — the Phase 11 split is a user-requested separation of documentation verification from polish).
+**Depth:** comprehensive (8–12 phases) — this roadmap has 14 (12 integer + 2 INSERTED decimal design phases; above the comprehensive ceiling — the Phase 11 split is a user-requested separation of documentation verification from polish, and Phase 12 is a user-requested ending-cutscene-rendering phase appended at the end).
 **Parallelization:** enabled — Phase 5 (decisions + source approval) runs in parallel with Phases 2–4 (engineering on placeholder content); the 4 Key Decisions within Phase 5 are independent of each other. Phase 5.1 (Story Graph Design) can start as soon as Phase 2 + the Phase 5 ATP/True-Ending decision are done (potentially before Phase 4 finishes); Phase 5.2 (Representation Design) follows 5.1 + Phase 3. Both 5.1 and 5.2 gate Phase 6. Use the spec.md worktree/branch protocol for parallel plan execution.
 
 ## Phases
@@ -28,6 +28,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 9: Anaerobic Pathway + Full Cast + Documentation Completion** — anaerobic framing implemented, ~20+ cast populated + cited, dramatic cast list + slogan in README and in-game
 - [ ] **Phase 10: Polish, Playtest & Release Readiness** — playtest-driven table expansion, accessibility, full manual test matrix, pre-ship citation gate green
 - [ ] **Phase 11: Documentation Finalization & Verification** — update README + in-game help to match shipped content; final docs verification as the last release gate
+- [ ] **Phase 12: Ending Cutscene Rendering** — for each ending, prepare a cutscene render (CG scene setup by agent, color/angle/lighting adjusted by human; default lighting 'XRay' in the lighting plugin, render with 'Ray')
 
 ## Phase Details
 
@@ -248,6 +249,25 @@ Plans:
 - [ ] 11-01: TBD — likely README + in-game help update to match final shipped cast + content
 - [ ] 11-02: TBD — likely final documentation verification pass (release gate)
 
+### Phase 12: Ending Cutscene Rendering
+**Goal**: [To be planned]
+**Depends on**: Phase 10 (content + polish settled — all endings finalized with their dramatic/teaching text and in-game scenes ready to be rendered as cutscenes). Note: Phase 12 can run between Phase 10 and Phase 11 if the docs (Phase 11) should reference the cutscene renders; otherwise it runs as the final phase after Phase 11.
+**Requirements**: (none owned — cutscene/render phase producing visual artifacts from already-delivered content)
+**Success Criteria** (what must be TRUE):
+  1. [To be planned]
+**Plans**: 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 12 to break down)
+
+**Details:**
+User-requested design preferences (capture during planning):
+- For each ending, prepare a cutscene render.
+- CG (scene setup) can be prepared by the agent, then color/angle/lighting adjusted by the human.
+- Default cutscene lighting: use 'XRay' in the PyMOL lighting plugin.
+- Default render with: 'Ray' (cmd.ray).
+- Workflow: agent sets up the scene headlessly (per Phase 5.2 representation convention + the ending's in-game scene) → human adjusts angle/color/lighting in a real PyMOL GUI session → render with Ray. This is a human-verify-heavy phase (GUI angle/lighting work cannot be automated from WSL).
+
 ## Content Phase Plan Granularity (Phases 7–9)
 
 **Decision:** Content phases (7, 8, 9) are NOT split into more phases. Instead, each content phase uses **granular plans — one per pathway segment + its citations** (5–7 plans for Phase 7; 4–6 for Phase 8; 4–5 for Phase 9). This keeps the roadmap within the comprehensive depth range (12 phases) while giving the human a per-segment review cadence that matches the per-claim approval bottleneck.
@@ -294,11 +314,12 @@ Plans:
 | 9 Anaerobic + cast | **Yes** | Full ~20+ cast enumeration + citations; anaerobic-path content once framing decided |
 | 10 Polish | No | Playtest-driven iteration on existing content |
 | 11 Docs Finalization | No | Docs update + verification against shipped content — no new research |
+| 12 Ending Cutscene Rendering | No | PyMOL `cmd.ray` + 'XRay' lighting setting are standard, well-documented features (verifiable against `tmp/pymol-src/`); scene setup reuses the Phase 5.2 representation convention |
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6 → 7 → 8 → 9 → 10 → 11. Phase 5 runs in PARALLEL with Phases 2–4 and must be complete (at least the ATP/True-Ending + anaerobic decisions) before Phase 5.1 begins. Phase 5.1 and 5.2 (INSERTED design phases) gate Phase 6. Phase 11 (documentation finalization + verification) is the last release gate, after Phase 10's content polish is complete.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6 → 7 → 8 → 9 → 10 → 11 → 12. Phase 5 runs in PARALLEL with Phases 2–4 and must be complete (at least the ATP/True-Ending + anaerobic decisions) before Phase 5.1 begins. Phase 5.1 and 5.2 (INSERTED design phases) gate Phase 6. Phase 11 (documentation finalization + verification) is the last release gate, after Phase 10's content polish is complete. Phase 12 (Ending Cutscene Rendering) depends on Phase 10 (settled content); it may run between Phase 10 and Phase 11 if the docs should reference the cutscene renders, or as the final phase after Phase 11.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -315,9 +336,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 | 9. Anaerobic + Full Cast + Docs | 0/TBD | Not started | - |
 | 10. Polish, Playtest & Release | 0/TBD | Not started | - |
 | 11. Documentation Finalization & Verification | 0/TBD | Not started | - |
+| 12. Ending Cutscene Rendering | 0/TBD | Not started | - |
 
 ---
 
 *Roadmap created: 2026-08-12 · Revised: 2026-08-12 (inserted Phases 5.1 + 5.2 — story graph design + representation design — per user feedback on story/editing/representation concerns) · Revised: 2026-08-12 (content phases 7/8/9 kept at 3 — not split further; per-pathway-segment plan granularity documented in "Content Phase Plan Granularity" section, per user feedback on content-authoring citation load) · Revised: 2026-08-12 (split documentation finalization + verification OUT of Phase 10 into Phase 11 — Phase 10 keeps polish/playtest/accessibility/test-matrix/citation-gate; Phase 11 owns docs update + final docs verification as the last release gate, per user feedback)*
-*Depth: comprehensive (13 phases: 11 integer + 2 INSERTED decimal design phases — slightly above the 8–12 comprehensive ceiling; the Phase 11 split is a user-requested separation of documentation verification from polish) · Coverage: 32/32 v1 requirements mapped ✓ (5.1 + 5.2 + 11 own 0 requirements — design/finalization phases enabling/verifying downstream delivery, per the Phase 10 0-requirement precedent)*
+*Depth: comprehensive (14 phases: 12 integer + 2 INSERTED decimal design phases — above the 8–12 comprehensive ceiling; the Phase 11 split is a user-requested separation of documentation verification from polish, and Phase 12 is a user-requested ending-cutscene-rendering phase) · Coverage: 32/32 v1 requirements mapped ✓ (5.1 + 5.2 + 11 + 12 own 0 requirements — design/finalization/render phases enabling/verifying downstream delivery, per the Phase 10 0-requirement precedent)*
 *Note: REQUIREMENTS.md previously stated "34 total" v1 requirements; the actual enumerated v1 set is 32 (PATH-01 and STAT-01 are v2). Traceability below uses the actual count of 32.*
