@@ -1,0 +1,65 @@
+{
+  "nodes": {
+    "etc.entry": {
+      "text_dramatic": "TBD — your spark (the electrons) is caught by NADH and FADH2.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ETC"],
+      "tags": ["stage:etc"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Follow the soul into the electron transport chain", "goto": "etc.complex_i", "tags": ["etc:enter"]},
+        {"label": "Let go — drift away as CO2 (the unremarkable exit)", "goto": "end.normal.co2", "tags": ["ending:normal"]}
+      ]
+    },
+    "etc.complex_i": {
+      "text_dramatic": "TBD — Complex I receives your electrons; protons pump across the membrane.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ETC"],
+      "tags": ["stage:etc", "edit:enzyme:etc.complex_i"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue down the chain", "goto": "etc.complex_ii_iii_iv"},
+        {"label": "Try to edit Complex I", "goto": "edit.prompt", "tags": ["edit:offer"]}
+      ]
+    },
+    "etc.complex_ii_iii_iv": {
+      "text_dramatic": "TBD — the chain continues; Complex IV hands your electrons to O2, forming water.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ETC"],
+      "tags": ["stage:etc"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue to ATP synthase", "goto": "etc.atp_synthase"}
+      ]
+    },
+    "etc.atp_synthase": {
+      "text_dramatic": "TBD — the proton flow drives ATP synthase; your electrons become the spark of ATP.",
+      "text_teaching": "TBD — Phase 7 teaching text (metamorphosis framing: the soul-jump climax).",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ETC"],
+      "tags": ["stage:etc"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Become ATP — the soul-jump", "goto": "end.true"}
+      ]
+    },
+    "end.true": {
+      "text_dramatic": "TBD — you are ATP. Your electrons power the cell; your carbon body was shed as CO2. The metamorphosis is complete.",
+      "text_teaching": "TBD — Phase 7 teaching text (metamorphosis: caterpillar -> butterfly; carbon -> CO2 = chrysalis; electrons -> ATP = the soul lives on).",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ETC"],
+      "tags": ["stage:etc", "ending:true"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "true",
+      "choices": []
+    }
+  }
+}
