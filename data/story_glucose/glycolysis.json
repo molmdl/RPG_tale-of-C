@@ -1,0 +1,66 @@
+{
+  "nodes": {
+    "gly.start": {
+      "text_dramatic": "TBD — glucose arrives in the cytosol.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS"],
+      "tags": ["stage:glycolysis"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "gly.g6p"}
+      ]
+    },
+    "gly.g6p": {
+      "text_dramatic": "TBD — hexokinase traps glucose as G6P.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS"],
+      "tags": ["stage:glycolysis"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "gly.pfk"}
+      ]
+    },
+    "gly.pfk": {
+      "text_dramatic": "TBD — PFK-1, the committed step of glycolysis.",
+      "text_teaching": "TBD — Phase 7 teaching text citing GLY-PFK-01.",
+      "claim_ids": ["GLY-PFK-01", "CAST-PFK-PDB-01"],
+      "tags": ["stage:glycolysis", "edit:enzyme:gly.pfk"],
+      "on_enter": [
+        {"op": "hide_all"},
+        {"op": "load", "target": "pdb:4PFK", "args": {"object": "pfk"}}
+      ],
+      "choices": [
+        {"label": "Continue glycolysis", "goto": "gly.fbp_to_pyruvate"},
+        {"label": "Try to edit PFK's active site", "goto": "edit.prompt", "tags": ["edit:offer"]}
+      ]
+    },
+    "gly.fbp_to_pyruvate": {
+      "text_dramatic": "TBD — the rest of glycolysis unfolds; net 2 ATP, 2 NADH.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS"],
+      "tags": ["stage:glycolysis"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "gly.pyruvate"}
+      ]
+    },
+    "gly.pyruvate": {
+      "text_dramatic": "TBD — you arrive at pyruvate, the branch point.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS"],
+      "tags": ["stage:glycolysis"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "pyr.branch"}
+      ]
+    }
+  }
+}

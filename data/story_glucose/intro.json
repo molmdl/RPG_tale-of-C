@@ -1,0 +1,42 @@
+{
+  "nodes": {
+    "intro.select": {
+      "text_dramatic": "Choose your form — which carbon are you?",
+      "text_teaching": "TBD — Phase 7 content (character-select screen)",
+      "claim_ids": ["PLACEHOLDER_PHASE7"],
+      "tags": ["stage:intro"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Glucose — enter the glycolysis path", "goto": "gly.start", "effects": {}, "tags": ["char:glucose"]},
+        {"label": "Fatty acid (coming in Phase 8)", "goto": "fa.stub", "effects": {}, "tags": ["char:fa", "stub"]},
+        {"label": "Alcohol (coming in Phase 8)", "goto": "alc.stub", "effects": {}, "tags": ["char:alc", "stub"]}
+      ]
+    },
+    "fa.stub": {
+      "text_dramatic": "This character is not yet available. Returning to character select.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE8"],
+      "tags": ["stage:intro"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Back to character select", "goto": "intro.select"}
+      ]
+    },
+    "alc.stub": {
+      "text_dramatic": "This character is not yet available. Returning to character select.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE8"],
+      "tags": ["stage:intro"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Back to character select", "goto": "intro.select"}
+      ]
+    }
+  }
+}

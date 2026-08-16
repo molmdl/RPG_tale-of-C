@@ -1,0 +1,77 @@
+{
+  "nodes": {
+    "pyr.branch": {
+      "text_dramatic": "TBD — the air is thin. What fate, little carbon?",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ANAEROBIC"],
+      "tags": ["stage:pyruvate"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Proceed aerobically (O2 available) -> acetyl-CoA -> TCA", "goto": "pyr.pdh", "cond": "not flags.host_o2_low", "tags": ["branch:aerobic"]},
+        {"label": "The air runs out — ferment (anaerobic)", "goto": "anaer.entry", "cond": "flags.host_o2_low", "effects": {"set": {"anaerobic": true}}, "tags": ["branch:anaerobic"]}
+      ]
+    },
+    "pyr.pdh": {
+      "text_dramatic": "TBD — PDH strips your first carbon as CO2.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7"],
+      "tags": ["stage:pyruvate", "edit:enzyme:pyr.pdh"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Continue into the TCA cycle", "goto": "tca.entry"},
+        {"label": "Try to edit the PDH complex", "goto": "edit.prompt", "tags": ["edit:offer"]}
+      ]
+    },
+    "anaer.entry": {
+      "text_dramatic": "TBD — the air runs out; your host switches to fermentation.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ANAEROBIC"],
+      "tags": ["stage:anaerobic"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "choices": [
+        {"label": "Lactic fermentation (stay as lactate)", "goto": "anaer.lactic", "tags": ["fermentation:lactic"]},
+        {"label": "Ethanolic fermentation (CO2 + ethanol)", "goto": "anaer.ethanolic", "tags": ["fermentation:ethanolic"]},
+        {"label": "The energy runs out — crisis", "goto": "anaer.crisis", "tags": ["fermentation:crisis"]}
+      ]
+    },
+    "anaer.lactic": {
+      "text_dramatic": "TBD — you are retained as lactate.",
+      "text_teaching": "TBD — Phase 7 teaching text.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ANAEROBIC"],
+      "tags": ["stage:anaerobic"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "good",
+      "choices": []
+    },
+    "anaer.ethanolic": {
+      "text_dramatic": "TBD — you drift off as CO2 and ethanol.",
+      "text_teaching": "TBD — Phase 7 teaching text. [HOST-TENSION FLAG: mammalian host does not do ethanolic fermentation — this is a yeast pathway; human review needed before Phase 7].",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ANAEROBIC"],
+      "tags": ["stage:anaerobic"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "normal",
+      "choices": []
+    },
+    "anaer.crisis": {
+      "text_dramatic": "TBD — fermentation cannot sustain the host; the host passes.",
+      "text_teaching": "",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ANAEROBIC"],
+      "tags": ["stage:anaerobic"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "bad",
+      "choices": []
+    }
+  }
+}
