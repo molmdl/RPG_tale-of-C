@@ -1,0 +1,37 @@
+{
+  "nodes": {
+    "end.good.fatty_acid": {
+      "text_dramatic": "TBD — you are stored for tomorrow; your carbon body lives on as a fatty acid.",
+      "text_teaching": "TBD — Phase 7 teaching text (citrate cataplerotic exit to fatty-acid synthesis).",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ENDINGS"],
+      "tags": ["stage:tca", "ending:good"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "good",
+      "choices": []
+    },
+    "end.good.amino_acid": {
+      "text_dramatic": "TBD — you become a building block; your carbon body is now an amino acid.",
+      "text_teaching": "TBD — Phase 7 teaching text (TCA cataplerotic exit to amino-acid synthesis).",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ENDINGS"],
+      "tags": ["stage:tca", "ending:good"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "good",
+      "choices": []
+    },
+    "end.normal.co2": {
+      "text_dramatic": "TBD — you drift away as CO2; the everyday exit, no drama, no destiny.",
+      "text_teaching": "TBD — Phase 7 teaching text. [NARRATIVE-FRAMING FLAG: this is a narrative tier, not a separate biochemical path — the carbon still goes through PDH/TCA and exits as CO2, but the dramatic soul-jump arc doesn't complete. Human review: is this the right narrative branch point? (research OQ2)].",
+      "claim_ids": ["PLACEHOLDER_PHASE7_ENDINGS"],
+      "tags": ["stage:etc", "ending:normal"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "normal",
+      "choices": []
+    }
+  }
+}
