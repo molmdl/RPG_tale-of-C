@@ -153,6 +153,7 @@ Issues that affect future work:
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 001 | Resolve Pitfall 4 (C14/ATP carbon-fate conflict) — adopt soul-jump reframing (electrons-as-soul → ETC → ATP, tied to RNG TCA shuffle) + cleanup wrong claims across planning docs | 2026-08-13 | 7b6119c | [001-resolve-pitfall-4-c14-atp-carbon-fate-co](./quick/001-resolve-pitfall-4-c14-atp-carbon-fate-co/) |
+| 002 | Narrative motivation: hero as "gifted/blessed" restorer of a sick host — reframes editing as restoration (on_enter pre-edit shows diseased enzyme; player's edit is the restoration attempt via EditRouter). Content-layer decision; no skeleton replan. Updates spec.md + PROJECT.md + 05.1-DESIGN.md | 2026-08-19 | (this commit) | [002-narrative-motivation-hero-as-restorer](./quick/002-narrative-motivation-hero-as-restorer/) |
 
 ## Session Continuity
 

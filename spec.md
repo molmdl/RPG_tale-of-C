@@ -6,6 +6,8 @@ Develop a PyMOL plugn as an RPG game of the hero, for their path taken in the re
 
 A PyMOL-based role playing game of the path taken by C, every step brings them closer to destiny.
 
+<!-- Narrative motivation NOTE (2026-08-19): The hero is a "gifted/blessed" carbon — beyond an ordinary carbon atom, the hero has the special power to edit/restore enzymes. The world (the host organism) is sick: enzymes are malfunctioning (mutated/diseased). The hero journeys through the respiratory pathway not only to reach a destiny, but to save the host by restoring the broken enzymes encountered along the way. This reframes the existing edit mechanic (Phase 4 EditRouter) as a restoration attempt: the enzyme is shown in its diseased state (via on_enter pre-edit), and the player's edit is the hero's attempt to fix it (correct restoration → known-edit branch; wrong edit → bad-ending pool). The skeleton structure (Phase 5.1) is unchanged — this is a content-layer narrative frame implemented in Phase 7 via text + edits.json signatures + on_enter pre-edit MolActions. See .planning/PROJECT.md Key Decisions row 109. -->
+
 ## Requirements of the pymol plugin
 
 1. About the plot
