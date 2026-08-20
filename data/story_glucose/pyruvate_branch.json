@@ -16,11 +16,11 @@
     "pyr.pdh": {
       "text_dramatic": "TBD — PDH strips your first carbon as CO2.",
       "text_teaching": "",
-      "claim_ids": ["PLACEHOLDER_PHASE7"],
+      "claim_ids": ["PLACEHOLDER_PHASE7", "DIS-PDHA1-01-cand", "CAST-PDH-WT-PDB-01-cand"],
       "tags": ["stage:pyruvate", "edit:enzyme:pyr.pdh"],
       "on_enter": [
         {"op": "hide_all"},
-        {"op": "load", "target": "pdb:2OZL", "args": {"object": "pdh"}}
+        {"op": "load", "target": "pdb:6CFO", "args": {"object": "pdh"}}
       ],
       "choices": [
         {"label": "Continue into the TCA cycle", "goto": "tca.entry"},
@@ -51,7 +51,8 @@
         {"op": "load", "target": "pdb:5W8J", "args": {"object": "ldh"}}
       ],
       "choices": [
-        {"label": "Continue to the lactate ending", "goto": "anaer.lactic"}
+        {"label": "Continue to the lactate ending", "goto": "anaer.lactic"},
+        {"label": "Examine the LDH active site", "goto": "anaer.lactic", "tags": ["mc:observe"]}
       ]
     },
     "anaer.lactic": {
