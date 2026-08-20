@@ -9,14 +9,15 @@
         {"op": "hide_all"}
       ],
       "choices": [
-        {"label": "Continue", "goto": "tca.citrate_synthase"}
+        {"label": "Continue", "goto": "tca.citrate_synthase"},
+        {"label": "Examine the TCA cycle entry", "goto": "tca.citrate_synthase", "tags": ["mc:observe"]}
       ]
     },
     "tca.citrate_synthase": {
       "text_dramatic": "TBD — citrate synthase forms (S)-citryl-CoA, then citrate.",
       "text_teaching": "TBD — Phase 7 teaching text citing the approved prochirality claim.",
       "claim_ids": ["CAST-CSC-PDB-01", "TCA-RNG-CITRATE-PROCHIRALITY-01"],
-      "tags": ["stage:tca", "edit:enzyme:tca.citrate_synthase"],
+      "tags": ["stage:tca", "edit:enzyme:tca.citrate_synthase", "edit:structural"],
       "on_enter": [
         {"op": "hide_all"},
         {"op": "load", "target": "pdb:1CSC", "args": {"object": "citrate_synthase"}}
@@ -105,7 +106,8 @@
         {"op": "hide_all"}
       ],
       "choices": [
-        {"label": "Continue", "goto": "tca.succinyl_coa_synthetase"}
+        {"label": "Continue", "goto": "tca.succinyl_coa_synthetase"},
+        {"label": "Examine the alpha-ketoglutarate dehydrogenase step", "goto": "tca.succinyl_coa_synthetase", "tags": ["mc:observe"]}
       ]
     },
     "tca.succinyl_coa_synthetase": {
