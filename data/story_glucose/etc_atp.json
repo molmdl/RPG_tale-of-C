@@ -16,7 +16,7 @@
     "etc.complex_i": {
       "text_dramatic": "TBD — Complex I receives your electrons; protons pump across the membrane.",
       "text_teaching": "",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ETC"],
+      "claim_ids": ["DIS-NDUFS8-01-cand"],
       "tags": ["stage:etc", "edit:enzyme:etc.complex_i"],
       "on_enter": [
         {"op": "hide_all"}
@@ -78,7 +78,8 @@
         {"op": "hide_all"}
       ],
       "choices": [
-        {"label": "Become ATP — the soul-jump", "goto": "end.true"}
+        {"label": "Become ATP — the soul-jump", "goto": "end.true"},
+        {"label": "Examine ATP synthase before the soul-jump", "goto": "end.true", "tags": ["mc:observe"]}
       ]
     },
     "end.true": {
