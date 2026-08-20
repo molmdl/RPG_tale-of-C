@@ -30,11 +30,13 @@ Glucose Story Graph Skeleton (Phase 5.1)
   ┌── [gly.start]  glucose arrives in the cy...
   │   out:
   │     --> "Continue" -> gly.g6p
+  │     --> "Examine the gluco..." -> gly.g6p
   └──
 
   ┌── [gly.g6p]  hexokinase traps glucose ...
   │   out:
   │     --> "Continue" -> gly.pfk
+  │     --> "Examine the G6P s..." -> gly.pfk
   └──
 
   ┌── [gly.pfk] [EDIT] [PDB]  PFK-1, the committed step...
@@ -46,16 +48,20 @@ Glucose Story Graph Skeleton (Phase 5.1)
   ┌── [gly.fbp_to_pyruvate]  aldolase splits the C6 in...
   │   out:
   │     --> "Continue" -> gly.pyruvate_kinase
+  │     --> "Examine the trios..." -> gly.pyruvate_kinase
   └──
 
-  ┌── [gly.pyruvate_kinase] [PDB]  pyruvate kinase strikes: ...
+  ┌── [gly.pyruvate_kinase] [EDIT] [PDB]  pyruvate kinase strikes: ...
   │   out:
   │     --> "Continue" -> gly.pyruvate
+  │     --> "Examine the pyruv..." -> gly.pyruvate
+  │     -.-> "edit:offer" -> edit.prompt
   └──
 
   ┌── [gly.pyruvate]  you arrive at pyruvate, t...
   │   out:
   │     --> "Continue" -> pyr.branch
+  │     --> "Examine the pyruv..." -> pyr.branch
   └──
 
 
@@ -84,6 +90,7 @@ Glucose Story Graph Skeleton (Phase 5.1)
   ┌── [anaer.ldh] [PDB]  lactate dehydrogenase cat...
   │   out:
   │     --> "Continue to the l..." -> anaer.lactic
+  │     --> "Examine the LDH a..." -> anaer.lactic
   └──
 
   ┌── [anaer.lactic] [GOOD]  you are retained as lactate.
@@ -105,6 +112,7 @@ Glucose Story Graph Skeleton (Phase 5.1)
   ┌── [tca.entry]  acetyl-CoA condenses with...
   │   out:
   │     --> "Continue" -> tca.citrate_synthase
+  │     --> "Examine the TCA c..." -> tca.citrate_synthase
   └──
 
   ┌── [tca.citrate_synthase] [EDIT] [PDB]  citrate synthase forms (S...
@@ -139,30 +147,38 @@ Glucose Story Graph Skeleton (Phase 5.1)
   │     --> "Continue onward —..." -> tca.isocitrate_dh
   └──
 
-  ┌── [tca.isocitrate_dh] [PDB]  isocitrate dehydrogenase ...
+  ┌── [tca.isocitrate_dh] [EDIT] [PDB]  isocitrate dehydrogenase ...
   │   out:
   │     --> "Continue" -> tca.akg_dh
+  │     --> "Examine the isoci..." -> tca.akg_dh
+  │     -.-> "edit:offer" -> edit.prompt
   └──
 
   ┌── [tca.akg_dh]  alpha-ketoglutarate dehyd...
   │   out:
   │     --> "Continue" -> tca.succinyl_coa_synthetase
+  │     --> "Examine the alpha..." -> tca.succinyl_coa_synthetase
   └──
 
-  ┌── [tca.succinyl_coa_synthetase]  succinyl-CoA synthetase h...
+  ┌── [tca.succinyl_coa_synthetase] [EDIT]  succinyl-CoA synthetase h...
   │   out:
   │     --> "Continue" -> tca.fumarase
+  │     --> "Examine the succi..." -> tca.fumarase
+  │     -.-> "edit:offer" -> edit.prompt
   └──
 
-  ┌── [tca.fumarase]  fumarase hydrates fumarat...
+  ┌── [tca.fumarase] [EDIT]  fumarase hydrates fumarat...
   │   out:
   │     --> "Continue" -> tca.malate_dh
+  │     --> "Examine the fumar..." -> tca.malate_dh
+  │     -.-> "edit:offer" -> edit.prompt
   └──
 
-  ┌── [tca.malate_dh]  malate dehydrogenase oxid...
+  ┌── [tca.malate_dh] [EDIT]  malate dehydrogenase oxid...
   │   out:
   │     --> "The cycle turns a..." -> tca.shuffle
   │     --> "Continue onward —..." -> tca.divert_to_good
+  │     -.-> "edit:offer" -> edit.prompt
   └──
 
   ┌── [tca.divert_to_good]  stay in the cycle and fol...
@@ -188,24 +204,31 @@ Glucose Story Graph Skeleton (Phase 5.1)
   │     -.-> "edit:offer" -> edit.prompt
   └──
 
-  ┌── [etc.complex_ii]  Complex II (succinate deh...
+  ┌── [etc.complex_ii] [EDIT]  Complex II (succinate deh...
   │   out:
   │     --> "Continue" -> etc.complex_iii
+  │     --> "Examine the Compl..." -> etc.complex_iii
+  │     -.-> "edit:offer" -> edit.prompt
   └──
 
-  ┌── [etc.complex_iii]  Complex III runs the Q-cy...
+  ┌── [etc.complex_iii] [EDIT]  Complex III runs the Q-cy...
   │   out:
   │     --> "Continue" -> etc.complex_iv
+  │     --> "Examine the Compl..." -> etc.complex_iv
+  │     -.-> "edit:offer" -> edit.prompt
   └──
 
-  ┌── [etc.complex_iv] [PDB]  Complex IV (cytochrome c ...
+  ┌── [etc.complex_iv] [EDIT] [PDB]  Complex IV (cytochrome c ...
   │   out:
   │     --> "Continue to ATP s..." -> etc.atp_synthase
+  │     --> "Examine the Compl..." -> etc.atp_synthase
+  │     -.-> "edit:offer" -> edit.prompt
   └──
 
   ┌── [etc.atp_synthase]  the proton flow drives AT...
   │   out:
   │     --> "Become ATP — the ..." -> end.true
+  │     --> "Examine ATP synth..." -> end.true
   └──
 
   ┌── [end.true] [TRUE]  you are ATP. Your electro...
@@ -257,5 +280,5 @@ Glucose Story Graph Skeleton (Phase 5.1)
 
 
 ==============================================================================
-Summary: 43 nodes | 11 endings (1T/3G/2N/5B) | 6 edit-allowed | 1 RNG
+Summary: 43 nodes | 11 endings (1T/3G/2N/5B) | 14 edit-allowed | 1 RNG
 ==============================================================================
