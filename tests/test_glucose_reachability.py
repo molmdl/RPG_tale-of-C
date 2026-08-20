@@ -8,6 +8,20 @@ The skeleton grew from 34 to 43 nodes in the Phase 5.1 tiered-completeness
 expansion (Plan 05.1-EXPANSION). The ending distribution is UNCHANGED
 (1T+3G+2N+5B = 11 endings); only path nodes were added.
 
+The Phase 5.1 replan Wave (Plans 05.1-07/08/09) then applied the disease-
+mutant research + Continue-to-MC directive to the post-expansion skeleton:
+- 43 nodes UNCHANGED count (the replan modifies nodes in place, no add/remove)
+- 14 edit-allowed nodes (8 disease-mutant promotions grew the set from
+  5+shuffle to 14: gly.pyruvate_kinase, 4 TCA enzymes, 3 ETC complexes)
+- 0 single-Continue nodes (the Continue-to-MC conversion added an
+  mc:observe Observe second choice to every formerly single-Continue node)
+- 8 disease-mutant promotions (DIS-*-cand claim_ids, CANDIDATE pending
+  Phase 7 per-claim approval)
+- pyr.pdh cast PDB fixed 2OZL (S264E phospho-mimic mutant) -> 6CFO (WT)
+- etc.complex_i claim_id PLACEHOLDER_PHASE7_ETC -> DIS-NDUFS8-01-cand
+- tca.citrate_synthase edit:structural reframe (NO disease point mutant;
+  7 ClinVar Pathogenic records are ALL structural variants)
+
 Pure Python 3.6 stdlib only. NO pymol/PyQt5. Mirrors the proven pattern in
 tests/test_integration.py:336-362 (the toy-graph SC2 tests).
 """
@@ -31,7 +45,16 @@ class TestGlucoseReachability(unittest.TestCase):
     akg_dh, succinyl_coa_synthetase, fumarase, malate_dh), +3 ETC complexes
     (complex_ii, complex_iii, complex_iv), -1 removed etc.complex_ii_iii_iv.
     Ending distribution is UNCHANGED: still 1T+3G+2N+5B = 11 endings (the
-    expansion adds path nodes, not endings)."""
+    expansion adds path nodes, not endings).
+
+    The Phase 5.1 replan Wave (Plans 05.1-07/08/09) then applied the disease-
+    mutant research + Continue-to-MC directive to the post-expansion skeleton:
+    43 nodes UNCHANGED; 14 edit-allowed nodes (8 disease-mutant promotions);
+    0 single-Continue nodes (Continue-to-MC conversion); the pyr.pdh 2OZL->
+    6CFO cast fix; the etc.complex_i PLACEHOLDER->DIS-NDUFS8-01-cand claim_id
+    fix; the tca.citrate_synthase edit:structural reframe. The replan
+    invariants are machine-checked by test_no_single_continue_choice,
+    test_14_edit_allowed_nodes, and test_pdh_cast_pdb_fix_and_complex_i_claim_id."""
 
     def setUp(self):
         self._story_dir = GLUCOSE_STORY_DIR
@@ -123,6 +146,118 @@ class TestGlucoseReachability(unittest.TestCase):
                          "loading the glucose skeleton did not import pymol")
         self.assertNotIn("PyQt5", sys.modules,
                          "loading the glucose skeleton did not import PyQt5")
+
+    def test_no_single_continue_choice(self):
+        """Replan invariant (Driver 2 -- Continue-to-MC): ZERO nodes have a
+        single 'Continue' choice. The Continue-to-MC conversion (Plans
+        05.1-07/08/09) added an mc:observe Observe second choice (or an
+        edit:offer third choice) to every formerly single-Continue node, so
+        no node is a linear click-through any more. A future regression that
+        re-introduces a single-Continue node fails this test loudly."""
+        g = StoryGraph.load(self._story_dir)
+        single_continue = []
+        for nid, node in g.all_nodes().items():
+            choices = node.choices
+            if len(choices) == 1 and choices[0].label == "Continue":
+                single_continue.append(nid)
+        self.assertEqual(
+            len(single_continue), 0,
+            "zero nodes should have a single 'Continue' choice (the "
+            "Continue-to-MC invariant -- Driver 2 of the Phase 5.1 replan); "
+            "found %d: %s" % (len(single_continue), single_continue))
+
+    def test_14_edit_allowed_nodes(self):
+        """Replan invariant (Driver 1 -- promotion): exactly 14 edit-allowed
+        nodes (each carrying an edit:enzyme:<id> tag). The disease-mutant
+        replan promoted 8 enzyme nodes to edit-allowed (gly.pyruvate_kinase,
+        4 TCA enzymes -- isocitrate_dh/succinyl_coa_synthetase/fumarase/
+        malate_dh, 3 ETC complexes -- complex_ii/iii/iv), growing the set
+        from 5+shuffle to 14. Each edit-allowed node must carry an edit:offer
+        choice routing to edit.prompt. tca.citrate_synthase carries the
+        edit:structural reframe tag (NO disease point mutant) and has NO
+        DIS-* claim_id."""
+        g = StoryGraph.load(self._story_dir)
+        edit_allowed = {}
+        for nid, node in g.all_nodes().items():
+            for tag in node.tags:
+                if str(tag).startswith("edit:enzyme:"):
+                    edit_allowed[nid] = node
+                    break
+        self.assertEqual(len(edit_allowed), 14,
+                         "exactly 14 edit-allowed nodes after the disease-"
+                         "mutant replan; found %d: %s"
+                         % (len(edit_allowed), sorted(edit_allowed.keys())))
+        expected_ids = {
+            "gly.pfk", "pyr.pdh", "tca.citrate_synthase", "tca.aconitase",
+            "tca.shuffle", "etc.complex_i", "gly.pyruvate_kinase",
+            "tca.isocitrate_dh", "tca.succinyl_coa_synthetase",
+            "tca.fumarase", "tca.malate_dh", "etc.complex_ii",
+            "etc.complex_iii", "etc.complex_iv",
+        }
+        self.assertEqual(
+            set(edit_allowed.keys()), expected_ids,
+            "the 14 edit-allowed node ids must match the replan set exactly")
+        # Each edit-allowed node has an edit:offer choice to edit.prompt.
+        for nid, node in edit_allowed.items():
+            has_offer = any(
+                "edit:offer" in (c.tags or []) or c.goto == "edit.prompt"
+                for c in node.choices)
+            self.assertTrue(
+                has_offer,
+                "edit-allowed node %r must have an edit:offer choice (a "
+                "choice whose tags include 'edit:offer' OR whose goto == "
+                "'edit.prompt')" % nid)
+        # tca.citrate_synthase reframe: edit:structural tag + NO DIS- claim.
+        cs = edit_allowed["tca.citrate_synthase"]
+        self.assertIn(
+            "edit:structural", cs.tags,
+            "tca.citrate_synthase carries the edit:structural reframe tag "
+            "(CS has NO disease point mutant; 7 ClinVar Pathogenic records "
+            "are ALL structural variants, not implementable via cmd.alter)")
+        self.assertFalse(
+            any(str(c).startswith("DIS-") for c in cs.claim_ids),
+            "tca.citrate_synthase has NO DIS-* disease-mutant claim_id (it "
+            "is edit:structural, not edit:disease); claim_ids=%s"
+            % cs.claim_ids)
+
+    def test_pdh_cast_pdb_fix_and_complex_i_claim_id(self):
+        """Replan metadata fixes: (a) pyr.pdh cast PDB corrected 2OZL (S264E
+        phospho-mimic mutant, NOT wild-type per RCSB title) -> 6CFO (WT,
+        Whitley 2018); (b) pyr.pdh claim_ids include DIS-PDHA1-01-cand
+        (PDHA1 V138M disease mutant) + CAST-PDH-WT-PDB-01-cand (6CFO WT
+        cast); (c) etc.complex_i claim_ids == ['DIS-NDUFS8-01-cand'] (the
+        PLACEHOLDER_PHASE7_ETC was REPLACED by DIS-NDUFS8-01-cand, Loeffen
+        1998 first nuclear Complex I Leigh mutation). All DIS-*-cand +
+        CAST-*-cand claims are CANDIDATE pending Phase 7 per-claim approval
+        (skeleton REFERENCES candidates, does NOT assert disease as approved
+        fact -- AGENTS.md no-fabricated-science rule)."""
+        g = StoryGraph.load(self._story_dir)
+        # (a) pyr.pdh cast PDB is 6CFO (WT), NOT 2OZL (phospho-mimic mutant).
+        pdh = g.get_node("pyr.pdh")
+        load_targets = [m.target for m in pdh.on_enter if m.op == "load"]
+        self.assertIn(
+            "pdb:6CFO", load_targets,
+            "pyr.pdh on_enter loads pdb:6CFO (WT, Whitley 2018); "
+            "load targets=%s" % load_targets)
+        self.assertNotIn(
+            "pdb:2OZL", load_targets,
+            "pyr.pdh must NOT load pdb:2OZL (the S264E phospho-mimic mutant, "
+            "NOT wild-type per RCSB title 'Human pyruvate dehydrogenase "
+            "S264E variant')")
+        # (b) pyr.pdh claim_ids include the disease + WT-cast candidates.
+        self.assertIn("DIS-PDHA1-01-cand", pdh.claim_ids,
+                      "pyr.pdh references DIS-PDHA1-01-cand (PDHA1 V138M, "
+                      "PDHAD MIM:312170)")
+        self.assertIn("CAST-PDH-WT-PDB-01-cand", pdh.claim_ids,
+                      "pyr.pdh references CAST-PDH-WT-PDB-01-cand (6CFO WT "
+                      "cast)")
+        # (c) etc.complex_i claim_ids == ['DIS-NDUFS8-01-cand'] (PLACEHOLDER absent).
+        ci = g.get_node("etc.complex_i")
+        self.assertEqual(
+            ci.claim_ids, ["DIS-NDUFS8-01-cand"],
+            "etc.complex_i claim_ids REPLACED PLACEHOLDER_PHASE7_ETC with "
+            "DIS-NDUFS8-01-cand (Loeffen 1998 PMID:9837812, first nuclear "
+            "Complex I Leigh mutation); got %s" % ci.claim_ids)
 
 
 if __name__ == "__main__":
