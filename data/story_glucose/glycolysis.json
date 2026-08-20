@@ -9,7 +9,8 @@
         {"op": "hide_all"}
       ],
       "choices": [
-        {"label": "Continue", "goto": "gly.g6p"}
+        {"label": "Continue", "goto": "gly.g6p"},
+        {"label": "Examine the glucose substrate", "goto": "gly.g6p", "tags": ["mc:observe"]}
       ]
     },
     "gly.g6p": {
@@ -21,13 +22,14 @@
         {"op": "hide_all"}
       ],
       "choices": [
-        {"label": "Continue", "goto": "gly.pfk"}
+        {"label": "Continue", "goto": "gly.pfk"},
+        {"label": "Examine the G6P structure", "goto": "gly.pfk", "tags": ["mc:observe"]}
       ]
     },
     "gly.pfk": {
       "text_dramatic": "TBD — PFK-1, the committed step of glycolysis.",
       "text_teaching": "TBD — Phase 7 teaching text citing GLY-PFK-01.",
-      "claim_ids": ["GLY-PFK-01", "CAST-PFK-PDB-01"],
+      "claim_ids": ["GLY-PFK-01", "CAST-PFK-PDB-01", "DIS-PFKM-01-cand"],
       "tags": ["stage:glycolysis", "edit:enzyme:gly.pfk"],
       "on_enter": [
         {"op": "hide_all"},
@@ -47,20 +49,23 @@
         {"op": "hide_all"}
       ],
       "choices": [
-        {"label": "Continue", "goto": "gly.pyruvate_kinase"}
+        {"label": "Continue", "goto": "gly.pyruvate_kinase"},
+        {"label": "Examine the triose intermediates", "goto": "gly.pyruvate_kinase", "tags": ["mc:observe"]}
       ]
     },
     "gly.pyruvate_kinase": {
       "text_dramatic": "TBD — pyruvate kinase strikes: PEP becomes pyruvate, and the second substrate-level ATP is born.",
       "text_teaching": "TBD — Phase 7 teaching text: pyruvate kinase transfers PEP's phosphate to ADP, yielding pyruvate + ATP (the 2nd substrate-level phosphorylation of glycolysis; irreversible, regulatory step). PDB 7FS3 is a CANDIDATE structure pending human approval.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS"],
-      "tags": ["stage:glycolysis"],
+      "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS", "DIS-PKLR-01-cand"],
+      "tags": ["stage:glycolysis", "edit:enzyme:gly.pyruvate_kinase"],
       "on_enter": [
         {"op": "hide_all"},
         {"op": "load", "target": "pdb:7FS3", "args": {"object": "pyruvate_kinase"}}
       ],
       "choices": [
-        {"label": "Continue", "goto": "gly.pyruvate"}
+        {"label": "Continue", "goto": "gly.pyruvate"},
+        {"label": "Examine the pyruvate kinase active site", "goto": "gly.pyruvate", "tags": ["mc:observe"]},
+        {"label": "Try to edit pyruvate kinase", "goto": "edit.prompt", "tags": ["edit:offer"]}
       ]
     },
     "gly.pyruvate": {
@@ -72,7 +77,8 @@
         {"op": "hide_all"}
       ],
       "choices": [
-        {"label": "Continue", "goto": "pyr.branch"}
+        {"label": "Continue", "goto": "pyr.branch"},
+        {"label": "Examine the pyruvate branch point", "goto": "pyr.branch", "tags": ["mc:observe"]}
       ]
     }
   }
