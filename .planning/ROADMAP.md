@@ -130,15 +130,20 @@ Plans:
   3. The **choice-point contract** is documented: for each choice node, the skeleton specifies the player-facing options, the edge each selects, and the MolActions fired on traversal — making the "text MC → graph edge" integration an explicit, reviewable spec (not implicit in interpreter code)
   4. The **edit-node contract** is documented: the skeleton marks which story nodes allow edits, the EditIntent each player-edit-action generates, and the branch/bad-ending node the EditRouter routes to (known → defined branch node, unknown → bad-ending pool node) — making the "editing ↔ story" integration an explicit, reviewable spec
   5. Every node is explicitly classified as MC-choice, edit-allowed, both, or neither — resolving the "which is multiple choice, which is editing" question as a per-node design decision, not an emergent property of the implementation
-**Plans**: 6 plans in 3 waves (3 parallel skeleton-authoring plans in Wave 1; manifest+SC2-tests + design-doc parallel in Wave 2; human-review checkpoint in Wave 3). `/gsd-research-phase` NOT needed — design on already-resolved framings (two parallel research tracks completed: pathway topology + graph contracts). Human review of the branch-point mapping against spec.md is required (Plan 06 checkpoint).
+**Plans**: 11 plans in 3 waves (3 original skeleton plans + manifest/tests + design doc DONE; 5 replan plans 07-11 driven by disease-mutant research + Continue-to-MC directive; human-review checkpoint 06 reviews the FINAL post-replan skeleton). The replan added 8 disease-mutant edit-allowed promotions (14 edit-allowed total), converted all single-"Continue" nodes to MC (0 single-Continue), fixed the pyr.pdh cast PDB (2OZL phospho-mimic -> 6CFO WT) + the etc.complex_i claim_id (PLACEHOLDER -> DIS-NDUFS8-01-cand), reframed tca.citrate_synthase (edit:structural), and added DIS-*-cand CANDIDATE claim references. `/gsd-research-phase` NOT needed for the original framings (pathway topology + graph contracts done); 3 disease-mutant research docs (glycolysis + tca + etc) drove the replan. Human review of the branch-point mapping + the 14-row edit-node contract + the 3 CRITICAL disease-mutant decisions (IDH3A/IDH1, cast-PDB, CS reframe) is required (Plan 06 checkpoint).
 
 Plans:
-- [ ] 05.1-01-PLAN.md — Early-path skeleton (intro + glycolysis + pyruvate branch + anaerobic 3-ending) (Wave 1)
-- [ ] 05.1-02-PLAN.md — TCA + ETC skeleton (RNG shuffle + soul-jump arc + True ending + Normal branch) (Wave 1)
-- [ ] 05.1-03-PLAN.md — Endings skeleton (Good + Normal + Bad endings + edit.prompt stub) (Wave 1)
-- [ ] 05.1-04-PLAN.md — Manifest + SC2 reachability validation (green/red tests on the real skeleton) (Wave 2)
-- [ ] 05.1-05-PLAN.md — 05.1-DESIGN.md (choice-point contract SC3 + edit-node contract SC4 + SC5 classification) (Wave 2)
-- [ ] 05.1-06-PLAN.md — Human review checkpoint (branch-point mapping + contracts + open questions) (Wave 3)
+- [x] 05.1-01-PLAN.md — Early-path skeleton (intro + glycolysis + pyruvate branch + anaerobic 3-ending) (Wave 1) ✓
+- [x] 05.1-02-PLAN.md — TCA + ETC skeleton (RNG shuffle + soul-jump arc + True ending + Normal branch) (Wave 1) ✓
+- [x] 05.1-03-PLAN.md — Endings skeleton (Good + Normal + Bad endings + edit.prompt stub) (Wave 1) ✓
+- [x] 05.1-04-PLAN.md — Manifest + SC2 reachability validation (green/red tests on the real skeleton) (Wave 2) ✓
+- [x] 05.1-05-PLAN.md — 05.1-DESIGN.md (choice-point contract SC3 + edit-node contract SC4 + SC5 classification) (Wave 2) ✓
+- [ ] 05.1-06-PLAN.md — Human review checkpoint of the FINAL post-replan skeleton (branch-point mapping + 14-row edit-node contract + 24 open questions + 3 CRITICAL disease-mutant decisions + SC2/invariant validation) (Wave 3)
+- [ ] 05.1-07-PLAN.md — Glycolysis + Pyruvate skeleton replan (gly.pyruvate_kinase promote [PKLR]; 5 Continue-to-MC; pyr.pdh 2OZL->6CFO cast fix; DIS-PFKM/PKLR/PDHA1-cand claims) (Wave 1, replan)
+- [ ] 05.1-08-PLAN.md — TCA skeleton replan (4 enzyme promotions [IDH3A default/SUCLG1/FH/MDH2]; tca.aconitase DIS-ACO2 claim; tca.entry/akg_dh Continue-to-MC; tca.citrate_synthase edit:structural reframe) (Wave 1, replan)
+- [ ] 05.1-09-PLAN.md — ETC skeleton replan (3 complex promotions [SDHA/CYC1/COX4I1]; etc.complex_i PLACEHOLDER->DIS-NDUFS8-01-cand claim_id fix; etc.atp_synthase Continue-to-MC) (Wave 1, replan)
+- [ ] 05.1-10-PLAN.md — 05.1-DESIGN.md update (SC5 table for 14 edit-allowed/0 single-Continue; 14-row edit-node contract + CS structural exception + IDH3A-default flag; 11 new disease-mutant open questions) (Wave 2, replan)
+- [ ] 05.1-11-PLAN.md — Reachability tests + 2 replan-invariant assertions (0 single-Continue; 14 edit-allowed; cast-PDB/claim_id fixes) + regenerate diagram (SVG/ASCII) + GRAPH-DIAGRAM.md (Wave 2, replan)
 
 ### Phase 5.2: Cast & Hero Representation Design — Visual Language + Scene Templates (INSERTED)
 **Goal**: The 3D representation language is designed as a reviewable artifact — the C14 hero highlight convention (how the player sees "their" atom in any structure), the per-stage-type scene templates (which residues are shown, in what representation, with what zoom/color), and the cast-reveal convention (how an enzyme appears when first encountered) — headless-prototyped on placeholder/bundled structures, so Phase 6 implements an already-reviewed visual design rather than inventing it inside the overloaded first-Qt phase. This directly resolves the user's concern about cast representation and hero representation.
@@ -333,7 +338,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 | 3. PyMOL cmd Layer | 3/3 ✓ | Complete | 2026-08-14 |
 | 4. Editing + Protonation + Restore | 5/5 ✓ | Complete | 2026-08-15 |
 | 5. Pre-Content Key Decisions (parallel) | 5/5 ✓ | Complete | 2026-08-15 |
-| 5.1 Story Graph Design (INSERTED) | 0/TBD | Not started | - |
+| 5.1 Story Graph Design (INSERTED) | 5/11 (replan: 07-11 planned, 06 updated) | In progress | - |
 | 5.2 Representation Design (INSERTED) | 0/TBD | Not started | - |
 | 6. Qt UI + MVP (Glucose + True+Bad) | 0/TBD | Not started | - |
 | 7. Content I: All Glucose Endings | 0/TBD | Not started | - |
