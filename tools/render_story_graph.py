@@ -657,134 +657,374 @@ def _ascii_summary(nodes, node_order):
             % (len(node_order), ending_total, tier_str or "0", edit_n, rng_n))
 
 
-def _ascii_box(nid, node, width=26):
-    # type: (str, dict, int) -> list
-    """Return the lines of a connected-flowchart box for a node.
+# --- Spatial ASCII layout engine --------------------------------------------
 
-    The box has a top border, a title line (id + markers), an optional desc
-    line, and a bottom border with a connector stem (``└─┬─┘``) so the next
-    arrow can attach. Endings use a closed bottom (``└───┘``). The box is
-    ``width`` chars wide (content area = width-2).
-    """
+class _CharBuf(object):
+    """2D character buffer for drawing connected-box ASCII flowcharts."""
+
+    def __init__(self):
+        self.grid = []  # list of list of chars, grows as needed
+
+    def _ensure(self, x, y):
+        while len(self.grid) <= y:
+            self.grid.append([])
+        for row in self.grid:
+            while len(row) <= x:
+                row.append(' ')
+
+    def put(self, x, y, ch):
+        # type: (int, int, str) -> None
+        self._ensure(x, y)
+        if 0 <= y < len(self.grid) and 0 <= x < len(self.grid[y]):
+            self.grid[y][x] = ch
+
+    def put_text(self, x, y, text):
+        # type: (int, int, str) -> None
+        for i, ch in enumerate(text):
+            self.put(x + i, y, ch)
+
+    def hline(self, x1, x2, y, ch='\u2500'):
+        # type: (int, int, int, str) -> None
+        for x in range(min(x1, x2), max(x1, x2) + 1):
+            self.put(x, y, ch)
+
+    def vline(self, x, y1, y2, ch='\u2502'):
+        # type: (int, int, int, str) -> None
+        for y in range(min(y1, y2), max(y1, y2) + 1):
+            self.put(x, y, ch)
+
+    def to_lines(self):
+        # type: () -> list
+        return [''.join(row).rstrip() for row in self.grid]
+
+
+def _box_size(nid, node):
+    # type: (str, dict) -> tuple
+    """Return (width, height, inner) for a node box that fits content (no truncation)."""
     markers = _ascii_markers(nid, node)
-    is_ending, _is_edit, _is_rng, _is_stub, _has_pdb = node_style(nid, node)
-    inner = width - 2
-    title = nid + markers
-    if len(title) > inner:
-        title = title[:inner]
     desc = short_desc(node)
-    lines = []
-    lines.append("  " + "\u250c" + "\u2500" * inner + "\u2510")
-    # title line, centered-ish (left-padded)
-    pad = max(0, (inner - len(title)) // 2)
-    lines.append("  " + "\u2502" + " " * pad + title + " " * (inner - pad - len(title)) + "\u2502")
+    title = nid + markers
+    # inner = content area; fit the longest line, min 16
+    inner = max(len(title) + 2, len(desc) + 2 if desc else 0, 16)
+    width = inner + 2  # +2 for borders
+    is_ending, _a, _b, _c, _d = node_style(nid, node)
+    lines = 2  # top + bottom borders
+    lines += 1  # title line
     if desc:
-        if len(desc) > inner:
-            desc = desc[:inner]
-        dpad = max(0, (inner - len(desc)) // 2)
-        lines.append("  " + "\u2502" + " " * dpad + desc + " " * (inner - dpad - len(desc)) + "\u2502")
-    # bottom: endings have no connector stem
-    if is_ending:
-        lines.append("  " + "\u2514" + "\u2500" * inner + "\u2518")
-    else:
-        half = inner // 2
-        lines.append("  " + "\u2514" + "\u2500" * half + "\u252c" + "\u2500" * (inner - half - 1) + "\u2518")
-    return lines
+        lines += 1
+    if len(title) > inner - 2 and markers:
+        # id + markers don't fit on one line; markers get their own line
+        lines += 1
+    return width, lines, inner
 
 
-def _ascii_arrows(nid, outs, nodes, width=26):
-    # type: (str, list, dict, int) -> list
-    """Return connector lines below a box for its outgoing edges.
-
-    The FIRST solid (non-dashed, non-trap) forward edge becomes the vertical
-    stem (``│`` + ``▼ label -> target``). Other edges branch off as labeled
-    side arrows. Dashed/structural edges (edit:offer, stubs, traps) use
-    ``┄┄► label -> target`` on their own lines. Endings produce no arrows.
-    """
-    if not outs:
-        return []
+def _draw_box_simple(nid, node, width, inner):
+    # type: (str, dict, int, int) -> list
+    """Return box lines as a list of strings (for the loose-nodes section)."""
+    markers = _ascii_markers(nid, node)
+    desc = short_desc(node)
+    title = nid + markers
     out = []
-    stem_used = False
-    # Center column under the box's ┬ stem
-    stem_col = 2 + (width // 2)
-    side_edges = []
-    stem_edge = None
-    for (tgt, choice) in outs:
-        dashed, is_trap = classify_edge(nid, choice)
-        if not dashed and not is_trap and stem_edge is None:
-            stem_edge = (tgt, choice, dashed, is_trap)
-        else:
-            side_edges.append((tgt, choice, dashed, is_trap))
-    # Stem (primary forward edge)
-    if stem_edge is not None:
-        tgt, choice, _d, _t = stem_edge
-        lab = edge_label(nid, choice)
-        # vertical stem + label
-        out.append(" " * stem_col + "\u2502")
-        arrow_line = " " * stem_col + "\u25bc  " + lab + "  \u2500\u2500\u2500\u2500\u25ba  " + tgt
-        out.append(arrow_line)
-    # Side / dashed / trap edges as labeled arrows on their own lines
-    for (tgt, choice, dashed, is_trap) in side_edges:
-        lab = edge_label(nid, choice)
-        marker = " [TRAP]" if is_trap else ""
-        if dashed:
-            arr = "\u2500\u2500\u2500\u2500\u251c\u2500\u2510 \u2504\u2504\u25ba " + lab + marker + " \u2500\u2500\u2500\u2500\u25ba " + tgt
-        else:
-            arr = "\u2500\u2500\u2500\u2500\u251c\u2500\u2510 " + lab + marker + " \u2500\u2500\u2500\u2500\u25ba  " + tgt
-        out.append("  " + arr)
-    # blank separator
-    out.append("")
+    out.append('  \u250c' + '\u2500' * inner + '\u2510')
+    row = '\u2502'
+    if len(title) > inner - 2 and markers:
+        row += nid + ' ' * (inner - len(nid))
+    else:
+        row += title + ' ' * (inner - len(title))
+    row += '\u2502'
+    out.append('  ' + row)
+    if len(title) > inner - 2 and markers:
+        m = markers.strip()
+        out.append('  \u2502' + m + ' ' * (inner - len(m)) + '\u2502')
+    if desc:
+        d = desc[:inner] + ' ' * (inner - min(len(desc), inner))
+        out.append('  \u2502' + d + '\u2502')
+    out.append('  \u2514' + '\u2500' * inner + '\u2518')
     return out
 
 
-def render_ascii(nodes, node_order, edges, out_path, title, node_count):
-    # type: (...) -> None
-    """Render a REAL connected-box ASCII flowchart.
+def _draw_box(buf, x, y, nid, node, width, inner):
+    # type: (_CharBuf, int, int, str, dict, int, int) -> tuple
+    """Draw a node box at char position (x, y). Returns (center_x, bottom_y, top_y)."""
+    markers = _ascii_markers(nid, node)
+    is_ending, _a, _b, _c, _d = node_style(nid, node)
+    desc = short_desc(node)
+    title = nid + markers
+    top = '\u250c' + '\u2500' * inner + '\u2510'
+    bot = '\u2514' + '\u2500' * inner + '\u2518'
+    buf.put_text(x, y, top)
+    row = y + 1
+    if len(title) > inner - 2 and markers:
+        # id on first line, markers on second
+        t1 = nid + ' ' * (inner - len(nid))
+        buf.put_text(x, row, '\u2502' + t1 + '\u2502')
+        row += 1
+        t2 = markers.strip() + ' ' * (inner - len(markers.strip()))
+        buf.put_text(x, row, '\u2502' + t2 + '\u2502')
+        row += 1
+    else:
+        t1 = title + ' ' * (inner - len(title))
+        buf.put_text(x, row, '\u2502' + t1 + '\u2502')
+        row += 1
+    if desc:
+        d = desc[:inner] + ' ' * (inner - min(len(desc), inner))
+        buf.put_text(x, row, '\u2502' + d + '\u2502')
+        row += 1
+    buf.put_text(x, row, bot)
+    center_x = x + width // 2
+    return center_x, row, y  # center_x, bottom_y, top_y
 
-    Each node is a box; the primary forward edge becomes a vertical ``│ ▼``
-    stem connecting to the next box; branches/cond/weight/edit:offer/trap
-    edges branch off as labeled arrows (``├─►`` / ``┄┄►``). Endings are
-    terminal (closed bottom, no outgoing arrow). Cross-section edges name
-    the target node (the reader follows it to the target stage section).
+
+def _compute_ascii_layout(nodes, node_order, edges):
+    # type: (dict, list, list) -> tuple
+    """BFS layout: assign (level, col) to each node.
+
+    Returns (positions, spatial_edges, note_edges).
+    - spatial_edges: (src, tgt, [labels]) drawn as L-shaped connector lines.
+      Labels from ALL solid choices to that target are merged (e.g. Continue
+      + Observe both going to gly.g6p -> one connector with 2 labels).
+    - note_edges: {src: [(tgt, label, is_dashed, is_trap)]} drawn as text
+      annotations. ONLY actually-dashed/trap/back-edge edges are notes.
+      Same-target solid duplicates are NOT notes (labels merged into spatial).
     """
-    ordered_keys, rows = group_by_stage(nodes, node_order)
     edges_by_src = collections.defaultdict(list)
     for (src, tgt, choice) in edges:
         edges_by_src[src].append((tgt, choice))
 
-    W = 80
-    lines = []
-    lines.append("=" * W)
-    lines.append(title)
-    lines.append(
-        "Legend: \u2502\u25bc\u2500\u25ba = player path | "
-        "\u2504\u2504\u25ba = edit:offer/structural | "
-        "[TRAP] = RNG cycle-trap")
-    lines.append(
-        "        [EDIT] = edit-allowed (14) | [PDB] = PDB load | "
-        "[TRUE/GOOD/NORMAL/BAD] = ending tier")
-    lines.append(_ascii_summary(nodes, node_order))
-    lines.append("=" * W)
-    lines.append("")
+    positions = {}  # node_id -> (level, col)
+    spatial_edges = []  # (src, tgt, [labels])
+    note_edges = collections.defaultdict(list)  # src -> [(tgt, label, dashed, is_trap)]
+    occupied = collections.defaultdict(set)  # level -> set of cols
 
-    for key in ordered_keys:
-        nids = rows[key]
-        label = STAGE_LABELS.get(key, key.title())
-        lines.append("-" * W)
-        lines.append("=== %s (%d nodes) ===" % (label, len(nids)))
-        lines.append("-" * W)
-        lines.append("")
-        for nid in nids:
+    start = None
+    for nid in node_order:
+        if nid.startswith('intro.') or nid == node_order[0]:
+            start = nid
+            break
+    if not start:
+        start = node_order[0]
+
+    from collections import deque
+    queue = deque([start])
+    positions[start] = (0, 0)
+    occupied[0].add(0)
+
+    while queue:
+        nid = queue.popleft()
+        level, col = positions[nid]
+        outs = edges_by_src.get(nid, [])
+        child_level = level + 1
+
+        # Group solid edges by target (merge same-target labels)
+        solid_by_tgt = collections.OrderedDict()  # tgt -> [choices]
+        notes = []
+        for (tgt, choice) in outs:
+            dashed, is_trap = classify_edge(nid, choice)
+            if dashed or is_trap:
+                notes.append((tgt, edge_label(nid, choice), True, is_trap))
+            elif tgt in positions and positions[tgt][0] <= level:
+                # back-edge / already placed -> note (solid but can't draw spatially)
+                notes.append((tgt, edge_label(nid, choice), False, False))
+            else:
+                solid_by_tgt.setdefault(tgt, []).append(choice)
+
+        spatial_children = list(solid_by_tgt.keys())  # distinct targets
+        n = len(spatial_children)
+        if n == 0:
+            pass
+        elif n == 1:
+            tgt = spatial_children[0]
+            cc = col
+            if cc in occupied[child_level]:
+                off = 1
+                while True:
+                    if col + off not in occupied[child_level]:
+                        cc = col + off
+                        break
+                    if col - off not in occupied[child_level]:
+                        cc = col - off
+                        break
+                    off += 1
+            if tgt not in positions:
+                positions[tgt] = (child_level, cc)
+                occupied[child_level].add(cc)
+                queue.append(tgt)
+            labels = [edge_label(nid, c) for c in solid_by_tgt[tgt]]
+            spatial_edges.append((nid, tgt, labels))
+        else:
+            for i, tgt in enumerate(spatial_children):
+                cc = col + (i - (n - 1) // 2)
+                while cc < 0:
+                    cc += 1
+                if cc in occupied[child_level]:
+                    off = 1
+                    while True:
+                        if col + (i - (n - 1) // 2) + off not in occupied[child_level]:
+                            cc = col + (i - (n - 1) // 2) + off
+                            break
+                        if col + (i - (n - 1) // 2) - off not in occupied[child_level]:
+                            cc = col + (i - (n - 1) // 2) - off
+                            break
+                        off += 1
+                if tgt not in positions:
+                    positions[tgt] = (child_level, cc)
+                    occupied[child_level].add(cc)
+                    queue.append(tgt)
+                labels = [edge_label(nid, c) for c in solid_by_tgt[tgt]]
+                spatial_edges.append((nid, tgt, labels))
+
+        note_edges[nid] = notes
+
+    return positions, spatial_edges, note_edges
+
+
+def render_ascii(nodes, node_order, edges, out_path, title, node_count):
+    # type: (...) -> None
+    """Render a spatial multi-column connected-box ASCII flowchart.
+
+    Nodes are placed on a 2D character grid via BFS layout (branches spread
+    into separate columns side-by-side). Boxes are connected by L-shaped
+    lines (vertical + horizontal + arrow). Dashed/structural edges
+    (edit:offer, trap, stubs, cycle back-edges) are drawn as text notes
+    beside the source box, not as spatial lines (they would tangle).
+    Endings are terminal boxes. No text truncation -- boxes grow to fit.
+    """
+    positions, spatial_edges, note_edges = _compute_ascii_layout(
+        nodes, node_order, edges)
+
+    # Box dimensions
+    box_info = {}  # nid -> (width, height, inner)
+    for nid in positions:
+        w, h, inner = _box_size(nid, nodes[nid])
+        box_info[nid] = (w, h, inner)
+
+    # Column x-positions
+    cols = sorted(set(pos[1] for pos in positions.values()))
+    col_w = {}
+    for nid, (lv, c) in positions.items():
+        col_w[c] = max(col_w.get(c, 0), box_info[nid][0])
+    col_gap = 8
+    col_x = {}
+    x_cursor = 4
+    for c in cols:
+        col_x[c] = x_cursor
+        x_cursor += col_w.get(c, 24) + col_gap
+    total_w = x_cursor + 4
+
+    # Level y-positions
+    max_level = max(pos[0] for pos in positions.values()) if positions else 0
+    level_h = {}
+    for nid, (lv, c) in positions.items():
+        level_h[lv] = max(level_h.get(lv, 0), box_info[nid][1])
+    connector_h = 5
+    level_y = {}
+    y_cursor = 6  # leave room for legend
+    for lv in range(max_level + 1):
+        level_y[lv] = y_cursor
+        y_cursor += level_h.get(lv, 3) + connector_h
+    total_h = y_cursor + 4
+
+    buf = _CharBuf()
+
+    # Draw boxes
+    box_geo = {}  # nid -> (center_x, top_y, bottom_y, x_left)
+    for nid, (lv, c) in positions.items():
+        bx = col_x[c] + (col_w.get(c, 0) - box_info[nid][0]) // 2
+        by = level_y[lv]
+        cx, bot_y, top_y = _draw_box(
+            buf, bx, by, nid, nodes[nid], box_info[nid][0], box_info[nid][2])
+        box_geo[nid] = (cx, top_y, bot_y, bx)
+
+    # Draw spatial connectors (L-shaped: down from src center, across, down to tgt top)
+    for (src, tgt, labels) in spatial_edges:
+        if src not in box_geo or tgt not in box_geo:
+            continue
+        sx, _st, s_bot, _sx_left = box_geo[src]
+        tx, t_top, _t_bot, _tx_left = box_geo[tgt]
+        lab = ' / '.join(labels) if labels else ''
+        mid_y = s_bot + (t_top - s_bot) // 2
+        if mid_y <= s_bot:
+            mid_y = s_bot + 2
+        if sx != tx:
+            # L-shaped: vertical down to mid_y-1, horizontal at mid_y, vertical to target
+            buf.vline(sx, s_bot + 1, mid_y - 1)
+            buf.hline(min(sx, tx), max(sx, tx), mid_y)
+            buf.put(sx, mid_y, '\u252c')  # T-down at source side
+            buf.put(tx, mid_y, '\u252c')  # T-down at target side
+            buf.vline(tx, mid_y + 1, t_top - 1)
+        else:
+            # straight vertical
+            buf.vline(sx, s_bot + 1, t_top - 1)
+        buf.put(tx, t_top - 1, '\u25bc')
+        # label placed near the arrowhead, to the right of ▼
+        if lab:
+            buf.put_text(tx + 2, t_top - 1, lab)
+
+    # Draw note edges (dashed/structural/trap/cycle) as text annotations
+    for nid, notes in note_edges.items():
+        if not notes or nid not in box_geo:
+            continue
+        _cx, _top, bot, x_left = box_geo[nid]
+        note_y = bot + 1
+        for (tgt, lab, is_dashed, is_trap) in notes:
+            if is_trap:
+                txt = '  \u2504\u2504\u25ba %s \u2500\u2500\u25ba %s  [TRAP]' % (lab, tgt)
+            elif is_dashed:
+                txt = '  \u2504\u2504\u25ba %s \u2500\u2500\u25ba %s' % (lab, tgt)
+            else:
+                # solid back-edge/cycle: use solid arrow, not dashed
+                txt = '  \u2500\u2500\u25ba %s \u2500\u2500\u25ba %s' % (lab, tgt)
+            buf.put_text(x_left, note_y, txt)
+            note_y += 1
+
+    # Convert buffer to lines
+    grid_lines = buf.to_lines()
+
+    # Unreached nodes (only reachable via dashed/structural edges — not in BFS)
+    unreached = [nid for nid in node_order if nid not in positions]
+    loose_lines = []
+    if unreached:
+        loose_lines.append('')
+        loose_lines.append('-' * min(total_w, 100))
+        loose_lines.append('=== Unreached nodes (%d) — structural/bad-ending pool ===' % len(unreached))
+        loose_lines.append('-' * min(total_w, 100))
+        loose_lines.append('')
+        edges_by_src_loose = collections.defaultdict(list)
+        for (src, tgt, choice) in edges:
+            edges_by_src_loose[src].append((tgt, choice))
+        for nid in unreached:
             node = nodes[nid]
-            box = _ascii_box(nid, node)
-            lines.extend(box)
-            outs = edges_by_src.get(nid, [])
-            arrows = _ascii_arrows(nid, outs, nodes)
-            lines.extend(arrows)
-        lines.append("")
+            w, h, inner = _box_size(nid, node)
+            box = _draw_box_simple(nid, node, w, inner)
+            loose_lines.extend(box)
+            outs = edges_by_src_loose.get(nid, [])
+            for (tgt, choice) in outs:
+                dashed, is_trap = classify_edge(nid, choice)
+                lab = edge_label(nid, choice)
+                marker = '  [TRAP]' if is_trap else ''
+                arr = '\u2504\u2504\u25ba' if dashed else '\u2500\u2500\u25ba'
+                loose_lines.append('  %s %s%s \u2500\u2500\u25ba %s' % (arr, lab, marker, tgt))
+            loose_lines.append('')
 
-    with open(out_path, "w", encoding="utf-8") as fh:
-        fh.write("\n".join(lines) + "\n")
+    # Build header (legend + summary)
+    header = [
+        '=' * min(total_w, 100),
+        title,
+        'Legend: \u2502\u25bc\u2500 = player path (spatial)  |  '
+        '\u2504\u2504\u25ba = edit:offer/structural/cycle (note)  |  '
+        '[TRAP] = RNG cycle-trap',
+        '        [EDIT] = edit-allowed (14)  |  [PDB] = PDB load  |  '
+        '[TRUE/GOOD/NORMAL/BAD] = ending tier',
+        _ascii_summary(nodes, node_order),
+        '=' * min(total_w, 100),
+        '',
+    ]
+
+    # Merge header + grid + loose
+    all_lines = header + grid_lines + loose_lines
+
+    with open(out_path, 'w', encoding='utf-8') as fh:
+        fh.write('\n'.join(all_lines) + '\n')
 
 
 # ---------------------------------------------------------------------------

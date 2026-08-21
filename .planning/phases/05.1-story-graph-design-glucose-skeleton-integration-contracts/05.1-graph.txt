@@ -1,351 +1,296 @@
-================================================================================
+====================================================================================================
 Glucose Story Graph Skeleton (Phase 5.1)
-Legend: │▼─► = player path | ┄┄► = edit:offer/structural | [TRAP] = RNG cycle-trap
-        [EDIT] = edit-allowed (14) | [PDB] = PDB load | [TRUE/GOOD/NORMAL/BAD] = ending tier
+Legend: │▼─ = player path (spatial)  |  ┄┄► = edit:offer/structural/cycle (note)  |  [TRAP] = RNG cycle-trap
+        [EDIT] = edit-allowed (14)  |  [PDB] = PDB load  |  [TRUE/GOOD/NORMAL/BAD] = ending tier
 Summary: 43 nodes | 11 endings (1T/3G/2N/5B) | 14 edit-allowed | 1 RNG
-================================================================================
-
---------------------------------------------------------------------------------
-=== Intro (3 nodes) ===
---------------------------------------------------------------------------------
-
-  ┌────────────────────────┐
-  │      intro.select      │
-  │Choose your form — which│
-  └────────────┬───────────┘
-               │
-               ▼  Glucose — enter t...  ────►  gly.start
-  ────├─┐ ┄┄► Phase 8 stub ────► fa.stub
-  ────├─┐ ┄┄► Phase 8 stub ────► alc.stub
-
-  ┌────────────────────────┐
-  │     fa.stub [STUB]     │
-  │This character is not ye│
-  └────────────┬───────────┘
-  ────├─┐ ┄┄► Back ────► intro.select
-
-  ┌────────────────────────┐
-  │    alc.stub [STUB]     │
-  │This character is not ye│
-  └────────────┬───────────┘
-  ────├─┐ ┄┄► Back ────► intro.select
+====================================================================================================
 
 
---------------------------------------------------------------------------------
-=== Glycolysis (6 nodes) ===
---------------------------------------------------------------------------------
-
-  ┌────────────────────────┐
-  │       gly.start        │
-  │glucose arrives in the c│
-  └────────────┬───────────┘
-               │
-               ▼  Continue  ────►  gly.g6p
-  ────├─┐ Examine the gluco... ────►  gly.g6p
-
-  ┌────────────────────────┐
-  │        gly.g6p         │
-  │hexokinase traps glucose│
-  └────────────┬───────────┘
-               │
-               ▼  Continue  ────►  gly.pfk
-  ────├─┐ Examine the G6P s... ────►  gly.pfk
-
-  ┌────────────────────────┐
-  │  gly.pfk [EDIT] [PDB]  │
-  │PFK-1, the committed ste│
-  └────────────┬───────────┘
-               │
-               ▼  Continue glycolysis  ────►  gly.fbp_to_pyruvate
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
-
-  ┌────────────────────────┐
-  │  gly.fbp_to_pyruvate   │
-  │aldolase splits the C6 i│
-  └────────────┬───────────┘
-               │
-               ▼  Continue  ────►  gly.pyruvate_kinase
-  ────├─┐ Examine the trios... ────►  gly.pyruvate_kinase
-
-  ┌────────────────────────┐
-  │gly.pyruvate_kinase [EDI│
-  │pyruvate kinase strikes:│
-  └────────────┬───────────┘
-               │
-               ▼  Continue  ────►  gly.pyruvate
-  ────├─┐ Examine the pyruv... ────►  gly.pyruvate
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
-
-  ┌────────────────────────┐
-  │      gly.pyruvate      │
-  │you arrive at pyruvate, │
-  └────────────┬───────────┘
-               │
-               ▼  Continue  ────►  pyr.branch
-  ────├─┐ Examine the pyruv... ────►  pyr.branch
 
 
---------------------------------------------------------------------------------
-=== Pyruvate Branch + Anaerobic (7 nodes) ===
---------------------------------------------------------------------------------
-
-  ┌────────────────────────┐
-  │       pyr.branch       │
-  │the air is thin. What fa│
-  └────────────┬───────────┘
-               │
-               ▼  cond: not flags.host_o2_low  ────►  pyr.pdh
-  ────├─┐ cond: flags.host_o2_low ────►  anaer.entry
-
-  ┌────────────────────────┐
-  │  pyr.pdh [EDIT] [PDB]  │
-  │PDH strips your first ca│
-  └────────────┬───────────┘
-               │
-               ▼  Continue into the...  ────►  tca.entry
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
-
-  ┌────────────────────────┐
-  │      anaer.entry       │
-  │the air runs out; your h│
-  └────────────┬───────────┘
-               │
-               ▼  Lactic fermentati...  ────►  anaer.ldh
-  ────├─┐ Ethanolic ferment... ────►  anaer.ethanolic
-  ────├─┐ The energy runs o... ────►  anaer.crisis
-
-  ┌────────────────────────┐
-  │    anaer.ldh [PDB]     │
-  │lactate dehydrogenase ca│
-  └────────────┬───────────┘
-               │
-               ▼  Continue to the l...  ────►  anaer.lactic
-  ────├─┐ Examine the LDH a... ────►  anaer.lactic
-
-  ┌────────────────────────┐
-  │  anaer.lactic [GOOD]   │
-  │you are retained as lact│
-  └────────────────────────┘
-  ┌────────────────────────┐
-  │anaer.ethanolic [NORMAL]│
-  │you drift off as CO2 and│
-  └────────────────────────┘
-  ┌────────────────────────┐
-  │   anaer.crisis [BAD]   │
-  │fermentation cannot sust│
-  └────────────────────────┘
-
---------------------------------------------------------------------------------
-=== TCA Cycle (12 nodes) ===
---------------------------------------------------------------------------------
-
-  ┌────────────────────────┐
-  │       tca.entry        │
-  │acetyl-CoA condenses wit│
-  └────────────┬───────────┘
-               │
-               ▼  Continue  ────►  tca.citrate_synthase
-  ────├─┐ Examine the TCA c... ────►  tca.citrate_synthase
-
-  ┌────────────────────────┐
-  │tca.citrate_synthase [ED│
-  │citrate synthase forms (│
-  └────────────┬───────────┘
-               │
-               ▼  Continue to aconi...  ────►  tca.aconitase
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
-
-  ┌────────────────────────┐
-  │tca.aconitase [EDIT] [PD│
-  │aconitase flips cis-acon│
-  └────────────┬───────────┘
-               │
-               ▼  Continue to the s...  ────►  tca.shuffle
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
-
-  ┌────────────────────────┐
-  │tca.shuffle [RNG] [EDIT]│
-  │the great wheel spins. F│
-  └────────────┬───────────┘
-               │
-               ▼  w=0.5  ────►  tca.co2_turn1
-  ────├─┐ w=0.5 ────►  tca.co2_turn2
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
-  ────├─┐ ┄┄► TRAP [TRAP] ────► bad.cycle_trap_host_death
-
-  ┌────────────────────────┐
-  │     tca.co2_turn1      │
-  │one of your carbons leav│
-  └────────────┬───────────┘
-               │
-               ▼  The cycle turns a...  ────►  tca.shuffle
-  ────├─┐ Continue onward —... ────►  tca.isocitrate_dh
-
-  ┌────────────────────────┐
-  │     tca.co2_turn2      │
-  │your other carbon leaves│
-  └────────────┬───────────┘
-               │
-               ▼  The cycle turns a...  ────►  tca.shuffle
-  ────├─┐ Continue onward —... ────►  tca.isocitrate_dh
-
-  ┌────────────────────────┐
-  │tca.isocitrate_dh [EDIT]│
-  │isocitrate dehydrogenase│
-  └────────────┬───────────┘
-               │
-               ▼  Continue  ────►  tca.akg_dh
-  ────├─┐ Examine the isoci... ────►  tca.akg_dh
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
-
-  ┌────────────────────────┐
-  │       tca.akg_dh       │
-  │alpha-ketoglutarate dehy│
-  └────────────┬───────────┘
-               │
-               ▼  Continue  ────►  tca.succinyl_coa_synthetase
-  ────├─┐ Examine the alpha... ────►  tca.succinyl_coa_synthetase
-
-  ┌────────────────────────┐
-  │tca.succinyl_coa_synthet│
-  │succinyl-CoA synthetase │
-  └────────────┬───────────┘
-               │
-               ▼  Continue  ────►  tca.fumarase
-  ────├─┐ Examine the succi... ────►  tca.fumarase
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
-
-  ┌────────────────────────┐
-  │  tca.fumarase [EDIT]   │
-  │fumarase hydrates fumara│
-  └────────────┬───────────┘
-               │
-               ▼  Continue  ────►  tca.malate_dh
-  ────├─┐ Examine the fumar... ────►  tca.malate_dh
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
-
-  ┌────────────────────────┐
-  │  tca.malate_dh [EDIT]  │
-  │malate dehydrogenase oxi│
-  └────────────┬───────────┘
-               │
-               ▼  The cycle turns a...  ────►  tca.shuffle
-  ────├─┐ Continue onward —... ────►  tca.divert_to_good
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
-
-  ┌────────────────────────┐
-  │   tca.divert_to_good   │
-  │stay in the cycle and fo│
-  └────────────┬───────────┘
-               │
-               ▼  Follow the soul t...  ────►  etc.entry
-  ────├─┐ Divert to fatty-a... ────►  end.good.fatty_acid
-  ────├─┐ Divert to amino-a... ────►  end.good.amino_acid
 
 
---------------------------------------------------------------------------------
-=== ETC + ATP (True ending) (7 nodes) ===
---------------------------------------------------------------------------------
 
-  ┌────────────────────────┐
-  │       etc.entry        │
-  │your spark (the electron│
-  └────────────┬───────────┘
-               │
-               ▼  Follow the soul i...  ────►  etc.complex_i
-  ────├─┐ Let go — drift aw... ────►  end.normal.co2
+       ┌──────────────────────────────┐
+       │intro.select                  │
+       │Choose your form — which ...  │
+       └──────────────────────────────┘
+         ┄┄► Phase 8 stub ──► fa.stub
+         ┄┄► Phase 8 stub ──► alc.stub
+                       │
+                       │
+                       ▼ Glucose — enter t...
+       ┌──────────────────────────────┐
+       │gly.start                     │
+       │glucose arrives in the cy...  │
+       └──────────────────────────────┘
+                       │
+                       │
+                       │
+                       │
+                       ▼ Continue / Examine the gluco...
+       ┌──────────────────────────────┐
+       │gly.g6p                       │
+       │hexokinase traps glucose ...  │
+       └──────────────────────────────┘
+                       │
+                       │
+                       │
+                       │
+                       ▼ Continue / Examine the G6P s...
+       ┌──────────────────────────────┐
+       │gly.pfk [EDIT] [PDB]          │
+       │PFK-1, the committed step...  │
+       └──────────────────────────────┘
+         ┄┄► edit:offer ──► edit.prompt
+                       │
+                       │
+                       │
+                       ▼ Continue glycolysis
+       ┌──────────────────────────────┐
+       │gly.fbp_to_pyruvate           │
+       │aldolase splits the C6 in...  │
+       └──────────────────────────────┘
+                       │
+                       │
+                       │
+                       │
+                       ▼ Continue / Examine the trios...
+     ┌──────────────────────────────────┐
+     │gly.pyruvate_kinase [EDIT] [PDB]  │
+     │pyruvate kinase strikes: ...      │
+     └──────────────────────────────────┘
+       ┄┄► edit:offer ──► edit.prompt
+                       │
+                       │
+                       │
+                       ▼ Continue / Examine the pyruv...
+       ┌──────────────────────────────┐
+       │gly.pyruvate                  │
+       │you arrive at pyruvate, t...  │
+       └──────────────────────────────┘
+                       │
+                       │
+                       │
+                       │
+                       ▼ Continue / Examine the pyruv...
+       ┌──────────────────────────────┐
+       │pyr.branch                    │
+       │the air is thin. What fat...  │
+       └──────────────────────────────┘
+                       │
+                       │
+                       ┬──────────────────────────────────────────┬
+                       │                                          │
+                       ▼ cond: not flags.host_o2_low              ▼ cond: flags.host_o2_low
+       ┌──────────────────────────────┐           ┌──────────────────────────────┐
+       │pyr.pdh [EDIT] [PDB]          │           │anaer.entry                   │
+       │PDH strips your first car...  │           │the air runs out; your ho...  │
+       └──────────────────────────────┘           └──────────────────────────────┘
+         ┄┄► edit:offer ──► edit.prompt                           │
+                       │                                          │
+                       │                                          ┬───────────────────────────────────────────────────────────────────────────────┬
+                       │                                          │                                       │                                       │
+                       ▼ Continue into the...                     ▼ Lactic fermentati...                  ▼ Ethanolic ferment...                  ▼ The energy runs o...
+       ┌──────────────────────────────┐           ┌──────────────────────────────┐        ┌──────────────────────────────┐        ┌──────────────────────────────┐
+       │tca.entry                     │           │anaer.ldh [PDB]               │        │anaer.ethanolic [NORMAL]      │        │anaer.crisis [BAD]            │
+       │acetyl-CoA condenses with...  │           │lactate dehydrogenase cat...  │        │you drift off as CO2 and ...  │        │fermentation cannot susta...  │
+       └──────────────────────────────┘           └──────────────────────────────┘        └──────────────────────────────┘        └──────────────────────────────┘
+                       │                                          │
+                       │                                          │
+                      ┬┬                                          │
+                      │                                           │
+                      ▼ Continue / Examine the TCA c...           ▼ Continue to the l... / Examine the LDH a...
+    ┌───────────────────────────────────┐         ┌──────────────────────────────┐
+    │tca.citrate_synthase [EDIT] [PDB]  │         │anaer.lactic [GOOD]           │
+    │citrate synthase forms (S...       │         │you are retained as lactate.  │
+    └───────────────────────────────────┘         └──────────────────────────────┘
+      ┄┄► edit:offer ──► edit.prompt
+                      │
+                      ┬┬
+                       │
+                       ▼ Continue to aconi...
+       ┌──────────────────────────────┐
+       │tca.aconitase [EDIT] [PDB]    │
+       │aconitase flips cis-aconi...  │
+       └──────────────────────────────┘
+         ┄┄► edit:offer ──► edit.prompt
+                       │
+                       │
+                       │
+                       ▼ Continue to the s...
+       ┌──────────────────────────────┐
+       │tca.shuffle [RNG] [EDIT]      │
+       │the great wheel spins. Fi...  │
+       └──────────────────────────────┘
+         ┄┄► edit:offer ──► edit.prompt
+         ┄┄► TRAP ──► bad.cycle_trap_host_death  [TRAP]
+                       ┬──────────────────────────────────────────┬
+                       │                                          │
+                       ▼ w=0.5                                    ▼ w=0.5
+       ┌──────────────────────────────┐           ┌──────────────────────────────┐
+       │tca.co2_turn1                 │           │tca.co2_turn2                 │
+       │one of your carbons leave...  │           │your other carbon leaves ...  │
+       └──────────────────────────────┘           └──────────────────────────────┘
+         ──► The cycle turns a... ──► tca.shuffle   ──► The cycle turns a... ──► tca.shuffle
+                       │                                          │
+                       ┬──────────────────────────────────────────┬
+                       │
+                       ▼ Continue onward —...
+      ┌────────────────────────────────┐
+      │tca.isocitrate_dh [EDIT] [PDB]  │
+      │isocitrate dehydrogenase ...    │
+      └────────────────────────────────┘
+        ┄┄► edit:offer ──► edit.prompt
+                       │
+                       │
+                       │
+                       ▼ Continue / Examine the isoci...
+       ┌──────────────────────────────┐
+       │tca.akg_dh                    │
+       │alpha-ketoglutarate dehyd...  │
+       └──────────────────────────────┘
+                       │
+                       │
+                       │
+                       │
+                       ▼ Continue / Examine the alpha...
+    ┌────────────────────────────────────┐
+    │tca.succinyl_coa_synthetase [EDIT]  │
+    │succinyl-CoA synthetase h...        │
+    └────────────────────────────────────┘
+      ┄┄► edit:offer ──► edit.prompt
+                       │
+                       │
+                       │
+                       ▼ Continue / Examine the succi...
+       ┌──────────────────────────────┐
+       │tca.fumarase [EDIT]           │
+       │fumarase hydrates fumarat...  │
+       └──────────────────────────────┘
+         ┄┄► edit:offer ──► edit.prompt
+                       │
+                       │
+                       │
+                       ▼ Continue / Examine the fumar...
+       ┌──────────────────────────────┐
+       │tca.malate_dh [EDIT]          │
+       │malate dehydrogenase oxid...  │
+       └──────────────────────────────┘
+         ──► The cycle turns a... ──► tca.shuffle
+         ┄┄► edit:offer ──► edit.prompt
+                       │
+                       │
+                       ▼ Continue onward —...
+       ┌──────────────────────────────┐
+       │tca.divert_to_good            │
+       │stay in the cycle and fol...  │
+       └──────────────────────────────┘
+                       │
+                       │
+                       ┬──────────────────────────────────────────────────────────────────────────────────┬
+                       │                                          │                                       │
+                       ▼ Follow the soul t...                     ▼ Divert to fatty-a...                  ▼ Divert to amino-a...
+       ┌──────────────────────────────┐           ┌──────────────────────────────┐        ┌──────────────────────────────┐
+       │etc.entry                     │           │end.good.fatty_acid [GOOD]    │        │end.good.amino_acid [GOOD]    │
+       │your spark (the electrons...  │           │you are stored for tomorr...  │        │you become a building blo...  │
+       └──────────────────────────────┘           └──────────────────────────────┘        └──────────────────────────────┘
+                       │
+                       │
+                       ┬──────────────────────────────────────────┬
+                       │                                          │
+                       ▼ Follow the soul i...                     ▼ Let go — drift aw...
+       ┌──────────────────────────────┐           ┌──────────────────────────────┐
+       │etc.complex_i [EDIT]          │           │end.normal.co2 [NORMAL]       │
+       │Complex I receives your e...  │           │you drift away as CO2; th...  │
+       └──────────────────────────────┘           └──────────────────────────────┘
+         ┄┄► edit:offer ──► edit.prompt
+                       │
+                       │
+                       │
+                       ▼ Continue down the...
+       ┌──────────────────────────────┐
+       │etc.complex_ii [EDIT]         │
+       │Complex II (succinate deh...  │
+       └──────────────────────────────┘
+         ┄┄► edit:offer ──► edit.prompt
+                       │
+                       │
+                       │
+                       ▼ Continue / Examine the Compl...
+       ┌──────────────────────────────┐
+       │etc.complex_iii [EDIT]        │
+       │Complex III runs the Q-cy...  │
+       └──────────────────────────────┘
+         ┄┄► edit:offer ──► edit.prompt
+                       │
+                       │
+                       │
+                       ▼ Continue / Examine the Compl...
+       ┌──────────────────────────────┐
+       │etc.complex_iv [EDIT] [PDB]   │
+       │Complex IV (cytochrome c ...  │
+       └──────────────────────────────┘
+         ┄┄► edit:offer ──► edit.prompt
+                       │
+                       │
+                       │
+                       ▼ Continue to ATP s... / Examine the Compl...
+       ┌──────────────────────────────┐
+       │etc.atp_synthase              │
+       │the proton flow drives AT...  │
+       └──────────────────────────────┘
+                       │
+                       │
+                       │
+                       │
+                       ▼ Become ATP — the ... / Examine ATP synth...
+       ┌──────────────────────────────┐
+       │end.true [TRUE]               │
+       │you are ATP. Your electro...  │
+       └──────────────────────────────┘
 
-  ┌────────────────────────┐
-  │  etc.complex_i [EDIT]  │
-  │Complex I receives your │
-  └────────────┬───────────┘
-               │
-               ▼  Continue down the...  ────►  etc.complex_ii
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
+----------------------------------------------------------------------------------------------------
+=== Unreached nodes (7) — structural/bad-ending pool ===
+----------------------------------------------------------------------------------------------------
 
-  ┌────────────────────────┐
-  │ etc.complex_ii [EDIT]  │
-  │Complex II (succinate de│
-  └────────────┬───────────┘
-               │
-               ▼  Continue  ────►  etc.complex_iii
-  ────├─┐ Examine the Compl... ────►  etc.complex_iii
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
+  ┌──────────────────────────────┐
+  │fa.stub [STUB]                │
+  │This character is not yet...  │
+  └──────────────────────────────┘
+  ┄┄► Back ──► intro.select
 
-  ┌────────────────────────┐
-  │ etc.complex_iii [EDIT] │
-  │Complex III runs the Q-c│
-  └────────────┬───────────┘
-               │
-               ▼  Continue  ────►  etc.complex_iv
-  ────├─┐ Examine the Compl... ────►  etc.complex_iv
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
+  ┌──────────────────────────────┐
+  │alc.stub [STUB]               │
+  │This character is not yet...  │
+  └──────────────────────────────┘
+  ┄┄► Back ──► intro.select
 
-  ┌────────────────────────┐
-  │etc.complex_iv [EDIT] [P│
-  │Complex IV (cytochrome c│
-  └────────────┬───────────┘
-               │
-               ▼  Continue to ATP s...  ────►  etc.atp_synthase
-  ────├─┐ Examine the Compl... ────►  etc.atp_synthase
-  ────├─┐ ┄┄► edit:offer ────► edit.prompt
+  ┌──────────────────────────────┐
+  │bad.lost_connection [BAD]     │
+  │lost connection to the host.  │
+  └──────────────────────────────┘
 
-  ┌────────────────────────┐
-  │    etc.atp_synthase    │
-  │the proton flow drives A│
-  └────────────┬───────────┘
-               │
-               ▼  Become ATP — the ...  ────►  end.true
-  ────├─┐ Examine ATP synth... ────►  end.true
+  ┌──────────────────────────────┐
+  │bad.released_from_host [BAD]  │
+  │released from the host.       │
+  └──────────────────────────────┘
 
-  ┌────────────────────────┐
-  │    end.true [TRUE]     │
-  │you are ATP. Your electr│
-  └────────────────────────┘
+  ┌─────────────────────────────────┐
+  │bad.cycle_trap_host_death [BAD]  │
+  │the cycle has spun too lo...     │
+  └─────────────────────────────────┘
 
---------------------------------------------------------------------------------
-=== Aerobic Endings (3 nodes) ===
---------------------------------------------------------------------------------
+  ┌──────────────────────────────────┐
+  │bad.critical_residue_break [BAD]  │
+  │you broke a critical resi...      │
+  └──────────────────────────────────┘
 
-  ┌────────────────────────┐
-  │end.good.fatty_acid [GOO│
-  │you are stored for tomor│
-  └────────────────────────┘
-  ┌────────────────────────┐
-  │end.good.amino_acid [GOO│
-  │you become a building bl│
-  └────────────────────────┘
-  ┌────────────────────────┐
-  │end.normal.co2 [NORMAL] │
-  │you drift away as CO2; t│
-  └────────────────────────┘
-
---------------------------------------------------------------------------------
-=== Bad Endings + Edit Stub (5 nodes) ===
---------------------------------------------------------------------------------
-
-  ┌────────────────────────┐
-  │bad.lost_connection [BAD│
-  │lost connection to the h│
-  └────────────────────────┘
-  ┌────────────────────────┐
-  │bad.released_from_host [│
-  │released from the host. │
-  └────────────────────────┘
-  ┌────────────────────────┐
-  │bad.cycle_trap_host_deat│
-  │the cycle has spun too l│
-  └────────────────────────┘
-  ┌────────────────────────┐
-  │bad.critical_residue_bre│
-  │you broke a critical res│
-  └────────────────────────┘
-  ┌────────────────────────┐
-  │   edit.prompt [STUB]   │
-  │you stand before the enz│
-  └────────────┬───────────┘
-  ────├─┐ ┄┄► structural ────► bad.critical_residue_break
-  ────├─┐ ┄┄► structural ────► bad.lost_connection
-  ────├─┐ ┄┄► structural ────► bad.released_from_host
-
+  ┌──────────────────────────────┐
+  │edit.prompt [STUB]            │
+  │you stand before the enzy...  │
+  └──────────────────────────────┘
+  ┄┄► structural ──► bad.critical_residue_break
+  ┄┄► structural ──► bad.lost_connection
+  ┄┄► structural ──► bad.released_from_host
 
