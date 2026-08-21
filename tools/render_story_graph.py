@@ -657,19 +657,113 @@ def _ascii_summary(nodes, node_order):
             % (len(node_order), ending_total, tier_str or "0", edit_n, rng_n))
 
 
+def _ascii_box(nid, node, width=26):
+    # type: (str, dict, int) -> list
+    """Return the lines of a connected-flowchart box for a node.
+
+    The box has a top border, a title line (id + markers), an optional desc
+    line, and a bottom border with a connector stem (``└─┬─┘``) so the next
+    arrow can attach. Endings use a closed bottom (``└───┘``). The box is
+    ``width`` chars wide (content area = width-2).
+    """
+    markers = _ascii_markers(nid, node)
+    is_ending, _is_edit, _is_rng, _is_stub, _has_pdb = node_style(nid, node)
+    inner = width - 2
+    title = nid + markers
+    if len(title) > inner:
+        title = title[:inner]
+    desc = short_desc(node)
+    lines = []
+    lines.append("  " + "\u250c" + "\u2500" * inner + "\u2510")
+    # title line, centered-ish (left-padded)
+    pad = max(0, (inner - len(title)) // 2)
+    lines.append("  " + "\u2502" + " " * pad + title + " " * (inner - pad - len(title)) + "\u2502")
+    if desc:
+        if len(desc) > inner:
+            desc = desc[:inner]
+        dpad = max(0, (inner - len(desc)) // 2)
+        lines.append("  " + "\u2502" + " " * dpad + desc + " " * (inner - dpad - len(desc)) + "\u2502")
+    # bottom: endings have no connector stem
+    if is_ending:
+        lines.append("  " + "\u2514" + "\u2500" * inner + "\u2518")
+    else:
+        half = inner // 2
+        lines.append("  " + "\u2514" + "\u2500" * half + "\u252c" + "\u2500" * (inner - half - 1) + "\u2518")
+    return lines
+
+
+def _ascii_arrows(nid, outs, nodes, width=26):
+    # type: (str, list, dict, int) -> list
+    """Return connector lines below a box for its outgoing edges.
+
+    The FIRST solid (non-dashed, non-trap) forward edge becomes the vertical
+    stem (``│`` + ``▼ label -> target``). Other edges branch off as labeled
+    side arrows. Dashed/structural edges (edit:offer, stubs, traps) use
+    ``┄┄► label -> target`` on their own lines. Endings produce no arrows.
+    """
+    if not outs:
+        return []
+    out = []
+    stem_used = False
+    # Center column under the box's ┬ stem
+    stem_col = 2 + (width // 2)
+    side_edges = []
+    stem_edge = None
+    for (tgt, choice) in outs:
+        dashed, is_trap = classify_edge(nid, choice)
+        if not dashed and not is_trap and stem_edge is None:
+            stem_edge = (tgt, choice, dashed, is_trap)
+        else:
+            side_edges.append((tgt, choice, dashed, is_trap))
+    # Stem (primary forward edge)
+    if stem_edge is not None:
+        tgt, choice, _d, _t = stem_edge
+        lab = edge_label(nid, choice)
+        # vertical stem + label
+        out.append(" " * stem_col + "\u2502")
+        arrow_line = " " * stem_col + "\u25bc  " + lab + "  \u2500\u2500\u2500\u2500\u25ba  " + tgt
+        out.append(arrow_line)
+    # Side / dashed / trap edges as labeled arrows on their own lines
+    for (tgt, choice, dashed, is_trap) in side_edges:
+        lab = edge_label(nid, choice)
+        marker = " [TRAP]" if is_trap else ""
+        if dashed:
+            arr = "\u2500\u2500\u2500\u2500\u251c\u2500\u2510 \u2504\u2504\u25ba " + lab + marker + " \u2500\u2500\u2500\u2500\u25ba " + tgt
+        else:
+            arr = "\u2500\u2500\u2500\u2500\u251c\u2500\u2510 " + lab + marker + " \u2500\u2500\u2500\u2500\u25ba  " + tgt
+        out.append("  " + arr)
+    # blank separator
+    out.append("")
+    return out
+
+
 def render_ascii(nodes, node_order, edges, out_path, title, node_count):
     # type: (...) -> None
+    """Render a REAL connected-box ASCII flowchart.
+
+    Each node is a box; the primary forward edge becomes a vertical ``│ ▼``
+    stem connecting to the next box; branches/cond/weight/edit:offer/trap
+    edges branch off as labeled arrows (``├─►`` / ``┄┄►``). Endings are
+    terminal (closed bottom, no outgoing arrow). Cross-section edges name
+    the target node (the reader follows it to the target stage section).
+    """
     ordered_keys, rows = group_by_stage(nodes, node_order)
     edges_by_src = collections.defaultdict(list)
     for (src, tgt, choice) in edges:
         edges_by_src[src].append((tgt, choice))
 
-    W = 78
+    W = 80
     lines = []
     lines.append("=" * W)
     lines.append(title)
-    lines.append(("%d nodes | --> = player path | -.-> = structural-only "
-                  "| [TRAP] = RNG cycle-trap" % node_count)[:W])
+    lines.append(
+        "Legend: \u2502\u25bc\u2500\u25ba = player path | "
+        "\u2504\u2504\u25ba = edit:offer/structural | "
+        "[TRAP] = RNG cycle-trap")
+    lines.append(
+        "        [EDIT] = edit-allowed (14) | [PDB] = PDB load | "
+        "[TRUE/GOOD/NORMAL/BAD] = ending tier")
+    lines.append(_ascii_summary(nodes, node_order))
     lines.append("=" * W)
     lines.append("")
 
@@ -679,36 +773,15 @@ def render_ascii(nodes, node_order, edges, out_path, title, node_count):
         lines.append("-" * W)
         lines.append("=== %s (%d nodes) ===" % (label, len(nids)))
         lines.append("-" * W)
+        lines.append("")
         for nid in nids:
             node = nodes[nid]
-            markers = _ascii_markers(nid, node)
-            desc = short_desc(node)
-            lines.append("  \u250c\u2500\u2500 [%s]%s  %s" % (nid, markers, desc))
+            box = _ascii_box(nid, node)
+            lines.extend(box)
             outs = edges_by_src.get(nid, [])
-            if outs:
-                lines.append("  \u2502   out:")
-                for (tgt, choice) in outs:
-                    dashed, is_trap = classify_edge(nid, choice)
-                    arrow = "-.->" if dashed else "-->"
-                    lab = edge_label(nid, choice)
-                    trap = " [TRAP]" if is_trap else ""
-                    lines.append(
-                        "  \u2502     %s \"%s\"%s -> %s"
-                        % (arrow, lab, trap, tgt))
-            else:
-                tier = node.get("is_ending")
-                if tier:
-                    lines.append("  \u2502   (ending: %s -- no outgoing edges)"
-                                 % str(tier).upper())
-                else:
-                    lines.append("  \u2502   (no outgoing edges)")
-            lines.append("  \u2514\u2500\u2500")
-            lines.append("")
+            arrows = _ascii_arrows(nid, outs, nodes)
+            lines.extend(arrows)
         lines.append("")
-
-    lines.append("=" * W)
-    lines.append(_ascii_summary(nodes, node_order))
-    lines.append("=" * W)
 
     with open(out_path, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
