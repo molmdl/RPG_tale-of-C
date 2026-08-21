@@ -139,11 +139,11 @@ Plans:
 - [x] 05.1-04-PLAN.md — Manifest + SC2 reachability validation (green/red tests on the real skeleton) (Wave 2) ✓
 - [x] 05.1-05-PLAN.md — 05.1-DESIGN.md (choice-point contract SC3 + edit-node contract SC4 + SC5 classification) (Wave 2) ✓
 - [ ] 05.1-06-PLAN.md — Human review checkpoint of the FINAL post-replan skeleton (branch-point mapping + 14-row edit-node contract + 24 open questions + 3 CRITICAL disease-mutant decisions + SC2/invariant validation) (Wave 3)
-- [ ] 05.1-07-PLAN.md — Glycolysis + Pyruvate skeleton replan (gly.pyruvate_kinase promote [PKLR]; 5 Continue-to-MC; pyr.pdh 2OZL->6CFO cast fix; DIS-PFKM/PKLR/PDHA1-cand claims) (Wave 1, replan)
-- [ ] 05.1-08-PLAN.md — TCA skeleton replan (4 enzyme promotions [IDH3A default/SUCLG1/FH/MDH2]; tca.aconitase DIS-ACO2 claim; tca.entry/akg_dh Continue-to-MC; tca.citrate_synthase edit:structural reframe) (Wave 1, replan)
-- [ ] 05.1-09-PLAN.md — ETC skeleton replan (3 complex promotions [SDHA/CYC1/COX4I1]; etc.complex_i PLACEHOLDER->DIS-NDUFS8-01-cand claim_id fix; etc.atp_synthase Continue-to-MC) (Wave 1, replan)
-- [ ] 05.1-10-PLAN.md — 05.1-DESIGN.md update (SC5 table for 14 edit-allowed/0 single-Continue; 14-row edit-node contract + CS structural exception + IDH3A-default flag; 11 new disease-mutant open questions) (Wave 2, replan)
-- [ ] 05.1-11-PLAN.md — Reachability tests + 2 replan-invariant assertions (0 single-Continue; 14 edit-allowed; cast-PDB/claim_id fixes) + regenerate diagram (SVG/ASCII) + GRAPH-DIAGRAM.md (Wave 2, replan)
+- [x] 05.1-07-PLAN.md — Glycolysis + pyruvate skeleton replan (gly.pyruvate_kinase promotion [PKLR R479H]; pyr.pdh 2OZL->6CFO cast fix + DIS-PDHA1; gly.pfk DIS-PFKM; 5 linear nodes Continue-to-MC; anaer.ldh NOT promoted) (Wave 1, replan) ✓
+- [x] 05.1-08-PLAN.md — TCA skeleton replan (4 enzyme promotions [IDH3A default/SUCLG1/FH/MDH2]; tca.aconitase DIS-ACO2 claim; tca.entry/akg_dh Continue-to-MC; tca.citrate_synthase edit:structural reframe) (Wave 1, replan) ✓
+- [x] 05.1-09-PLAN.md — ETC skeleton replan (3 complex promotions [SDHA/CYC1/COX4I1]; etc.complex_i PLACEHOLDER->DIS-NDUFS8-01-cand claim_id fix; etc.atp_synthase Continue-to-MC) (Wave 1, replan) ✓
+- [x] 05.1-10-PLAN.md — 05.1-DESIGN.md update (SC5 table for 14 edit-allowed/0 single-Continue; 14-row edit-node contract + CS structural exception + IDH3A-default flag; 11 new disease-mutant open questions) (Wave 2, replan) ✓
+- [x] 05.1-11-PLAN.md — Reachability tests + 2 replan-invariant assertions (0 single-Continue; 14 edit-allowed; cast-PDB/claim_id fixes) + regenerate diagram (SVG/ASCII) + GRAPH-DIAGRAM.md (Wave 2, replan) ✓
 
 ### Phase 5.2: Cast & Hero Representation Design — Visual Language + Scene Templates (INSERTED)
 **Goal**: The 3D representation language is designed as a reviewable artifact — the C14 hero highlight convention (how the player sees "their" atom in any structure), the per-stage-type scene templates (which residues are shown, in what representation, with what zoom/color), and the cast-reveal convention (how an enzyme appears when first encountered) — headless-prototyped on placeholder/bundled structures, so Phase 6 implements an already-reviewed visual design rather than inventing it inside the overloaded first-Qt phase. This directly resolves the user's concern about cast representation and hero representation.
