@@ -297,6 +297,56 @@ class TestGlucoseReachability(unittest.TestCase):
             "DIS-NDUFS8-01-cand (Loeffen 1998 PMID:9837812, first nuclear "
             "Complex I Leigh mutation); got %s" % ci.claim_ids)
 
+    def test_all_new_bad_endings_reachable_from_edit_prompt(self):
+        """Bad-ending expansion invariant (Plan 05.1-12, Req 1 CG-collection):
+        the 9 new bad endings (6 1a unknown-pool + 3 1b known-consequence)
+        are all reachable from the edit.prompt structural stub via choice.goto
+        chains, so the BFS sees them (no orphaned bad endings). The edit.prompt
+        stub's 12 structural choices (3 existing + 6 1a edit:unknown + 3 1b
+        edit:known) are the structural BFS paths; at runtime the Phase 4
+        EditRouter (c14/edit_router.py) routes known edits to a branch node +
+        unknown edits to the RngEngine-weighted bad-ending pool, BYPASSING the
+        stub's choices. This test locks in the structural reachability of the
+        expanded pool (a future regression that adds a bad ending without an
+        incoming edit.prompt choice fails this test loudly)."""
+        g = StoryGraph.load(self._story_dir)
+        # The 9 new bad-ending node ids added in Plan 05.1-12.
+        new_bad = [
+            # 1a unknown-pool (6): tags ["ending:bad", "edit:unknown"]
+            "bad.enzyme_collapse", "bad.wrong_substrate_trapped",
+            "bad.broken_active_site", "bad.lost_in_cytosol",
+            "bad.proton_leak", "bad.misfolded_aggregate",
+            # 1b known-consequence (3): tags ["ending:bad", "edit:known"]
+            "bad.active_site_destroyed", "bad.substrate_channel_blocked",
+            "bad.cofactor_lost",
+        ]
+        # Each exists + is a bad ending.
+        for nid in new_bad:
+            self.assertIn(nid, g.all_nodes(),
+                          "new bad ending %r must exist in the skeleton" % nid)
+            self.assertEqual(g.get_node(nid).is_ending, "bad",
+                             "new bad ending %r must be is_ending=bad" % nid)
+        # The edit.prompt stub has a choice.goto to each of the 9 new bad endings.
+        edit_prompt = g.get_node("edit.prompt")
+        gotos = {c.goto for c in edit_prompt.choices}
+        for nid in new_bad:
+            self.assertIn(nid, gotos,
+                          "edit.prompt must have a structural choice.goto to "
+                          "new bad ending %r (else it is orphaned; the BFS "
+                          "cannot reach it)" % nid)
+        # The 1a/1b tag distinction: 1a edit:unknown, 1b edit:known.
+        for c in edit_prompt.choices:
+            if c.goto in new_bad[:6]:  # 1a pool
+                self.assertIn("edit:unknown", c.tags or [],
+                              "1a bad-ending choice must carry edit:unknown")
+            elif c.goto in new_bad[6:]:  # 1b pool
+                self.assertIn("edit:known", c.tags or [],
+                              "1b bad-ending choice must carry edit:known")
+        # The full check_reachability is still GREEN (no orphaned endings).
+        rep = check_reachability(g.all_nodes(), g.start_node())
+        self.assertTrue(rep.is_ok, "all endings reachable (no orphans)")
+        self.assertEqual(rep.unreachable_endings, [], "no unreachable endings from edit.prompt")
+
 
 if __name__ == "__main__":
     unittest.main()
