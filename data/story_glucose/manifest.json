@@ -1,7 +1,7 @@
 {
   "version": 1,
   "default_seed": 0,
-  "start": "intro.select",
+  "start": "intro.preface",
   "files": [
     "intro.json",
     "glycolysis.json",

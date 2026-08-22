@@ -1,5 +1,22 @@
 {
   "nodes": {
+    "intro.preface": {
+      "text_dramatic": "TBD — the hero, a single carbon atom, is blessed with a superpower: the destiny to travel the respiratory pathway and become ATP.",
+      "text_teaching": "TBD — Phase 7 preface text (the hero's blessing + the 20-AA cast introduction).",
+      "claim_ids": ["PLACEHOLDER_PHASE7"],
+      "tags": ["stage:intro", "preface"],
+      "on_enter": [
+        {"op": "hide_all"},
+        {"op": "load", "target": "pdb:TBD_HERO_CARBON", "args": {"object": "hero_atom"}},
+        {"op": "show_as", "target": "hero_atom", "args": {"rep": "spheres"}},
+        {"op": "load", "target": "pdb:TBD_AA_CAST_20", "args": {"object": "aa_cast"}},
+        {"op": "show_as", "target": "aa_cast", "args": {"rep": "cartoon"}}
+      ],
+      "choices": [
+        {"label": "Continue to character selection", "goto": "intro.select"},
+        {"label": "Observe the hero and the cast", "goto": "intro.select", "tags": ["mc:observe"]}
+      ]
+    },
     "intro.select": {
       "text_dramatic": "Choose your form — which carbon are you?",
       "text_teaching": "TBD — Phase 7 content (character-select screen)",
