@@ -145,7 +145,7 @@ Plans:
 - [x] 05.1-10-PLAN.md — 05.1-DESIGN.md update (SC5 table for 14 edit-allowed/0 single-Continue; 14-row edit-node contract + CS structural exception + IDH3A-default flag; 11 new disease-mutant open questions) (Wave 2, replan) ✓
 - [x] 05.1-11-PLAN.md — Reachability tests + 2 replan-invariant assertions (0 single-Continue; 14 edit-allowed; cast-PDB/claim_id fixes) + regenerate diagram (SVG/ASCII) + GRAPH-DIAGRAM.md (Wave 2, replan) ✓
 - [x] 05.1-12-PLAN.md — Bad-ending expansion Req 1 (1a: +6 unknown-pool bad endings [CG-collection variety]; 1b: +3 known-consequence bad endings [edit:known]; edit.prompt stub 3->12 structural choices) in bad_endings.json (Wave 1, expansion) ✓
-- [ ] 05.1-13-PLAN.md — Preface sequence Req 2 (Beat A intro.preface before character select + Beat B intro.shell_glucose before journey; manifest start intro.select->intro.preface; gly.start on_enter hide-20-AA) in intro.json + manifest.json + glycolysis.json (Wave 1, expansion)
+- [x] 05.1-13-PLAN.md — Preface sequence Req 2 (Beat A intro.preface before character select + Beat B intro.shell_glucose before journey; manifest start intro.select->intro.preface; gly.start on_enter hide-20-AA) in intro.json + manifest.json + glycolysis.json (Wave 1, expansion) ✓
 - [ ] 05.1-14-PLAN.md — Update reachability tests for 54-node/20-ending/intro.preface-start skeleton (count assertions 43->54, 11->20, start fix) + new bad-ending-reachability invariant test (Wave 2, expansion)
 - [ ] 05.1-15-PLAN.md — Update 05.1-DESIGN.md for the bad-ending + preface expansion (§1/§3/§4/§5/§6 54-row SC5 table/§7 reachability/§8/§9 8 new OQs) (Wave 2, expansion)
 - [ ] 05.1-16-PLAN.md — Regenerate diagram (SVG/ASCII via render_story_graph.py) + update 05.1-GRAPH-DIAGRAM.md (11 new nodes + new edges + Ending-Tier table + new "Bad-Ending + Preface Expansion" section) (Wave 2, expansion)
@@ -343,7 +343,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 | 3. PyMOL cmd Layer | 3/3 ✓ | Complete | 2026-08-14 |
 | 4. Editing + Protonation + Restore | 5/5 ✓ | Complete | 2026-08-15 |
 | 5. Pre-Content Key Decisions (parallel) | 5/5 ✓ | Complete | 2026-08-15 |
-| 5.1 Story Graph Design (INSERTED) | 5/11 (replan: 07-11 planned, 06 updated) | In progress | - |
+| 5.1 Story Graph Design (INSERTED) | 12/16 (expansion Wave 2: 12+13 done; 14-16 + 06 review remain) | In progress | - |
 | 5.2 Representation Design (INSERTED) | 0/TBD | Not started | - |
 | 6. Qt UI + MVP (Glucose + True+Bad) | 0/TBD | Not started | - |
 | 7. Content I: All Glucose Endings | 0/TBD | Not started | - |
