@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The player experiences cellular respiration as a story with consequences — every choice and edit on the C14 hero either advances them toward a destiny (ATP [the hero's electrons harvested into energy via the ETC], storage, CO2, or catastrophe) or diverts them into a branch, with real PDB proteins as the cast and scientifically validated chemistry as the plot.
-**Current focus:** Phase 5.1 — Story Graph Design — Glucose Skeleton + Integration Contracts — COMPLETE (16/16 plans; human review APPROVED; skeleton FROZEN at 54 nodes / 20 endings / intro.preface start). Phase 5 remains COMPLETE ✓ (all 5 success criteria delivered). Phase 4 remains COMPLETE + VERIFIED (198 tests). Next: Phase 5.2 (Bad-Ending Extensibility) + Phase 5.3 (WT-Aligned Structure Load Convention) — 2 URGENT INSERTED phases from the 05.1-06 checkpoint follow-ups; then Phase 5.4 (Cast & Hero Representation Design, formerly 5.2, renumbered); then Phase 6 (Qt UI MVP).
+**Current focus:** Phase 5.2 — Bad-Ending Extensibility + Flexibility — COMPLETE (1/1 plans; skeleton grew 54→55 nodes / 20→21 endings [1T+3G+2N+15B] / Bad 14→15; extensibility convention locked by parametrized subTest; VERIFICATION status: passed). Phase 5.1 COMPLETE (skeleton FROZEN at 54 nodes). Phase 5 COMPLETE ✓. Phase 4 COMPLETE + VERIFIED (198 tests). Next: Phase 5.3 (WT-Aligned Structure Load Convention) + Phase 5.4 (Cast & Hero Representation Design, formerly 5.2, renumbered) — 2 remaining INSERTED design phases; then Phase 6 (Qt UI MVP).
 
 ## Current Position
 
