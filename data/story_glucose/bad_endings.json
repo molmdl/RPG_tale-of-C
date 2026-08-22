@@ -44,6 +44,72 @@
       "is_ending": "bad",
       "choices": []
     },
+    "bad.enzyme_collapse": {
+      "text_dramatic": "TBD — your edit misfolded the enzyme; it collapses into a useless tangle.",
+      "text_teaching": "TBD — Phase 7 teaching text.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "tags": ["ending:bad", "edit:unknown"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "bad",
+      "choices": []
+    },
+    "bad.wrong_substrate_trapped": {
+      "text_dramatic": "TBD — a foreign substrate is jammed in the active site; the reaction stalls.",
+      "text_teaching": "TBD — Phase 7 teaching text.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "tags": ["ending:bad", "edit:unknown"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "bad",
+      "choices": []
+    },
+    "bad.broken_active_site": {
+      "text_dramatic": "TBD — the catalytic residues are scattered; the active site is broken.",
+      "text_teaching": "TBD — Phase 7 teaching text.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "tags": ["ending:bad", "edit:unknown"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "bad",
+      "choices": []
+    },
+    "bad.lost_in_cytosol": {
+      "text_dramatic": "TBD — with no enzyme to bind you, you drift free in the cytosol, adrift and purposeless.",
+      "text_teaching": "TBD — Phase 7 teaching text.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "tags": ["ending:bad", "edit:unknown"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "bad",
+      "choices": []
+    },
+    "bad.proton_leak": {
+      "text_dramatic": "TBD — the proton gradient bleeds away; your electrons leak to nowhere.",
+      "text_teaching": "TBD — Phase 7 teaching text.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "tags": ["ending:bad", "edit:unknown"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "bad",
+      "choices": []
+    },
+    "bad.misfolded_aggregate": {
+      "text_dramatic": "TBD — the enzyme aggregates into a proteostasis tangle; the cell flags it for destruction.",
+      "text_teaching": "TBD — Phase 7 teaching text.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "tags": ["ending:bad", "edit:unknown"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "bad",
+      "choices": []
+    },
     "edit.prompt": {
       "text_dramatic": "TBD — you stand before the enzyme. [STRUCTURAL STUB: at runtime, the EditRouter (c14/edit_router.py) routes known edits to a defined branch node and unknown edits to the bad-ending pool; this stub's choices are structural BFS paths, not player-facing options.]",
       "text_teaching": "",
@@ -55,7 +121,13 @@
       "choices": [
         {"label": "Break a critical residue (structural path)", "goto": "bad.critical_residue_break", "tags": ["edit:known_critical"]},
         {"label": "Make an unrecognized edit (structural path A)", "goto": "bad.lost_connection", "tags": ["edit:unknown"]},
-        {"label": "Make an unrecognized edit (structural path B)", "goto": "bad.released_from_host", "tags": ["edit:unknown"]}
+        {"label": "Make an unrecognized edit (structural path B)", "goto": "bad.released_from_host", "tags": ["edit:unknown"]},
+        {"label": "Make an unrecognized edit (structural path C)", "goto": "bad.enzyme_collapse", "tags": ["edit:unknown"]},
+        {"label": "Make an unrecognized edit (structural path D)", "goto": "bad.wrong_substrate_trapped", "tags": ["edit:unknown"]},
+        {"label": "Make an unrecognized edit (structural path E)", "goto": "bad.broken_active_site", "tags": ["edit:unknown"]},
+        {"label": "Make an unrecognized edit (structural path F)", "goto": "bad.lost_in_cytosol", "tags": ["edit:unknown"]},
+        {"label": "Make an unrecognized edit (structural path G)", "goto": "bad.proton_leak", "tags": ["edit:unknown"]},
+        {"label": "Make an unrecognized edit (structural path H)", "goto": "bad.misfolded_aggregate", "tags": ["edit:unknown"]}
       ]
     }
   }
