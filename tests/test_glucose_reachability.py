@@ -36,6 +36,8 @@ The 14 edit-allowed count + the 0 single-Continue invariant are UNCHANGED
 across the expansion Wave 2 (the 9 new bad endings are ending nodes with no
 choices; the 2 new preface nodes each have 2 choices = Continue + Observe).
 
+- Plan 05.2-01 (extensibility convention) added +1 bad-ending node (bad.denature_ph_change, pH-denaturation, edit:unknown): 54 -> 55 nodes, 20 -> 21 endings, Bad 14 -> 15 (1T+3G+2N+15B). The bad-ending-reachability test was generalized into a parametrized subTest convention proof (test_all_edit_prompt_bad_endings_reachable_convention) that auto-covers future Phase 7 additions WITHOUT test edits. The 14 edit-allowed + 0 single-Continue invariants are UNCHANGED by this addition.
+
 Pure Python 3.6 stdlib only. NO pymol/PyQt5. Mirrors the proven pattern in
 tests/test_integration.py:336-362 (the toy-graph SC2 tests).
 """
@@ -51,7 +53,7 @@ GLUCOSE_STORY_DIR = os.path.join(HERE, "..", "data", "story_glucose")
 
 
 class TestGlucoseReachability(unittest.TestCase):
-    """SC2: the reachability checker on the real 54-node glucose skeleton.
+    """SC2: the reachability checker on the real 55-node glucose skeleton.
 
     The skeleton grew 34 -> 43 nodes in the Phase 5.1 tiered-completeness
     expansion (see 05.1-EXPANSION-SUMMARY.md): +1 gly.pyruvate_kinase,
@@ -68,9 +70,9 @@ class TestGlucoseReachability(unittest.TestCase):
     (Req 2, preface sequence) added +2 preface nodes (intro.preface Beat A
     before character select + intro.shell_glucose Beat B before the
     journey); the manifest start changed intro.select -> intro.preface (the
-    preface Beat A is the new entry point). The new bad-ending-reachability
-    invariant is machine-checked by
-    test_all_new_bad_endings_reachable_from_edit_prompt.
+    preface Beat A is the new entry point). The bad-ending extensibility
+    convention (Phase 5.2) is machine-checked by
+    test_all_edit_prompt_bad_endings_reachable_convention.
 
     The Phase 5.1 replan Wave (Plans 05.1-07/08/09) applied the disease-
     mutant research + Continue-to-MC directive: 14 edit-allowed nodes (8
@@ -80,23 +82,33 @@ class TestGlucoseReachability(unittest.TestCase):
     edit:structural reframe. The 14 edit-allowed count + the 0 single-Continue
     invariant are UNCHANGED across the expansion Wave 2. The replan
     invariants are machine-checked by test_no_single_continue_choice,
-    test_14_edit_allowed_nodes, and test_pdh_cast_pdb_fix_and_complex_i_claim_id."""
+    test_14_edit_allowed_nodes, and test_pdh_cast_pdb_fix_and_complex_i_claim_id.
+
+    Plan 05.2-01 (extensibility convention) added +1 bad-ending node
+    (bad.denature_ph_change, pH-denaturation, edit:unknown): 54 -> 55 nodes,
+    20 -> 21 endings, Bad 14 -> 15 (1T+3G+2N+15B). The bad-ending-reachability
+    test was generalized into a parametrized subTest convention proof that
+    auto-covers future Phase 7 additions WITHOUT test edits. The 14
+    edit-allowed + 0 single-Continue invariants are UNCHANGED by this
+    addition."""
 
     def setUp(self):
         self._story_dir = GLUCOSE_STORY_DIR
 
-    def test_manifest_loads_all_54_nodes(self):
+    def test_manifest_loads_all_55_nodes(self):
         """The manifest lists 7 files; StoryGraph.load merges them with no
-        duplicate-id ValueError. 54 nodes = 51 story nodes + fa.stub +
+        duplicate-id ValueError. 55 nodes = 52 story nodes + fa.stub +
         alc.stub + edit.prompt. (Was 34 before the tiered-completeness
         expansion added 9 net nodes, then 43 before the expansion Wave 2
         added +9 bad-ending nodes [Plan 05.1-12] + 2 preface nodes
-        [Plan 05.1-13].) The manifest start is now intro.preface (the
-        preface Beat A is the entry point after Plan 05.1-13)."""
+        [Plan 05.1-13], then 54 before Plan 05.2-01 added +1 bad-ending
+        node [bad.denature_ph_change].) The manifest start is now
+        intro.preface (the preface Beat A is the entry point after Plan
+        05.1-13)."""
         g = StoryGraph.load(self._story_dir)
         nodes = g.all_nodes()
-        self.assertEqual(len(nodes), 54,
-                         "glucose skeleton has 54 nodes after the bad-ending + preface expansion (43 base + 9 bad endings + 2 preface)")
+        self.assertEqual(len(nodes), 55,
+                         "glucose skeleton has 55 nodes after the bad-ending + preface + extensibility expansion (43 base + 10 bad endings + 2 preface)")
         self.assertEqual(g.start_node(), "intro.preface",
                          "manifest start is intro.preface (the preface Beat A is the entry point after Plan 05.1-13)")
 
@@ -109,8 +121,8 @@ class TestGlucoseReachability(unittest.TestCase):
         (Plan 05.1-13 shifted the manifest start intro.select -> intro.preface;
         the preface is upstream of everything, so all 4 tiers stay reachable).
         The endings are unchanged in tier -- only the Bad count grew
-        (1T+3G+2N+5B -> 1T+3G+2N+14B = 20 endings) via the Plan 05.1-12
-        bad-ending expansion."""
+        (1T+3G+2N+5B -> 1T+3G+2N+15B = 21 endings) via the Plan 05.1-12
+        bad-ending expansion + the Plan 05.2-01 extensibility addition."""
         g = StoryGraph.load(self._story_dir)
         rep = check_reachability(g.all_nodes(), g.start_node())
         self.assertTrue(rep.is_ok,
@@ -126,10 +138,10 @@ class TestGlucoseReachability(unittest.TestCase):
             reachable_tiers,
             {"true", "good", "normal", "bad"},
             "all 4 ending tiers reachable; got " + str(reachable_tiers))
-        # exactly 20 ending nodes (1 True + 3 Good + 2 Normal + 14 Bad)
+        # exactly 21 ending nodes (1 True + 3 Good + 2 Normal + 15 Bad)
         all_endings = [n for n in g.all_nodes().values() if n.is_ending]
-        self.assertEqual(len(all_endings), 20,
-                         "exactly 20 ending nodes after the bad-ending expansion (1T+3G+2N+14B; the Bad tier grew 5 -> 14 via 9 new bad-ending nodes)")
+        self.assertEqual(len(all_endings), 21,
+                         "exactly 21 ending nodes after the bad-ending expansion (1T+3G+2N+15B; the Bad tier grew 5 -> 15 via 10 new bad-ending nodes)")
 
     def test_reachability_red_orphaned_true_ending(self):
         """SC2 RED (variant 1): remove the choice.goto edge to end.true
@@ -297,55 +309,42 @@ class TestGlucoseReachability(unittest.TestCase):
             "DIS-NDUFS8-01-cand (Loeffen 1998 PMID:9837812, first nuclear "
             "Complex I Leigh mutation); got %s" % ci.claim_ids)
 
-    def test_all_new_bad_endings_reachable_from_edit_prompt(self):
-        """Bad-ending expansion invariant (Plan 05.1-12, Req 1 CG-collection):
-        the 9 new bad endings (6 1a unknown-pool + 3 1b known-consequence)
-        are all reachable from the edit.prompt structural stub via choice.goto
-        chains, so the BFS sees them (no orphaned bad endings). The edit.prompt
-        stub's 12 structural choices (3 existing + 6 1a edit:unknown + 3 1b
-        edit:known) are the structural BFS paths; at runtime the Phase 4
-        EditRouter (c14/edit_router.py) routes known edits to a branch node +
-        unknown edits to the RngEngine-weighted bad-ending pool, BYPASSING the
-        stub's choices. This test locks in the structural reachability of the
-        expanded pool (a future regression that adds a bad ending without an
-        incoming edit.prompt choice fails this test loudly)."""
+    def test_all_edit_prompt_bad_endings_reachable_convention(self):
+        """Bad-ending extensibility convention (Phase 5.2): every bad ending
+        reachable from the edit.prompt structural stub is a valid bad ending
+        with a correct edit:* tag, and the full-graph reachability stays GREEN.
+        Parametrized via subTest over the stub's structural choices so future
+        additions (Phase 7 content) auto-verify WITHOUT test edits. The 14
+        edit-allowed + 0 single-Continue invariants are covered by the UNCHANGED
+        test_14_edit_allowed_nodes + test_no_single_continue_choice (which still
+        pass after the addition -- see those tests)."""
         g = StoryGraph.load(self._story_dir)
-        # The 9 new bad-ending node ids added in Plan 05.1-12.
-        new_bad = [
-            # 1a unknown-pool (6): tags ["ending:bad", "edit:unknown"]
-            "bad.enzyme_collapse", "bad.wrong_substrate_trapped",
-            "bad.broken_active_site", "bad.lost_in_cytosol",
-            "bad.proton_leak", "bad.misfolded_aggregate",
-            # 1b known-consequence (3): tags ["ending:bad", "edit:known"]
-            "bad.active_site_destroyed", "bad.substrate_channel_blocked",
-            "bad.cofactor_lost",
-        ]
-        # Each exists + is a bad ending.
-        for nid in new_bad:
-            self.assertIn(nid, g.all_nodes(),
-                          "new bad ending %r must exist in the skeleton" % nid)
-            self.assertEqual(g.get_node(nid).is_ending, "bad",
-                             "new bad ending %r must be is_ending=bad" % nid)
-        # The edit.prompt stub has a choice.goto to each of the 9 new bad endings.
         edit_prompt = g.get_node("edit.prompt")
-        gotos = {c.goto for c in edit_prompt.choices}
-        for nid in new_bad:
-            self.assertIn(nid, gotos,
-                          "edit.prompt must have a structural choice.goto to "
-                          "new bad ending %r (else it is orphaned; the BFS "
-                          "cannot reach it)" % nid)
-        # The 1a/1b tag distinction: 1a edit:unknown, 1b edit:known.
+        valid_edit_tags = ("edit:unknown", "edit:known", "edit:known_critical")
+        bad_targets = []
         for c in edit_prompt.choices:
-            if c.goto in new_bad[:6]:  # 1a pool
-                self.assertIn("edit:unknown", c.tags or [],
-                              "1a bad-ending choice must carry edit:unknown")
-            elif c.goto in new_bad[6:]:  # 1b pool
-                self.assertIn("edit:known", c.tags or [],
-                              "1b bad-ending choice must carry edit:known")
-        # The full check_reachability is still GREEN (no orphaned endings).
+            if c.goto is None or not c.goto.startswith("bad."):
+                continue
+            with self.subTest(choice_goto=c.goto):
+                self.assertIn(c.goto, g.all_nodes(),
+                              "structural choice target %r must exist" % c.goto)
+                self.assertEqual(g.get_node(c.goto).is_ending, "bad",
+                                 "target %r must be is_ending=bad" % c.goto)
+                ctags = c.tags or []
+                self.assertTrue(
+                    any(t in valid_edit_tags for t in ctags),
+                    "choice to %r must carry one of %s; got %s"
+                    % (c.goto, valid_edit_tags, ctags))
+                bad_targets.append(c.goto)
+        self.assertGreaterEqual(
+            len(bad_targets), 13,
+            "edit.prompt should reach >=13 bad endings after Phase 5.2; "
+            "got %d: %s" % (len(bad_targets), sorted(bad_targets)))
         rep = check_reachability(g.all_nodes(), g.start_node())
-        self.assertTrue(rep.is_ok, "all endings reachable (no orphans)")
-        self.assertEqual(rep.unreachable_endings, [], "no unreachable endings from edit.prompt")
+        self.assertTrue(rep.is_ok,
+                        "reachability stays GREEN after the bad-ending addition")
+        self.assertEqual(rep.unreachable_endings, [],
+                         "no unreachable endings after the bad-ending addition")
 
 
 if __name__ == "__main__":
