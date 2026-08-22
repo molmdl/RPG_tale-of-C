@@ -2,7 +2,7 @@
 Glucose Story Graph Skeleton (Phase 5.1)
 Legend: │▼─ = player path (spatial)  |  ┄┄► = edit:offer/structural/cycle (note)  |  [TRAP] = RNG cycle-trap
         [EDIT] = edit-allowed (14)  |  [PDB] = PDB load  |  [TRUE/GOOD/NORMAL/BAD] = ending tier
-Summary: 54 nodes | 20 endings (1T/3G/2N/14B) | 14 edit-allowed | 1 RNG
+Summary: 55 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
 ====================================================================================================
 
 
@@ -269,7 +269,7 @@ Summary: 54 nodes | 20 endings (1T/3G/2N/14B) | 14 edit-allowed | 1 RNG
        └──────────────────────────────┘
 
 ----------------------------------------------------------------------------------------------------
-=== Unreached nodes (16) — structural/bad-ending pool ===
+=== Unreached nodes (17) — structural/bad-ending pool ===
 ----------------------------------------------------------------------------------------------------
 
   ┌──────────────────────────────┐
@@ -350,6 +350,11 @@ Summary: 54 nodes | 20 endings (1T/3G/2N/14B) | 14 edit-allowed | 1 RNG
   └──────────────────────────────┘
 
   ┌──────────────────────────────┐
+  │bad.denature_ph_change [BAD]  │
+  │extreme pH shatters the e...  │
+  └──────────────────────────────┘
+
+  ┌──────────────────────────────┐
   │edit.prompt [STUB]            │
   │you stand before the enzy...  │
   └──────────────────────────────┘
@@ -365,4 +370,5 @@ Summary: 54 nodes | 20 endings (1T/3G/2N/14B) | 14 edit-allowed | 1 RNG
   ┄┄► structural ──► bad.active_site_destroyed
   ┄┄► structural ──► bad.substrate_channel_blocked
   ┄┄► structural ──► bad.cofactor_lost
+  ┄┄► structural ──► bad.denature_ph_change
 
