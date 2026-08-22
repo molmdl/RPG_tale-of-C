@@ -2,7 +2,7 @@
 Glucose Story Graph Skeleton (Phase 5.1)
 Legend: │▼─ = player path (spatial)  |  ┄┄► = edit:offer/structural/cycle (note)  |  [TRAP] = RNG cycle-trap
         [EDIT] = edit-allowed (14)  |  [PDB] = PDB load  |  [TRUE/GOOD/NORMAL/BAD] = ending tier
-Summary: 43 nodes | 11 endings (1T/3G/2N/5B) | 14 edit-allowed | 1 RNG
+Summary: 54 nodes | 20 endings (1T/3G/2N/14B) | 14 edit-allowed | 1 RNG
 ====================================================================================================
 
 
@@ -12,6 +12,15 @@ Summary: 43 nodes | 11 endings (1T/3G/2N/5B) | 14 edit-allowed | 1 RNG
 
 
        ┌──────────────────────────────┐
+       │intro.preface [PDB]           │
+       │the hero, a single carbon...  │
+       └──────────────────────────────┘
+                       │
+                       │
+                       │
+                       │
+                       ▼ Continue to chara... / Observe the hero ...
+       ┌──────────────────────────────┐
        │intro.select                  │
        │Choose your form — which ...  │
        └──────────────────────────────┘
@@ -20,6 +29,15 @@ Summary: 43 nodes | 11 endings (1T/3G/2N/5B) | 14 edit-allowed | 1 RNG
                        │
                        │
                        ▼ Glucose — enter t...
+       ┌──────────────────────────────┐
+       │intro.shell_glucose [PDB]     │
+       │you select glucose; the a...  │
+       └──────────────────────────────┘
+                       │
+                       │
+                       │
+                       │
+                       ▼ Begin the journey... / Observe your new ...
        ┌──────────────────────────────┐
        │gly.start                     │
        │glucose arrives in the cy...  │
@@ -251,7 +269,7 @@ Summary: 43 nodes | 11 endings (1T/3G/2N/5B) | 14 edit-allowed | 1 RNG
        └──────────────────────────────┘
 
 ----------------------------------------------------------------------------------------------------
-=== Unreached nodes (7) — structural/bad-ending pool ===
+=== Unreached nodes (16) — structural/bad-ending pool ===
 ----------------------------------------------------------------------------------------------------
 
   ┌──────────────────────────────┐
@@ -287,10 +305,64 @@ Summary: 43 nodes | 11 endings (1T/3G/2N/5B) | 14 edit-allowed | 1 RNG
   └──────────────────────────────────┘
 
   ┌──────────────────────────────┐
+  │bad.enzyme_collapse [BAD]     │
+  │your edit misfolded the e...  │
+  └──────────────────────────────┘
+
+  ┌───────────────────────────────────┐
+  │bad.wrong_substrate_trapped [BAD]  │
+  │a foreign substrate is ja...       │
+  └───────────────────────────────────┘
+
+  ┌──────────────────────────────┐
+  │bad.broken_active_site [BAD]  │
+  │the catalytic residues ar...  │
+  └──────────────────────────────┘
+
+  ┌──────────────────────────────┐
+  │bad.lost_in_cytosol [BAD]     │
+  │with no enzyme to bind yo...  │
+  └──────────────────────────────┘
+
+  ┌──────────────────────────────┐
+  │bad.proton_leak [BAD]         │
+  │the proton gradient bleed...  │
+  └──────────────────────────────┘
+
+  ┌───────────────────────────────┐
+  │bad.misfolded_aggregate [BAD]  │
+  │the enzyme aggregates int...   │
+  └───────────────────────────────┘
+
+  ┌─────────────────────────────────┐
+  │bad.active_site_destroyed [BAD]  │
+  │this specific edit shredd...     │
+  └─────────────────────────────────┘
+
+  ┌─────────────────────────────────────┐
+  │bad.substrate_channel_blocked [BAD]  │
+  │the substrate channel is ...         │
+  └─────────────────────────────────────┘
+
+  ┌──────────────────────────────┐
+  │bad.cofactor_lost [BAD]       │
+  │the cofactor (NAD+/FAD) c...  │
+  └──────────────────────────────┘
+
+  ┌──────────────────────────────┐
   │edit.prompt [STUB]            │
   │you stand before the enzy...  │
   └──────────────────────────────┘
   ┄┄► structural ──► bad.critical_residue_break
   ┄┄► structural ──► bad.lost_connection
   ┄┄► structural ──► bad.released_from_host
+  ┄┄► structural ──► bad.enzyme_collapse
+  ┄┄► structural ──► bad.wrong_substrate_trapped
+  ┄┄► structural ──► bad.broken_active_site
+  ┄┄► structural ──► bad.lost_in_cytosol
+  ┄┄► structural ──► bad.proton_leak
+  ┄┄► structural ──► bad.misfolded_aggregate
+  ┄┄► structural ──► bad.active_site_destroyed
+  ┄┄► structural ──► bad.substrate_channel_blocked
+  ┄┄► structural ──► bad.cofactor_lost
 

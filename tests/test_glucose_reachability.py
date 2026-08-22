@@ -1,16 +1,26 @@
 """SC2 reachability validation on the real glucose skeleton (Phase 5.1).
 
 Proves the Phase 2 reachability checker guards REAL content: all 4 ending
-tiers (true/good/normal/bad) are reachable from intro.select via choice.goto
+tiers (true/good/normal/bad) are reachable from intro.preface via choice.goto
 chains (GREEN), and a deliberately-orphaned variant is flagged RED.
 
 The skeleton grew from 34 to 43 nodes in the Phase 5.1 tiered-completeness
-expansion (Plan 05.1-EXPANSION). The ending distribution is UNCHANGED
-(1T+3G+2N+5B = 11 endings); only path nodes were added.
+expansion (Plan 05.1-EXPANSION), then from 43 to 54 nodes in the expansion
+Wave 2 (Plans 05.1-12 + 05.1-13):
+- Plan 05.1-12 (Req 1, CG-collection feel) added +9 bad-ending nodes
+  (6 unknown-pool 1a + 3 known-consequence 1b) so the SAME wrong edit can
+  produce DIFFERENT bad endings; the RngEngine-weighted unknown-edit
+  bad-ending pool grew 2 -> 8 unknown + 3 known. The Bad ending tier grew
+  5 -> 14 (ending distribution 1T+3G+2N+5B -> 1T+3G+2N+14B = 20 endings).
+- Plan 05.1-13 (Req 2, preface sequence) added +2 preface nodes
+  (intro.preface Beat A before character select + intro.shell_glucose
+  Beat B before the journey); the manifest start changed
+  intro.select -> intro.preface (the preface Beat A is the new entry point).
 
-The Phase 5.1 replan Wave (Plans 05.1-07/08/09) then applied the disease-
-mutant research + Continue-to-MC directive to the post-expansion skeleton:
-- 43 nodes UNCHANGED count (the replan modifies nodes in place, no add/remove)
+The Phase 5.1 replan Wave (Plans 05.1-07/08/09) applied the disease-mutant
+research + Continue-to-MC directive to the post-expansion skeleton:
+- 43 -> 54 nodes (the replan modified nodes in place; the +11 came from
+  the expansion Wave 2 above, not the replan)
 - 14 edit-allowed nodes (8 disease-mutant promotions grew the set from
   5+shuffle to 14: gly.pyruvate_kinase, 4 TCA enzymes, 3 ETC complexes)
 - 0 single-Continue nodes (the Continue-to-MC conversion added an
@@ -21,6 +31,10 @@ mutant research + Continue-to-MC directive to the post-expansion skeleton:
 - etc.complex_i claim_id PLACEHOLDER_PHASE7_ETC -> DIS-NDUFS8-01-cand
 - tca.citrate_synthase edit:structural reframe (NO disease point mutant;
   7 ClinVar Pathogenic records are ALL structural variants)
+
+The 14 edit-allowed count + the 0 single-Continue invariant are UNCHANGED
+across the expansion Wave 2 (the 9 new bad endings are ending nodes with no
+choices; the 2 new preface nodes each have 2 choices = Continue + Observe).
 
 Pure Python 3.6 stdlib only. NO pymol/PyQt5. Mirrors the proven pattern in
 tests/test_integration.py:336-362 (the toy-graph SC2 tests).
@@ -37,47 +51,66 @@ GLUCOSE_STORY_DIR = os.path.join(HERE, "..", "data", "story_glucose")
 
 
 class TestGlucoseReachability(unittest.TestCase):
-    """SC2: the reachability checker on the real 43-node glucose skeleton.
+    """SC2: the reachability checker on the real 54-node glucose skeleton.
 
-    The skeleton grew from 34 nodes to 43 nodes in the Phase 5.1 tiered-
-    completeness expansion (see 05.1-EXPANSION-SUMMARY.md): +1
-    gly.pyruvate_kinase, +1 anaer.ldh, +5 TCA enzymes (isocitrate_dh,
-    akg_dh, succinyl_coa_synthetase, fumarase, malate_dh), +3 ETC complexes
+    The skeleton grew 34 -> 43 nodes in the Phase 5.1 tiered-completeness
+    expansion (see 05.1-EXPANSION-SUMMARY.md): +1 gly.pyruvate_kinase,
+    +1 anaer.ldh, +5 TCA enzymes (isocitrate_dh, akg_dh,
+    succinyl_coa_synthetase, fumarase, malate_dh), +3 ETC complexes
     (complex_ii, complex_iii, complex_iv), -1 removed etc.complex_ii_iii_iv.
-    Ending distribution is UNCHANGED: still 1T+3G+2N+5B = 11 endings (the
-    expansion adds path nodes, not endings).
 
-    The Phase 5.1 replan Wave (Plans 05.1-07/08/09) then applied the disease-
-    mutant research + Continue-to-MC directive to the post-expansion skeleton:
-    43 nodes UNCHANGED; 14 edit-allowed nodes (8 disease-mutant promotions);
-    0 single-Continue nodes (Continue-to-MC conversion); the pyr.pdh 2OZL->
-    6CFO cast fix; the etc.complex_i PLACEHOLDER->DIS-NDUFS8-01-cand claim_id
-    fix; the tca.citrate_synthase edit:structural reframe. The replan
+    The expansion Wave 2 (Plans 05.1-12 + 05.1-13) then grew 43 -> 54 nodes:
+    Plan 05.1-12 (Req 1, CG-collection feel) added +9 bad-ending nodes
+    (6 unknown-pool 1a + 3 known-consequence 1b) so the SAME wrong edit can
+    produce DIFFERENT bad endings; the RngEngine-weighted bad-ending pool
+    grew 2 -> 8 unknown + 3 known. The Bad ending tier grew 5 -> 14 (ending
+    distribution 1T+3G+2N+5B -> 1T+3G+2N+14B = 20 endings). Plan 05.1-13
+    (Req 2, preface sequence) added +2 preface nodes (intro.preface Beat A
+    before character select + intro.shell_glucose Beat B before the
+    journey); the manifest start changed intro.select -> intro.preface (the
+    preface Beat A is the new entry point). The new bad-ending-reachability
+    invariant is machine-checked by
+    test_all_new_bad_endings_reachable_from_edit_prompt.
+
+    The Phase 5.1 replan Wave (Plans 05.1-07/08/09) applied the disease-
+    mutant research + Continue-to-MC directive: 14 edit-allowed nodes (8
+    disease-mutant promotions); 0 single-Continue nodes (Continue-to-MC
+    conversion); the pyr.pdh 2OZL->6CFO cast fix; the etc.complex_i
+    PLACEHOLDER->DIS-NDUFS8-01-cand claim_id fix; the tca.citrate_synthase
+    edit:structural reframe. The 14 edit-allowed count + the 0 single-Continue
+    invariant are UNCHANGED across the expansion Wave 2. The replan
     invariants are machine-checked by test_no_single_continue_choice,
     test_14_edit_allowed_nodes, and test_pdh_cast_pdb_fix_and_complex_i_claim_id."""
 
     def setUp(self):
         self._story_dir = GLUCOSE_STORY_DIR
 
-    def test_manifest_loads_all_43_nodes(self):
+    def test_manifest_loads_all_54_nodes(self):
         """The manifest lists 7 files; StoryGraph.load merges them with no
-        duplicate-id ValueError. 43 nodes = 40 story nodes + fa.stub +
+        duplicate-id ValueError. 54 nodes = 51 story nodes + fa.stub +
         alc.stub + edit.prompt. (Was 34 before the tiered-completeness
-        expansion added 9 net nodes: +1 pyruvate_kinase, +1 anaer.ldh,
-        +5 TCA enzymes, +3 ETC complexes, -1 removed etc.complex_ii_iii_iv.)"""
+        expansion added 9 net nodes, then 43 before the expansion Wave 2
+        added +9 bad-ending nodes [Plan 05.1-12] + 2 preface nodes
+        [Plan 05.1-13].) The manifest start is now intro.preface (the
+        preface Beat A is the entry point after Plan 05.1-13)."""
         g = StoryGraph.load(self._story_dir)
         nodes = g.all_nodes()
-        self.assertEqual(len(nodes), 43,
-                         "glucose skeleton has 43 nodes after the full tiered-completeness expansion")
-        self.assertEqual(g.start_node(), "intro.select",
-                         "manifest start is intro.select")
+        self.assertEqual(len(nodes), 54,
+                         "glucose skeleton has 54 nodes after the bad-ending + preface expansion (43 base + 9 bad endings + 2 preface)")
+        self.assertEqual(g.start_node(), "intro.preface",
+                         "manifest start is intro.preface (the preface Beat A is the entry point after Plan 05.1-13)")
 
     def test_reachability_green_all_four_tiers(self):
-        """SC2 GREEN: all 4 ending tiers reachable from intro.select via
+        """SC2 GREEN: all 4 ending tiers reachable from intro.preface via
         choice.goto chains. The BFS ignores cond/weight, so both the aerobic
         and anaerobic subtrees are traversed; the True ending is structurally
         reachable via the aerobic path (the anaerobic guard is a runtime cond
-        concern, not a structural one)."""
+        concern, not a structural one). The BFS now starts from intro.preface
+        (Plan 05.1-13 shifted the manifest start intro.select -> intro.preface;
+        the preface is upstream of everything, so all 4 tiers stay reachable).
+        The endings are unchanged in tier -- only the Bad count grew
+        (1T+3G+2N+5B -> 1T+3G+2N+14B = 20 endings) via the Plan 05.1-12
+        bad-ending expansion."""
         g = StoryGraph.load(self._story_dir)
         rep = check_reachability(g.all_nodes(), g.start_node())
         self.assertTrue(rep.is_ok,
@@ -93,16 +126,18 @@ class TestGlucoseReachability(unittest.TestCase):
             reachable_tiers,
             {"true", "good", "normal", "bad"},
             "all 4 ending tiers reachable; got " + str(reachable_tiers))
-        # exactly 11 ending nodes (1 True + 3 Good + 2 Normal + 5 Bad)
+        # exactly 20 ending nodes (1 True + 3 Good + 2 Normal + 14 Bad)
         all_endings = [n for n in g.all_nodes().values() if n.is_ending]
-        self.assertEqual(len(all_endings), 11,
-                         "exactly 11 ending nodes (1T+3G+2N+5B)")
+        self.assertEqual(len(all_endings), 20,
+                         "exactly 20 ending nodes after the bad-ending expansion (1T+3G+2N+14B; the Bad tier grew 5 -> 14 via 9 new bad-ending nodes)")
 
     def test_reachability_red_orphaned_true_ending(self):
         """SC2 RED (variant 1): remove the choice.goto edge to end.true
         (change etc.atp_synthase's choice to goto a non-existent node) ->
         end.true becomes unreachable -> is_ok False. Mirrors the
-        test_integration.py:348-362 orphan pattern."""
+        test_integration.py:348-362 orphan pattern. The BFS uses
+        g.start_node() which is now intro.preface (Plan 05.1-13) -- still
+        RED because orphaning end.true is unreachable from intro.preface too."""
         g = StoryGraph.load(self._story_dir)
         orphaned = dict(g.all_nodes())
         # rebuild etc.atp_synthase without the choice that leads to end.true
@@ -123,7 +158,10 @@ class TestGlucoseReachability(unittest.TestCase):
 
     def test_reachability_red_extra_orphaned_ending(self):
         """SC2 RED (variant 2): add an extra ending node with no incoming
-        edge -> flagged unreachable. Mirrors test_integration.py:348-356."""
+        edge -> flagged unreachable. Mirrors test_integration.py:348-356.
+        The BFS uses g.start_node() which is now intro.preface (Plan
+        05.1-13) -- still RED because the orphaned ending is unreachable
+        from intro.preface too."""
         g = StoryGraph.load(self._story_dir)
         orphaned = dict(g.all_nodes())
         orphaned["glucose.ending_orphan"] = Node.from_dict({
