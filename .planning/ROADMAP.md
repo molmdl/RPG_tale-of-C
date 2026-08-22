@@ -160,10 +160,10 @@ Plans:
   1. A new bad-ending node `bad.denature_ph_change` (pH-denaturation, `edit:unknown`, `PLACEHOLDER_PHASE7_BAD`) is added to the bad-ending pool + reachable from `edit.prompt` via a structural choice
   2. A **parametrized extensibility test** exists that demonstrates the convention: "add a new bad ending → reachability still GREEN → 14 edit-allowed + 0 single-Continue invariants hold → the new ending is reachable from edit.prompt". This locks in the pattern so future additions (Phase 7 content) follow a tested convention
   3. All count assertions are updated (54→55 nodes, 20→21 endings, Bad tier 14→15) + DESIGN.md + diagram reflect the new node
-**Plans**: TBD (likely 1 plan; `/gsd-research-phase` NOT needed — structural convention on the existing skeleton)
+**Plans**: 1 plan (research done — 05.2-RESEARCH.md; structural convention on the existing skeleton)
 
 Plans:
-- [ ] 05.2-01: TBD (run /gsd-plan-phase 5.2 to break down)
+- [ ] 05.2-01-PLAN.md — Add `bad.denature_ph_change` + edit.prompt path L; generalize the bad-ending test into a parametrized `subTest` convention proof; bump all counts (54→55 / 20→21 / Bad 14→15) + DESIGN.md + diagram
 
 ### Phase 5.3: WT-Aligned Experimental Structure Load Convention (INSERTED)
 **Goal**: The convention for loading the aligned wild-type experimental structure after a correct (disease-reversing) edit is designed as a reviewable artifact — especially for mutants with major conformational differences (e.g. a large domain shift), where showing the aligned WT experimental structure (vs just the edited-mutant model) gives a scientifically stronger + visually clearer "this is what healthy looks like" restoration reveal. This interacts with the Phase 4 ProtonationManager restore path, the Phase 5.1 pyr.pdh cast-PDB + mutant-reveal decision (OQ-DM2: 6CER approach deferred to Phase 7), and the Phase 5.4 scene-template / cast-reveal convention.
