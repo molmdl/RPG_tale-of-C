@@ -26,9 +26,25 @@
         {"op": "hide_all"}
       ],
       "choices": [
-        {"label": "Glucose — enter the glycolysis path", "goto": "gly.start", "effects": {}, "tags": ["char:glucose"]},
+        {"label": "Glucose — enter the glycolysis path", "goto": "intro.shell_glucose", "effects": {}, "tags": ["char:glucose"]},
         {"label": "Fatty acid (coming in Phase 8)", "goto": "fa.stub", "effects": {}, "tags": ["char:fa", "stub"]},
         {"label": "Alcohol (coming in Phase 8)", "goto": "alc.stub", "effects": {}, "tags": ["char:alc", "stub"]}
+      ]
+    },
+    "intro.shell_glucose": {
+      "text_dramatic": "TBD — you select glucose; the atom gains its shell — the glucose structure becomes your form.",
+      "text_teaching": "TBD — Phase 7 shell text (the hero dons the glucose molecule; the 20 AA remain as the cast).",
+      "claim_ids": ["PLACEHOLDER_PHASE7"],
+      "tags": ["stage:intro", "preface", "char:glucose"],
+      "on_enter": [
+        {"op": "hide_all"},
+        {"op": "load", "target": "pdb:TBD_GLUCOSE", "args": {"object": "glucose"}},
+        {"op": "show_as", "target": "glucose", "args": {"rep": "sticks"}},
+        {"op": "show_as", "target": "aa_cast", "args": {"rep": "cartoon"}}
+      ],
+      "choices": [
+        {"label": "Begin the journey — enter glycolysis", "goto": "gly.start"},
+        {"label": "Observe your new form", "goto": "gly.start", "tags": ["mc:observe"]}
       ]
     },
     "fa.stub": {

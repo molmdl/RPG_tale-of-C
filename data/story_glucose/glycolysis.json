@@ -6,7 +6,8 @@
       "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS"],
       "tags": ["stage:glycolysis"],
       "on_enter": [
-        {"op": "hide_all"}
+        {"op": "hide_all"},
+        {"op": "show_as", "target": "glucose", "args": {"rep": "sticks"}}
       ],
       "choices": [
         {"label": "Continue", "goto": "gly.g6p"},
