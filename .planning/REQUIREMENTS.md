@@ -142,7 +142,7 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 - Phase 4: 6 reqs (EDIT-01..05, CAST-03)
 - Phase 5: 1 req (CITE-01) — parallel track
 - Phase 5.1: 0 reqs (INSERTED design phase — story graph skeleton + MC-choice/edit-node integration contracts; enables STORY-01/03/06/07 + EDIT-04 downstream)
-- Phase 5.2: 0 reqs (INSERTED design phase — hero highlight + scene templates + cast-reveal convention; enables CHAR-02/CAST-05 downstream)
+- Phase 5.4: 0 reqs (INSERTED design phase — hero highlight + scene templates + cast-reveal convention; enables CHAR-02/CAST-05 downstream)
 - Phase 6: 8 reqs (PLGN-01, PLGN-02, CHAR-02, CAST-04, CAST-05, DOC-03, ACH-01, ACH-02)
 - Phase 7: 3 reqs (STORY-03, STORY-06, STORY-07)
 - Phase 8: 2 reqs (CHAR-01, STORY-02)

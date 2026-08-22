@@ -2,10 +2,10 @@
 
 ## Overview
 
-A 14-phase build order (12 integer milestones + 2 INSERTED decimal design phases at 5.1/5.2) that front-loads the project's hardest invariants (testability boundary + no-fabricated-science gate + path resolution), proves the whole architecture end-to-end in WSL on a toy story BEFORE any PyMOL/Qt code, then layers the PyMOL `cmd` molecular layer (headless-testable) and finally the Qt UI (human-verify). The critical path is **engineering on placeholder content racing in parallel** with a **human source-approval + science-framing decision track** (Phase 5) that gates all content authoring. **Two design phases (5.1 Story Graph Design, 5.2 Cast & Hero Representation Design) sit between the Phase 5 decisions and the Phase 6 MVP**: they make the *story graph topology + gameplay-integration contracts* and the *3D visual language* explicit, reviewable artifacts before any Qt UI or cited content is built on top — so Phase 6 implements an already-reviewed design rather than inventing one inside the already-overloaded first-Qt phase. Content is a marathon spanning Phases 7–9 (glucose first, then fatty acid + alcohol, then anaerobic + full ~20+ cast), each phase dominated by per-claim approval throughput rather than engineering difficulty — these phases stay at 3 (not split further) and instead use granular per-pathway-segment plans (see "Content Phase Plan Granularity" below) because the per-claim approval bottleneck is orthogonal to phase structure. Phase 10 is playtest-driven polish (content/engineering finalization); Phase 11 is documentation finalization + verification — the last release gate, ensuring all user-facing docs match the shipped game. Depth = comprehensive.
+A 16-phase build order (12 integer milestones + 4 INSERTED decimal design phases at 5.1/5.2/5.3/5.4) that front-loads the project's hardest invariants (testability boundary + no-fabricated-science gate + path resolution), proves the whole architecture end-to-end in WSL on a toy story BEFORE any PyMOL/Qt code, then layers the PyMOL `cmd` molecular layer (headless-testable) and finally the Qt UI (human-verify). The critical path is **engineering on placeholder content racing in parallel** with a **human source-approval + science-framing decision track** (Phase 5) that gates all content authoring. **Four design phases (5.1 Story Graph Design, 5.2 Bad-Ending Extensibility, 5.3 WT-Aligned Structure Load, 5.4 Cast & Hero Representation Design) sit between the Phase 5 decisions and the Phase 6 MVP**: they make the *story graph topology + gameplay-integration contracts*, the *bad-ending extensibility convention*, the *restoration-reveal scene template*, and the *3D visual language* explicit, reviewable artifacts before any Qt UI or cited content is built on top — so Phase 6 implements an already-reviewed design rather than inventing one inside the already-overloaded first-Qt phase. Content is a marathon spanning Phases 7–9 (glucose first, then fatty acid + alcohol, then anaerobic + full ~20+ cast), each phase dominated by per-claim approval throughput rather than engineering difficulty — these phases stay at 3 (not split further) and instead use granular per-pathway-segment plans (see "Content Phase Plan Granularity" below) because the per-claim approval bottleneck is orthogonal to phase structure. Phase 10 is playtest-driven polish (content/engineering finalization); Phase 11 is documentation finalization + verification — the last release gate, ensuring all user-facing docs match the shipped game. Depth = comprehensive.
 
-**Depth:** comprehensive (8–12 phases) — this roadmap has 14 (12 integer + 2 INSERTED decimal design phases; above the comprehensive ceiling — the Phase 11 split is a user-requested separation of documentation verification from polish, and Phase 12 is a user-requested ending-cutscene-rendering phase appended at the end).
-**Parallelization:** enabled — Phase 5 (decisions + source approval) runs in parallel with Phases 2–4 (engineering on placeholder content); the 4 Key Decisions within Phase 5 are independent of each other. Phase 5.1 (Story Graph Design) can start as soon as Phase 2 + the Phase 5 ATP/True-Ending decision are done (potentially before Phase 4 finishes); Phase 5.2 (Representation Design) follows 5.1 + Phase 3. Both 5.1 and 5.2 gate Phase 6. Use the spec.md worktree/branch protocol for parallel plan execution.
+**Depth:** comprehensive (8–12 phases) — this roadmap has 16 (12 integer + 4 INSERTED decimal design phases; above the comprehensive ceiling — the Phase 11 split is a user-requested separation of documentation verification from polish, Phase 12 is a user-requested ending-cutscene-rendering phase appended at the end, and Phases 5.2/5.3 are user-requested urgent insertions for bad-ending extensibility + WT-aligned structure load convention discovered during the Phase 5.1 human review checkpoint).
+**Parallelization:** enabled — Phase 5 (decisions + source approval) runs in parallel with Phases 2–4 (engineering on placeholder content); the 4 Key Decisions within Phase 5 are independent of each other. Phase 5.1 (Story Graph Design) can start as soon as Phase 2 + the Phase 5 ATP/True-Ending decision are done (potentially before Phase 4 finishes); Phase 5.2 + 5.3 (urgent follow-ups from the 5.1 checkpoint) follow 5.1; Phase 5.4 (Representation Design) follows 5.1 + Phase 3. Phases 5.1–5.4 gate Phase 6. Use the spec.md worktree/branch protocol for parallel plan execution.
 
 ## Phases
 
@@ -21,7 +21,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Editing, Protonation & Restore Safety Net** — the highest technical-risk phase: apply_edit helper, backup/restore, curated protonation, edit routing ✓ COMPLETE + VERIFIED (2026-08-15; all 5 SCs delivered + verified: SC1 alter->sort mitigated + AST gate + headless byres proof, SC2 backup/restore round-trip for 3 edit types, SC3 EditRouter routing, SC4 protonation switch, SC5 coverage scan; 198 tests pass; 2 headless smokes green; VERIFICATION.md status: passed)
 - [x] **Phase 5: Pre-Content Key Decisions & Source Approval** — PARALLEL track: 4 science-framing decisions + batch-by-source approval workflow (gates Phases 6–9 content) ✓ COMPLETE (2026-08-15; all 5 SCs delivered + verified: SC1 soul-jump metaphor=metamorphosis, SC2 C14-decay DROP, SC3 anaerobic framing=(d)+invariant=(i)+host=mammal, SC4 hybrid workflow+first batch approved, SC5 gate operational on real data; 5/5 VERIFICATION.md status: passed)
 - [x] **Phase 5.1: Story Graph Design — Glucose Skeleton + Integration Contracts (INSERTED)** — designs the real glucose story graph topology + the MC-choice-point and edit-node integration contracts as reviewable artifacts; validated by the reachability checker ✓ COMPLETE (2026-08-22; all 5 SCs delivered: SC1 human-review APPROVED, SC2 reachability green/red + 3 invariants, SC3 choice-point contract, SC4 edit-node contract design-reviewed, SC5 54-node classification; 54 nodes, 20 endings 1T+3G+2N+14B, 14 edit-allowed, 0 single-Continue, intro.preface start; 9 reachability tests + 207 full suite PASS; human review APPROVED with 3 disease-mutant decisions confirmed as defaults + 32 OQs disposed; skeleton FROZEN)
-- [ ] **Phase 5.2: Cast & Hero Representation Design — Visual Language + Scene Templates (INSERTED)** — designs the C14 hero highlight convention + per-stage scene templates + cast-reveal convention; headless-prototyped on placeholder structures
+- [ ] **Phase 5.2: Bad-Ending Extensibility + Flexibility (INSERTED)** — demonstrates + locks in the convention for adding new bad endings whenever needed (shared-pool extensibility, reachability invariant); tested with a yet-to-exist ending "denature with a change in pH"
+- [ ] **Phase 5.3: WT-Aligned Experimental Structure Load Convention (INSERTED)** — designs the convention for loading the aligned wild-type experimental structure after a correct (disease-reversing) edit, especially for mutants with major conformational differences (the "restoration reveal" scene template)
+- [ ] **Phase 5.4: Cast & Hero Representation Design — Visual Language + Scene Templates (INSERTED)** — designs the C14 hero highlight convention + per-stage scene templates + cast-reveal convention; headless-prototyped on placeholder structures
 - [ ] **Phase 6: Qt UI + Minimal Playable MVP (Glucose + True+Bad)** — FIRST human-verify milestone; UI as thin adapter over proven engine + molecular layer + reviewed design artifacts
 - [ ] **Phase 7: Content Expansion I — All Glucose Endings + Full Glucose Path** — 4 endings + TCA RNG weights + real branch points + two-layer text for glucose
 - [ ] **Phase 8: Content Expansion II — Fatty Acid + Alcohol Characters** — completes the 3-character roster; all 4 endings reachable per character (v1 success measure)
@@ -150,7 +152,33 @@ Plans:
 - [x] 05.1-15-PLAN.md — Update 05.1-DESIGN.md for the bad-ending + preface expansion (§1/§3/§4/§5/§6 54-row SC5 table/§7 reachability/§8/§9 8 new OQs) (Wave 2, expansion) ✓
 - [x] 05.1-16-PLAN.md — Regenerate diagram (SVG/ASCII via render_story_graph.py) + update 05.1-GRAPH-DIAGRAM.md (11 new nodes + new edges + Ending-Tier table + new "Bad-Ending + Preface Expansion" section) (Wave 2, expansion) ✓
 
-### Phase 5.2: Cast & Hero Representation Design — Visual Language + Scene Templates (INSERTED)
+### Phase 5.2: Bad-Ending Extensibility + Flexibility (INSERTED)
+**Goal**: The bad-ending pool is demonstrably extensible — a tested convention exists for adding new bad endings whenever needed (Phase 7 content, future expansions) without breaking the skeleton structure or the reachability invariants. The convention is proven by adding a yet-to-exist ending "denature with a change in pH" (a pH-denaturation bad ending not previously in the skeleton) and verifying all invariants hold.
+**Depends on**: Phase 5.1 (the approved 54-node skeleton + the bad-ending pool structure + the edit.prompt stub + the reachability invariants)
+**Requirements**: (none owned — extensibility/convention phase; enables STORY-03 bad-ending variety delivery in Phase 7)
+**Success Criteria** (what must be TRUE):
+  1. A new bad-ending node `bad.denature_ph_change` (pH-denaturation, `edit:unknown`, `PLACEHOLDER_PHASE7_BAD`) is added to the bad-ending pool + reachable from `edit.prompt` via a structural choice
+  2. A **parametrized extensibility test** exists that demonstrates the convention: "add a new bad ending → reachability still GREEN → 14 edit-allowed + 0 single-Continue invariants hold → the new ending is reachable from edit.prompt". This locks in the pattern so future additions (Phase 7 content) follow a tested convention
+  3. All count assertions are updated (54→55 nodes, 20→21 endings, Bad tier 14→15) + DESIGN.md + diagram reflect the new node
+**Plans**: TBD (likely 1 plan; `/gsd-research-phase` NOT needed — structural convention on the existing skeleton)
+
+Plans:
+- [ ] 05.2-01: TBD (run /gsd-plan-phase 5.2 to break down)
+
+### Phase 5.3: WT-Aligned Experimental Structure Load Convention (INSERTED)
+**Goal**: The convention for loading the aligned wild-type experimental structure after a correct (disease-reversing) edit is designed as a reviewable artifact — especially for mutants with major conformational differences (e.g. a large domain shift), where showing the aligned WT experimental structure (vs just the edited-mutant model) gives a scientifically stronger + visually clearer "this is what healthy looks like" restoration reveal. This interacts with the Phase 4 ProtonationManager restore path, the Phase 5.1 pyr.pdh cast-PDB + mutant-reveal decision (OQ-DM2: 6CER approach deferred to Phase 7), and the Phase 5.4 scene-template / cast-reveal convention.
+**Depends on**: Phase 5.1 (the approved skeleton + the edit-allowed node structure + the restoration-narrative concept); Phase 4 (ProtonationManager restore path — where the WT-aligned load fires)
+**Requirements**: (none owned — convention/design phase; enables EDIT-02 restoration-reveal delivery in Phase 6/7)
+**Success Criteria** (what must be TRUE):
+  1. A **WT-aligned structure load convention** is specified (when it fires: after a correct/disease-reversing edit; what it loads: the aligned WT experimental PDB; how it aligns: superpose/align command; how it's presented: side-by-side or replacement) and documented for review
+  2. The convention is **headless-prototyped** on a placeholder/bundled structure (load a mutant → apply correct edit → load + align WT → verify alignment via RMSD or atom-count post-condition) — the 3-tier testability pattern
+  3. The convention is **human-reviewed for scientific accuracy + narrative clarity** — this is a design-review checkpoint (the real in-game human-verify is Phase 6)
+**Plans**: TBD (likely 1–2 plans; `/gsd-research-phase` NOT needed — PyMOL `cmd.align`/`cmd.super` are well-documented; the convention is a design decision on existing tools)
+
+Plans:
+- [ ] 05.3-01: TBD (run /gsd-plan-phase 5.3 to break down)
+
+### Phase 5.4: Cast & Hero Representation Design — Visual Language + Scene Templates (INSERTED)
 **Goal**: The 3D representation language is designed as a reviewable artifact — the C14 hero highlight convention (how the player sees "their" atom in any structure), the per-stage-type scene templates (which residues are shown, in what representation, with what zoom/color), and the cast-reveal convention (how an enzyme appears when first encountered) — headless-prototyped on placeholder/bundled structures, so Phase 6 implements an already-reviewed visual design rather than inventing it inside the overloaded first-Qt phase. This directly resolves the user's concern about cast representation and hero representation.
 **Depends on**: Phase 3 (cmd layer — structures loadable headlessly for prototyping); Phase 5.1 (story stages defined — to know which stage types need scene templates)
 **Requirements**: (none owned — design phase; enables CHAR-02, CAST-05 delivery in Phase 6; CAST-01 delivery in Phase 9)
@@ -162,11 +190,11 @@ Plans:
 **Plans**: TBD (likely 1–2 plans; `/gsd-research-phase` NOT needed — visual design on placeholder structures; real cast PDBs land in Phase 6/9)
 
 Plans:
-- [ ] 05.2-01: TBD
+- [ ] 05.4-01: TBD
 
 ### Phase 6: Qt UI + Minimal Playable MVP (Glucose + True+Bad)
-**Goal**: The game is playable end-to-end for the first time in a real Windows PyMOL session — a player installs the plugin, starts a glucose game, sees the C14 hero highlighted (per the reviewed Phase 5.2 convention), makes choices (per the reviewed Phase 5.1 choice-point contract), edits molecules (per the reviewed Phase 5.1 edit-node contract), sees real structures at the relevant stages (per the reviewed Phase 5.2 scene templates), saves/loads, and reaches a True or Bad ending — with the UI as a thin adapter over the already-proven engine + molecular layer + already-reviewed design artifacts. This is the FIRST human-verify milestone.
-**Depends on**: Phases 2, 3, 4 (engine + molecular layer); Phase 5 (approved glucose content + resolved Key Decisions); Phase 5.1 (glucose story graph skeleton + integration contracts); Phase 5.2 (hero/cast representation convention + scene templates)
+**Goal**: The game is playable end-to-end for the first time in a real Windows PyMOL session — a player installs the plugin, starts a glucose game, sees the C14 hero highlighted (per the reviewed Phase 5.4 convention), makes choices (per the reviewed Phase 5.1 choice-point contract), edits molecules (per the reviewed Phase 5.1 edit-node contract), sees real structures at the relevant stages (per the reviewed Phase 5.4 scene templates), saves/loads, and reaches a True or Bad ending — with the UI as a thin adapter over the already-proven engine + molecular layer + already-reviewed design artifacts. This is the FIRST human-verify milestone.
+**Depends on**: Phases 2, 3, 4 (engine + molecular layer); Phase 5 (approved glucose content + resolved Key Decisions); Phase 5.1 (glucose story graph skeleton + integration contracts); Phase 5.4 (hero/cast representation convention + scene templates)
 **Requirements**: PLGN-01, PLGN-02, CHAR-02, CAST-04, CAST-05, DOC-03, ACH-01, ACH-02
 **Success Criteria** (what must be TRUE):
   1. The plugin installs via Plugin Manager (package dir → .zip → startup/) and on PyMOL restart a "RPG: Tale of C" menu item appears; the main window opens with character selection, story text, choice panel, and cast/help/save/load/achievement controls (human-verify)
@@ -281,7 +309,7 @@ User-requested design preferences (capture during planning):
 - CG (scene setup) can be prepared by the agent, then color/angle/lighting adjusted by the human.
 - Default cutscene lighting: use 'XRay' in the PyMOL lighting plugin.
 - Default render with: 'Ray' (cmd.ray).
-- Workflow: agent sets up the scene headlessly (per Phase 5.2 representation convention + the ending's in-game scene) → human adjusts angle/color/lighting in a real PyMOL GUI session → render with Ray. This is a human-verify-heavy phase (GUI angle/lighting work cannot be automated from WSL).
+- Workflow: agent sets up the scene headlessly (per Phase 5.4 representation convention + the ending's in-game scene) → human adjusts angle/color/lighting in a real PyMOL GUI session → render with Ray. This is a human-verify-heavy phase (GUI angle/lighting work cannot be automated from WSL).
 
 ## Content Phase Plan Granularity (Phases 7–9)
 
@@ -306,8 +334,9 @@ User-requested design preferences (capture during planning):
 
 - **Phase 5 (Decisions + Source Approval) is the parallel track.** It runs alongside Phases 2–4 (engineering on `UNAPPROVED_PLACEHOLDER` content). The critical path is: *engineering races ahead while the human resolves science framings and approves sources in parallel.* Phase 5's four Key Decisions are independent of each other and can be resolved in parallel by the human.
 - **Phase 5.1 (Story Graph Design) can start early.** It depends on Phase 2 (engine + reachability checker) and the Phase 5 ATP/True-Ending decision only — so it can begin as soon as those two are ready, potentially before Phase 4 finishes. It designs the real glucose skeleton + the MC-choice and edit-node integration contracts, and gates Phase 6.
-- **Phase 5.2 (Representation Design) follows 5.1 + Phase 3.** It prototypes the hero-highlight + scene-template convention headlessly on placeholder structures. It gates Phase 6's visual implementation but not its engineering.
-- **Both 5.1 and 5.2 are design phases (0 requirements owned).** They produce reviewable artifacts (story graph skeleton JSON + integration-contract docs; representation convention + headless-prototyped scene templates) that Phase 6 implements and Phases 7–9 extend. They de-risk the overloaded first-Qt phase by making story structure and visual language explicit *before* UI code.
+- **Phase 5.2 + 5.3 (urgent follow-ups from 5.1 checkpoint) follow 5.1.** Phase 5.2 demonstrates bad-ending extensibility (add "denature with a change in pH" + a parametrized test). Phase 5.3 designs the WT-aligned structure load convention (restoration reveal after a correct edit). Both are small convention/extensibility phases; they do NOT require Phase 3.
+- **Phase 5.4 (Representation Design) follows 5.1 + Phase 3.** It prototypes the hero-highlight + scene-template convention headlessly on placeholder structures. It gates Phase 6's visual implementation but not its engineering.
+- **Phases 5.1–5.4 are design phases (0 requirements owned).** They produce reviewable artifacts (story graph skeleton JSON + integration-contract docs; bad-ending extensibility convention + test; WT-aligned-load convention; representation convention + headless-prototyped scene templates) that Phase 6 implements and Phases 7–9 extend. They de-risk the overloaded first-Qt phase by making story structure and visual language explicit *before* UI code.
 - **Content phases (7–9) are sequential** for a solo developer (each builds on the content model of the prior), but the per-file pathway split in `data/story/` means different pathways *could* be authored in parallel worktrees if additional capacity exists. Phase 7 fleshes out the Phase 5.1 glucose skeleton with cited two-layer text.
 - **Worktree/branch protocol** (per spec.md): parallel plan execution should use separate git worktrees/branches to avoid conflicts, especially when Phase 5 (content research/approval) overlaps with Phases 2–4 (engineering).
 - **Engineering never blocks on content approval**: Phases 2–4 ship on placeholder content; the citation gate (Phase 1) blocks only at ship time, not at dev time.
@@ -322,19 +351,21 @@ User-requested design preferences (capture during planning):
 | 4 Editing + Protonation | **Yes** | Per-residue protonation variant set per structure; edit-table coverage criteria (HIGH validation load) |
 | 5 Key Decisions | **Yes (heaviest human-approval load)** | ATP/True-Ending reframing, C14-decay framing, anaerobic framing, batch-vs-per-claim approval — these ARE research/approval tasks |
 | 5.1 Story Graph Design (INSERTED) | No | Design on already-resolved framings; human review of branch-point mapping against spec.md, not new research |
-| 5.2 Representation Design (INSERTED) | No | Visual design prototyped headlessly on placeholder structures; real cast PDBs land in Phase 6/9 |
+| 5.2 Bad-Ending Extensibility (INSERTED) | No | Structural convention on the existing skeleton; no new research needed |
+| 5.3 WT-Aligned Structure Load (INSERTED) | No | PyMOL `cmd.align`/`cmd.super` are well-documented; convention is a design decision on existing tools |
+| 5.4 Representation Design (INSERTED) | No | Visual design prototyped headlessly on placeholder structures; real cast PDBs land in Phase 6/9 |
 | 6 MVP | **Yes** | ATP/True-Ending reframing MUST be resolved before this phase's content; critical-path cast PDB IDs + resolutions + citations; TCA RNG weight values |
 | 7 Glucose content | **Yes** | Glucose pathway branch enumeration + ending-fate citations |
 | 8 Fatty acid + alcohol | **Yes** | Fatty acid / alcohol pathway branches + ending fates |
 | 9 Anaerobic + cast | **Yes** | Full ~20+ cast enumeration + citations; anaerobic-path content once framing decided |
 | 10 Polish | No | Playtest-driven iteration on existing content |
 | 11 Docs Finalization | No | Docs update + verification against shipped content — no new research |
-| 12 Ending Cutscene Rendering | No | PyMOL `cmd.ray` + 'XRay' lighting setting are standard, well-documented features (verifiable against `tmp/pymol-src/`); scene setup reuses the Phase 5.2 representation convention |
+| 12 Ending Cutscene Rendering | No | PyMOL `cmd.ray` + 'XRay' lighting setting are standard, well-documented features (verifiable against `tmp/pymol-src/`); scene setup reuses the Phase 5.4 representation convention |
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6 → 7 → 8 → 9 → 10 → 11 → 12. Phase 5 runs in PARALLEL with Phases 2–4 and must be complete (at least the ATP/True-Ending + anaerobic decisions) before Phase 5.1 begins. Phase 5.1 and 5.2 (INSERTED design phases) gate Phase 6. Phase 11 (documentation finalization + verification) is the last release gate, after Phase 10's content polish is complete. Phase 12 (Ending Cutscene Rendering) depends on Phase 10 (settled content); it may run between Phase 10 and Phase 11 if the docs should reference the cutscene renders, or as the final phase after Phase 11.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 5.3 → 5.4 → 6 → 7 → 8 → 9 → 10 → 11 → 12. Phase 5 runs in PARALLEL with Phases 2–4 and must be complete (at least the ATP/True-Ending + anaerobic decisions) before Phase 5.1 begins. Phases 5.1–5.4 (INSERTED design phases) gate Phase 6. Phase 11 (documentation finalization + verification) is the last release gate, after Phase 10's content polish is complete. Phase 12 (Ending Cutscene Rendering) depends on Phase 10 (settled content); it may run between Phase 10 and Phase 11 if the docs should reference the cutscene renders, or as the final phase after Phase 11.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -343,8 +374,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 | 3. PyMOL cmd Layer | 3/3 ✓ | Complete | 2026-08-14 |
 | 4. Editing + Protonation + Restore | 5/5 ✓ | Complete | 2026-08-15 |
 | 5. Pre-Content Key Decisions (parallel) | 5/5 ✓ | Complete | 2026-08-15 |
-| 5.1 Story Graph Design (INSERTED) | 14/16 (expansion Wave 2: 14+16 done; 15 in progress; 06 review remains) | In progress | - |
-| 5.2 Representation Design (INSERTED) | 0/TBD | Not started | - |
+| 5.1 Story Graph Design (INSERTED) | 16/16 ✓ | Complete | 2026-08-22 |
+| 5.2 Bad-Ending Extensibility (INSERTED) | 0/TBD | Not started | - |
+| 5.3 WT-Aligned Structure Load (INSERTED) | 0/TBD | Not started | - |
+| 5.4 Representation Design (INSERTED) | 0/TBD | Not started | - |
 | 6. Qt UI + MVP (Glucose + True+Bad) | 0/TBD | Not started | - |
 | 7. Content I: All Glucose Endings | 0/TBD | Not started | - |
 | 8. Content II: Fatty Acid + Alcohol | 0/TBD | Not started | - |
@@ -355,6 +388,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 6
 
 ---
 
-*Roadmap created: 2026-08-12 · Revised: 2026-08-12 (inserted Phases 5.1 + 5.2 — story graph design + representation design — per user feedback on story/editing/representation concerns) · Revised: 2026-08-12 (content phases 7/8/9 kept at 3 — not split further; per-pathway-segment plan granularity documented in "Content Phase Plan Granularity" section, per user feedback on content-authoring citation load) · Revised: 2026-08-12 (split documentation finalization + verification OUT of Phase 10 into Phase 11 — Phase 10 keeps polish/playtest/accessibility/test-matrix/citation-gate; Phase 11 owns docs update + final docs verification as the last release gate, per user feedback)*
-*Depth: comprehensive (14 phases: 12 integer + 2 INSERTED decimal design phases — above the 8–12 comprehensive ceiling; the Phase 11 split is a user-requested separation of documentation verification from polish, and Phase 12 is a user-requested ending-cutscene-rendering phase) · Coverage: 32/32 v1 requirements mapped ✓ (5.1 + 5.2 + 11 + 12 own 0 requirements — design/finalization/render phases enabling/verifying downstream delivery, per the Phase 10 0-requirement precedent)*
+*Roadmap created: 2026-08-12 · Revised: 2026-08-12 (inserted Phases 5.1 + 5.4 — story graph design + representation design — per user feedback on story/editing/representation concerns) · Revised: 2026-08-12 (content phases 7/8/9 kept at 3 — not split further; per-pathway-segment plan granularity documented in "Content Phase Plan Granularity" section, per user feedback on content-authoring citation load) · Revised: 2026-08-12 (split documentation finalization + verification OUT of Phase 10 into Phase 11 — Phase 10 keeps polish/playtest/accessibility/test-matrix/citation-gate; Phase 11 owns docs update + final docs verification as the last release gate, per user feedback) · Revised: 2026-08-22 (inserted Phases 5.2 + 5.3 — bad-ending extensibility + WT-aligned structure load convention — per user feedback during the Phase 5.1 human review checkpoint; old Phase 5.2 renumbered to Phase 5.4)*
+*Depth: comprehensive (16 phases: 12 integer + 4 INSERTED decimal design phases — above the 8–12 comprehensive ceiling; the Phase 11 split is a user-requested separation of documentation verification from polish, Phase 12 is a user-requested ending-cutscene-rendering phase, and Phases 5.2/5.3 are user-requested urgent insertions for bad-ending extensibility + WT-aligned structure load convention discovered during the Phase 5.1 human review checkpoint) · Coverage: 32/32 v1 requirements mapped ✓ (5.1 + 5.2 + 5.3 + 5.4 + 11 + 12 own 0 requirements — design/finalization/render phases enabling/verifying downstream delivery, per the Phase 10 0-requirement precedent)*
 *Note: REQUIREMENTS.md previously stated "34 total" v1 requirements; the actual enumerated v1 set is 32 (PATH-01 and STAT-01 are v2). Traceability below uses the actual count of 32.*
