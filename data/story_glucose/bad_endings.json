@@ -143,6 +143,17 @@
       "is_ending": "bad",
       "choices": []
     },
+    "bad.denature_ph_change": {
+      "text_dramatic": "TBD — extreme pH shatters the enzyme's ionic bonds and salt bridges; it unfolds into a useless tangle and its catalytic fire goes out.",
+      "text_teaching": "TBD — Phase 7 teaching text.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "tags": ["ending:bad", "edit:unknown"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "bad",
+      "choices": []
+    },
     "edit.prompt": {
       "text_dramatic": "TBD — you stand before the enzyme. [STRUCTURAL STUB: at runtime, the EditRouter (c14/edit_router.py) routes known edits to a defined branch node and unknown edits to the bad-ending pool; this stub's choices are structural BFS paths, not player-facing options.]",
       "text_teaching": "",
@@ -163,7 +174,8 @@
         {"label": "Make an unrecognized edit (structural path H)", "goto": "bad.misfolded_aggregate", "tags": ["edit:unknown"]},
         {"label": "Make a known-wrong edit (structural path I)", "goto": "bad.active_site_destroyed", "tags": ["edit:known"]},
         {"label": "Make a known-wrong edit (structural path J)", "goto": "bad.substrate_channel_blocked", "tags": ["edit:known"]},
-        {"label": "Make a known-wrong edit (structural path K)", "goto": "bad.cofactor_lost", "tags": ["edit:known"]}
+        {"label": "Make a known-wrong edit (structural path K)", "goto": "bad.cofactor_lost", "tags": ["edit:known"]},
+        {"label": "Make an unrecognized edit (structural path L)", "goto": "bad.denature_ph_change", "tags": ["edit:unknown"]}
       ]
     }
   }
