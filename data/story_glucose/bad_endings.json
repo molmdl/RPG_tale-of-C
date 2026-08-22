@@ -110,6 +110,39 @@
       "is_ending": "bad",
       "choices": []
     },
+    "bad.active_site_destroyed": {
+      "text_dramatic": "TBD — this specific edit shredded the active site; the enzyme is definitively dead.",
+      "text_teaching": "TBD — Phase 7 teaching text.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "tags": ["ending:bad", "edit:known"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "bad",
+      "choices": []
+    },
+    "bad.substrate_channel_blocked": {
+      "text_dramatic": "TBD — the substrate channel is plugged; nothing enters, nothing leaves.",
+      "text_teaching": "TBD — Phase 7 teaching text.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "tags": ["ending:bad", "edit:known"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "bad",
+      "choices": []
+    },
+    "bad.cofactor_lost": {
+      "text_dramatic": "TBD — the cofactor (NAD+/FAD) can no longer bind; the reaction is starved.",
+      "text_teaching": "TBD — Phase 7 teaching text.",
+      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "tags": ["ending:bad", "edit:known"],
+      "on_enter": [
+        {"op": "hide_all"}
+      ],
+      "is_ending": "bad",
+      "choices": []
+    },
     "edit.prompt": {
       "text_dramatic": "TBD — you stand before the enzyme. [STRUCTURAL STUB: at runtime, the EditRouter (c14/edit_router.py) routes known edits to a defined branch node and unknown edits to the bad-ending pool; this stub's choices are structural BFS paths, not player-facing options.]",
       "text_teaching": "",
@@ -127,7 +160,10 @@
         {"label": "Make an unrecognized edit (structural path E)", "goto": "bad.broken_active_site", "tags": ["edit:unknown"]},
         {"label": "Make an unrecognized edit (structural path F)", "goto": "bad.lost_in_cytosol", "tags": ["edit:unknown"]},
         {"label": "Make an unrecognized edit (structural path G)", "goto": "bad.proton_leak", "tags": ["edit:unknown"]},
-        {"label": "Make an unrecognized edit (structural path H)", "goto": "bad.misfolded_aggregate", "tags": ["edit:unknown"]}
+        {"label": "Make an unrecognized edit (structural path H)", "goto": "bad.misfolded_aggregate", "tags": ["edit:unknown"]},
+        {"label": "Make a known-wrong edit (structural path I)", "goto": "bad.active_site_destroyed", "tags": ["edit:known"]},
+        {"label": "Make a known-wrong edit (structural path J)", "goto": "bad.substrate_channel_blocked", "tags": ["edit:known"]},
+        {"label": "Make a known-wrong edit (structural path K)", "goto": "bad.cofactor_lost", "tags": ["edit:known"]}
       ]
     }
   }
