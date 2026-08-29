@@ -394,5 +394,234 @@ class TestSourceCitationsPresent(unittest.TestCase):
             )
 
 
+class TestMolOpsDeferredDispatch(unittest.TestCase):
+    """Phase 6 (06-01): the 4 deferred dispatches (set_color/label/set/align
+    from 5.4/5.3) map MolAction -> self._cmd.* with the right args.
+
+    Reuses the existing MockCmd at test_molops.py:54-80 (records (name, args,
+    kwargs) via __getattr__; count_atoms is an explicit method). Proves the
+    per-op dispatch mapping; the REAL cmd.* contract is deferred to the
+    headless smoke (tools/molops_deferred_dispatch_smoke.py -- Task 3). Covers
+    the quoted-string label footgun, the cealign REVERSED arg order, the
+    align_sele composition, and ValueError on an unknown align method.
+    """
+
+    def setUp(self):
+        self.mock = MockCmd()
+        self.molops = MolOps(self.mock)
+
+    def test_set_color_dispatch(self):
+        # set_color(name, rgb) -- the 5.4 hero_cyan palette (idempotent define).
+        self.molops.apply(MolAction(
+            "set_color", None, {"name": "hero_cyan", "rgb": [0.0, 0.75, 0.75]}))
+        self.assertEqual(
+            self.mock.calls[0],
+            ("set_color", ("hero_cyan", [0.0, 0.75, 0.75]), {}))
+
+    def test_label_dispatch_quotes_text(self):
+        # The label expression is a QUOTED STRING '"YOU"' -- a bare "YOU"
+        # would eval the atom property `YOU` (the footgun the dispatch
+        # encapsulates; 05.4-CONVENTION.md section 2.1 / viewing.py:1332).
+        self.molops.apply(MolAction("label", "hero_atom", {"text": "YOU"}))
+        self.assertEqual(
+            self.mock.calls[0], ("label", ("hero_atom", '"YOU"'), {}))
+
+    def test_label_sele_defaults_to_target(self):
+        # No "sele" key -> defaults to action.target ("hero_atom").
+        self.molops.apply(MolAction("label", "hero_atom", {"text": "YOU"}))
+        self.assertEqual(self.mock.calls[0][1][0], "hero_atom")
+
+    def test_label_sele_explicit(self):
+        # Explicit sele OVERRIDES target (args["sele"] wins).
+        self.molops.apply(MolAction(
+            "label", "hero_atom",
+            {"sele": "mol and name C1", "text": "YOU"}))
+        self.assertEqual(self.mock.calls[0][1][0], "mol and name C1")
+
+    def test_label_clear_empty_text(self):
+        # Empty text -> expression '""' (empty quoted string clears the label;
+        # mirrors hero_highlight_smoke.py Stage 4 climax fade).
+        self.molops.apply(MolAction("label", "hero_atom", {"text": ""}))
+        self.assertEqual(self.mock.calls[0][1][1], '""')
+
+    def test_set_dispatch(self):
+        # set(name, value, sele) -- selection is 3rd positional, defaults to
+        # target (the 5.4 ball-and-stick sphere_scale setting).
+        self.molops.apply(MolAction(
+            "set", "hero_atom", {"name": "sphere_scale", "value": 0.3}))
+        self.assertEqual(
+            self.mock.calls[0],
+            ("set", ("sphere_scale", 0.3, "hero_atom"), {}))
+
+    def test_set_sele_explicit(self):
+        # Explicit sele OVERRIDES target as the 3rd positional arg.
+        self.molops.apply(MolAction(
+            "set", "hero_atom",
+            {"name": "sphere_scale", "value": 0.3, "sele": "mol and name C1"}))
+        self.assertEqual(self.mock.calls[0][1][2], "mol and name C1")
+
+    def test_align_super_dispatch(self):
+        # cmd.super(mobile, target) -- mobile MOVED, reference=fixed FIXED
+        # (fitting.py:242 arg order; mobile first, reference second).
+        self.molops.apply(MolAction(
+            "align", "mol_a", {"reference": "mol_b", "method": "super"}))
+        self.assertEqual(
+            self.mock.calls[0], ("super", ("mol_a", "mol_b"), {}))
+
+    def test_align_default_method_is_super(self):
+        # Omit "method" -> defaults to "super" -> cmd.super called.
+        self.molops.apply(MolAction("align", "mol_a", {"reference": "mol_b"}))
+        self.assertEqual(self.mock.calls[0][0], "super")
+
+    def test_align_cealign_reversed_args(self):
+        # cmd.cealign(target, mobile) -- arg order is REVERSED per
+        # fitting.py:27 (target=fixed FIRST, mobile SECOND). The dispatch
+        # normalizes the reversal so callers always pass (mobile, reference)
+        # and the dispatch swaps for cealign only.
+        self.molops.apply(MolAction(
+            "align", "mol_a", {"reference": "mol_b", "method": "cealign"}))
+        self.assertEqual(
+            self.mock.calls[0], ("cealign", ("mol_b", "mol_a"), {}))
+
+    def test_align_method_align(self):
+        # method="align" -> cmd.align(mobile, ref) (NOT reversed; same order
+        # as super per fitting.py:306).
+        self.molops.apply(MolAction(
+            "align", "mol_a", {"reference": "mol_b", "method": "align"}))
+        self.assertEqual(
+            self.mock.calls[0], ("align", ("mol_a", "mol_b"), {}))
+
+    def test_align_align_sele_composition(self):
+        # align_sele composes "{target} and {sele}" for BOTH mobile AND ref
+        # (the substructure scope -- 05.3-CONVENTION.md section 4).
+        self.molops.apply(MolAction(
+            "align", "mol_a",
+            {"reference": "mol_b", "align_sele": "name CA"}))
+        mobile_arg, ref_arg = self.mock.calls[0][1]
+        self.assertEqual(mobile_arg, "mol_a and name CA")
+        self.assertEqual(ref_arg, "mol_b and name CA")
+
+    def test_align_unknown_method_raises_valueerror(self):
+        # An align method molops doesn't recognize raises ValueError (NOT
+        # NotImplementedError -- the op IS "align", but the method is bogus).
+        with self.assertRaises(ValueError):
+            self.molops.apply(MolAction(
+                "align", "mol_a", {"reference": "mol_b", "method": "quaternion"}))
+
+    def test_set_color_then_label_then_set_citations_present(self):
+        # SC#4: every direct self._cmd.* call in the 4 new branches carries a
+        # `# src: tmp/pymol-src` citation (mirrors TestSourceCitationsPresent
+        # for the 8 original ops). One citation per cmd.* call site -- the
+        # align branch has 3 (super/align/cealign), so 6 citations across 4 ops.
+        repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        src_path = os.path.join(repo, "c14", "pymol_layer", "molops.py")
+        with open(src_path, "r") as fh:
+            src = fh.read()
+        expected = [
+            "# src: tmp/pymol-src/modules/pymol/viewing.py:2107 cmd.set_color",
+            "# src: tmp/pymol-src/modules/pymol/viewing.py:1332 cmd.label",
+            "# src: tmp/pymol-src/modules/pymol/setting.py:183 cmd.set",
+            "# src: tmp/pymol-src/modules/pymol/fitting.py:242 cmd.super",
+            "# src: tmp/pymol-src/modules/pymol/fitting.py:306 cmd.align",
+            "# src: tmp/pymol-src/modules/pymol/fitting.py:27 cmd.cealign",
+        ]
+        for citation in expected:
+            self.assertIn(
+                citation, src,
+                "missing source citation: {0}".format(citation),
+            )
+
+
+class TestMolOpsLoadTargetPrefix(unittest.TestCase):
+    """Phase 6 (06-01): the `load` branch target-prefix fallback parses
+    action.target = "pdb:XXX"/"cid:XXX"/"sid:XXX"/<bundled-filename> when no
+    source/file/code/cid keys are present (the 5.1 skeleton on_enter form).
+
+    Reuses the existing MockAssets at test_molops.py:86-105 (records
+    (fetch_pubchem cid obj kind) / (fetch_pdb code obj fte) / (load_bundled
+    filename obj)). The explicit-source backward-compat path (test_molops.py
+    220-251) is regression-guarded by test_load_explicit_source_still_works.
+    """
+
+    def setUp(self):
+        self.mock = MockCmd()
+        self.assets = MockAssets()
+        self.molops = MolOps(self.mock, self.assets)
+
+    def test_load_target_pdb_prefix(self):
+        # "pdb:4PFK" prefix stripped -> fetch_pdb("4PFK", "pfk"); object from
+        # args (NOT the full "pdb:4PFK" string).
+        self.molops.apply(MolAction("load", "pdb:4PFK", {"object": "pfk"}))
+        self.assertEqual(
+            self.assets.calls[0], ("fetch_pdb", "4PFK", "pfk", "pdb"))
+
+    def test_load_target_cid_prefix(self):
+        # "cid:2244" prefix stripped -> fetch_pubchem("2244", "sub", kind="cid").
+        self.molops.apply(MolAction("load", "cid:2244", {"object": "sub"}))
+        self.assertEqual(
+            self.assets.calls[0], ("fetch_pubchem", "2244", "sub", "cid"))
+
+    def test_load_target_sid_prefix(self):
+        # "sid:2244" prefix stripped -> fetch_pubchem("2244", "sub", kind="sid").
+        self.molops.apply(MolAction("load", "sid:2244", {"object": "sub"}))
+        self.assertEqual(
+            self.assets.calls[0], ("fetch_pubchem", "2244", "sub", "sid"))
+
+    def test_load_target_bundled_no_prefix(self):
+        # Bare filename (no prefix) -> load_bundled(target, object); NO network.
+        self.molops.apply(MolAction("load", "_smoke.pdb", {"object": "mol"}))
+        self.assertEqual(
+            self.assets.calls[0], ("load_bundled", "_smoke.pdb", "mol"))
+
+    def test_load_target_pdb_no_object_defaults_to_stripped_code(self):
+        # No "object" key -> object defaults to the stripped code "4PFK" (NOT
+        # the full "pdb:4PFK" string -- avoids a colon in the object name).
+        self.molops.apply(MolAction("load", "pdb:4PFK", {}))
+        self.assertEqual(
+            self.assets.calls[0], ("fetch_pdb", "4PFK", "4PFK", "pdb"))
+
+    def test_load_target_bundled_no_object_defaults_to_target(self):
+        # No "object" key + bare filename -> object defaults to the target
+        # itself (the filename).
+        self.molops.apply(MolAction("load", "_smoke.pdb", {}))
+        self.assertEqual(
+            self.assets.calls[0], ("load_bundled", "_smoke.pdb", "_smoke.pdb"))
+
+    def test_load_no_source_no_file_no_target_raises_valueerror(self):
+        # No source, no file, no target (target is None) -> ValueError (the
+        # branch cannot resolve what to load -- fail loudly, NOT a KeyError).
+        with self.assertRaises(ValueError):
+            self.molops.apply(MolAction("load", None, {"object": "x"}))
+
+    def test_load_explicit_source_still_works_backward_compat(self):
+        # REGRESSION GUARD: the load-branch rewrite must NOT break the 4
+        # explicit-source forms at test_molops.py:220-251 (source:bundled+file,
+        # source:cid+cid, source:pdb+code, no-source+file). Each must STILL
+        # delegate identically to the same AssetManager method with the same
+        # args (the explicit-source branches are UNCHANGED; the bundled branch
+        # checks "file" in args FIRST before the target-prefix fallback).
+        # 1) source:bundled + file -> load_bundled("f.pdb", "obj")
+        self.molops.apply(MolAction(
+            "load", "key", {"source": "bundled", "file": "f.pdb", "object": "obj"}))
+        self.assertEqual(self.assets.calls[0], ("load_bundled", "f.pdb", "obj"))
+        # 2) source:cid + cid -> fetch_pubchem("2244", "obj", "cid")
+        self.assets.calls = []
+        self.molops.apply(MolAction(
+            "load", "key", {"source": "cid", "cid": "2244", "object": "obj"}))
+        self.assertEqual(
+            self.assets.calls[0], ("fetch_pubchem", "2244", "obj", "cid"))
+        # 3) source:pdb + code -> fetch_pdb("1crn", "obj", "pdb")
+        self.assets.calls = []
+        self.molops.apply(MolAction(
+            "load", "key", {"source": "pdb", "code": "1crn", "object": "obj"}))
+        self.assertEqual(
+            self.assets.calls[0], ("fetch_pdb", "1crn", "obj", "pdb"))
+        # 4) no-source + file -> load_bundled("f.pdb", "obj") (default source)
+        self.assets.calls = []
+        self.molops.apply(MolAction(
+            "load", "key", {"file": "f.pdb", "object": "obj"}))
+        self.assertEqual(self.assets.calls[0], ("load_bundled", "f.pdb", "obj"))
+
+
 if __name__ == "__main__":
     unittest.main()
