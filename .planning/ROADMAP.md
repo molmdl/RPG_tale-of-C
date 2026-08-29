@@ -206,10 +206,23 @@ Plans:
   3. The player can reach a True ending and a Bad ending for glucose via text multiple-choice; a save mid-game and load restores the exact session (story position + RNG state + loaded structures + view) (human-verify)
   4. On first play, a one-time bulk-download prompt fetches the large structures needed (with progress + cancel + retry + offline fallback that locks only affected characters); small/critical structures are bundled so the game starts instantly (human-verify)
   5. The achievement board shows unlocks (glucose tried + endings found so far) and persists across PyMOL sessions to a user-writable file; in-game help includes molecule-editing pointers + PyMOL wiki links (human-verify)
-**Plans**: TBD (likely 5–7 plans — this is the first Qt-bearing phase; `/gsd-research-phase` recommended: ATP/True-Ending reframing MUST be resolved before this phase's content, critical-path cast PDB IDs + resolutions + citations, TCA RNG weight values)
+**Plans**: 14 plans in 4 waves (aggressive atomicity per user guidance — "accept 50-100 focused plans, just make sure things work"; the first Qt-bearing phase split into focused pure-Python Wave 1 + Qt-free controller Wave 2 + Qt widgets/dialogs Wave 3 + integration/human-verify Wave 4). The 3 Phase-6 research tracks (qt-packaging, ui-adapter, persistence-achievements) are DONE; the 4 deferred molops dispatches (set_color/label/set/align) + the view-matrix gap + the OQ-6 prompt + the 2 SC#3 blockers (pyr.branch cond + tca.shuffle edit:offer/RNG) are all addressed by named plans.
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 06-01-PLAN.md — The 4 deferred molops dispatches (set_color/label/set/align) + MockCmd tests + headless smoke (Wave 1)
+- [ ] 06-02-PLAN.md — user_data_path() resolver + WSL unit tests (Wave 1)
+- [ ] 06-03-PLAN.md — GameState view field + GameEngine view_provider/view_applier injection (SC#3 view-matrix gap) (Wave 1)
+- [ ] 06-04-PLAN.md — AchievementBoard domain module + unlock detection + persistence (Wave 1)
+- [ ] 06-05-PLAN.md — Fix pyr.branch cond-syntax bug (SC#3 blocker A: flags.host_o2_low -> flags.get(...)) (Wave 1)
+- [ ] 06-06-PLAN.md — Qt-free Controller + HeroResolver (OQ-6 gate) + engine.goto (SC#3 blocker B: tca.shuffle edit:offer/RNG routing) (Wave 2)
+- [ ] 06-07-PLAN.md — Plugin entry point (__init_plugin__ + addmenuitemqt) + build_plugin_zip.sh (PLGN-01/02) (Wave 3)
+- [ ] 06-08-PLAN.md — MainWindow + StoryPanel + ChoicePanel (SC1 main window + tca.shuffle UI) (Wave 3)
+- [ ] 06-09-PLAN.md — EditDialog (curated edit options -> EditIntent) (Wave 3)
+- [ ] 06-10-PLAN.md — Bulk-download (Qt-free runner + QDialog + cast.json schema) (CAST-04) (Wave 3)
+- [ ] 06-11-PLAN.md — Save/Load dialogs (SAVE-01/02 UI) (Wave 3)
+- [ ] 06-12-PLAN.md — Achievements dialog (ACH-01/02 UI) (Wave 3)
+- [ ] 06-13-PLAN.md — Help dialog + help.json (DOC-03, webfetch-verified wiki links) (Wave 1)
+- [ ] 06-14-PLAN.md — End-to-end integration smoke (headless) + comprehensive human-verify (all 5 SCs) (Wave 4)
 
 ### Phase 7: Content Expansion I — All Glucose Endings + Full Glucose Pathway
 **Goal**: The glucose character's complete pathway is authored with all four ending tiers reachable, RNG-weighted TCA steps using approved weights, real pathway branch points (no invented branches), and two-layer (dramatic + teaching) text on every glucose node — proving the full content model on one character before replicating to others.
