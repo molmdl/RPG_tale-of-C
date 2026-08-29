@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "editing_pointers": [
+    {"title": "Point mutation", "body": "Swap one residue in an enzyme's active site. Use the edit panel to pick a residue + a new identity. A known reverse-mutation (matching a disease allele) routes the story to a 'you restored it' branch; an unknown edit falls through to a bad ending."},
+    {"title": "Substrate edit", "body": "Add or remove a group on the small molecule (the C14 hero or an intermediate). Pick the substrate + the group change in the edit panel."},
+    {"title": "Protonation change", "body": "Switch a catalytic residue's or substrate's protonation state between curated variants (e.g. HIP/HIE/HID for histidine). Defaults are physiological pH; you can adjust."},
+    {"title": "Restore safety net", "body": "If an edit goes wrong, 'Reveal correct 3D model' restores the pre-edit snapshot without restarting (keeps gameplay smooth)."}
+  ],
+  "wiki_links": [
+    {"label": "alter (residue editing)", "url": "https://pymolwiki.org/index.php/Alter", "note": "Read-write atom properties; sort after altering identifiers. Verified live 2026-08-29 (redirects to Iterate)."},
+    {"label": "h_add (protonation)", "url": "https://pymolwiki.org/index.php/H_Add", "note": "Valence-only hydrogen add (NOT pH-aware) -- why the game uses curated variants. Verified live 2026-08-29."},
+    {"label": "fetch (loading structures)", "url": "https://pymolwiki.org/index.php/Fetch", "note": "Downloads from PDB/PubChem; async=0 for scripting. Verified live 2026-08-29."}
+  ]
+}
