@@ -1,6 +1,7 @@
 {
   "version": 1,
   "enzymes": [
-    {"id": "fixture_enzyme_1", "label": "Fixture Enzyme 1 (placeholder)", "fixture": "_edit_smoke.pdb", "claim_id": "PLACEHOLDER_PHASE5"}
+    {"id": "fixture_enzyme_1", "label": "Fixture Enzyme 1 (placeholder)", "fixture": "_edit_smoke.pdb", "source": "bundled", "claim_id": "PLACEHOLDER_PHASE5"},
+    {"id": "PLACEHOLDER_large_enzyme", "label": "Placeholder large enzyme (Phase 7)", "source": "download", "pdb_id": "PLACEHOLDER_PDB", "character": "glucose", "claim_id": "PLACEHOLDER_PHASE7"}
   ]
 }
