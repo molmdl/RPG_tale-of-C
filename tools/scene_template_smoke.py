@@ -95,7 +95,7 @@ def color_name_for(sele):
         if not cidx:
             return None
         # src: tmp/pymol-src/modules/pymol/querying.py:843 cmd.get_color_indices
-        idx2name = {i: n for (n, i) in cmd.get_color_indices()}
+        idx2name = {i: n for (n, i) in cmd.get_color_indices(all=1)}
         return idx2name.get(cidx[0])
     except Exception:
         return None
@@ -118,20 +118,20 @@ def label_text_for(sele):
 
 # =========================================================================
 # Stage 0 -- define the palette (convention section 2.3).
-# hero_gold is a PLACEHOLDER Okabe-Ito orange; gray/green/red/orange/gray80
+# hero_cyan is a PLACEHOLDER PLACEHOLDER colorblind-safe cyan; gray/green/red/orange/gray80
 # are standard PyMOL named colors (no set_color needed for them). The final
 # palette + RGB source approval is Phase 7 (RESEARCH-api section I OQ-2;
 # spec.md no-fabricated-science).
 # =========================================================================
 try:
     # src: tmp/pymol-src/modules/pymol/viewing.py:2107 cmd.set_color
-    cmd.set_color("hero_gold", [0.90, 0.62, 0.0])
+    cmd.set_color("hero_cyan", [0.0, 0.75, 0.75])
     # src: tmp/pymol-src/modules/pymol/querying.py:851 cmd.get_color_index
-    hg = cmd.get_color_index("hero_gold")
+    hg = cmd.get_color_index("hero_cyan")
     # src: tmp/pymol-src/modules/pymol/querying.py:851 cmd.get_color_index
     gn = cmd.get_color_index("green")
     check("t0_palette", hg is not None and gn is not None,
-          "hero_gold=%r green=%r" % (hg, gn))
+          "hero_cyan=%r green=%r" % (hg, gn))
 except Exception as e:
     check("t0_palette", False, repr(e))
 
@@ -152,11 +152,15 @@ try:
     # src: tmp/pymol-src/modules/pymol/importing.py:635 cmd.load
     cmd.load(edit_path, "aa_cast")
     # src: tmp/pymol-src/modules/pymol/viewing.py:528 cmd.show_as
-    cmd.show_as("spheres", "hero_atom")
+    cmd.show_as("sticks", "hero_atom")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1858 cmd.color
-    cmd.color("hero_gold", "hero_atom")
+    cmd.color("hero_cyan", "hero_atom and elem C")
+    # src: tmp/pymol-src/modules/pymol/viewing.py:491 cmd.show  (ball-and-stick: ADD spheres ON TOP of sticks)
+    cmd.show("spheres", "hero_atom")
+    # src: tmp/pymol-src/modules/pymol/setting.py:183 cmd.set  (small elegant sphere)
+    cmd.set("sphere_scale", 0.3, "hero_atom")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1332 cmd.label
-    cmd.label("hero_atom", '"C14"')
+    cmd.label("hero_atom", '"YOU"')
     # src: tmp/pymol-src/modules/pymol/viewing.py:528 cmd.show_as
     cmd.show_as("cartoon", "aa_cast")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1858 cmd.color
@@ -190,14 +194,14 @@ try:
     cmd.load(smoke_path, "substrate")
     # src: tmp/pymol-src/modules/pymol/viewing.py:528 cmd.show_as
     cmd.show_as("sticks", "substrate")
-    # src: tmp/pymol-src/modules/pymol/viewing.py:1858 cmd.color
-    cmd.color("gray", "substrate")
-    # src: tmp/pymol-src/modules/pymol/viewing.py:528 cmd.show_as  (per-atom scoping: hero sub-sele only)
-    cmd.show_as("spheres", "substrate and name C1")
-    # src: tmp/pymol-src/modules/pymol/viewing.py:1858 cmd.color
-    cmd.color("hero_gold", "substrate and name C1")
+    # src: tmp/pymol-src/modules/pymol/viewing.py:1858 cmd.color  (ALL carbons cyan -- the hero is one of them)
+    cmd.color("hero_cyan", "substrate and elem C")
+    # src: tmp/pymol-src/modules/pymol/viewing.py:491 cmd.show  (ball-and-stick: ADD spheres ON TOP of sticks for hero only)
+    cmd.show("spheres", "substrate and name C1")
+    # src: tmp/pymol-src/modules/pymol/setting.py:183 cmd.set  (small elegant sphere)
+    cmd.set("sphere_scale", 0.3, "substrate and name C1")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1332 cmd.label
-    cmd.label("substrate and name C1", '"C14"')
+    cmd.label("substrate and name C1", '"YOU"')
     # src: tmp/pymol-src/modules/pymol/viewing.py:65 cmd.zoom
     cmd.zoom("substrate")
     # src: tmp/pymol-src/modules/pymol/querying.py:1412 cmd.count_atoms
@@ -207,7 +211,7 @@ try:
     n_hs2 = cmd.count_atoms("substrate and name C1 and rep spheres")
     check("t2_hero_spheres", n_hs2 == 1, "rep-spheres=%d" % n_hs2)
     check("t2_hero_color",
-          color_name_for("substrate and name C1") == "hero_gold",
+          color_name_for("substrate and name C1") == "hero_cyan",
           "color=%r" % color_name_for("substrate and name C1"))
 except Exception as e:
     check("t2_exception", False, repr(e))
@@ -240,7 +244,7 @@ try:
     # src: tmp/pymol-src/modules/pymol/viewing.py:491 cmd.show  (ADDS spheres on top of cartoon)
     cmd.show("spheres", "enzyme and resi 1")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1858 cmd.color
-    cmd.color("red", "enzyme and resi 1")
+    cmd.color("magenta", "enzyme and resi 1")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1332 cmd.label  (ONE nameplate label per anchor CA; Pitfall 2 quoted-string)
     cmd.label("enzyme and resi 2 and name CA", '"ENZ"')
     # src: tmp/pymol-src/modules/pymol/querying.py:1412 cmd.count_atoms
@@ -252,8 +256,8 @@ try:
     # src: tmp/pymol-src/modules/pymol/querying.py:1412 cmd.count_atoms
     n_ms = cmd.count_atoms("enzyme and resi 1 and rep spheres")
     check("t3_mutant_spheres", n_ms > 0, "rep-spheres=%d" % n_ms)
-    check("t3_mutant_color_red",
-          color_name_for("enzyme and resi 1 and name CA") == "red",
+    check("t3_mutant_color_magenta",
+          color_name_for("enzyme and resi 1 and name CA") == "magenta",
           "color=%r" % color_name_for("enzyme and resi 1 and name CA"))
     # src: tmp/pymol-src/modules/pymol/querying.py:1412 cmd.count_atoms
     n_cs = cmd.count_atoms("enzyme and resi 2 and rep sticks")
@@ -303,7 +307,7 @@ except Exception as e:
 # =========================================================================
 # Type 4 -- branch-point (convention section 4.3 Type 4; nodes pyr.branch
 # etc). Show the current state + HINT the alternative destiny. The
-# `alt_destiny` is colored hero_gold = the "where you could go" signal.
+# `alt_destiny` is colored hero_cyan = the "where you could go" signal.
 # 5.4 specs the 2-object data-level shape; the viewport SPLIT is deferred
 # to Phase 6 (OQ-8).
 # =========================================================================
@@ -319,7 +323,7 @@ try:
     # src: tmp/pymol-src/modules/pymol/viewing.py:528 cmd.show_as
     cmd.show_as("sticks", "alt_destiny")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1858 cmd.color
-    cmd.color("hero_gold", "alt_destiny")
+    cmd.color("hero_cyan", "alt_destiny")
     # src: tmp/pymol-src/modules/pymol/viewing.py:65 cmd.zoom
     cmd.zoom("current")
     # src: tmp/pymol-src/modules/pymol/querying.py:1412 cmd.count_atoms
@@ -328,8 +332,8 @@ try:
     # src: tmp/pymol-src/modules/pymol/querying.py:1412 cmd.count_atoms
     n_alt = cmd.count_atoms("alt_destiny and rep sticks")
     check("t4_alt_sticks", n_alt > 0, "rep-sticks=%d" % n_alt)
-    check("t4_alt_color_hero_gold",
-          color_name_for("alt_destiny and name CA") == "hero_gold",
+    check("t4_alt_color_hero_cyan",
+          color_name_for("alt_destiny and name CA") == "hero_cyan",
           "color=%r" % color_name_for("alt_destiny and name CA"))
     check("t4_current_color_gray",
           color_name_for("current and name C1") == "gray",
@@ -359,7 +363,7 @@ try:
     # src: tmp/pymol-src/modules/pymol/viewing.py:491 cmd.show  (ADDS spheres on top of sticks)
     cmd.show("spheres", "prochiral_pair")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1858 cmd.color
-    cmd.color("hero_gold", "prochiral_pair")
+    cmd.color("hero_cyan", "prochiral_pair")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1332 cmd.label
     cmd.label("prochiral_pair", '"? (RNG)"')
     # src: tmp/pymol-src/modules/pymol/viewing.py:65 cmd.zoom
@@ -373,8 +377,8 @@ try:
     # src: tmp/pymol-src/modules/pymol/querying.py:1412 cmd.count_atoms
     n_ps = cmd.count_atoms("prochiral_pair and rep spheres")
     check("t5_prochiral_spheres", n_ps > 0, "rep-spheres=%d" % n_ps)
-    check("t5_prochiral_color_hero_gold",
-          color_name_for("prochiral_pair") == "hero_gold",
+    check("t5_prochiral_color_hero_cyan",
+          color_name_for("prochiral_pair") == "hero_cyan",
           "color=%r" % color_name_for("prochiral_pair"))
 except Exception as e:
     check("t5_exception", False, repr(e))
@@ -391,9 +395,9 @@ try:
     # src: tmp/pymol-src/modules/pymol/viewing.py:528 cmd.show_as
     cmd.show_as("sticks", "atp")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1858 cmd.color
-    cmd.color("hero_gold", "atp")
+    cmd.color("hero_cyan", "atp")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1332 cmd.label
-    cmd.label("atp", '"ATP - soul"')
+    cmd.label("atp", '"YOU - soul"')
     # src: tmp/pymol-src/modules/pymol/viewing.py:65 cmd.zoom
     cmd.zoom("atp")
     # ANTI-CONFUSION: the gold on `atp` represents the hero's ELECTRONS (the
@@ -403,11 +407,11 @@ try:
     # src: tmp/pymol-src/modules/pymol/querying.py:1412 cmd.count_atoms
     n_ts = cmd.count_atoms("atp and rep sticks")
     check("t6_true_atp_sticks", n_ts > 0, "rep-sticks=%d" % n_ts)
-    check("t6_true_color_hero_gold",
-          color_name_for("atp") == "hero_gold",
+    check("t6_true_color_hero_cyan",
+          color_name_for("atp") == "hero_cyan",
           "color=%r" % color_name_for("atp"))
     check("t6_true_label",
-          label_text_for("atp") == "ATP - soul",
+          label_text_for("atp") == "YOU - soul",
           "label=%r" % label_text_for("atp"))
 except Exception as e:
     check("t6_true_exception", False, repr(e))
@@ -419,14 +423,14 @@ try:
     # src: tmp/pymol-src/modules/pymol/viewing.py:528 cmd.show_as
     cmd.show_as("sticks", "product")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1858 cmd.color
-    cmd.color("hero_gold", "product")
+    cmd.color("hero_cyan", "product")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1332 cmd.label
     cmd.label("product", '"retained"')
     # src: tmp/pymol-src/modules/pymol/querying.py:1412 cmd.count_atoms
     n_gs = cmd.count_atoms("product and rep sticks")
     check("t6_good_sticks", n_gs > 0, "rep-sticks=%d" % n_gs)
-    check("t6_good_color_hero_gold",
-          color_name_for("product") == "hero_gold",
+    check("t6_good_color_hero_cyan",
+          color_name_for("product") == "hero_cyan",
           "color=%r" % color_name_for("product"))
 except Exception as e:
     check("t6_good_exception", False, repr(e))
@@ -488,11 +492,11 @@ try:
     # src: tmp/pymol-src/modules/pymol/viewing.py:491 cmd.show  (re-establish the BEFORE mutant red spheres)
     cmd.show("spheres", "enzyme and resi 1")
     # src: tmp/pymol-src/modules/pymol/viewing.py:1858 cmd.color
-    cmd.color("red", "enzyme and resi 1")
+    cmd.color("magenta", "enzyme and resi 1")
     # src: tmp/pymol-src/modules/pymol/querying.py:1412 cmd.count_atoms
     n_before = cmd.count_atoms("enzyme and resi 1 and rep spheres")
-    check("comp_before_mutant_red_spheres",
-          n_before > 0 and color_name_for("enzyme and resi 1 and name CA") == "red",
+    check("comp_before_mutant_magenta_spheres",
+          n_before > 0 and color_name_for("enzyme and resi 1 and name CA") == "magenta",
           "spheres=%d color=%r" % (n_before, color_name_for("enzyme and resi 1 and name CA")))
     # AFTER: load the pre-built WT fixture as `enzyme_wt` (the restored WT).
     wt_path = str(c14.paths.data_path("data", "assets", "bundled", "_wt_align_wt.pdb"))
