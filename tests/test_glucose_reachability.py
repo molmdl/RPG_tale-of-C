@@ -42,11 +42,14 @@ Pure Python 3.6 stdlib only. NO pymol/PyQt5. Mirrors the proven pattern in
 tests/test_integration.py:336-362 (the toy-graph SC2 tests).
 """
 import os
+import re
 import unittest
 
 from c14.story.graph import StoryGraph
-from c14.story.validate import check_reachability
+from c14.story.interpreter import StoryInterpreter
 from c14.story.model import Node
+from c14.story.validate import check_reachability
+from c14.state import GameState
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GLUCOSE_STORY_DIR = os.path.join(HERE, "..", "data", "story_glucose")
@@ -345,6 +348,152 @@ class TestGlucoseReachability(unittest.TestCase):
                         "reachability stays GREEN after the bad-ending addition")
         self.assertEqual(rep.unreachable_endings, [],
                          "no unreachable endings after the bad-ending addition")
+
+
+class TestPyrBranchRuntimeEligibility(unittest.TestCase):
+    """Runtime-eligibility tests for the pyr.branch cond-syntax fix (06-05).
+
+    The structural reachability tests in TestGlucoseReachability cover BFS
+    (cond ignored). These tests exercise the interpreter's ``_cond`` at
+    RUNTIME to confirm the fixed ``flags.get('host_o2_low')`` conds evaluate
+    correctly: the aerobic choice is eligible when ``host_o2_low`` is unset
+    (player can proceed to TCA -> True ending), the anaerobic choice is hidden
+    until a flag-setter exists (Phase 7), and the flag flip inverts
+    eligibility. Also includes a regression scan ensuring NO choice cond in the
+    glucose story uses the broken ``flags.<attr>`` dict-attribute form.
+
+    This is a COND-SYNTAX fix to the FROZEN 5.1 skeleton, NOT a topology
+    change: the 55-node/21-ending structural reachability is unchanged (covered
+    by TestGlucoseReachability above); these tests prove the FROZEN topology is
+    actually PLAYABLE past pyr.branch (the 05.1-06 review didn't exercise
+    runtime cond evaluation).
+    """
+
+    def setUp(self):
+        self._story_dir = GLUCOSE_STORY_DIR
+
+    def _pyr_branch_choices(self):
+        """Return (aerobic_choice, anaerobic_choice) from pyr.branch.
+
+        Aerobic = the choice whose cond starts with 'not ' (the
+        ``not flags.get('host_o2_low')`` choice -> pyr.pdh -> TCA -> True
+        ending). Anaerobic = the other cond-gated choice
+        (``flags.get('host_o2_low')`` -> anaer.entry -> fermentation endings).
+        """
+        g = StoryGraph.load(self._story_dir)
+        node = g.get_node("pyr.branch")
+        aerobic = None
+        anaerobic = None
+        for c in node.choices:
+            if c.cond and c.cond.startswith("not "):
+                aerobic = c
+            elif c.cond:
+                anaerobic = c
+        self.assertIsNotNone(
+            aerobic,
+            "pyr.branch has an aerobic choice (cond starts with 'not ')")
+        self.assertIsNotNone(
+            anaerobic,
+            "pyr.branch has an anaerobic choice (cond without 'not ')")
+        return aerobic, anaerobic
+
+    def test_pyr_branch_aerobic_choice_eligible_when_host_o2_low_unset(self):
+        """Aerobic choice (``not flags.get('host_o2_low')``) is eligible when
+        ``host_o2_low`` is unset (fresh GameState, empty flags). ``flags.get``
+        returns None -> ``not None`` is True -> the player CAN proceed
+        aerobically to pyr.pdh -> TCA -> the True ending (SC#3 unblocked)."""
+        aerobic, _ = self._pyr_branch_choices()
+        interp = StoryInterpreter()
+        state = GameState()  # empty flags -> host_o2_low unset
+        self.assertIs(
+            interp._cond(aerobic.cond, state), True,
+            "aerobic choice eligible when host_o2_low unset (player can reach "
+            "TCA -> True ending); cond=%r" % aerobic.cond)
+
+    def test_pyr_branch_anaerobic_choice_hidden_when_host_o2_low_unset(self):
+        """Anaerobic choice (``flags.get('host_o2_low')``) is HIDDEN when
+        ``host_o2_low`` is unset. ``flags.get`` returns None -> ``bool(None)``
+        is False -> the anaerobic branch is not selectable until a Phase 7
+        flag-setter exists (no fabricated anaerobic reachability)."""
+        _, anaerobic = self._pyr_branch_choices()
+        interp = StoryInterpreter()
+        state = GameState()  # empty flags -> host_o2_low unset
+        self.assertIs(
+            interp._cond(anaerobic.cond, state), False,
+            "anaerobic choice hidden when host_o2_low unset (None is falsy); "
+            "cond=%r" % anaerobic.cond)
+
+    def test_pyr_branch_aerobic_hidden_when_host_o2_low_set_true(self):
+        """Setting ``host_o2_low=True`` FLIPS eligibility: the aerobic choice
+        becomes hidden (``not True`` is False) and the anaerobic choice becomes
+        eligible (``True`` is truthy). Proves the cond is actually reading the
+        flag, not just always-True (a regression guard against a cond that
+        ignores the flag entirely)."""
+        aerobic, anaerobic = self._pyr_branch_choices()
+        interp = StoryInterpreter()
+        state = GameState()
+        state.set_flag("host_o2_low", True)
+        self.assertIs(
+            interp._cond(aerobic.cond, state), False,
+            "aerobic choice hidden when host_o2_low=True (not True is False); "
+            "cond=%r" % aerobic.cond)
+        self.assertIs(
+            interp._cond(anaerobic.cond, state), True,
+            "anaerobic choice eligible when host_o2_low=True; cond=%r"
+            % anaerobic.cond)
+
+    def test_pyr_branch_both_choices_not_stuck(self):
+        """Regression guard: at least ONE pyr.branch choice is eligible when
+        ``host_o2_low`` is unset (the aerobic choice is True). The OLD broken
+        ``flags.host_o2_low`` cond made BOTH choices False (AttributeError ->
+        caught -> False) -> the player was STUCK at pyr.branch -> SC#3 blocked.
+        This test proves the fix: the player can advance past pyr.branch."""
+        aerobic, anaerobic = self._pyr_branch_choices()
+        interp = StoryInterpreter()
+        state = GameState()  # host_o2_low unset
+        eligible = [c for c in (aerobic, anaerobic)
+                    if interp._cond(c.cond, state)]
+        self.assertGreaterEqual(
+            len(eligible), 1,
+            "at least one pyr.branch choice must be eligible when "
+            "host_o2_low is unset (the OLD broken cond made both False -> "
+            "stuck -> SC#3 blocked); conds=%r, %r"
+            % (aerobic.cond, anaerobic.cond))
+
+    def test_no_broken_dict_attribute_conds_remain(self):
+        """Regression scan: NO choice cond in the glucose story uses the broken
+        ``flags.<attr>`` dict-attribute form (which raises AttributeError in
+        ``_cond`` -> caught -> False -> choice hidden -> potentially stuck).
+        The dict-method form ``flags.get(...)`` is correct (matches
+        tca.shuffle's working ``visits.get(...)`` sibling). Scans only ``flags.``
+        attribute access (``visits.``/``counters.`` are separate dicts and are
+        not flagged here). Catches any other node with the same bug so it
+        surfaces immediately rather than stranding the player at runtime."""
+        g = StoryGraph.load(self._story_dir)
+        # Match flags.<identifier> NOT immediately followed by '(' (i.e. a bare
+        # dict-attribute access, NOT a dict-method call like flags.get(...)).
+        # The trailing (?![a-zA-Z0-9_]) word-boundary BEFORE (?!\() is REQUIRED:
+        # without it the greedy [a-zA-Z0-9_]* backtracks from 'get' to 'ge' when
+        # the next char is '(', making (?!\() succeed on the truncated prefix
+        # 'flags.ge' -- a false positive that flags the CORRECT flags.get(...)
+        # form as broken. The boundary forces the full identifier to match
+        # first, so (?!\() only tests the char after the COMPLETE identifier.
+        broken = re.compile(r"flags\.[a-zA-Z_][a-zA-Z0-9_]*(?![a-zA-Z0-9_])(?!\()")
+        offenders = []
+        for nid, node in g.all_nodes().items():
+            for c in node.choices:
+                if c.cond is None:
+                    continue
+                m = broken.search(c.cond)
+                if m:
+                    offenders.append((nid, c.cond, m.group(0)))
+        self.assertEqual(
+            offenders, [],
+            "no choice cond should use the broken flags.<attr> "
+            "dict-attribute form (use flags.get('<attr>') instead -- the "
+            "interpreter exposes flags as a DICT so attribute access raises "
+            "AttributeError -> caught -> choice hidden); offenders=%s"
+            % offenders)
 
 
 if __name__ == "__main__":
