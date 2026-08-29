@@ -7,9 +7,14 @@
       "tags": ["stage:intro", "preface"],
       "on_enter": [
         {"op": "hide_all"},
-        {"op": "load", "target": "pdb:TBD_HERO_CARBON", "args": {"object": "hero_atom"}},
-        {"op": "show_as", "target": "hero_atom", "args": {"rep": "spheres"}},
-        {"op": "load", "target": "pdb:TBD_AA_CAST_20", "args": {"object": "aa_cast"}},
+        {"op": "load", "target": "_smoke.pdb", "args": {"object": "hero_atom"}},
+        {"op": "set_color", "args": {"name": "hero_cyan", "rgb": [0.0, 0.75, 0.75]}},
+        {"op": "show_as", "target": "hero_atom", "args": {"rep": "sticks"}},
+        {"op": "color", "target": "hero_atom", "args": {"color": "hero_cyan", "sele": "hero_atom and elem C"}},
+        {"op": "show", "target": "hero_atom", "args": {"rep": "spheres", "sele": "hero_atom"}},
+        {"op": "set", "target": "hero_atom", "args": {"name": "sphere_scale", "value": 0.3, "sele": "hero_atom"}},
+        {"op": "label", "target": "hero_atom", "args": {"sele": "hero_atom", "text": "YOU"}},
+        {"op": "load", "target": "_smoke.pdb", "args": {"object": "aa_cast"}},
         {"op": "show_as", "target": "aa_cast", "args": {"rep": "cartoon"}}
       ],
       "choices": [
@@ -38,7 +43,7 @@
       "tags": ["stage:intro", "preface", "char:glucose"],
       "on_enter": [
         {"op": "hide_all"},
-        {"op": "load", "target": "pdb:TBD_GLUCOSE", "args": {"object": "glucose"}},
+        {"op": "load", "target": "_smoke.pdb", "args": {"object": "glucose"}},
         {"op": "show_as", "target": "glucose", "args": {"rep": "sticks"}},
         {"op": "show_as", "target": "aa_cast", "args": {"rep": "cartoon"}}
       ],

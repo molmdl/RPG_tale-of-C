@@ -496,5 +496,155 @@ class TestPyrBranchRuntimeEligibility(unittest.TestCase):
             % offenders)
 
 
+class TestStartNodeOnEnterShape(unittest.TestCase):
+    """Start-node on_enter shape tests for the _smoke.pdb swap + the 6-call
+    hero-highlight sequence (06-05 Task 3).
+
+    The FROZEN 5.1 start nodes (intro.preface + intro.shell_glucose) used
+    ``pdb:TBD_*`` load targets that are NOT real PDB IDs -- molops.load's
+    target-prefix fallback (06-01) would route them to fetch_pdb -> a network
+    fetch that fails -> the game crashes on intro.preface (the manifest start
+    node) the moment the first load dispatches. These tests confirm the swap
+    to the bundled ``_smoke.pdb`` placeholder (no network, no crash) + the
+    6-call hero-highlight sequence on hero_atom (SC2 human-verifiable at
+    Phase 6, no fabricated science -- _smoke.pdb is a test fixture, NOT a
+    cited PDB).
+
+    These are CONTENT-shape tests (the on_enter MolAction list), NOT topology
+    tests -- the 55-node/21-ending structural reachability is unchanged
+    (covered by test_intro_topology_unchanged below re-running the counts).
+    """
+
+    def setUp(self):
+        self._story_dir = GLUCOSE_STORY_DIR
+
+    def _graph(self):
+        return StoryGraph.load(self._story_dir)
+
+    def test_preface_on_enter_loads_bundled_placeholder_not_tbd(self):
+        """intro.preface on_enter loads the bundled ``_smoke.pdb`` placeholder
+        (no network fetch) and has NO ``pdb:TBD*`` crash target. The 2
+        original TBD loads (TBD_HERO_CARBON + TBD_AA_CAST_20) are both swapped
+        for _smoke.pdb so the start node does not crash on the first load
+        (Blocker 1 fix b)."""
+        node = self._graph().get_node("intro.preface")
+        load_targets = [m.target for m in node.on_enter if m.op == "load"]
+        for t in load_targets:
+            self.assertFalse(
+                t is not None and t.startswith("pdb:TBD"),
+                "intro.preface on_enter must NOT load a pdb:TBD* target (it "
+                "would network-fetch a non-existent PDB -> crash); got %r"
+                % load_targets)
+        self.assertIn(
+            "_smoke.pdb", load_targets,
+            "intro.preface on_enter loads the bundled _smoke.pdb placeholder; "
+            "load targets=%s" % load_targets)
+
+    def test_preface_on_enter_has_hero_highlight_sequence(self):
+        """intro.preface on_enter contains the 6-call hero-highlight sequence
+        from 05.4-CONVENTION.md section 3.3 (set_color hero_cyan + show_as
+        sticks + color hero_cyan on elem C + show spheres + set sphere_scale
+        0.3 + label YOU), IN ORDER, AFTER the hero_atom load (the load
+        precedes the highlight so the ops act on a real object). SC2
+        ('Starting a glucose game highlights the C14 hero atom') is
+        human-verifiable at Phase 6 via this sequence."""
+        node = self._graph().get_node("intro.preface")
+        on_enter = node.on_enter
+        # The hero_atom load must precede the highlight sequence.
+        hero_load_idx = None
+        for i, m in enumerate(on_enter):
+            if m.op == "load" and m.args.get("object") == "hero_atom":
+                hero_load_idx = i
+                break
+        self.assertIsNotNone(
+            hero_load_idx,
+            "intro.preface on_enter loads hero_atom before the highlight")
+        # The 6-op sequence, in order, each matching a predicate. Walk
+        # forward from after the hero_atom load; each op must be the next
+        # matching one at a higher index (ordered subsequence).
+        seq = [
+            ("set_color", lambda m: m.args.get("name") == "hero_cyan"),
+            ("show_as",   lambda m: m.args.get("rep") == "sticks"),
+            ("color",     lambda m: m.args.get("color") == "hero_cyan"),
+            ("show",      lambda m: m.args.get("rep") == "spheres"),
+            ("set",       lambda m: m.args.get("name") == "sphere_scale"),
+            ("label",     lambda m: m.args.get("text") == "YOU"),
+        ]
+        idx = hero_load_idx + 1
+        for op_name, pred in seq:
+            found = False
+            while idx < len(on_enter):
+                m = on_enter[idx]
+                idx += 1
+                if m.op == op_name and pred(m):
+                    found = True
+                    break
+            self.assertTrue(
+                found,
+                "intro.preface on_enter hero-highlight sequence missing op "
+                "%r (with its predicate) after the hero_atom load; "
+                "on_enter=%s" % (op_name, [mm.to_dict() for mm in on_enter]))
+
+    def test_shell_glucose_on_enter_loads_bundled_not_tbd(self):
+        """intro.shell_glucose on_enter loads the bundled ``_smoke.pdb`` as
+        ``glucose`` (no ``pdb:TBD`` network fetch, no crash on the second
+        start-node load). NO hero-highlight here -- preface owns the highlight
+        (keeps the diff minimal)."""
+        node = self._graph().get_node("intro.shell_glucose")
+        glucose_loads = [m for m in node.on_enter
+                         if m.op == "load" and m.args.get("object") == "glucose"]
+        self.assertEqual(
+            len(glucose_loads), 1,
+            "intro.shell_glucose on_enter has exactly one glucose load; got "
+            "%s" % [m.to_dict() for m in glucose_loads])
+        self.assertEqual(
+            glucose_loads[0].target, "_smoke.pdb",
+            "the glucose load uses the bundled _smoke.pdb placeholder (NOT "
+            "pdb:TBD_GLUCOSE); target=%r" % glucose_loads[0].target)
+        for m in node.on_enter:
+            if m.op == "load":
+                self.assertFalse(
+                    m.target is not None and m.target.startswith("pdb:TBD"),
+                    "intro.shell_glucose on_enter must NOT load a pdb:TBD* "
+                    "target; got %r" % m.target)
+
+    def test_start_nodes_do_not_reference_real_pdb_fetch(self):
+        """NO start-node (intro.preface / intro.shell_glucose / intro.select)
+        on_enter load target starts with ``pdb:`` -- the start nodes use
+        bundled placeholders ONLY (no network fetch at game start; SC4
+        'small/critical bundled so the game starts instantly'). intro.select
+        / fa.stub / alc.stub have ``[hide_all]``-only on_enter (no load) and
+        trivially pass."""
+        g = self._graph()
+        start_nodes = ["intro.preface", "intro.shell_glucose", "intro.select"]
+        for nid in start_nodes:
+            node = g.get_node(nid)
+            for m in node.on_enter:
+                if m.op == "load":
+                    self.assertFalse(
+                        m.target is not None and m.target.startswith("pdb:"),
+                        "start node %r on_enter must NOT load a pdb: target "
+                        "(start nodes use bundled placeholders only -- SC4 "
+                        "instant-start); got %r" % (nid, m.target))
+
+    def test_intro_topology_unchanged(self):
+        """Regression guard: the on_enter content edit (swapping TBD_* targets
+        + adding the hero-highlight sequence) did NOT change the topology.
+        Re-runs the frozen skeleton counts: 55 nodes, 21 endings (1T+3G+2N+
+        15B), all 4 tiers reachable from intro.preface."""
+        g = self._graph()
+        self.assertEqual(
+            len(g.all_nodes()), 55,
+            "topology unchanged: 55 nodes (the on_enter edit is content-only)")
+        rep = check_reachability(g.all_nodes(), g.start_node())
+        self.assertTrue(
+            rep.is_ok,
+            "reachability stays GREEN after the on_enter edit")
+        all_endings = [n for n in g.all_nodes().values() if n.is_ending]
+        self.assertEqual(
+            len(all_endings), 21,
+            "topology unchanged: 21 endings (1T+3G+2N+15B)")
+
+
 if __name__ == "__main__":
     unittest.main()
