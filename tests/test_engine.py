@@ -213,5 +213,181 @@ class TestGameEngine(unittest.TestCase):
                             "two random-mode starts pick different seeds")
 
 
+class TestEngineViewCallbacks(unittest.TestCase):
+    """Tests for the view_provider/view_applier injection (06-03): save captures
+    the view via an injected provider (failure-tolerant, no-op if None); load
+    applies the saved view via an injected applier AFTER the on_enter replay
+    (the saved view wins over any zoom MolAction; failure-tolerant, no-op if
+    None or view None). Uses the real data/story graph + list sinks as the mock
+    molaction_sink (test_engine.py:64 style); lambdas as the mock provider/applier
+    (NO pymol import)."""
+
+    def setUp(self):
+        self._paths = []
+        self._dirs = []
+
+    def tearDown(self):
+        for p in self._paths:
+            try:
+                os.unlink(p)
+            except OSError:
+                pass
+        for d in self._dirs:
+            try:
+                shutil.rmtree(d)
+            except OSError:
+                pass
+
+    def _story_dir(self):
+        # type: () -> str
+        return _story_dir()
+
+    def _tmpfile(self, name="save.json"):
+        # type: (str) -> str
+        """A path inside a fresh temp dir (cleaned in tearDown)."""
+        d = tempfile.mkdtemp()
+        self._dirs.append(d)
+        p = os.path.join(d, name)
+        self._paths.append(p)
+        return p
+
+    def _graph(self):
+        return StoryGraph.load(self._story_dir())
+
+    def test_save_captures_view_when_provider_injected(self):
+        """save() calls the injected view_provider and stores its 18-float list
+        into state.view before serializing."""
+        graph = self._graph()
+        captured = []
+        provider = lambda: (captured.append('called') or [0.5] * 18)
+        sink = []
+        eng = GameEngine(graph, molaction_sink=sink.append,
+                         view_provider=provider)
+        eng.start('glucose', 42)
+        p = self._tmpfile()
+        eng.save(p)
+        self.assertEqual(eng.state.view, [0.5] * 18,
+                         "save captured the provider's 18-float view list")
+        self.assertEqual(captured, ['called'],
+                         "view_provider was called exactly once on save")
+
+    def test_save_no_capture_when_provider_none(self):
+        """save() with view_provider=None leaves state.view None (Phase 2
+        behavior preserved; backward-compatible)."""
+        graph = self._graph()
+        sink = []
+        eng = GameEngine(graph, molaction_sink=sink.append, view_provider=None)
+        eng.start('glucose', 42)
+        p = self._tmpfile()
+        eng.save(p)
+        self.assertIsNone(eng.state.view,
+                          "no provider -> view stays None after save")
+
+    def test_save_view_capture_failure_does_not_block_save(self):
+        """A view_provider that raises does NOT block the save (the try/except
+        swallows; state.view stays None -- 06-RESEARCH Pattern 4)."""
+        graph = self._graph()
+
+        def boom():
+            raise RuntimeError('no view')
+
+        sink = []
+        eng = GameEngine(graph, molaction_sink=sink.append, view_provider=boom)
+        eng.start('glucose', 42)
+        p = self._tmpfile()
+        eng.save(p)  # must NOT raise
+        self.assertIsNone(eng.state.view,
+                          "capture failure -> view None, save proceeds")
+
+    def test_load_applies_view_after_replay(self):
+        """load() applies the saved view via view_applier AFTER the on_enter
+        replay (the saved view wins over any zoom MolAction -- 06-RESEARCH
+        Pattern 4). Ordering proven via a single shared log: the sink appends
+        ('molaction', a) per replayed action, the applier appends
+        ('set_view', v); the LAST log entry is the set_view (all molactions
+        precede it)."""
+        graph = self._graph()
+        # Save an engine with a view set (manually; no provider needed for the
+        # save -- the view is serialized as-is by SaveStore).
+        sink1 = []
+        eng = GameEngine(graph, molaction_sink=sink1.append)
+        eng.start('glucose', 0)
+        eng.state.view = [0.7] * 18
+        p = self._tmpfile()
+        eng.save(p)
+        # Load into a fresh engine sharing a single ordered log so we can assert
+        # the replay's molactions precede the set_view.
+        log = []
+        applier = lambda v: log.append(('set_view', v))
+        sink_fn = lambda a: log.append(('molaction', a))
+        eng2 = GameEngine(graph, molaction_sink=sink_fn, view_applier=applier)
+        eng2.load(p)
+        # The view applied is the saved 18-float list.
+        self.assertEqual(log[-1], ('set_view', [0.7] * 18),
+                         "the last log entry is the set_view (applied AFTER replay)")
+        molaction_count = sum(1 for tag, _ in log if tag == 'molaction')
+        self.assertGreater(molaction_count, 0,
+                           "load replayed on_enter molactions to the sink")
+        self.assertEqual(len(log), molaction_count + 1,
+                         "exactly one set_view AFTER all molactions "
+                         "(saved view wins over the replay's zoom MolAction)")
+
+    def test_load_no_apply_when_applier_none(self):
+        """load() with view_applier=None does NOT apply a view (the scene still
+        replays via the sink; no exception)."""
+        graph = self._graph()
+        sink1 = []
+        eng = GameEngine(graph, molaction_sink=sink1.append)
+        eng.start('glucose', 0)
+        eng.state.view = [0.3] * 18
+        p = self._tmpfile()
+        eng.save(p)
+        sink2 = []
+        eng2 = GameEngine(graph, molaction_sink=sink2.append, view_applier=None)
+        tr = eng2.load(p)  # must NOT raise
+        self.assertIsInstance(tr, TurnResult)
+        self.assertGreater(len(sink2), 0,
+                           "scene replays on load even with no view_applier")
+
+    def test_load_no_apply_when_view_none(self):
+        """load() does NOT call the applier when state.view is None (old saves /
+        saves made without a provider -- the `state.view is not None` guard)."""
+        graph = self._graph()
+        # Save WITHOUT a provider -> view stays None on the saved state.
+        sink1 = []
+        eng = GameEngine(graph, molaction_sink=sink1.append, view_provider=None)
+        eng.start('glucose', 0)
+        p = self._tmpfile()
+        eng.save(p)
+        self.assertIsNone(eng.state.view, "save without provider -> view None")
+        applied = []
+        applier = lambda v: applied.append(('set_view', v))
+        sink2 = []
+        eng2 = GameEngine(graph, molaction_sink=sink2.append, view_applier=applier)
+        eng2.load(p)
+        self.assertEqual(applied, [],
+                         "applier NOT called when state.view is None")
+
+    def test_load_view_apply_failure_does_not_block_load(self):
+        """A view_applier that raises does NOT block the load (the try/except
+        swallows; the TurnResult is still returned -- 06-RESEARCH Pattern 4)."""
+        graph = self._graph()
+        sink1 = []
+        eng = GameEngine(graph, molaction_sink=sink1.append)
+        eng.start('glucose', 0)
+        eng.state.view = [0.9] * 18
+        p = self._tmpfile()
+        eng.save(p)
+
+        def boom(v):
+            raise RuntimeError('bad view')
+
+        sink2 = []
+        eng2 = GameEngine(graph, molaction_sink=sink2.append, view_applier=boom)
+        tr = eng2.load(p)  # must NOT raise
+        self.assertIsInstance(tr, TurnResult,
+                              "load returns a TurnResult despite view-apply failure")
+
+
 if __name__ == "__main__":
     unittest.main()

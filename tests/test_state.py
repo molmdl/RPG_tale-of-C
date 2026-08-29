@@ -105,5 +105,34 @@ class TestGameState(unittest.TestCase):
         self.assertIsNone(s.rng_state)
 
 
+class TestGameStateView(unittest.TestCase):
+    """Tests for the ``view`` field (06-03): default None, round-trip, old-save
+    backward-compat, new_game starts with view=None."""
+
+    def test_view_defaults_none(self):
+        """GameState() defaults view to None (no view until a save captures it)."""
+        self.assertIsNone(GameState().view)
+
+    def test_view_round_trips(self):
+        """view survives a to_dict/from_dict round-trip (18 floats preserved)."""
+        view = [1.0] * 18
+        d = GameState(view=view).to_dict()
+        self.assertEqual(d["view"], view)
+        restored = GameState.from_dict(d)
+        self.assertEqual(restored.view, view)
+
+    def test_old_save_without_view_loads_none(self):
+        """An old Phase-2 save (no 'view' key) loads with view=None -- no crash
+        (from_dict .get default None; 06-03 backward-compat invariant)."""
+        old_save = {"seed": 0, "character": "glucose", "current_node": "x"}
+        s = GameState.from_dict(old_save)
+        self.assertIsNone(s.view)
+
+    def test_new_game_view_none(self):
+        """new_game() starts with view=None (the view is captured only on save)."""
+        s = GameState.new_game("glucose", 42, "intro.start")
+        self.assertIsNone(s.view)
+
+
 if __name__ == "__main__":
     unittest.main()
