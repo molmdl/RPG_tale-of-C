@@ -91,8 +91,8 @@ def color_name_for(sele):
     cmd.iterate(sele, "cidx.append(color)", space={"cidx": cidx})
     if not cidx:
         return None
-    # src: tmp/pymol-src/modules/pymol/querying.py:843 cmd.get_color_indices  (returns [(name, index), ...])
-    idx2name = {i: n for (n, i) in cmd.get_color_indices()}
+    # src: tmp/pymol-src/modules/pymol/querying.py:843 cmd.get_color_indices  (all=1 -> ALL colors incl. standard extended like gray80; all=0 omits gray80/gray10..gray90 -- empirically gray80 idx=4236 is only in all=1)
+    idx2name = {i: n for (n, i) in cmd.get_color_indices(all=1)}
     return idx2name.get(cidx[0])
 
 
@@ -111,8 +111,8 @@ cmd.set_color("hero_gold", [0.90, 0.62, 0.0])
 # index; assert the NAME).
 # src: tmp/pymol-src/modules/pymol/querying.py:851 cmd.get_color_index  (name -> int index)
 hg_idx = cmd.get_color_index("hero_gold")
-# src: tmp/pymol-src/modules/pymol/querying.py:843 cmd.get_color_indices  ([(name,index),...]; build idx2name)
-_idx2name_stage0 = {i: n for (n, i) in cmd.get_color_indices()}
+# src: tmp/pymol-src/modules/pymol/querying.py:843 cmd.get_color_indices  (all=1 -> ALL colors incl. extended; build idx2name)
+_idx2name_stage0 = {i: n for (n, i) in cmd.get_color_indices(all=1)}
 check("hero_gold_defined",
       hg_idx is not None and hg_idx in _idx2name_stage0
       and _idx2name_stage0[hg_idx] == "hero_gold",
