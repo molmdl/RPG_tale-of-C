@@ -16,6 +16,7 @@ silently break; ``__file__``-relative paths always work. This is Pitfall
 .planning/research/SUMMARY.md. Baking the convention into a single
 helper in Phase 1 means every later phase inherits correct path handling.
 """
+import os
 from pathlib import Path
 
 # Package root = the directory containing THIS file (c14/paths.py -> c14/).
@@ -62,3 +63,30 @@ def selfcheck():
             )
         )
     return str(fixture)
+
+
+def user_data_path(*relative_parts):
+    # type: (*str) -> Path
+    """Resolve a user-writable path that survives PyMOL restarts AND plugin reinstalls.
+
+    Matches PyMOL's own user-dir convention (plugins/installation.py:22-29
+    get_default_user_plugin_path): ~/.pymol/ on Linux/Mac, %APPDATA%/pymol/ on
+    Windows. Appends a 'c14-tale-of-c/' subfolder so game data sits BESIDE (not
+    inside) the plugin install dir (~/.pymol/startup/<plugin>/) -- a plugin
+    reinstall (delete + re-unzip startup/) does NOT wipe this data.
+
+    Pure-Python (os + pathlib), NO pymol import -- importable in pure WSL python3.6
+    for unit tests (set/monkeypatch APPDATA / HOME to assert the split). Does NOT
+    check existence -- callers makedirs as needed (matches data_path's pure-resolver
+    design, paths.py:26-43). Returns Path (use str() for open()).
+
+    Example:
+        p = user_data_path("achievements.json")
+        # -> ~/.pymol/c14-tale-of-c/achievements.json  (Linux/Mac)
+        # -> %APPDATA%/pymol/c14-tale-of-c/achievements.json  (Windows)
+    """
+    if 'APPDATA' in os.environ:   # Windows -- matches installation.py:27
+        base = os.path.join(os.environ['APPDATA'], 'pymol', 'c14-tale-of-c')
+    else:                         # Linux/Mac -- matches installation.py:29
+        base = os.path.join(os.path.expanduser('~'), '.pymol', 'c14-tale-of-c')
+    return Path(base).joinpath(*relative_parts)
