@@ -389,5 +389,118 @@ class TestEngineViewCallbacks(unittest.TestCase):
                               "load returns a TurnResult despite view-apply failure")
 
 
+class TestEngineGoto(unittest.TestCase):
+    """Tests for the additive ``GameEngine.goto`` + ``choice_cond_met`` methods
+    (06-06 Task 1). ``goto`` directly enters a node id (bypassing choice
+    resolution) so the controller can route non-weighted choices at a mixed
+    weighted+non-weighted node (tca.shuffle's edit:offer + cycle-trap) WITHOUT
+    the RNG pre-empting them. ``choice_cond_met`` exposes the interpreter's
+    cond check so the controller can enable/disable cond-gated buttons.
+
+    Reuses the real ``data/story`` toy graph (intro.start -> 2 weighted choices
+    -> 2 endings) + a list sink (test_engine.py:64 style). Additive: the
+    existing TestGameEngine + TestEngineViewCallbacks suites stay green.
+    """
+
+    def setUp(self):
+        self._paths = []
+        self._dirs = []
+
+    def tearDown(self):
+        for p in self._paths:
+            try:
+                os.unlink(p)
+            except OSError:
+                pass
+        for d in self._dirs:
+            try:
+                shutil.rmtree(d)
+            except OSError:
+                pass
+
+    def _story_dir(self):
+        # type: () -> str
+        return _story_dir()
+
+    def _make_engine(self):
+        # type: () -> tuple
+        """Build a GameEngine over the real data/story graph with a list sink."""
+        sink = []
+        eng = GameEngine(StoryGraph.load(self._story_dir()),
+                         molaction_sink=sink.append)
+        return eng, sink
+
+    def test_goto_enters_node(self):
+        """goto(target) sets state.current_node to target + dispatches its
+        on_enter MolActions to the sink (the ending node's hide_all fires)."""
+        eng, sink = self._make_engine()
+        eng.start('glucose', 0)  # at intro.start
+        tr = eng.goto('intro.ending_good')
+        self.assertEqual(eng.state.current_node, 'intro.ending_good',
+                         "goto entered the target node id directly")
+        self.assertIsInstance(tr, TurnResult)
+        self.assertEqual(tr.node.id, 'intro.ending_good')
+        self.assertGreater(len(sink), 0,
+                           "goto dispatched the target's on_enter MolActions")
+
+    def test_goto_records_visit(self):
+        """goto records a visit to the target (visit_counts bumped >= 1)."""
+        eng, _ = self._make_engine()
+        eng.start('glucose', 0)
+        eng.goto('intro.ending_good')
+        self.assertGreaterEqual(
+            eng.state.visit_counts.get('intro.ending_good', 0), 1,
+            "goto recorded a visit to the target node")
+
+    def test_goto_ending_marks_finished(self):
+        """goto an ending node marks the playthrough finished (state.finished
+        is not None -- the interpreter detects the ending on entry)."""
+        eng, _ = self._make_engine()
+        eng.start('glucose', 0)
+        eng.goto('intro.ending_good')
+        self.assertIsNotNone(eng.state.finished,
+                             "goto to an ending node marks the game finished")
+        self.assertEqual(eng.state.ending_tier, 'good',
+                         "goto to a good ending records the good tier")
+
+    def test_choice_cond_met_true_when_cond_none(self):
+        """A Choice with cond=None is always eligible (choice_cond_met -> True)."""
+        eng, _ = self._make_engine()
+        eng.start('glucose', 0)
+        from c14.story.model import Choice
+        c = Choice(label='x', goto='intro.ending_good', cond=None)
+        self.assertTrue(eng.choice_cond_met(c),
+                        "cond=None -> choice_cond_met returns True")
+
+    def test_choice_cond_met_delegates_to_interpreter(self):
+        """choice_cond_met delegates to the interpreter's _cond: a cond
+        referencing `char` evaluates against state.character. glucose -> True;
+        fatty_acid -> False."""
+        eng, _ = self._make_engine()
+        eng.start('glucose', 0)
+        from c14.story.model import Choice
+        c_glu = Choice(label='x', goto='intro.ending_good',
+                       cond="char=='glucose'")
+        c_fa = Choice(label='y', goto='intro.ending_bad',
+                      cond="char=='fatty_acid'")
+        self.assertTrue(eng.choice_cond_met(c_glu),
+                        "char=='glucose' is True when state.character='glucose'")
+        self.assertFalse(eng.choice_cond_met(c_fa),
+                         "char=='fatty_acid' is False when state.character='glucose'")
+
+    def test_choice_cond_met_before_start_returns_cond_is_none(self):
+        """Before start (state is None), choice_cond_met returns True only for
+        cond-less choices (fail-safe: the controller should not present choices
+        before start, but the guard avoids an AttributeError crash)."""
+        eng, _ = self._make_engine()
+        from c14.story.model import Choice
+        c_none = Choice(label='x', goto='intro.ending_good', cond=None)
+        c_cond = Choice(label='y', goto='intro.ending_bad', cond="char=='glucose'")
+        self.assertTrue(eng.choice_cond_met(c_none),
+                        "state=None + cond=None -> True (cond-less always eligible)")
+        self.assertFalse(eng.choice_cond_met(c_cond),
+                         "state=None + cond set -> False (no state to eval against)")
+
+
 if __name__ == "__main__":
     unittest.main()

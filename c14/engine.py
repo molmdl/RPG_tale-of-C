@@ -176,6 +176,38 @@ class GameEngine(object):
         })
         return self._enter(node_id)
 
+    def goto(self, node_id):
+        # type: (str) -> TurnResult
+        """Directly enter ``node_id``, bypassing choice resolution.
+
+        Used by the controller for non-weighted choices (``edit:offer``,
+        ``cycle-trap``) at a mixed weighted+non-weighted node (e.g.
+        ``tca.shuffle``) where :meth:`choose` would RNG-pick among the
+        weighted choices and pre-empt the non-weighted ones. ``goto`` reuses
+        :meth:`_enter` so it records the visit, emits ``on_enter`` MolActions
+        to the sink, detects an ending, and syncs the RNG state -- everything
+        :meth:`choose` does EXCEPT resolving a choice (no effects applied, no
+        RNG draw). Additive: ``start``/``choose``/``apply_player_edit``/
+        ``_enter``/``save``/``load`` are unchanged (Phase 2 tests stay green).
+        """
+        return self._enter(node_id, record_visit=True)
+
+    def choice_cond_met(self, choice):
+        # type: (Choice) -> bool
+        """Return ``True`` iff ``choice.cond`` is met under the current state.
+
+        Delegates to :meth:`StoryInterpreter._cond` so the controller can
+        enable/disable cond-gated buttons (e.g. the ``tca.shuffle``
+        cycle-trap whose cond is ``visits.get('tca.shuffle', 0) > 5``)
+        WITHOUT re-implementing cond evaluation. If no game is in progress
+        (``state is None``), only cond-less choices (``cond is None``) are
+        considered met (fail-safe: the controller should not present choices
+        before :meth:`start`). Additive public method.
+        """
+        if self.state is None:
+            return choice.cond is None
+        return self.interpreter._cond(choice.cond, self.state)
+
     def _enter(self, node_id, record_visit=True):
         # type: (str, bool) -> TurnResult
         """Enter ``node_id``: set current_node, run on_enter (emitting
