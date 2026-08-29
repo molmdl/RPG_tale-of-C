@@ -21,6 +21,19 @@
 #
 # Usage: bash tools/build_plugin_zip.sh   (callable from any cwd; the script
 #                                          cd's to the repo root)
+#
+# DEV INSTALL (no zip rebuild per change): instead of installing the zip via
+# Plugin Manager, point PyMOL's plugin search path at THIS REPO ROOT so PyMOL
+# loads c14/ straight from source. Edits to c14/ui/*.py then take effect on
+# PyMOL restart with NO rebuild. Two equivalent ways:
+#   - GUI:  PyMOL -> Plugin -> Plugin Manager -> Settings -> add the repo root
+#           (the dir containing c14/) to "Plugin Directories", then restart.
+#   - Env:  set PYMOL_GIT_MOD=<repo-root> before launching PyMOL.
+# On restart PyMOL scans the path, finds c14/__init__.py exposing
+# __init_plugin__, and registers the "RPG: Tale of C" menu item. The
+# MainWindow's _resolve_story_dir() already falls back to repo-root
+# data/story_glucose in dev (06-08), so the story resolves without bundling.
+# Use the zip build (below) only for a clean install / distribution.
 set -eu
 set -o pipefail
 
