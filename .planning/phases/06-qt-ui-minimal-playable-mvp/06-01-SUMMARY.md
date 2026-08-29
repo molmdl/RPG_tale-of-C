@@ -106,9 +106,18 @@ Each task was committed atomically:
 - **Verification:** full suite 253 tests green (237 from 06-01 + 16 from the bundled parallel test files); the smoke file content is mine and verified PASS; the parallel test files pass too (no regression).
 - **Committed in:** `524362a`
 
+**2. [Rule 3 - Blocking] Parallel-staging race bundled the 06-01 SUMMARY into the parallel 06-03 docs commit**
+
+- **Found during:** SUMMARY commit step
+- **Issue:** After I `git add`-ed `06-01-SUMMARY.md` (staging it), the parallel 06-03 agent's commit `335fdfa docs(06-03): complete view-matrix-injection plan` landed and swept up my staged SUMMARY alongside its own `06-03-SUMMARY.md`. So the first version of this SUMMARY was committed under the 06-03 commit, not a dedicated `docs(06-01)` commit (`git log --diff-filter=A` confirms `06-01-SUMMARY.md` was introduced in `335fdfa`).
+- **Fix:** Updated this SUMMARY's Deviations section to record the second race (this entry), then made a dedicated `docs(06-01)` commit with the updated content via a path-limited commit (`git commit -m "..." -- <path>`) so it does NOT sweep any other parallel-staged files. The `335fdfa` version is now an intermediate version in history; the current version carries the full deviation record under the correct `docs(06-01)` attribution.
+- **Files modified:** `.planning/phases/06-qt-ui-minimal-playable-mvp/06-01-SUMMARY.md` (this edit)
+- **Verification:** `git log --diff-filter=A` shows the SUMMARY first introduced in `335fdfa`; the dedicated `docs(06-01)` commit supersedes it with the complete deviation record.
+- **Committed in:** the `docs(06-01)` commit that follows this edit.
+
 ---
 
-**Total deviations:** 1 auto-fixed (1 blocking parallel-race)
+**Total deviations:** 2 auto-fixed (2 blocking parallel-race)
 **Impact on plan:** Attribution noise only. All 06-01 deliverables are correctly committed + verified. No scope creep; the 4 dispatches + load extension + tests + smoke are exactly what the plan specified.
 
 ## Issues Encountered
