@@ -353,16 +353,24 @@ class Controller(object):
         ``edit:enzyme:<id>`` tag + call ``engine.apply_player_edit`` (which
         routes via EditRouter -> branch or bad-ending pool). Records + renders.
 
-        Raises ``RuntimeError`` if the current node has no ``edit:enzyme:`` tag
-        (not edit-allowed). The enzyme_id MUST come from the current node (the
-        edit-allowed source); do NOT use the pending stash here (that's for
-        build_edit_intent at edit.prompt).
+        The enzyme_id comes from the current node's ``edit:enzyme:<id>`` tag (the
+        edit-allowed source). At ``edit.prompt`` (which has NO ``edit:enzyme:``
+        tag) it falls back to ``edit_intent.enzyme_id`` -- the value
+        :meth:`build_edit_intent` stashed from ``_pending_edit_enzyme_id`` (set
+        by :meth:`request_edit` at the source edit-allowed node). Raises
+        ``RuntimeError`` only if both are absent.
         """
         enzyme_id = self._current_enzyme_id()
         if enzyme_id is None:
+            # edit.prompt has no edit:enzyme:<id> tag -- use the enzyme_id the
+            # EditIntent carries (build_edit_intent stashed it from the pending
+            # stash set by request_edit at the source edit-allowed node).
+            enzyme_id = getattr(edit_intent, "enzyme_id", None)
+        if enzyme_id is None:
             raise RuntimeError(
                 "cannot apply_edit: current node {!r} has no edit:enzyme:<id> "
-                "tag".format(self._engine.state.current_node))
+                "tag and the EditIntent carries no enzyme_id".format(
+                    self._engine.state.current_node))
         turn = self._engine.apply_player_edit(edit_intent, enzyme_id)
         self._record_achievement(turn, self._engine.state.character)
         self._render(turn)

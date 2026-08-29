@@ -195,15 +195,41 @@ class TestController(unittest.TestCase):
         self.assertEqual(len(c._engine.state.edits_history), 1,
                          "the edit was recorded in edits_history")
 
-    # 6. apply_edit raises when no enzyme tag
+    # 6. apply_edit raises when no enzyme tag AND intent carries no enzyme_id
     def test_apply_edit_raises_when_no_enzyme_tag(self):
-        """At a non-edit node (intro.preface has no edit:enzyme tag), apply_edit
-        raises RuntimeError (cannot route an edit without an enzyme_id)."""
+        """At a non-edit node (intro.preface has no edit:enzyme tag) with an
+        EditIntent that carries no enzyme_id, apply_edit raises RuntimeError
+        (cannot route an edit without an enzyme_id from either source)."""
         c = self._make_controller()
         c.start_game("glucose", 42)  # intro.preface (no edit:enzyme tag)
-        intent = EditIntent("point_mutation", "resi 1", {"new_res": "GLY"}, "ignored")
+        intent = EditIntent("point_mutation", "resi 1", {"new_res": "GLY"})  # enzyme_id=None
         with self.assertRaises(RuntimeError):
             c.apply_edit(intent)
+
+    # 6b. apply_edit falls back to edit_intent.enzyme_id at edit.prompt
+    def test_apply_edit_falls_back_to_intent_enzyme_id(self):
+        """At a non-edit node (intro.preface has no edit:enzyme tag), if the
+        EditIntent carries an enzyme_id (as build_edit_intent stashes it at
+        edit.prompt), apply_edit uses that enzyme_id + routes (no raise). This
+        is the edit.prompt seam: the enzyme_id comes from the source node via the
+        intent, not from the current node. tca.citrate_synthase is NOT in
+        edits.json -> unknown enzyme -> bad-ending pool (mirrors test #5)."""
+        molops = MockMolOps()
+        view = MockView()
+        c = self._make_controller(molops=molops, view=view)
+        c.start_game("glucose", 42)  # intro.preface (no edit:enzyme tag)
+        # build_edit_intent would stash the enzyme_id into the intent; simulate
+        # that by constructing an intent carrying an enzyme_id that routes to
+        # the bad-ending pool (an unknown edit) -- the EditRouter's global pool.
+        intent = EditIntent("point_mutation", "resi 999",
+                            {"new_res": "ZZZ"}, "tca.citrate_synthase")
+        c.apply_edit(intent)  # must NOT raise
+        self.assertIn(c._engine.state.current_node,
+                      ("bad.lost_connection", "bad.released_from_host"),
+                      "apply_edit routed via the EditIntent's enzyme_id (no raise) "
+                      "to the bad-ending pool")
+        self.assertEqual(len(c._engine.state.edits_history), 1,
+                         "the edit was recorded in edits_history")
 
     # 7. save/load call engine
     def test_save_load_call_engine(self):
