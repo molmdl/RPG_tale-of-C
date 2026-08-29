@@ -78,14 +78,30 @@ class GameEngine(object):
     branch, unknown -> bad-ending pool), record it in ``edits_history``, and
     enter the routed node. When ``None`` (default), edit-routing is disabled --
     ``start``/``choose``/``save``/``load`` work unchanged (backward-compatible).
+
+    An optional ``view_provider`` / ``view_applier`` pair (Phase 6, 06-03) closes
+    the view-matrix gap for SC#3 (load restores the exact session incl. camera).
+    ``view_provider`` is a zero-arg callable returning the 18-float view list
+    (the controller injects ``lambda: list(cmd.get_view())``); ``save`` captures
+    it into ``state.view`` (failure-tolerant: a capture error leaves view=None,
+    the save is NOT blocked). ``view_applier`` is a callable taking the 18-float
+    view list (the controller injects ``lambda v: cmd.set_view(v)``); ``load``
+    applies it AFTER the on_enter replay so a node's ``zoom`` MolAction does NOT
+    override the saved view (the saved view wins -- 06-RESEARCH Pattern 4).
+    Both default None = no view capture/restore (keeps Phase 2 tests green +
+    the engine WSL-testable with mock callbacks -- mirrors the
+    ``molaction_sink`` injection; the engine NEVER imports pymol).
     """
 
-    def __init__(self, graph, molaction_sink=None, edit_router=None):
-        # type: (StoryGraph, object, object) -> None
+    def __init__(self, graph, molaction_sink=None, edit_router=None,
+                 view_provider=None, view_applier=None):
+        # type: (StoryGraph, object, object, object, object) -> None
         self.graph = graph
         self.interpreter = StoryInterpreter()
         self.molaction_sink = molaction_sink
         self.edit_router = edit_router
+        self._view_provider = view_provider
+        self._view_applier = view_applier
         self.state = None
         self.rng = None
 
@@ -195,9 +211,20 @@ class GameEngine(object):
 
     def save(self, path):
         # type: (str) -> None
-        """Sync the live RngEngine state into GameState, then serialize via
-        SaveStore to ``path`` (human-readable JSON)."""
+        """Sync the live RngEngine state into GameState, capture the view via
+        the injected ``view_provider`` (if any), then serialize via SaveStore
+        to ``path`` (human-readable JSON).
+
+        The view capture is failure-tolerant: if ``view_provider`` raises (or
+        is None), ``state.view`` stays None and the save proceeds (a view-
+        capture failure does NOT block the save -- 06-RESEARCH Pattern 4).
+        """
         self.state.rng_state = self.rng.get_state()
+        if self._view_provider is not None:
+            try:
+                self.state.view = list(self._view_provider())  # cmd.get_view() -> 18 floats
+            except Exception:
+                self.state.view = None  # don't block save on view capture
         SaveStore.save(self.state, path)
 
     def load(self, path):
@@ -205,12 +232,24 @@ class GameEngine(object):
         """Restore a saved game: load GameState, rebuild the RngEngine from
         ``(seed, rng_state)``, then re-enter the current node (replaying its
         on_enter MolActions to reconstruct the scene -- Pattern 6) with
-        ``record_visit=False`` (loading does NOT double-count visits).
+        ``record_visit=False`` (loading does NOT double-count visits), and
+        finally apply the saved view via the injected ``view_applier`` (if any)
+        AFTER the on_enter replay so a node's ``zoom`` MolAction does NOT
+        override the saved camera (the saved view wins -- 06-RESEARCH Pattern 4).
         Returns the TurnResult for the re-entered current node.
         """
         self.state = SaveStore.load(path)
         self.rng = RngEngine.from_state(self.state.seed, self.state.rng_state)
-        return self._enter(self.state.current_node, record_visit=False)
+        result = self._enter(self.state.current_node, record_visit=False)
+        # Apply the saved view AFTER the on_enter replay (which may include a
+        # zoom MolAction) so the saved camera wins. Failure-tolerant: a
+        # view-apply error does NOT block the load (06-RESEARCH Pattern 4).
+        if self._view_applier is not None and self.state.view is not None:
+            try:
+                self._view_applier(self.state.view)  # cmd.set_view(18 floats)
+            except Exception:
+                pass  # don't block load on view restore
+        return result
 
     def __repr__(self):
         return "GameEngine(graph={!r}, current={!r}, finished={!r})".format(

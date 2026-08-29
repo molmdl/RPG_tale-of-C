@@ -9,8 +9,8 @@
         {"op": "hide_all"}
       ],
       "choices": [
-        {"label": "Proceed aerobically (O2 available) -> acetyl-CoA -> TCA", "goto": "pyr.pdh", "cond": "not flags.host_o2_low", "tags": ["branch:aerobic"]},
-        {"label": "The air runs out — ferment (anaerobic)", "goto": "anaer.entry", "cond": "flags.host_o2_low", "effects": {"set": {"anaerobic": true}}, "tags": ["branch:anaerobic"]}
+        {"label": "Proceed aerobically (O2 available) -> acetyl-CoA -> TCA", "goto": "pyr.pdh", "cond": "not flags.get('host_o2_low')", "tags": ["branch:aerobic"]},
+        {"label": "The air runs out — ferment (anaerobic)", "goto": "anaer.entry", "cond": "flags.get('host_o2_low')", "effects": {"set": {"anaerobic": true}}, "tags": ["branch:anaerobic"]}
       ]
     },
     "pyr.pdh": {
