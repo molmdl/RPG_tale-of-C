@@ -1,5 +1,7 @@
 # c14/pymol_layer/molops.py -- Phase 3 Plan 03-03 MolOps + Phase 4 Plan 04-05
-# edit/restore/protonate delegation.
+# edit/restore/protonate delegation + Phase 6 Plan 06-01 the 4 deferred
+# dispatches (set_color/label/set/align from 5.3/5.4) + the `load` branch
+# target-prefix fallback.
 #
 # Translates a MolAction (the pure-data carrier from c14/story/model.py) into
 # the right cmd.* call, per-action (ONE MolAction per apply() call -- the
@@ -68,23 +70,49 @@ Implemented ops (Phase 3):
   * zoom         -> cmd.zoom(sele)
   * color        -> cmd.color(color, sele)
   * load         -> delegates to AssetManager (fetch_pubchem / fetch_pdb /
-                    load_bundled per args["source"]). Raises RuntimeError if
-                    no AssetManager was injected.
+                    load_bundled per args["source"], OR the NEW target-prefix
+                    fallback parsing action.target = "pdb:XXX"/"cid:XXX"/
+                    "sid:XXX"/<bundled-filename> when no source/file/code/cid
+                    keys are present -- the 5.1 skeleton on_enter form; Phase 6
+                    06-01). Raises RuntimeError if no AssetManager was injected.
   * delete       -> cmd.delete(target)
 
 Phase 4 implemented (delegated -- Plan 04-05):
   * edit        -> delegates to EditOps (point_mutation /
-                   substrate_remove_group / substrate_add_group /
-                   protonation_change per args["edit_type"]). Raises
-                   RuntimeError if no EditOps was injected; ValueError for an
-                   unknown edit_type.
+                    substrate_remove_group / substrate_add_group /
+                    protonation_change per args["edit_type"]). Raises
+                    RuntimeError if no EditOps was injected; ValueError for an
+                    unknown edit_type.
   * protonate   -> delegates to ProtonationManager.apply_variant (per
-                   args["variant_id"]). Raises RuntimeError if no
-                   ProtonationManager was injected.
+                    args["variant_id"]). Raises RuntimeError if no
+                    ProtonationManager was injected.
   * restore     -> delegates to EditOps.restore (per action.target). Raises
-                   RuntimeError if no EditOps was injected.
+                    RuntimeError if no EditOps was injected.
   * unknown ops -> still raise NotImplementedError (a stray op fails loudly --
-                   the boundary is preserved for genuinely unknown ops).
+                    the boundary is preserved for genuinely unknown ops).
+
+Phase 6 implemented (Plan 06-01 -- the 4 deferred dispatches from 5.3/5.4):
+  * set_color   -> cmd.set_color(name, rgb)  (viewing.py:2107; idempotent
+                    named-RGB define -- the 5.4 hero_cyan palette).
+  * label       -> cmd.label(sele, '"text"')  (viewing.py:1332; the expression
+                    is a QUOTED STRING -- a bare "YOU" would eval the atom
+                    property `YOU`; the footgun is encapsulated here).
+  * set         -> cmd.set(name, value, sele)  (setting.py:183; per-atom
+                    settings like sphere_scale -- the 5.4 ball-and-stick small
+                    sphere).
+  * align       -> cmd.super / cmd.align / cmd.cealign (fitting.py:242/306/27)
+                    per args["method"] (default "super"). mobile=action.target
+                    (MOVED), reference=args["reference"] (FIXED); align_sele
+                    composes "{target} and {sele}" for BOTH. cealign arg order
+                    is REVERSED (target, mobile) -- the dispatch normalizes it
+                    (ref first, mobile second). Unknown method raises
+                    ValueError.
+  * The `load` branch ALSO gained a target-prefix fallback (Phase 6 06-01)
+    so the FROZEN skeleton's `{"op":"load","target":"pdb:XXX","args":
+    {"object":"x"}}` on_enter form dispatches WITHOUT a KeyError (the
+    explicit-`source`/`file` backward-compat path is preserved).
+  * unknown ops -> STILL raise NotImplementedError (the boundary is preserved
+                    for genuinely unknown ops; the 4 new ops are additive).
 """
 from c14.story.model import MolAction  # MolAction is pure data (no pymol) -- OK to import here
 
@@ -129,16 +157,83 @@ class MolOps(object):
         elif op == "color":
             # src: tmp/pymol-src/modules/pymol/viewing.py:1858 cmd.color
             self._cmd.color(action.args["color"], action.args.get("sele", action.target))
+        elif op == "set_color":
+            # Phase 6 (06-01): FROZEN-verbatim from 05.4-CONVENTION.md:125-139.
+            # src: tmp/pymol-src/modules/pymol/viewing.py:2107 cmd.set_color
+            self._cmd.set_color(action.args["name"], action.args["rgb"])
+        elif op == "label":
+            # Phase 6 (06-01): FROZEN-verbatim from 05.4-CONVENTION.md:125-139.
+            # src: tmp/pymol-src/modules/pymol/viewing.py:1332 cmd.label
+            # Wrap text as a quoted-string expression: '"YOU"' (the label
+            # expression is a Python expression; a bare "YOU" would evaluate
+            # the atom property `YOU`).
+            text = action.args.get("text", "")
+            sele = action.args.get("sele", action.target)
+            expr = '"{0}"'.format(text.replace('"', '\\"'))  # quote the literal string
+            self._cmd.label(sele, expr)
+        elif op == "set":
+            # Phase 6 (06-01): FROZEN-verbatim from 05.4-CONVENTION.md:125-139.
+            # src: tmp/pymol-src/modules/pymol/setting.py:183 cmd.set
+            self._cmd.set(action.args["name"], action.args["value"],
+                          action.args.get("sele", action.target))
+        elif op == "align":
+            # Phase 6 (06-01): FROZEN-verbatim from 05.3-CONVENTION.md:240-258.
+            # The 5.3 WT-aligned structure load op (deferred from 5.3 §6/Q3).
+            method = action.args.get("method", "super")
+            reference = action.args["reference"]
+            sele = action.args.get("align_sele")  # None => whole object
+            mobile = action.target if sele is None else "{0} and {1}".format(action.target, sele)
+            ref = reference if sele is None else "{0} and {1}".format(reference, sele)
+            if method == "super":
+                # src: tmp/pymol-src/modules/pymol/fitting.py:242 cmd.super  (mobile MOVED, target FIXED)
+                self._cmd.super(mobile, ref)
+            elif method == "align":
+                # src: tmp/pymol-src/modules/pymol/fitting.py:306 cmd.align
+                self._cmd.align(mobile, ref)
+            elif method == "cealign":
+                # src: tmp/pymol-src/modules/pymol/fitting.py:27 cmd.cealign  NOTE: arg order is (target, mobile) -- REVERSED
+                self._cmd.cealign(ref, mobile)  # dispatch normalizes the reversal: ref=target(fixed) first, mobile second
+            else:
+                raise ValueError("molops.align: unknown method {!r}".format(method))
         elif op == "load":
             if self._assets is None:
                 raise RuntimeError("molops.load requires an AssetManager")
             src = action.args.get("source", "bundled")
             if src == "cid":
-                self._assets.fetch_pubchem(action.args["cid"], action.args.get("object", action.target))
+                self._assets.fetch_pubchem(
+                    action.args["cid"], action.args.get("object", action.target))
             elif src == "pdb":
-                self._assets.fetch_pdb(action.args["code"], action.args.get("object", action.target))
+                self._assets.fetch_pdb(
+                    action.args["code"], action.args.get("object", action.target))
+            elif src == "bundled":
+                if "file" in action.args:
+                    # Explicit file (backward-compat: molops_smoke + the
+                    # no-source test at test_molops.py:240-245 + hero_highlight
+                    # smoke all pass `file`).
+                    self._assets.load_bundled(
+                        action.args["file"], action.args.get("object", action.target))
+                elif action.target is not None:
+                    # NEW target-prefix fallback (Phase 6 06-01): the FROZEN
+                    # skeleton on_enter uses target="pdb:XXX"/"cid:XXX"/
+                    # "sid:XXX"/<bundled-filename> with NO source/file/code/cid
+                    # keys -- the 5.1 skeleton convention. Maps to the SAME
+                    # AssetManager methods the explicit-`source` branches use.
+                    target = action.target
+                    obj = action.args.get("object")
+                    if target.startswith("pdb:"):
+                        code = target[4:]
+                        self._assets.fetch_pdb(code, obj if obj is not None else code)
+                    elif target.startswith("cid:") or target.startswith("sid:"):
+                        cid = target[4:]
+                        kind = "sid" if target.startswith("sid:") else "cid"
+                        self._assets.fetch_pubchem(cid, obj if obj is not None else cid, kind=kind)
+                    else:
+                        self._assets.load_bundled(target, obj if obj is not None else target)
+                else:
+                    raise ValueError(
+                        "molops.load: no source/file/target -- cannot resolve")
             else:
-                self._assets.load_bundled(action.args["file"], action.args.get("object", action.target))
+                raise ValueError("molops.load: unknown source {!r}".format(src))
         elif op == "delete":
             # src: tmp/pymol-src/modules/pymol/commanding.py:496 cmd.delete
             self._cmd.delete(action.target)
