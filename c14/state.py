@@ -41,14 +41,20 @@ class GameState(object):
         started_at: ISO-8601 UTC timestamp string the game started at.
         finished: None while playing, truthy when an ending node is reached.
         ending_tier: the ending tier ("true"|"good"|"normal"|"bad") or None.
+        view: list of 18 floats from ``cmd.get_view()`` (the PyMOL camera matrix)
+            or None. Captured on save via the engine's injected
+            ``view_provider`` and restored on load via ``view_applier`` AFTER
+            the on_enter replay (06-03: SC#3 view-matrix gap close). Defaults to
+            None; old Phase-2 saves without a ``view`` key load as None via
+            ``from_dict``'s ``.get`` default (forward-compatible).
     """
 
     def __init__(self, seed=0, character="glucose", current_node=None,
                  flags=None, counters=None, visit_counts=None,
                  edits_history=None, rng_state=None,
                  protonation_pref="physiological", started_at=None,
-                 finished=None, ending_tier=None, version=1):
-        # type: (object, str, str, dict, dict, dict, list, dict, str, str, object, str, int) -> None
+                 finished=None, ending_tier=None, version=1, view=None):
+        # type: (object, str, str, dict, dict, dict, list, dict, str, str, object, str, int, object) -> None
         self.version = version
         self.seed = seed
         self.character = character
@@ -62,6 +68,7 @@ class GameState(object):
         self.started_at = started_at
         self.finished = finished
         self.ending_tier = ending_tier
+        self.view = view
 
     def to_dict(self):
         # type: () -> dict
@@ -69,9 +76,10 @@ class GameState(object):
 
         Key order is stable (version, seed, character, current_node, flags,
         counters, visit_counts, edits_history, rng_state, protonation_pref,
-        started_at, finished, ending_tier) so saves are human-readable and
-        diff-stable. ``rng_state`` is the dict from ``RngEngine.get_state()``
-        or None.
+        started_at, finished, ending_tier, view) so saves are human-readable
+        and diff-stable. ``rng_state`` is the dict from ``RngEngine.get_state()``
+        or None. ``view`` is the list of 18 floats from ``cmd.get_view()`` or
+        None (added in 06-03; placed last for diff-stability of older saves).
         """
         return {
             "version": self.version,
@@ -87,6 +95,7 @@ class GameState(object):
             "started_at": self.started_at,
             "finished": self.finished,
             "ending_tier": self.ending_tier,
+            "view": self.view,
         }
 
     @classmethod
@@ -95,7 +104,9 @@ class GameState(object):
         """Build a GameState from a parsed dict, tolerating missing fields.
 
         Reads every field with ``.get`` defaults so partial/older saves don't
-        crash (forward-compatible with future field additions).
+        crash (forward-compatible with future field additions). The ``view``
+        field defaults to None when absent (old Phase-2 saves load cleanly --
+        06-03 backward-compat invariant).
         """
         return cls(
             version=d.get("version", 1),
@@ -111,6 +122,7 @@ class GameState(object):
             started_at=d.get("started_at"),
             finished=d.get("finished"),
             ending_tier=d.get("ending_tier"),
+            view=d.get("view"),
         )
 
     @classmethod

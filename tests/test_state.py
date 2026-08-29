@@ -36,6 +36,7 @@ class TestGameState(unittest.TestCase):
             "version", "seed", "character", "current_node", "flags",
             "counters", "visit_counts", "edits_history", "rng_state",
             "protonation_pref", "started_at", "finished", "ending_tier",
+            "view",
         }
         self.assertEqual(set(d.keys()), expected_keys)
 
