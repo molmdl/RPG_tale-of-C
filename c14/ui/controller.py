@@ -123,7 +123,20 @@ class HeroResolver(object):
         # 2. Count the atoms in the hero sele.
         hero_sele = hero_label.args.get("sele", hero_label.target)
         hero_obj = hero_label.target
-        n = self._count_fn(hero_sele)
+        # The count is a best-effort pre-pass check: it runs BEFORE the
+        # on_enter load dispatches (start_game / choose / take_choice all do
+        # the hero pre-pass BEFORE engine.start/choose/goto enters the node +
+        # runs on_enter). At pre-pass time the hero object may NOT exist yet
+        # (the load is in on_enter). A bare cmd.count_atoms on a non-existent
+        # object RAISES CmdException (03-01 decision: "Invalid selection
+        # name"). Catch that + treat as ambiguous (n != 1) -> prompt the
+        # player (OQ-6 multi-C path). The count becomes reliable only AFTER
+        # the load dispatches; the prompt + confirm is the no-fabricated-
+        # science guard regardless (the human/auto-confirm decides).
+        try:
+            n = self._count_fn(hero_sele)
+        except Exception:
+            n = 0  # count failed (object not yet loaded) -> ambiguous -> prompt
         if n == 1:
             return on_enter_actions  # single-C: deterministic, no prompt
         # 3. Multi-C (n != 1): default + warn + confirm (OQ-6 OVERRIDE).
