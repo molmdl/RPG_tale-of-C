@@ -11,7 +11,7 @@ requires:
 provides:
   - Headless integration smoke (tools/controller_integration_smoke.py) proving the full Controller path end-to-end (SC1-3 mechanism proof)
   - HeroResolver pre-pass count robustness fix (the count_fn is called before the on_enter load dispatches)
-  - Task 2 human-verify checkpoint material (the 5 SCs for a real Windows PyMOL session)
+  - Task 2 human-verify verdict (recorded 2026-08-30) + the 3 SC2 bug fixes (edit-dialog 3-tuple contract, single-carbon hero default sele via empirically-verified `first` operator, stage-tag status bar) + the recorded open items
 affects: [07-content-glucose, 10-polish-playtest]
 
 # Tech tracking
@@ -24,12 +24,20 @@ tech-stack:
 key-files:
   created:
     - tools/controller_integration_smoke.py
+    - tools/probe_first_operator.py
   modified:
     - c14/ui/controller.py
+    - c14/ui/edit_dialog.py
+    - c14/ui/main_window.py
+    - tests/test_controller.py
+    - tools/controller_integration_smoke.py
 
 key-decisions:
   - "The HeroResolver pre-pass count MUST be wrapped in try/except: it runs BEFORE the on_enter load dispatches, so the hero object does not exist yet at pre-pass time; a bare cmd.count_atoms on a non-existent object RAISES CmdException (03-01 decision). The count failure is treated as ambiguous (n=0) -> prompt (OQ-6 multi-C path)."
   - "The label assertion uses cmd.iterate (reading the label atom property), NOT count_atoms('... and label') -- `label` is an atom PROPERTY, not a selection keyword (hero_highlight_smoke.py:191-194 uses the same iterate approach)."
+  - "06-14 fix session: the OQ-6 default sele is `first (<obj> and elem C)` -- EMPIRICALLY VERIFIED headlessly (tools/probe_first_operator.py): PyMOL 2.5.0 supports the `first` operator; it resolves to exactly 1 atom and picks C1 (id=1, the first carbon by internal order); spheres+label post-conditions work on the sele. The old `<obj> and elem C` matched ALL carbons (SC2a: both got spheres + YOU)."
+  - "06-14 fix session (probe byproduct): the cmd.iterate atom-namespace property for atom id is `ID` (UPPERCASE, completing.py:18-29); lowercase `id` raises NameError. `label` is likewise a property, not a selector."
+  - "06-14 fix session: EditDialog.selected_edit() returns the DOCUMENTED (op, target, args) 3-tuple (strips the display-only label from the stored (label, op, target, args) option tuple) -- the contract main_window.py:413 already unpacks."
 
 patterns-established:
   - "Headless integration smoke pattern: real molops stack + MockView + mock prompt_fn/count_fn + real EditRouter/AchievementBoard; SMOKE_RESULT sentinel; check() helper; FAILS list; pymol.finish_launching() first; sys.path.insert(0, os.getcwd())"
@@ -41,15 +49,15 @@ completed: 2026-08-30
 
 # Phase 6 Plan 14: Phase 6 CAPSTONE Summary
 
-**Headless integration smoke proving the full Controller path end-to-end (SC1-3 mechanism: start + hero highlight, pyr.branch cond fix, tca.shuffle goto routing to a Bad ending, True ending via BFS-distance-guided walk, save/load with view, achievements, bulk-download runner); Task 2 human-verify (SC1-5 in a real Windows PyMOL session) awaits the human.**
+**Headless integration smoke proving the full Controller path end-to-end (SC1-3 mechanism: start + hero highlight, pyr.branch cond fix, tca.shuffle goto routing to a Bad ending, True ending via BFS-distance-guided walk, save/load with view, achievements, bulk-download runner); Task 2 human-verify VERDICT: SC1 PASS, SC3 PASS, SC4/SC5 PASS (placeholders expected), SC2 findings fixed (edit-dialog 3-tuple crash, both-carbons "YOU", orientation status bar) — 3 fix commits, all gates green, 5 open items recorded for the user/Phase 7.**
 
 ## Performance
 
-- **Duration:** 14 min
-- **Started:** 2026-08-29T18:45:30Z
-- **Completed:** 2026-08-29T19:00:02Z
-- **Tasks:** 1/2 complete (Task 1 auto COMPLETE; Task 2 checkpoint:human-verify PENDING)
-- **Files modified:** 2 (1 created, 1 fixed)
+- **Duration:** 14 min (Task 1) + ~35 min (Task 2 verdict + fix session)
+- **Started:** 2026-08-29T18:45:30Z (Task 1); 2026-08-30T07:15Z (fix session)
+- **Completed:** 2026-08-30 (Task 2 verdict recorded + fixes committed 07:47Z)
+- **Tasks:** 2/2 complete (Task 1 auto COMPLETE; Task 2 checkpoint:human-verify COMPLETE — verdict recorded, SC2 bugs fixed, open items documented)
+- **Files modified:** 6 (1 created Task 1, 1 fixed Task 1; 3 fixed + 1 created + 1 test-updated in the fix session)
 
 ## Accomplishments
 
@@ -60,19 +68,33 @@ completed: 2026-08-30
   - **Stage 7 (True ending via BFS-distance-guided walk):** fresh controller (seed=7); precomputed `dist[id]` = BFS shortest-path distance from every node to `end.true` over reverse choice edges (cond-IGNORED — `dist[intro.preface]=28`); the dist-guided walk deterministically reached `end.true` in 28 steps; milestone path asserted in-order (`intro.preface -> intro.select -> intro.shell_glucose -> gly.start -> gly.g6p -> gly.pfk -> gly.fbp_to_pyruvate -> gly.pyruvate_kinase -> gly.pyruvate -> pyr.branch -> pyr.pdh -> tca.entry -> tca.citrate_synthase -> tca.aconitase -> tca.shuffle -> tca.co2_turn1 -> tca.isocitrate_dh -> tca.akg_dh -> tca.succinyl_coa_synthetase -> tca.fumarase -> tca.malate_dh -> tca.divert_to_good -> etc.entry -> etc.complex_i -> etc.complex_ii -> etc.complex_iii -> etc.complex_iv -> etc.atp_synthase` then `end.true`); `true_ending` achievement unlocked.
   - **Stage 8 (save/load round-trip with view — 06-03):** saved at `gly.g6p` (mid-game, non-ending); the view was captured (18 floats); loaded into a 2nd controller; `current_node`, `seed`, `rng_state` all match; the view was applied (the `view_applier` was called); the scene rebuilt (on_enter replayed, the loaded controller's view rendered).
   - **Stage 9 (bulk-download runner — 06-10):** `missing_large_pdbs(cmd)` returns `[]` for the Phase 6 placeholder cast (PLACEHOLDER guard skips `PLACEHOLDER_PDB`); `run_bulk_download(cmd, [])` returns all-zeros; `characters_to_lock([])` returns empty set; `expected_download_characters()` returns empty set.
-- **No regression:** 309 unit tests green; AST gate clean (exit 0).
+- **Task 2 COMPLETE (human-verify verdict + SC2 fixes):** the human played the game end-to-end in a real Windows PyMOL session. SC1 PASS, SC3 PASS (camera restores; manual color/rep edits intentionally not restored — scene rebuilds from on_enter replay), SC4 PASS (placeholders expected), SC5 PASS (with a fuller-inline-help preference noted). SC2's concrete bugs FIXED: the edit-dialog unpack crash (Fix 1 `c2d1008`), the both-carbons "YOU" highlight (Fix 2 `389ee3e` — default sele now `first (obj and elem C)`, empirically verified via `tools/probe_first_operator.py`), and the orientation gap (Fix 3 `3f483aa` — status bar shows node id + stage tag). 5 open items recorded for the user/Phase 7 (see the REMAINING OPEN ITEMS section).
+- **No regression:** 309 unit tests green; AST gate clean; both smokes + the probe re-ran `SMOKE_RESULT: PASS` post-fix.
 
 ## Task Commits
 
 1. **Task 1 HeroResolver fix** — `3a661f5` (fix) — `c14/ui/controller.py`
 2. **Task 1 headless integration smoke** — `ad95068` (feat) — `tools/controller_integration_smoke.py`
+3. **Fix 1 (SC2f): selected_edit returns the documented 3-tuple** — `c2d1008` (fix) — `c14/ui/edit_dialog.py`
+4. **Fix 2 (SC2a): HeroResolver default sele -> first (obj and elem C)** — `389ee3e` (fix) — `c14/ui/controller.py` + `tests/test_controller.py` + `tools/controller_integration_smoke.py` + `tools/probe_first_operator.py`
+5. **Fix 3 (SC2b): status bar shows node id + stage tag** — `3f483aa` (fix) — `c14/ui/main_window.py`
+6. **Docs: Task 2 verdict + fixes + open items** — this commit — `06-14-SUMMARY.md` + `.planning/STATE.md`
 
-**Plan metadata:** pending (Task 2 human-verify not yet complete — SUMMARY + STATE committed below).
+**Plan metadata:** committed (docs commit below).
 
 ## Files Created/Modified
 
+Task 1:
 - `tools/controller_integration_smoke.py` — The headless end-to-end Controller path smoke (SC1-3 mechanism proof). Pure `pymol.cmd.*` (NO Qt — MockView). 10 stages, 58 checks, `SMOKE_RESULT: PASS`.
-- `c14/ui/controller.py` — HeroResolver.resolve: wrapped the `count_fn(hero_sele)` call in try/except. The pre-pass count runs BEFORE the on_enter load dispatches, so the hero object may not exist yet; a count failure is treated as ambiguous (n=0 != 1) -> prompt (OQ-6 multi-C path). Minimal fix (14 insertions, 1 deletion).
+- `c14/ui/controller.py` — HeroResolver.resolve: wrapped the `count_fn(hero_sele)` call in try/except (the pre-pass runs BEFORE the on_enter load dispatches; a count failure is treated as ambiguous -> prompt).
+
+Fix session (Task 2 verdict):
+- `c14/ui/edit_dialog.py` — Fix 1 (SC2f): `selected_edit()` now returns `self._selected[1:]` (the documented `(op, target, args)` 3-tuple) instead of the raw stored 4-tuple `(label, op, target, args)`; docstrings updated. `main_window.py:413` untouched (it already matches the contract).
+- `c14/ui/controller.py` — Fix 2 (SC2a): the OQ-6 default sele is now `"first ({0} and elem C)"` — resolves to EXACTLY ONE carbon (empirically verified); the old `"{0} and elem C"` matched ALL carbons so BOTH got spheres + "YOU" on the 2-carbon `_smoke.pdb` fixture.
+- `tools/probe_first_operator.py` — NEW: the empirical `first`-operator probe (pure `pymol.cmd.*`, headless): 9/9 checks PASS. Verdict: `first` SUPPORTED; `count_atoms("first (hero_atom and elem C)")` == 1; picks C1 (id=1, resi 1 — the first carbon); sphere+label post-conditions work on the sele. Fallback (`elem C and index 1`) also verified == 1 but NOT needed. Byproduct documented: the iterate atom-id property is `ID` (uppercase).
+- `tests/test_controller.py` — multi-C rewrite assertions expect the single-carbon default sele; added an assertion that the `color` op KEEPS its object-wide all-C sele (the 5.4 all-C-cyan convention).
+- `tools/controller_integration_smoke.py` — comment updated to the new default sele; the `hero_you_label_dispatched` check strengthened from "at least one YOU" to EXACTLY ONE `YOU` label (post-fix: `labels=['YOU', '', '']`).
+- `c14/ui/main_window.py` — Fix 3 (SC2b): the normal-node status bar now shows `node=<id>  stage=<tag>  character=<c>  seed=<s>` (stage read from the node's `stage:<x>` tag; omitted when absent) + a None-safe `_engine_state(attr)` helper.
 
 ## Decisions Made
 
@@ -112,26 +134,55 @@ completed: 2026-08-30
 
 None — no external service configuration required for Task 1. Task 2 (human-verify) requires a real Windows PyMOL 2.5.0 session (the WSL agent cannot run Qt/GUI per AGENTS.md).
 
-## Checkpoint: human-verify pending
+## Checkpoint: human-verify — VERDICT RECORDED (2026-08-30)
 
-**Task 2 status:** awaiting human-verify
+**Task 2 status:** COMPLETE — the human tested the game in a real Windows PyMOL 2.5.0 session and reported the verdict below. The SC2 concrete bugs were fixed in the same session (3 fix commits); the open items are recorded for the user/Phase 7 (NOT resolved unilaterally).
 
-Task 2 is a `checkpoint:human-verify` that requires a **real Windows PyMOL 2.5.0 session** (the WSL agent CANNOT run Qt/GUI per AGENTS.md). The headless smoke (Task 1) proved the SC1-3 MECHANISM (controller wiring, molops dispatch, view capture/restore, tca.shuffle goto routing, pyr.branch cond fix, hero highlight). Task 2 verifies the Qt RENDERING + the real PyMOL session behavior the WSL agent cannot exercise — ALL 5 Success Criteria:
+### The human's verdict (abridged, faithful)
 
-- **SC1 — install + menu + main window:** build the zip (`bash tools/build_plugin_zip.sh`), install via Plugin Manager, restart, confirm the "RPG: Tale of C" menu item + the main window opens (toolbar + story panel + choice panel + status bar). **DEV ALTERNATIVE (no zip rebuild per change):** point PyMOL's plugin search path at the repo root (Plugin Manager -> Settings -> add the dir containing `c14/`, or set `PYMOL_GIT_MOD=<repo-root>`) + restart — PyMOL loads `c14/` from source; edits to `c14/ui/*.py` take effect on restart. See `tools/build_plugin_zip.sh` header.
-- **SC2 — hero highlight + scene templates:** start a glucose game; confirm the C14 hero atom is highlighted (cyan + "YOU" label) in the loaded `_smoke.pdb` structure; the OQ-6 HeroResolver prompts "2 carbons... Highlight the first carbon?" — click Yes; advance through Continue choices; confirm residue representations at relevant stages.
-- **SC3 — reach True + Bad endings + save/load round-trip:** play to `tca.shuffle`, spin 6+ times, click "cycle has spun too long" -> `bad.cycle_trap_host_death` (Bad ending, "Lost Connection" unlocks); new game -> aerobic path -> `end.true` (True ending, "Soul Harvested" unlocks); mid-game Save -> Load -> confirm story position + RNG state + structures + camera view restore.
-- **SC4 — bulk-download:** confirm small/critical structures are bundled (glucose starts instantly); IF a download is triggered, confirm progress bar advances per-file, Cancel stops after the current file, Retry re-runs skipping already-downloaded, offline failure locks only the affected character. (Phase 6 cast has only PLACEHOLDER download enzymes — the prompt may NOT fire; the mechanism is verified headlessly in Task 1 Stage 9.)
-- **SC5 — achievements + help:** click Achievements -> the board shows unlocks (First Steps + Glucose + endings found); close + reopen PyMOL -> unlocks PERSIST (ACH-02); click Help -> 4 editing pointers + 3 PyMOL wiki links (clickable, open in browser).
+- **SC1 — PASS.** Install via Plugin Manager + "RPG: Tale of C" menu + the main window (toolbar / story panel / choice panel / status bar) all work.
+- **SC2 — findings (bugs a, b, f + orientation):**
+  - **(a)** "it highlight both carbons and highlight both as 'YOU'" — BUG (should be ONE hero carbon). **FIXED** (Fix 2, `389ee3e`).
+  - **(b)** after Continue, reached a step showing an enzyme that keeps erroring on Continue: "Error-fetch: unable to load 'tbd_aconitase'" + console "Invalid selection name 'aconitase'", and the player is "not sure which point it is" — orientation problem. **Orientation FIXED** (Fix 3, `3f483aa`); the error noise is CORRECT behavior (see Fix 4 below).
+  - **(f)** clicking "Edit enzyme" crashes: `main_window.py:413 _open_edit_dialog -> op, target, args = dlg.selected_edit() -> ValueError: too many values to unpack (expected 3)`. **FIXED** (Fix 1, `c2d1008`).
+- **SC3 — PASS.** Camera view restores on save/load. Manual color/rep changes made BEFORE the save do NOT restore — EXPECTED per design: the scene rebuilds from the node's on_enter replay (default reps/colors), and the saved view = CAMERA only (06-03 view-matrix injection scope). Not a bug.
+- **SC4 — PASS (placeholders expected).** Glucose starts instantly (bundled small/critical assets; the bulk-download prompt does NOT fire for the Phase 6 placeholder cast — `missing_large_pdbs` returns [] — the mechanism was verified headlessly in Task 1 Stage 9).
+- **SC5 — PASS.** Achievements unlock + persist across PyMOL restarts; help shows the 4 editing pointers + 3 clickable wiki links. **User preference (OPEN, do NOT change help.json now):** the user prefers FULLER INLINE help (guidance in the GUI itself) with the wiki links only as reference — a pending design decision.
 
-**Awaiting:** the user types "approved" (all 5 SCs pass) OR describes which SC(s) failed + what they observed. The agent will then diagnose + create gap-closure plans if needed.
+### Fixes (committed)
+
+1. **Fix 1 (SC2f) — `c2d1008`** — `c14/ui/edit_dialog.py` `selected_edit()` (was line ~173-183): returned the raw `self._selected`, but `_on_accept` stores the FULL `(label, op, target, args)` option tuple (line ~126 comment) while the DOCUMENTED contract (its own docstring + `submit()`'s flow + the caller `main_window.py:413`) is the 3-tuple. Now returns `self._selected[1:]` (3-tuple) when set, else None. `main_window.py` NOT changed (it already matches the contract).
+2. **Fix 2 (SC2a) — `389ee3e`** — `c14/ui/controller.py` `HeroResolver.resolve()` line ~143: the default sele `"{0} and elem C"` → `"first ({0} and elem C)"`. The old sele matched ALL carbons (`_smoke.pdb` = ethanol: C1 id 1, O1 id 2, C2 id 3) so BOTH carbons got spheres + "YOU". Per the OQ-6 prompt text ("Highlight the FIRST carbon as the hero?") + the 5.4 convention (ONE hero: sphere + YOU; other carbons: cyan sticks only), the default now resolves to EXACTLY ONE atom. **Empirical verdict (tools/probe_first_operator.py, headless PyMOL 2.5.0, 9/9 PASS): the PREFERRED `first` sele WON** — supported, count == 1, picks C1 (id=1, resi 1 = the first carbon), sphere+label post-conditions OK. The `index 1` fallback was verified (also == 1, also C1) but NOT needed. Tests (`tests/test_controller.py`) updated to the single-carbon sele (+ a new assertion that `color` keeps its object-wide all-C sele per the 5.4 convention); smoke (`tools/controller_integration_smoke.py`) label check strengthened to EXACTLY ONE "YOU" (post-fix `labels=['YOU', '', '']`).
+3. **Fix 3 (SC2b orientation) — `3f483aa`** — `c14/ui/main_window.py` `render_turn()` normal-node branch: the status bar now reads `node=gly.start  stage=glycolysis  character=glucose  seed=42` (the node's `stage:<x>` tag extracted from `node.tags`; omitted when absent) + a None-safe `_engine_state(attr)` helper. One line, simple.
+4. **Fix 4 (SC2b noise) — VERIFY ONLY, no commit.** The console lines `controller: molops.apply failed for op='load' target='pdb:TBD_ACONITASE': ...` are the controller's defensive one-line swallow (06-06 Blocker 1 fix c) — CORRECT behavior (mid-game `pdb:TBD_*` placeholders fail until Phase 7 fills real structures; the game keeps flowing — re-verified in the headless smoke output). The additional `Error-fetch: unable to load 'tbd_aconitase'` stderr line is PyMOL's own fetch print — deliberately NOT silenced. The optional "(structure placeholder — Phase 7)" status-bar hint was SKIPPED: it would require a new controller→view failure channel (not trivial; no over-engineering).
+
+### Post-fix verification (all green)
+
+- `python3.6 -m py_compile c14/ui/edit_dialog.py c14/ui/controller.py c14/ui/main_window.py` — exit 0.
+- `python3.6 -m unittest discover -s tests` — 309 tests, OK.
+- `python3.6 tools/check_imports.py` — clean (exit 0).
+- `bash tools/run_headless.sh tools/controller_integration_smoke.py` — `SMOKE_RESULT: PASS`, all stage checks green (`hero_you_label_dispatched exactly_one_YOU=True`).
+- `bash tools/run_headless.sh tools/hero_highlight_smoke.py` — `PASSED` (regression insurance).
+- `bash tools/run_headless.sh tools/probe_first_operator.py` — `SMOKE_RESULT: PASS` (9/9; the `first`-operator verdict recorded above).
+
+### REMAINING OPEN ITEMS (do NOT resolve unilaterally)
+
+1. **Cycle-trap presented as an OPTION vs the user's expectation of a RESULT** — design decision pending the user (the FROZEN story skeleton topology — 55 nodes / 21 endings / cycle-trap as a choice — is NOT changed by these fixes).
+2. **Help: fuller inline GUI guidance vs links-only** — pending the user (the user prefers fuller inline help; help.json NOT edited in this session).
+3. **Citrate synthase dimer (biological assembly) loading** — Phase 7 cast convention.
+4. **Real glucose + story-like text** — Phase 7.
+5. **Per-node default color/focus** — 5.4 scene templates filled in Phase 7; ending CG — Phase 12.
+
+### Phase 6 completion status
+
+Task 1 (headless smoke) + Task 2 (human-verify) are both COMPLETE. The human-verify milestone has been exercised end-to-end: SC1/SC3/SC4/SC5 PASS; SC2's concrete bugs (a, b-orientation, f) are FIXED with all gates green; the remaining SC2-adjacent items are Phase 7 content placeholders (tbd_aconitase structures, story text) + the user-decision open items above — none block Phase 6 closure as Phase 6 scope (the MVP).
 
 ## Next Phase Readiness
 
 - **Task 1 (headless smoke) COMPLETE:** the SC1-3 mechanism is proven end-to-end. The controller wiring, molops dispatch, view capture/restore, tca.shuffle goto routing, pyr.branch cond fix, hero highlight, achievements, save/load, and bulk-download runner all work headlessly.
-- **Task 2 (human-verify) PENDING:** the Qt rendering + real PyMOL session behavior must be verified by the human. Until Task 2 is approved, Phase 6 is NOT complete (this is the FIRST human-verify milestone — the game is played end-to-end for the first time).
-- **Blockers/concerns:** the HeroResolver pre-pass count fix (3a661f5) is essential for the real MainWindow to not crash at start_game — it should be reviewed as part of Task 2.
+- **Task 2 (human-verify) COMPLETE:** SC1/SC3/SC4/SC5 PASS; SC2's concrete bugs (a: both-carbons YOU, b: orientation, f: edit-dialog crash) FIXED (commits `c2d1008` + `389ee3e` + `3f483aa`), all gates green post-fix. The HeroResolver pre-pass count fix (3a661f5) was confirmed working in the real session (start_game did not crash; the OQ-6 prompt fired).
+- **Open items carried forward (user decisions + Phase 7 content):** cycle-trap option-vs-result design decision (user); fuller inline help preference (user); citrate synthase dimer loading (Phase 7); real glucose + story-like text (Phase 7); per-node default color/focus + ending CG (Phase 7 / Phase 12). See the REMAINING OPEN ITEMS section above.
 
 ---
 *Phase: 06-qt-ui-minimal-playable-mvp*
-*Completed: 2026-08-30 (Task 1); Task 2 awaiting human-verify*
+*Completed: 2026-08-30 (Task 1 + Task 2 verdict + SC2 fixes; open items recorded)*
