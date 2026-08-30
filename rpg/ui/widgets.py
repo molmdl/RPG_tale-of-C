@@ -107,11 +107,23 @@ class StoryPanel(QtWidgets.QWidget):
     def render_node(self, node):
         """Populate the dramatic + teaching labels from a Node.
 
+        As its FIRST action, blanks + hides the ending banner: every
+        non-ending render (New Game / Load / a normal advance) clears a
+        stale "Ending reached: <tier>" banner left by a previous ending
+        (S1 bad-end-persistence root cause 1 -- 06-14 re-verify round 3,
+        .planning/debug/bad-end-restart-and-edit-pool.md: only clear()
+        hid the banner before, and the MainWindow never calls clear()).
+        :meth:`render_ending` re-shows the banner AFTER this reset.
+
         Handles None/empty gracefully: an empty ``text_dramatic`` (the skeleton
         ships TBD text on many nodes) shows a placeholder so the panel never
         looks broken. ``text_teaching`` empty -> blank (no placeholder; the
         teaching layer is optional per node).
         """
+        # Reset the ending banner FIRST (see docstring): setText("") + hide()
+        # use the same attribute (self._banner) as render_ending/clear.
+        self._banner.setText("")
+        self._banner.hide()
         dramatic = getattr(node, "text_dramatic", "") or ""
         if not dramatic.strip():
             dramatic = "(This scene's story text is being written -- TBD.)"
@@ -125,11 +137,17 @@ class StoryPanel(QtWidgets.QWidget):
         Reuses :meth:`render_node` for the text so an ending node's
         text_dramatic/text_teaching still render (endings carry their own
         dramatic + teaching text per the 5.1 skeleton).
+
+        ORDER NOTE (06-14 re-verify round 3): render_node now resets the
+        banner as its first action, so the set+show here runs AFTER the
+        render_node call -- same final widget state as before (banner shown
+        with the tier text + node text rendered), but the ending banner is no
+        longer immediately re-hidden by the delegated render_node reset.
         """
         tier = (getattr(node, "is_ending", None) or "").capitalize()
+        self.render_node(node)
         self._banner.setText("Ending reached: {0}".format(tier))
         self._banner.show()
-        self.render_node(node)
 
     def clear(self):
         """Reset all labels + hide the ending banner."""
