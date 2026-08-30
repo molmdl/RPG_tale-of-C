@@ -352,6 +352,19 @@ class Controller(object):
             turn = self._engine.start(character, seed)
         finally:
             self._restore_hero_patch(patch)
+        # Probe-E stash hardening (06-14 re-verify round 3, debugger session
+        # .planning/debug/bad-end-restart-and-edit-pool.md): a restart is a NEW
+        # game -- clear any pending edit stashes left over from the PREVIOUS
+        # playthrough. engine.start replaces GameState wholesale, but the
+        # stashes are controller attributes (never persisted) and PROVED to
+        # survive a restart (probe E: request_edit at gly.pfk -> start_game on
+        # the SAME controller kept BOTH stashes set -- a stale enzyme_id for
+        # build_edit_intent + a stale SOURCE-node jump for
+        # return_to_edit_source after a future flow change; unreachable via
+        # today's modal EditDialog, but a latent correctness hole).
+        # Mirrors the B1 post-apply clearing.
+        self._pending_edit_enzyme_id = None
+        self._pending_edit_source_node_id = None
         self._record_achievement(turn, character, is_new_game=True)
         turn = self._render(turn)  # post-auto-resolve (shuffle choke point)
         return turn
@@ -539,8 +552,18 @@ class Controller(object):
         # type: (str) -> TurnResult
         """Load a saved game: delegates to ``engine.load`` (replays the current
         node's on_enter -> molops -> cmd.* to reconstruct the scene) + renders
-        the restored turn."""
+        the restored turn.
+
+        Clears BOTH pending edit stashes after a successful load (probe-E
+        hardening, same rationale as :meth:`start_game`): a load restores a
+        DIFFERENT playthrough -- the stashes are controller attributes (never
+        persisted in the save), so whatever they held belongs to the session
+        before the load and is stale now (a stale enzyme_id fallback or a
+        stale SOURCE-node jump). Mirrors the B1 post-apply clearing.
+        """
         turn = self._engine.load(path)
+        self._pending_edit_enzyme_id = None
+        self._pending_edit_source_node_id = None
         turn = self._render(turn)  # post-auto-resolve (shuffle choke point)
         return turn
 

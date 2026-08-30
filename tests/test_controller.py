@@ -511,6 +511,74 @@ class TestController(unittest.TestCase):
         self.assertEqual(intent.enzyme_id, "gly.pfk",
                          "build_edit_intent used the stash set at gly.pfk")
 
+    # 17c. Probe-E hardening (06-14 re-verify round 3): start_game clears
+    #      BOTH pending edit stashes (formalizes the debugger's probe E in
+    #      .planning/debug/bad-end-restart-and-edit-pool.md).
+    def test_start_game_clears_pending_edit_stashes(self):
+        """Walk to gly.pfk -> request_edit (both stashes set) -> start_game
+        AGAIN on the SAME controller -> the restart is a NEW game: BOTH
+        stashes are cleared and the returned turn is the manifest start
+        (intro.preface). Probe E proved the stashes SURVIVED the restart
+        (engine.start replaces GameState wholesale; the stashes are
+        controller attributes) -- a stale enzyme_id for build_edit_intent +
+        a stale SOURCE-node jump for return_to_edit_source."""
+        molops = MockMolOps()
+        view = MockView()
+        c = self._make_controller(molops=molops, view=view)
+        c.start_game("glucose", 42)  # intro.preface
+        c._engine.goto("gly.g6p")
+        turn = c.choose(0)  # -> gly.pfk (the pure-MC enzyme node)
+        self.assertEqual(turn.node.id, "gly.pfk", "walked to gly.pfk")
+        c.request_edit(c._current_enzyme_id())  # stashes enzyme + source
+        self.assertEqual(c._pending_edit_enzyme_id, "gly.pfk",
+                         "precondition: the enzyme stash is set")
+        self.assertEqual(c._pending_edit_source_node_id, "gly.pfk",
+                         "precondition: the source stash is set")
+        # Restart on the SAME controller (probe E's exact shape).
+        turn = c.start_game("glucose", 42)
+        self.assertEqual(turn.node.id, "intro.preface",
+                         "the restart landed at the manifest start node")
+        self.assertIsNone(c._pending_edit_enzyme_id,
+                          "the enzyme stash is cleared by the restart")
+        self.assertIsNone(c._pending_edit_source_node_id,
+                          "the source stash is cleared by the restart")
+        self.assertEqual(view.turns[-1].node.id, "intro.preface",
+                         "the restart was rendered (fresh intro view)")
+
+    # 17d. Probe-E hardening, load variant: load clears BOTH pending stashes.
+    def test_load_clears_pending_edit_stashes(self):
+        """Save mid-game at gly.pfk, request_edit (both stashes set), then
+        load on the SAME controller -> the load restores a DIFFERENT
+        playthrough, so both stashes (controller attributes, never persisted)
+        are cleared; the loaded turn is the saved node (gly.pfk)."""
+        molops = MockMolOps()
+        view = MockView()
+        c = self._make_controller(molops=molops, view=view)
+        c.start_game("glucose", 42)  # intro.preface
+        c._engine.goto("gly.g6p")
+        turn = c.choose(0)  # -> gly.pfk
+        self.assertEqual(turn.node.id, "gly.pfk", "walked to gly.pfk")
+        save_path = tempfile.mktemp(suffix="_ctrl_stash_save.json")
+        try:
+            c.save(save_path)
+            c.request_edit(c._current_enzyme_id())  # -> edit.prompt, stashes
+            self.assertEqual(c._engine.state.current_node, "edit.prompt")
+            self.assertEqual(c._pending_edit_enzyme_id, "gly.pfk",
+                             "precondition: the enzyme stash is set")
+            self.assertEqual(c._pending_edit_source_node_id, "gly.pfk",
+                             "precondition: the source stash is set")
+            # Load on the SAME controller.
+            turn = c.load(save_path)
+            self.assertEqual(turn.node.id, "gly.pfk",
+                             "the loaded game restored the saved node")
+            self.assertIsNone(c._pending_edit_enzyme_id,
+                              "the enzyme stash is cleared by the load")
+            self.assertIsNone(c._pending_edit_source_node_id,
+                              "the source stash is cleared by the load")
+        finally:
+            if os.path.isfile(save_path):
+                os.remove(save_path)
+
     # 18. _dispatch_molaction swallows molops failure + continues (Blocker 1 fix c)
     def test_dispatch_molaction_swallows_molops_failure_and_continues(self):
         """MockMolOps raises on the 2nd apply but succeeds on 1st + 3rd.
