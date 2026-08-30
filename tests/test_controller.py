@@ -411,6 +411,43 @@ class TestController(unittest.TestCase):
         self.assertEqual(intent.enzyme_id, "tca.citrate_synthase",
                          "build_edit_intent fell back to _pending_edit_enzyme_id")
 
+    # 17b. SC2f round-2 fix: the formalized debugger probe at gly.pfk.
+    def test_request_edit_at_gly_pfk_stashes_and_builds_intent(self):
+        """Formalizes the debugger's probe
+        (.planning/debug/edit-prompt-empty-stash.md): walk (controller path) to
+        gly.pfk -- the FIRST pure-MC enzyme node on the glucose path and the
+        node where the user hit the RuntimeError -- then request_edit the
+        node's own edit:enzyme id + build_edit_intent. The stash must be set
+        AT THE SOURCE NODE (before the goto) and the intent must carry
+        enzyme_id 'gly.pfk' with NO raise. (The original bug: the pure-MC
+        edit:offer choice routed through the generic choose(i), so
+        edit.prompt was entered with an empty stash.)"""
+        molops = MockMolOps()
+        view = MockView()
+        c = self._make_controller(molops=molops, view=view)
+        c.start_game("glucose", 42)  # intro.preface
+        # Position one step upstream (engine-level -- the established test
+        # pattern, test #4/#5) and advance into gly.pfk via the CONTROLLER
+        # (mirrors the real UI click on gly.g6p's "Continue" choice).
+        c._engine.goto("gly.g6p")
+        turn = c.choose(0)
+        self.assertEqual(turn.node.id, "gly.pfk", "walked to gly.pfk")
+        # The debugger probe: request_edit the CURRENT node's enzyme id.
+        enzyme_id = c._current_enzyme_id()
+        self.assertEqual(enzyme_id, "gly.pfk",
+                         "gly.pfk carries the edit:enzyme:gly.pfk tag")
+        c.request_edit(enzyme_id)
+        self.assertEqual(c._pending_edit_enzyme_id, "gly.pfk",
+                         "the stash is set at the SOURCE node (gly.pfk) "
+                         "before the goto edit.prompt")
+        self.assertEqual(c._engine.state.current_node, "edit.prompt")
+        # build_edit_intent must NOT raise (the original bug's symptom) and
+        # must carry the stashed enzyme_id.
+        intent = c.build_edit_intent(
+            "point_mutation", "resi 1", {"new_res": "GLY"})
+        self.assertEqual(intent.enzyme_id, "gly.pfk",
+                         "build_edit_intent used the stash set at gly.pfk")
+
     # 18. _dispatch_molaction swallows molops failure + continues (Blocker 1 fix c)
     def test_dispatch_molaction_swallows_molops_failure_and_continues(self):
         """MockMolOps raises on the 2nd apply but succeeds on 1st + 3rd.

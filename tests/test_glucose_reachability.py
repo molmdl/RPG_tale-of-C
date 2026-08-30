@@ -273,6 +273,44 @@ class TestGlucoseReachability(unittest.TestCase):
             "is edit:structural, not edit:disease); claim_ids=%s"
             % cs.claim_ids)
 
+    def test_edit_offer_nodes_carry_edit_enzyme_tag(self):
+        """SC2f round-2 graph invariant (06-14 re-verify, debugger session
+        .planning/debug/edit-prompt-empty-stash.md): EVERY node that offers an
+        edit -- any choice carrying the 'edit:offer' tag OR whose goto IS
+        'edit.prompt' (the DUAL predicate the ChoicePanel special-cases,
+        widgets.py _render_pure + _render_mixed) -- must itself carry an
+        'edit:enzyme:<id>' tag. This guarantees
+        Controller._current_enzyme_id() is NON-None wherever the UI edit seam
+        routes from, so request_edit always stashes a real enzyme_id and
+        build_edit_intent can never raise the 'no pending enzyme_id stash'
+        RuntimeError at edit.prompt. (Root cause of the user-reported bug:
+        gly.pfk offered an edit as a PURE-MC node whose routing skipped
+        request_edit; this invariant pins the data-side precondition that the
+        fixed routing relies on.)"""
+        g = StoryGraph.load(self._story_dir)
+        offenders = []
+        offer_nodes = 0
+        for nid, node in g.all_nodes().items():
+            offers = [c for c in node.choices
+                      if "edit:offer" in (c.tags or [])
+                      or c.goto == "edit.prompt"]
+            if not offers:
+                continue
+            offer_nodes += 1
+            has_tag = any(str(t).startswith("edit:enzyme:")
+                          for t in node.tags)
+            if not has_tag:
+                offenders.append(nid)
+        self.assertGreaterEqual(
+            offer_nodes, 14,
+            "the skeleton should have >=14 edit-offering nodes (the 14 "
+            "edit-allowed set); found %d" % offer_nodes)
+        self.assertEqual(
+            offenders, [],
+            "every edit-offering node must carry an edit:enzyme:<id> tag "
+            "(guarantees _current_enzyme_id() is non-None wherever the UI "
+            "edit seam routes from); offenders=%s" % offenders)
+
     def test_pdh_cast_pdb_fix_and_complex_i_claim_id(self):
         """Replan metadata fixes: (a) pyr.pdh cast PDB corrected 2OZL (S264E
         phospho-mimic mutant, NOT wild-type per RCSB title) -> 6CFO (WT,

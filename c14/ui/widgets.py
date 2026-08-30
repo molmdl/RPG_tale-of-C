@@ -170,8 +170,12 @@ class ChoicePanel(QtWidgets.QWidget):
        5"). The cycle-trap button is shown greyed-out BEFORE its cond is met so
        the player sees something will unlock after enough visits.
     3. **Pure-MC / pure-weighted**: one button per eligible choice for pure-MC
-       (-> ``controller.choose(index)``); for pure-weighted a single "Spin the
-       wheel" button (-> ``controller.choose(0)``) + an info label listing the
+       (-> ``controller.choose(index)``; an edit affordance choice -- the
+       dual predicate ``edit:offer`` tag OR ``goto == "edit.prompt"``,
+       matching the graph invariant test -- routes to
+       ``controller.request_edit`` instead, the SC2f round-2 fix); for
+       pure-weighted a single "Spin the wheel" button
+       (-> ``controller.choose(0)``) + an info label listing the
        possible outcomes with a "(luck decides)" note. Cond-unmet choices are
        disabled.
     """
@@ -311,9 +315,34 @@ class ChoicePanel(QtWidgets.QWidget):
             # engine's pick_choice eligible list (both filter via _cond), so
             # choose(index) picks the right choice.
             for index, choice in enumerate(eligible):
-                btn = QtWidgets.QPushButton(choice.label)
-                btn.clicked.connect(
-                    lambda _=False, i=index: controller.choose(i))
+                tags = getattr(choice, "tags", None) or []
+                # SC2f round-2 fix (06-14 re-verify): an edit affordance on a
+                # PURE-MC node must route through request_edit, NOT the generic
+                # choose(i). Dual predicate (matches
+                # tests/test_glucose_reachability.py's edit-offer invariant:
+                # the choice carries the 'edit:offer' tag OR its goto IS
+                # edit.prompt). The seam was originally designed for the only
+                # then-existing edit node (the MIXED tca.shuffle, handled in
+                # _render_mixed); the Phase 5.1 replan added edit:offer
+                # choices to 13 pure-MC enzyme nodes without extending this
+                # loop, so the edit button advanced via choose() ->
+                # edit.prompt with the enzyme stash never set ->
+                # build_edit_intent RuntimeError. Mirrors _render_mixed's
+                # edit:offer handling verbatim: request_edit stashes the
+                # enzyme_id (read from THIS node's edit:enzyme:<id> tag at
+                # click time) + gotos edit.prompt; the MainWindow's
+                # render_turn then opens the EditDialog.
+                if ("edit:offer" in tags
+                        or choice.goto == "edit.prompt"):
+                    btn = QtWidgets.QPushButton(choice.label)
+                    btn.clicked.connect(
+                        lambda _=False:
+                        controller.request_edit(
+                            controller._current_enzyme_id()))
+                else:
+                    btn = QtWidgets.QPushButton(choice.label)
+                    btn.clicked.connect(
+                        lambda _=False, i=index: controller.choose(i))
                 self._add_widget(btn)
         if not eligible:
             self._info.setText("No choices available.")

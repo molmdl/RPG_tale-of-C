@@ -295,6 +295,33 @@ try:
     turn = controller.choose(0)
     check("walk_g6p_to_pfk", turn.node.id == "gly.pfk",
           "node=%r" % turn.node.id)
+
+    # --- gly.pfk edit seam (SC2f round-2 fix, 06-14 re-verify): the pure-MC
+    # edit:offer choice routes through request_edit (the stash is set at the
+    # SOURCE node BEFORE the goto). Formalizes the debugger probe
+    # (.planning/debug/edit-prompt-empty-stash.md): the ORIGINAL bug was that
+    # gly.pfk's edit button advanced via the generic choose(i) -> edit.prompt
+    # with an EMPTY stash -> build_edit_intent RuntimeError.
+    enzyme_at_pfk = controller._current_enzyme_id()
+    check("gly_pfk_current_enzyme_id", enzyme_at_pfk == "gly.pfk",
+          "enzyme=%r" % enzyme_at_pfk)
+    edit_turn = controller.request_edit(enzyme_at_pfk)
+    check("gly_pfk_request_edit_lands_edit_prompt",
+          edit_turn.node.id == "edit.prompt",
+          "node=%r" % edit_turn.node.id)
+    check("gly_pfk_request_edit_stash",
+          controller._pending_edit_enzyme_id == "gly.pfk",
+          "stash=%r" % controller._pending_edit_enzyme_id)
+    intent_pfk = controller.build_edit_intent(
+        "point_mutation", "resi 1", {"new_res": "GLY"})
+    check("gly_pfk_build_edit_intent_enzyme",
+          intent_pfk.enzyme_id == "gly.pfk",
+          "intent.enzyme_id=%r (no raise)" % intent_pfk.enzyme_id)
+    # Reposition back to gly.pfk (engine-level; the walk continues from the
+    # enzyme node). gly.pfk's on_enter re-dispatch hits pdb:4PFK (fails
+    # offline -> the 06-06 defensive swallow; NOT asserted headlessly).
+    controller._engine.goto("gly.pfk")
+
     # gly.pfk -> gly.fbp_to_pyruvate (Continue glycolysis, index 0)
     turn = controller.choose(0)
     check("walk_pfk_to_fbp", turn.node.id == "gly.fbp_to_pyruvate",
@@ -342,6 +369,10 @@ except Exception as e:
     check("walk_shell_to_gly_start", False, repr(e))
     check("walk_gly_start_to_g6p", False, repr(e))
     check("walk_g6p_to_pfk", False, repr(e))
+    check("gly_pfk_current_enzyme_id", False, repr(e))
+    check("gly_pfk_request_edit_lands_edit_prompt", False, repr(e))
+    check("gly_pfk_request_edit_stash", False, repr(e))
+    check("gly_pfk_build_edit_intent_enzyme", False, repr(e))
     check("walk_pfk_to_fbp", False, repr(e))
     check("walk_fbp_to_pk", False, repr(e))
     check("walk_pk_to_pyr", False, repr(e))
