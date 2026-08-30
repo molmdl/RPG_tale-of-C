@@ -186,3 +186,158 @@ Task 1 (headless smoke) + Task 2 (human-verify) are both COMPLETE. The human-ver
 ---
 *Phase: 06-qt-ui-minimal-playable-mvp*
 *Completed: 2026-08-30 (Task 1 + Task 2 verdict + SC2 fixes; open items recorded)*
+
+---
+
+# Re-verify round 2 (2026-08-30, post human-verify re-check)
+
+The Phase 6 human-verify re-check found ONE remaining bug (SC2f: clicking the
+edit affordance on the first enzyme raised
+`RuntimeError: cannot build EditIntent: current node 'edit.prompt' has no
+edit:enzyme:<id> tag and no pending enzyme_id stash`), and the user made TWO
+design decisions (Decision 1: cycle-trap auto-fire + auto-spin soul-jump;
+Decision 2: help expansion DEFERRED to Phase 11). All implemented in this
+round; full root cause in the committed debug session
+`.planning/debug/edit-prompt-empty-stash.md`.
+
+## SC2f root cause + fix (commit `68631dd`)
+
+- **Root cause (debugger-confirmed):** the edit:offer -> request_edit routing
+  existed ONLY in `ChoicePanel._render_mixed` (gated on
+  `is_mixed_weighted_node`, designed when tca.shuffle was the only
+  edit-offering node -- a MIXED node). The Phase 5.1 disease-mutant replan
+  added edit:offer choices to 13 PURE-MC enzyme nodes without extending the
+  panel, so gly.pfk (the first enzyme on the glucose path) routed its edit
+  button through the generic `choose(i)` lambda -> `engine.choose` entered
+  edit.prompt with `_pending_edit_enzyme_id` never set ->
+  `build_edit_intent` RuntimeError. Empirically reproduced headlessly
+  (probe) + verified the designed seam works at the same node.
+- **Fix (debugger recommendation a):** `widgets.py _render_pure` special-cases
+  any eligible choice with the DUAL predicate (`"edit:offer" in tags` OR
+  `goto == "edit.prompt"` -- matching the reachability invariant) ->
+  `controller.request_edit(controller._current_enzyme_id())`, mirroring
+  `_render_mixed` verbatim. Restores the designed invariant: the stash is set
+  at the SOURCE node before the goto.
+- **Guard rails:** formalized debugger probe test at gly.pfk (request_edit ->
+  stash 'gly.pfk' -> build_edit_intent enzyme_id 'gly.pfk', no raise) + NEW
+  graph-invariant test (every edit-offering node in the real glucose graph
+  carries an `edit:enzyme:<id>` tag -- guarantees `_current_enzyme_id()` is
+  non-None wherever the UI seam routes from) + smoke stage at gly.pfk
+  (4 checks).
+
+## Latent-seam hardening (commit `245f88f`)
+
+1. **B1 stale-stash clear:** `_pending_edit_enzyme_id` (+ the new
+   `_pending_edit_source_node_id`) cleared after a SUCCESSFUL apply --
+   controller.apply_edit success path + the MainWindow's inline post-apply
+   path -- so a stale stash can never silently supply an enzyme for a future,
+   unrelated dialog.
+2. **B2 Cancel anti-stranding:** EditDialog Cancel used to leave the player at
+   edit.prompt (empty choice panel). request_edit now ALSO stashes the SOURCE
+   node id (controller-side attribute only -- NO skeleton change, NO save
+   impact); on Cancel the MainWindow shows a status message + ONE "Return to
+   the enzyme" button (`ChoicePanel.render_single_action`, dumb-renderer
+   hook) wired to the new `controller.return_to_edit_source()` (engine.goto
+   of the stashed source, clearing both stashes). FROZEN skeleton untouched.
+3. **B3 docstring reality:** `edit_dialog.submit()` still calls
+   `controller.apply_edit(intent)` -- WORKS now (apply_edit's
+   `edit_intent.enzyme_id` fallback landed); it is currently unused by the
+   MainWindow (which inlines the routing) -- docstrings updated to match
+   reality (edit_dialog.py + the stale 06-08 deviation note in
+   main_window.py).
+
+## Decision 1: tca.shuffle auto-fire trap + auto-spin soul-jump (commit `81b1a48`)
+
+User verbatim: "decision 1 auto fire. also the soul jump shouldnt be a
+decision too, its rng jump success or keep on loop or out as CO2."
+
+- **Where the hook lives:** `controller._auto_resolve_shuffle(turn)` called
+  from the `_render` CHOKE POINT -- every entry path (start / choose /
+  take_choice / request_edit / apply_edit / load / return_to_edit_source)
+  funnels through `_render`, so the shuffle can never surface as a
+  player-facing decision regardless of how it was entered. Re-entrancy guard
+  (`_resolving_shuffle`). Entry methods RETURN the POST-auto-resolve
+  TurnResult (the smoke's BFS walk + MockView observe the final state); the
+  superseded shuffle turn is NOT rendered (auto-resolves pre-render -- the
+  ChoicePanel mixed mode is dead-for-shuffle, kept for future mixed nodes).
+- **Flow** (node == tca.shuffle): (1) trap cond met (`visits > 5`) ->
+  AUTO-FIRE `take_choice(trap)` as a RESULT -> bad.cycle_trap_host_death +
+  bad_ending achievement (recursion depth <= 2 -- the ending is never the
+  shuffle); (2) FIRST entry (`visit_counts == 1` -- survives save/load via
+  GameState, NO new state) -> the aconitase edit is offered ONCE via the NEW
+  injected `edit_offer_fn` (generalized prompt seam; defaults to prompt_fn;
+  the MainWindow injects a separate wrapper titled "The wheel is about to
+  turn") -> yes: `request_edit("tca.aconitase")` (the shuffle's own
+  edit:enzyme tag; graph-invariant-guaranteed non-None); (3) else AUTO-SPIN
+  `choose(0)` -- the engine RNG picks among the WEIGHTED choices ONLY
+  (interpreter.pick_choice ignores the index when weighted choices exist;
+  debugger-verified: 40 seeds landed exclusively on the approved 0.5/0.5
+  co2_turn outcomes). Exactly one RNG draw per spin.
+- **Hard constraints honored:** NO new RNG outcomes/weights (TCA-RNG-WEIGHT-01
+  covers only the existing 0.5/0.5); NO skeleton JSON change (55 nodes /
+  21 endings untouched -- the trap choice stays in the JSON, the controller
+  just auto-takes it; reachability tests pass untouched); the co2_turnX
+  nodes KEEP their player buttons ("The cycle turns again" / "Continue
+  onward" -- the structural return is NOT automated).
+- **Verification:** +7 unit tests (declined entry auto-spins + the shuffle is
+  never rendered; visits-6 auto-fires with NO explicit take_choice; accepted
+  offer routes to edit.prompt with stash 'tca.aconitase'; edit_offer_fn used
+  over prompt_fn; offer is one-time; same-seed determinism; load returns the
+  post-resolve turn). Smoke stage 6 REWRITTEN (auto-spin lands on co2_turnX
+  WITHOUT a player click; offer declined once; 4 auto-spins; the 5th return
+  AUTO-FIRED the trap at visits==6 + bad_ending achievement; same-seed
+  determinism re-spin) + stage 7 BFS walk updated (the shuffle milestone is
+  recorded from the CHOICE TARGET; the returned turn is already post-spin;
+  the walk reaches end.true in the same 28-step path).
+
+## Decision 2: help expansion DEFERRED to Phase 11 (commit `f413dbb`)
+
+- Visible placeholder pointer card added to `c14/data/help.json` as the final
+  editing_pointers entry: "More detailed step-by-step guidance is planned for
+  a later update (Phase 11 -- documentation finalization)." (rendered by
+  HelpDialog with zero code change; wiki links stay as further reference).
+- Phase 11 owns the fuller inline help expansion (user decision 2026-08-30) --
+  recorded in STATE.md.
+
+## Round-2 verification (all green)
+
+- `python3.6 -m py_compile` over widgets/controller/main_window/edit_dialog --
+  exit 0.
+- `python3.6 -m unittest discover -s tests` -- **322 tests OK** (309 prior +
+  1 probe + 1 graph invariant + 4 seam-hardening + 7 auto-resolve; the
+  shuffle unit tests adapted to the auto-resolve semantics).
+- `python3.6 tools/check_imports.py` -- clean.
+- `bash tools/run_headless.sh tools/controller_integration_smoke.py` --
+  **SMOKE_RESULT: PASS** (60 checks: +4 gly.pfk edit-seam checks; stage 6
+  rewritten for auto-spin/auto-fire; stage 7 BFS walk updated; same-seed
+  determinism asserted `co2_turn2 == co2_turn2`).
+- Reachability tests still 19/19 (55 nodes / 21 endings -- untouched
+  topology; 20 tests in the file now = 19 prior + 1 new invariant).
+- RNG determinism: same seed -> same spin outcome (smoke +
+  `test_spin_is_deterministic_same_seed`).
+
+## Round-2 re-check items for the human (GUI)
+
+1. **Edit at gly.pfk** opens the "Edit gly.pfk" dialog (SC2f fixed -- the
+   stash is set at the source node).
+2. **The shuffle auto-spins** without a Spin button (one-time "Edit aconitase
+   before the wheel turns?" offer on the first entry).
+3. **The trap auto-fires as an ENDING** after 6 wheel visits (no trap button).
+4. **Cancel** on the EditDialog returns to the enzyme ("Return to the enzyme"
+   button + status message -- no stranded empty panel).
+
+## Round-2 open items carried forward
+
+- **Phase 7 content item (recorded, NOT resolved here):** a
+  shuffle -> end.normal.co2 early-exit edge was considered and REJECTED for
+  this round (RNG weights are high-stakes per-claim approval; TCA-RNG-WEIGHT-01
+  covers only the existing 0.5/0.5). Phase 7 approves TCA weights and may add
+  the edge then.
+- Phase 6 open items 3-5 from the round-1 verdict are unchanged (citrate
+  synthase dimer / real glucose + story text / per-node color + ending CG).
+- Fuller inline help -> Phase 11 (Decision 2, closed as a decision; the work
+  itself is Phase 11's).
+
+---
+*Re-verify round 2 completed: 2026-08-30 -- commits 68631dd (A) + 245f88f (B)
++ 81b1a48 (C) + f413dbb (D) + a0eb04d (debug session) + this docs commit.*
