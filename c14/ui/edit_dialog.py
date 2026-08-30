@@ -123,8 +123,9 @@ class EditDialog(QtWidgets.QDialog):
 
         # Load the curated options: known edits (from edits.json) + a few
         # plausible wrong options (hardcoded for Phase 6). ``_options`` is a
-        # list of (label, op, target, args) tuples; ``_selected`` is set on
-        # OK (the index of the checked radio -> the matching _options tuple).
+        # list of (label, op, target, args) tuples; ``_selected`` holds the
+        # checked radio's FULL option tuple on OK (selected_edit() strips the
+        # display-only label -> the documented (op, target, args) 3-tuple).
         self._options, has_known = self._build_options(enzyme_id)
         self._selected = None
 
@@ -179,8 +180,17 @@ class EditDialog(QtWidgets.QDialog):
         elements to :meth:`Controller.build_edit_intent` to assemble the
         EditIntent whose :meth:`~c14.story.model.EditIntent.signature` is
         matched against ``edits.json`` by the EditRouter.
+
+        Contract note (06-14 SC2f fix): ``_on_accept`` stores the FULL
+        ``(label, op, target, args)`` option tuple in ``_selected`` (the label
+        is display-only); THIS method strips the label and returns the
+        3-tuple ``(op, target, args)`` -- the documented contract consumed by
+        ``main_window.py`` (``op, target, args = dlg.selected_edit()``) and
+        :meth:`submit`.
         """
-        return self._selected
+        if self._selected is None:
+            return None
+        return self._selected[1:]
 
     @staticmethod
     def submit(controller, enzyme_id, parent=None):
@@ -231,10 +241,11 @@ class EditDialog(QtWidgets.QDialog):
 
     def _on_accept(self):
         # type: () -> None
-        """Record the checked option's ``(op, target, args)`` + accept the
-        dialog (so ``exec_()`` returns Accepted). If no radio is checked
-        (``checkedId()`` returns -1), ``_selected`` stays None and the dialog
-        still accepts (the caller sees a None selection)."""
+        """Record the checked option's FULL (label, op, target, args) tuple +
+        accept the dialog (so ``exec_()`` returns Accepted). If no radio is
+        checked (``checkedId()`` returns -1), ``_selected`` stays None and the
+        dialog still accepts (the caller sees a None selection via
+        :meth:`selected_edit`)."""
         idx = self._button_group.checkedId()
         if 0 <= idx < len(self._options):
             self._selected = self._options[idx]
