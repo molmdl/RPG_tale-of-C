@@ -341,3 +341,20 @@ decision too, its rng jump success or keep on loop or out as CO2."
 ---
 *Re-verify round 2 completed: 2026-08-30 -- commits 68631dd (A) + 245f88f (B)
 + 81b1a48 (C) + f413dbb (D) + a0eb04d (debug session) + this docs commit.*
+
+## Package rename c14 -> rpg (2026-08-30, post-Phase-6 quick task)
+
+The Python package was renamed `c14` -> `rpg` (user-approved 2026-08-30,
+lowercase per PEP8; commit bacbb09, code-only scope — historical planning docs
+keep their `c14` references; forward docs use `rpg`). Full suite 322 OK, both
+AST gates clean, reachability green (55 nodes / 21 endings), both headless
+smokes SMOKE_RESULT: PASS (real Windows PyMOL imports rpg.* end-to-end),
+zip rebuilt as dist/rpg-0.0.1-dev.zip (Case-1 first entry rpg/__init__.py,
+zero c14 entries). Windows user-data dir migrated to
+%APPDATA%\pymol\rpg-tale-of-c (achievements + saves carried over).
+
+The GUI re-check list grows by ONE item:
+
+5. **Restart PyMOL** -> the plugin still registers from the renamed package
+   (menu entry appears; window opens from rpg.*) and the achievements carried
+   over from the migrated %APPDATA%\pymol\rpg-tale-of-c dir are still listed.
