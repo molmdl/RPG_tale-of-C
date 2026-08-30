@@ -243,7 +243,7 @@ Phase 6 (Qt UI MVP) IN PROGRESS — Plan 06-06 COMPLETE ✓ (3/3 tasks): built t
 
 ### Pending Todos
 
-None yet.
+- [ ] **Phase 10 — scene-tuning support (user request 2026-08-30):** add `set_view` op to the MolAction dispatch (one peer-primitive op: `cmd.set_view(18 floats)`, molops.py — follows the 5.3/5.4 precedent; Phase 7 was scoped no-engine-surgery) + in-game "capture scene" write-back UX so 07-19's captured JSON can be saved into `data/story_glucose/*.json` directly from the GUI. Camera entries emitted by 07-19 are flagged until this lands.
 
 ### Blockers/Concerns
 

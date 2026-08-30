@@ -233,7 +233,7 @@ Plans:
   2. TCA-cycle shuffle nodes use RNG-weighted stochastic steps with weights drawn from approved sources (claim_ids approved in the registry); a seeded run produces a documented, reproducible fate (determinism test)
   3. Every choice point in the glucose path maps to a real pathway branch point (e.g. pyruvate → acetyl-CoA vs → lactate), with no invented branches — each mapping carrying an approved claim_id
   4. Every glucose story node carries both a dramatic-layer text (plain-language stakes) and a teaching-layer text (correct terminology, pathway logic, editable residues explained), both passing the per-claim citation gate
-**Plans**: 18 plans in 7 waves (fine-grained per user guidance — "split to more plans so each plan is focused, I accept more than 20"; approval-before-landing ordering: Wave 1 decision + 3 batch-by-source approval checkpoints → Wave 2 registry landing → Waves 3-5 per-segment content/topology/edit-system → Waves 6-7 cross-cutting passes + final verification). 4 parallel research files back the plans (glycolysis-pyruvate / tca-rng / etc-endings / content-mechanics in the phase dir); see 07-PLAN-INDEX.md for the authoritative roster. Topology change: +2 restoration-branch nodes (gly.pfk_restored, tca.aconitase_restored) per the restoration-narrative decision; OGDH promotion is a Wave-1 decision (D5) with its invariant update landing in plan 13.
+**Plans**: 19 plans in 8 waves (fine-grained per user guidance — "split to more plans so each plan is focused, I accept more than 20"; approval-before-landing ordering: Wave 1 decision + 3 batch-by-source approval checkpoints → Wave 2 registry landing → Waves 3-5 per-segment content/topology/edit-system → Waves 6-8 cross-cutting passes + final verification + scene-capture tool). 4 parallel research files back the plans (glycolysis-pyruvate / tca-rng / etc-endings / content-mechanics in the phase dir); see 07-PLAN-INDEX.md for the authoritative roster. Topology change: +2 restoration-branch nodes (gly.pfk_restored, tca.aconitase_restored) per the restoration-narrative decision; OGDH promotion is a Wave-1 decision (D5) with its invariant update landing in plan 13.
 
 Plans:
 - [ ] 07-01-PLAN.md — Structural+mechanics decision checkpoint (restoration topology, PLACEHOLDER_PHASE8, host_o2_low, -cand policy) (Wave 1)
@@ -254,6 +254,7 @@ Plans:
 - [ ] 07-16-PLAN.md — Cross-cutting: two-layer/claims/determinism/count tests + gate exit 0 (Wave 6)
 - [ ] 07-17-PLAN.md — 5.4 template-fill verification + 5.3 reveal wiring (Wave 7)
 - [ ] 07-18-PLAN.md — Final verification + human content-review checkpoint (Wave 7)
+- [ ] 07-19-PLAN.md — Scene-capture tool: pose a scene in PyMOL GUI → emits paste-ready on_enter JSON (set_view flagged for Phase 10) (Wave 8)
 
 ### Phase 8: Content Expansion II — Fatty Acid + Alcohol Characters
 **Goal**: The fatty acid and alcohol characters are authored with all four ending tiers each, completing the three-character roster — every character can reach every ending, fulfilling the v1 success measure ("all endings reachable for all characters").
