@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5.2: Bad-Ending Extensibility + Flexibility (INSERTED)** — demonstrates + locks in the convention for adding new bad endings whenever needed (shared-pool extensibility, reachability invariant); tested with a yet-to-exist ending "denature with a change in pH" ✓ COMPLETE (2026-08-22; all 3 SCs delivered: SC1 bad.denature_ph_change reachable, SC2 parametrized subTest convention proof, SC3 all counts/docs/diagram updated; 55 nodes, 21 endings 1T+3G+2N+15B; 9 reachability tests PASS; runtime edits.json UNCHANGED)
 - [x] **Phase 5.3: WT-Aligned Experimental Structure Load Convention (INSERTED)** — designs the convention for loading the aligned wild-type experimental structure after a correct (disease-reversing) edit, especially for mutants with major conformational differences (the "restoration reveal" scene template) ✓ COMPLETE (2026-08-28; all 3 SCs delivered + verified: SC1 convention spec [05.3-CONVENTION.md 415 lines], SC2 headless prototype [SMOKE_RESULT: PASS, all 8 stage checks green], SC3 human design-review APPROVED [all 8 open questions at recs, Q3 dispatch deferred to Phase 6]; VERIFICATION.md status: passed)
 - [x] **Phase 5.4: Cast & Hero Representation Design — Visual Language + Scene Templates (INSERTED)** — designs the C14 hero highlight convention + per-stage scene templates + cast-reveal convention; headless-prototyped on placeholder structures ✓ COMPLETE (2026-08-29; all 4 SCs delivered: SC1 hero-highlight convention [OQ-3 OVERRIDE: cyan hero + all-C-colored ball-and-stick + "YOU" label] + SC2 scene-template library [6 types, 4 ending tiers] + SC3 cast-reveal [OQ-2 OVERRIDE: magenta mutant; full-then-zoom] + SC4 human design-review APPROVED-WITH-ADJUSTMENTS [5 overrides + 6 approve-rec; convention FROZEN]; both smokes PASS [hero 29/29, scene 37/37]; molops.py untouched)
-- [ ] **Phase 6: Qt UI + Minimal Playable MVP (Glucose + True+Bad)** — FIRST human-verify milestone; UI as thin adapter over proven engine + molecular layer + reviewed design artifacts
+- [x] **Phase 6: Qt UI + Minimal Playable MVP (Glucose + True+Bad)** — FIRST human-verify milestone; UI as thin adapter over proven engine + molecular layer + reviewed design artifacts ✓ COMPLETE (2026-08-30; 14/14 plans + 3 fix/debug rounds: edit-prompt seam, tca.shuffle auto-spin/auto-fire [user decision], hero single-carbon fix, ending-banner persistence fix; package renamed c14→rpg; human-verified in real Windows PyMOL across 3 rounds)
 - [ ] **Phase 7: Content Expansion I — All Glucose Endings + Full Glucose Path** — 4 endings + TCA RNG weights + real branch points + two-layer text for glucose
 - [ ] **Phase 8: Content Expansion II — Fatty Acid + Alcohol Characters** — completes the 3-character roster; all 4 endings reachable per character (v1 success measure)
 - [ ] **Phase 9: Anaerobic Pathway + Full Cast + Documentation Completion** — anaerobic framing implemented, ~20+ cast populated + cited, dramatic cast list + slogan in README and in-game
@@ -209,20 +209,20 @@ Plans:
 **Plans**: 14 plans in 5 waves (aggressive atomicity per user guidance — "accept 50-100 focused plans, just make sure things work"; the first Qt-bearing phase split into focused pure-Python Wave 1 + AchievementBoard/bulk-download Wave 2 + Qt-free controller + achievements dialog Wave 3 + Qt widgets/dialogs Wave 4 + integration/human-verify Wave 5). Waves recomputed from each plan's depends_on (Blocker 2 fix: 06-04 depends_on 06-02 → Wave 2; 06-06 depends_on 06-03+06-04 → Wave 3; the UI dialogs depend_on 06-06 → Wave 4; 06-14 depends on all → Wave 5). The 3 Phase-6 research tracks (qt-packaging, ui-adapter, persistence-achievements) are DONE; the 4 deferred molops dispatches (set_color/label/set/align) + the load-branch target-prefix fallback (Blocker 1) + the start-node bundled-placeholder + hero-highlight (Warning 3 / SC2) + the view-matrix gap + the OQ-6 prompt + the edit-prompt seam (Warning 4) + the 2 SC#3 blockers (pyr.branch cond + tca.shuffle edit:offer/RNG) + the precise True-ending walk (Warning 5) are all addressed by named plans.
 
 Plans:
-- [ ] 06-01-PLAN.md — The 4 deferred molops dispatches (set_color/label/set/align) + load-branch target-prefix fallback (Blocker 1) + MockCmd tests + headless smoke (Wave 1)
-- [ ] 06-02-PLAN.md — user_data_path() resolver + WSL unit tests (Wave 1)
-- [ ] 06-03-PLAN.md — GameState view field + GameEngine view_provider/view_applier injection (SC#3 view-matrix gap) (Wave 1)
-- [ ] 06-04-PLAN.md — AchievementBoard domain module + unlock detection + persistence (Wave 2; depends_on 06-02)
-- [ ] 06-05-PLAN.md — Fix pyr.branch cond-syntax bug (SC#3 blocker A) + swap start-node TBD_* targets for bundled _smoke.pdb + add the 6-call hero-highlight sequence (Blocker 1 fix b + Warning 3 / SC2) (Wave 1)
-- [ ] 06-06-PLAN.md — Qt-free Controller + HeroResolver (OQ-6 gate) + engine.goto (SC#3 blocker B) + request_edit seam + defensive load try/except (Blocker 1 fix c + Warning 4) (Wave 3; depends_on 06-03, 06-04)
-- [ ] 06-07-PLAN.md — Plugin entry point (__init_plugin__ + addmenuitemqt) + build_plugin_zip.sh (PLGN-01/02) (Wave 4; depends_on 06-02, 06-06)
-- [ ] 06-08-PLAN.md — MainWindow + StoryPanel + ChoicePanel (SC1 main window + tca.shuffle UI + edit.prompt -> EditDialog detection) (Wave 4; depends_on 06-06)
-- [ ] 06-09-PLAN.md — EditDialog (curated edit options -> EditIntent; consumes the 06-06/06-08 seam — Warning 4) (Wave 4; depends_on 06-06)
-- [ ] 06-10-PLAN.md — Bulk-download (Qt-free runner + QDialog + cast.json schema) (CAST-04) (Wave 2; depends_on 06-02)
-- [ ] 06-11-PLAN.md — Save/Load dialogs (SAVE-01/02 UI) (Wave 4; depends_on 06-02, 06-06)
-- [ ] 06-12-PLAN.md — Achievements dialog (ACH-01/02 UI) (Wave 3; depends_on 06-04)
-- [ ] 06-13-PLAN.md — Help dialog + help.json (DOC-03, webfetch-verified wiki links) (Wave 1)
-- [ ] 06-14-PLAN.md — End-to-end integration smoke (headless, BFS-distance-guided True-ending walk — Warning 5) + comprehensive human-verify (all 5 SCs) (Wave 5; depends on 06-01..06-13)
+- [x] 06-01-PLAN.md — The 4 deferred molops dispatches (set_color/label/set/align) + load-branch target-prefix fallback (Blocker 1) + MockCmd tests + headless smoke (Wave 1) ✓
+- [x] 06-02-PLAN.md — user_data_path() resolver + WSL unit tests (Wave 1) ✓
+- [x] 06-03-PLAN.md — GameState view field + GameEngine view_provider/view_applier injection (SC#3 view-matrix gap) (Wave 1) ✓
+- [x] 06-04-PLAN.md — AchievementBoard domain module + unlock detection + persistence (Wave 2; depends_on 06-02) ✓
+- [x] 06-05-PLAN.md — Fix pyr.branch cond-syntax bug (SC#3 blocker A) + swap start-node TBD_* targets for bundled _smoke.pdb + add the 6-call hero-highlight sequence (Blocker 1 fix b + Warning 3 / SC2) (Wave 1) ✓
+- [x] 06-06-PLAN.md — Qt-free Controller + HeroResolver (OQ-6 gate) + engine.goto (SC#3 blocker B) + request_edit seam + defensive load try/except (Blocker 1 fix c + Warning 4) (Wave 3; depends_on 06-03, 06-04) ✓
+- [x] 06-07-PLAN.md — Plugin entry point (__init_plugin__ + addmenuitemqt) + build_plugin_zip.sh (PLGN-01/02) (Wave 4; depends_on 06-02, 06-06) ✓
+- [x] 06-08-PLAN.md — MainWindow + StoryPanel + ChoicePanel (SC1 main window + tca.shuffle UI + edit.prompt -> EditDialog detection) (Wave 4; depends_on 06-06) ✓
+- [x] 06-09-PLAN.md — EditDialog (curated edit options -> EditIntent; consumes the 06-06/06-08 seam — Warning 4) (Wave 4; depends_on 06-06) ✓
+- [x] 06-10-PLAN.md — Bulk-download (Qt-free runner + QDialog + cast.json schema) (CAST-04) (Wave 2; depends_on 06-02) ✓
+- [x] 06-11-PLAN.md — Save/Load dialogs (SAVE-01/02 UI) (Wave 4; depends_on 06-02, 06-06) ✓
+- [x] 06-12-PLAN.md — Achievements dialog (ACH-01/02 UI) (Wave 3; depends_on 06-04) ✓
+- [x] 06-13-PLAN.md — Help dialog + help.json (DOC-03, webfetch-verified wiki links) (Wave 1) ✓
+- [x] 06-14-PLAN.md — End-to-end integration smoke (headless, BFS-distance-guided True-ending walk — Warning 5) + comprehensive human-verify (all 5 SCs) (Wave 5; depends on 06-01..06-13) ✓
 
 ### Phase 7: Content Expansion I — All Glucose Endings + Full Glucose Pathway
 **Goal**: The glucose character's complete pathway is authored with all four ending tiers reachable, RNG-weighted TCA steps using approved weights, real pathway branch points (no invented branches), and two-layer (dramatic + teaching) text on every glucose node — proving the full content model on one character before replicating to others.
@@ -392,10 +392,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 5
 | 4. Editing + Protonation + Restore | 5/5 ✓ | Complete | 2026-08-15 |
 | 5. Pre-Content Key Decisions (parallel) | 5/5 ✓ | Complete | 2026-08-15 |
 | 5.1 Story Graph Design (INSERTED) | 16/16 ✓ | Complete | 2026-08-22 |
-| 5.2 Bad-Ending Extensibility (INSERTED) | 0/TBD | Not started | - |
-| 5.3 WT-Aligned Structure Load (INSERTED) | 0/TBD | Not started | - |
-| 5.4 Representation Design (INSERTED) | 0/TBD | Not started | - |
-| 6. Qt UI + MVP (Glucose + True+Bad) | 0/TBD | Not started | - |
+| 5.2 Bad-Ending Extensibility (INSERTED) | 1/1 ✓ | Complete | 2026-08-22 |
+| 5.3 WT-Aligned Structure Load (INSERTED) | 2/2 ✓ | Complete | 2026-08-28 |
+| 5.4 Representation Design (INSERTED) | 4/4 ✓ | Complete | 2026-08-29 |
+| 6. Qt UI + MVP (Glucose + True+Bad) | 14/14 ✓ | Complete | 2026-08-30 |
 | 7. Content I: All Glucose Endings | 0/TBD | Not started | - |
 | 8. Content II: Fatty Acid + Alcohol | 0/TBD | Not started | - |
 | 9. Anaerobic + Full Cast + Docs | 0/TBD | Not started | - |

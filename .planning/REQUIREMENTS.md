@@ -9,14 +9,14 @@ Requirements for initial release. Each maps to roadmap phases. Cross-checked aga
 
 ### Plugin Foundation
 
-- [ ] **PLGN-01**: Plugin loads in PyMOL 2.5.0 via the modern `pymol.Qt` interface (PyQt5) with a menu entry, using the `__init_plugin__` + `addmenuitemqt` pattern (no legacy `pmgqt`/Tk)
-- [ ] **PLGN-02**: Plugin is installable via Plugin Manager (package dir → .zip → startup/) and bundles small/critical PDB structures within the package
+- [x] **PLGN-01**: Plugin loads in PyMOL 2.5.0 via the modern `pymol.Qt` interface (PyQt5) with a menu entry, using the `__init_plugin__` + `addmenuitemqt` pattern (no legacy `pmgqt`/Tk) ✓ Phase 6
+- [x] **PLGN-02**: Plugin is installable via Plugin Manager (package dir → .zip → startup/) and bundles small/critical PDB structures within the package ✓ Phase 6
 - [x] **PLGN-03**: Plugin code targets Python 3.6 syntax universally (WSL test env = 3.6.9; pure-Python modules stay import-clean of `pymol`/`PyQt5` for unit testability) ✓ Phase 1
 
 ### Characters & Starting Points
 
 - [ ] **CHAR-01**: Player can start a new game choosing one of 3 characters: glucose, fatty acid, or alcohol
-- [ ] **CHAR-02**: The C14 hero is identified/highlighted in the loaded 3D structure at game start so the player can see "their" atom
+- [x] **CHAR-02**: The C14 hero is identified/highlighted in the loaded 3D structure at game start so the player can see "their" atom ✓ Phase 6
 
 ### Pathway & Story
 
@@ -41,21 +41,21 @@ Requirements for initial release. Each maps to roadmap phases. Cross-checked aga
 - [ ] **CAST-01**: Protein "cast" of ~20+ enzymes sourced from the PDB, each with PDB ID + resolution + citation, verified via per-claim checkpoint
 - [x] **CAST-02**: Small-molecule substrates (the C14 hero + intermediates) are 3D models from PubChem (via `cmd.fetch type='cid'/'sid'`) or PDB (via `cmd.fetch type='pdb'`) ✓ Phase 3
 - [x] **CAST-03**: Protonation defaults to physiological pH or reaction-relevant states; user-adjustable (curated variants via `cmd.alter` resn + targeted H add/remove, since `h_add` is valence-only not pH-aware) ✓ Phase 4
-- [ ] **CAST-04**: Large PDB structures are fetched via a one-time bulk download prompt before first play (hybrid bundle-small + bulk-download-large model)
-- [ ] **CAST-05**: Specific residue representations are shown as the game proceeds to relevant stages (using `cmd.show`/`cmd.hide`/`cmd.select` scene pattern)
+- [x] **CAST-04**: Large PDB structures are fetched via a one-time bulk download prompt before first play (hybrid bundle-small + bulk-download-large model) ✓ Phase 6
+- [x] **CAST-05**: Specific residue representations are shown as the game proceeds to relevant stages (using `cmd.show`/`cmd.hide`/`cmd.select` scene pattern) ✓ Phase 6
 
 ### Persistence & Achievements
 
 - [ ] **SAVE-01**: Save button persists game progress/state to a JSON file (human-readable, diff-friendly)
 - [ ] **SAVE-02**: Load button restores a saved session (game state JSON; molecular scene reconstructed by replaying current node's MolActions)
-- [ ] **ACH-01**: Achievement board with a limited set of unlockable achievements (collection-based: endings found, characters tried, branches discovered — not a ranked leaderboard) and a limited collection of starting points/endings
-- [ ] **ACH-02**: Achievement board persists to a file so the user can revisit it across sessions; cap deferred to content/UI phase (depends on story and UI — see PROJECT.md Key Decisions)
+- [x] **ACH-01**: Achievement board with a limited set of unlockable achievements (collection-based: endings found, characters tried, branches discovered — not a ranked leaderboard) and a limited collection of starting points/endings ✓ Phase 6
+- [x] **ACH-02**: Achievement board persists to a file so the user can revisit it across sessions; cap deferred to content/UI phase (depends on story and UI — see PROJECT.md Key Decisions) ✓ Phase 6
 
 ### Documentation & Help
 
 - [ ] **DOC-01**: Repo-root README includes a dramatic cast list (protein name, PDB ID, resolution) and a dramatic slogan (e.g. "featuring high-resolution, real protein models in our cast")
 - [ ] **DOC-02**: In-game help text includes the dramatic cast list + slogan
-- [ ] **DOC-03**: In-game help includes molecule-editing pointers and/or PyMOL wiki links
+- [x] **DOC-03**: In-game help includes molecule-editing pointers and/or PyMOL wiki links ✓ Phase 6
 - [x] **DOC-04**: Initial minimal README.md with "Under Development" banner, description, and TBD placeholder sections (Installation Instructions, References, etc.) ✓ Phase 1
 
 ### Scientific Integrity
@@ -96,11 +96,11 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLGN-01 | Phase 6 — Qt UI + MVP | Pending |
-| PLGN-02 | Phase 6 — Qt UI + MVP | Pending |
+| PLGN-01 | Phase 6 — Qt UI + MVP | Complete |
+| PLGN-02 | Phase 6 — Qt UI + MVP | Complete |
 | PLGN-03 | Phase 1 — Foundations & Citation Gate | Complete |
 | CHAR-01 | Phase 8 — Fatty Acid + Alcohol Characters | Pending |
-| CHAR-02 | Phase 6 — Qt UI + MVP | Pending |
+| CHAR-02 | Phase 6 — Qt UI + MVP | Complete |
 | STORY-01 | Phase 2 — Story Engine Core | Complete |
 | STORY-02 | Phase 8 — Fatty Acid + Alcohol Characters | Pending |
 | STORY-03 | Phase 7 — All Glucose Endings | Pending |
@@ -116,15 +116,15 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 | CAST-01 | Phase 9 — Anaerobic + Full Cast | Pending |
 | CAST-02 | Phase 3 — PyMOL cmd Layer | Complete |
 | CAST-03 | Phase 4 — Editing + Protonation + Restore | Complete |
-| CAST-04 | Phase 6 — Qt UI + MVP | Pending |
-| CAST-05 | Phase 6 — Qt UI + MVP | Pending |
+| CAST-04 | Phase 6 — Qt UI + MVP | Complete |
+| CAST-05 | Phase 6 — Qt UI + MVP | Complete |
 | SAVE-01 | Phase 2 — Story Engine Core | Complete |
 | SAVE-02 | Phase 2 — Story Engine Core | Complete |
-| ACH-01 | Phase 6 — Qt UI + MVP | Pending |
-| ACH-02 | Phase 6 — Qt UI + MVP | Pending |
+| ACH-01 | Phase 6 — Qt UI + MVP | Complete |
+| ACH-02 | Phase 6 — Qt UI + MVP | Complete |
 | DOC-01 | Phase 9 — Anaerobic + Full Cast | Pending |
 | DOC-02 | Phase 9 — Anaerobic + Full Cast | Pending |
-| DOC-03 | Phase 6 — Qt UI + MVP | Pending |
+| DOC-03 | Phase 6 — Qt UI + MVP | Complete |
 | DOC-04 | Phase 1 — Foundations & Citation Gate | Complete |
 | CITE-01 | Phase 5 — Pre-Content Key Decisions (parallel); content delivery spans Phases 7-9 | In Progress (Phase 5 operationalized: hybrid workflow agreed, gate proven on real approved data, first batch of 5 claims + 4 sources approved; full requirement satisfied as content phases author + approve all claims) |
 | CITE-02 | Phase 1 — Foundations & Citation Gate | Complete |
@@ -157,4 +157,4 @@ Which phases cover which requirements. Updated during roadmap creation (2026-08-
 
 ---
 *Requirements defined: 2026-08-12*
-*Last updated: 2026-08-15 — Phase 5 COMPLETE + VERIFIED (all 5 SCs delivered; CITE-01 operationalized: hybrid workflow agreed, gate proven on real approved data, first batch of 5 claims + 4 sources approved; LEHNINGER rejected per license + swapped to LibreTexts Jakubowski Ch 16 for the 2 high-stakes TCA RNG claims; CITE-01 marked In Progress — full requirement satisfied across Phases 7-9 as content is authored + approved). (Prior: SC#3 anaerobic framing resolved; Phase 4 completion — EDIT-01..05, CAST-03 marked Complete — 10/32 v1 requirements delivered)*
+*Last updated: 2026-08-30 — Phase 6 COMPLETE + VERIFIED (PLGN-01, PLGN-02, CHAR-02, CAST-04, CAST-05, DOC-03, ACH-01, ACH-02 marked Complete — 22/32 v1 requirements delivered; human-verified in a real Windows PyMOL session across 3 re-verify rounds; see .planning/phases/06-qt-ui-minimal-playable-mvp/06-VERIFICATION.md). (Prior: 2026-08-15 — Phase 5 COMPLETE + VERIFIED (all 5 SCs delivered; CITE-01 operationalized: hybrid workflow agreed, gate proven on real approved data, first batch of 5 claims + 4 sources approved; LEHNINGER rejected per license + swapped to LibreTexts Jakubowski Ch 16 for the 2 high-stakes TCA RNG claims; CITE-01 marked In Progress — full requirement satisfied across Phases 7-9 as content is authored + approved). (Prior: SC#3 anaerobic framing resolved; Phase 4 completion — EDIT-01..05, CAST-03 marked Complete — 10/32 v1 requirements delivered))*
