@@ -358,3 +358,84 @@ The GUI re-check list grows by ONE item:
 5. **Restart PyMOL** -> the plugin still registers from the renamed package
    (menu entry appears; window opens from rpg.*) and the achievements carried
    over from the migrated %APPDATA%\pymol\rpg-tale-of-c dir are still listed.
+
+---
+
+## Re-verify round 3 (2026-08-30): bad-end persistence + edit-pool diagnosis
+
+Debug session: `.planning/debug/bad-end-restart-and-edit-pool.md` (42/42 headless
+probe checks across 3 scripts). The controller/engine restart was PROVEN clean on
+both ending paths (trap auto-fire + edit-pool bad ending) — the persistence was
+two Qt-view defects plus one test gap.
+
+### Symptom 1 root cause: the ending banner never resets (FIXED)
+
+- **Root cause (primary):** `StoryPanel.render_node`
+  (`rpg/ui/widgets.py`) never touched the "Ending reached: <tier>" banner that
+  `render_ending` shows — only `clear()` hides it and the MainWindow never calls
+  `clear()`. After ANY ending, every later render (New Game / Load / normal
+  advance) kept the stale banner; with placeholder intro text the story panel kept
+  looking like the ending.
+- **Fix 1 (`8c2d344`):** `render_node` blanks + hides the banner as its FIRST
+  action. Deviation (Rule 1, auto-fixed): `render_ending` delegates to
+  `render_node` AFTER showing the banner, so the literal plan (reset in
+  `render_node`, "do not change render_ending") would have re-hidden the ending
+  banner immediately — `render_ending` was reordered (render_node first, then
+  set+show) with identical final widget state and unchanged semantics.
+- **Root cause (secondary):** `plugin_entry.py` re-shows the SAME hidden
+  MainWindow singleton on window reopen (Qt default close = hide; no closeEvent;
+  no re-render on show) — the last render (the ending) reappears. **P2 item
+  DEFERRED per the debugger's recommendation (refresh-on-show); revisit only if
+  the human still finds close→reopen confusing after Fix 1** — a full PyMOL
+  restart cannot show an ending without playing, and Fix 1 clears the banner on
+  the next render either way.
+- **Fix 2 (`33ddbc1`, P1 defense-in-depth):** `Controller.start_game` + `load`
+  clear BOTH pending edit stashes after the engine call succeeds (probe E proved
+  the stashes survive a restart — unreachable via today's modal EditDialog but a
+  latent stale-SOURCE-jump/enzyme seam). +2 unit tests (probe E formalized:
+  start_game restart on the SAME controller + the load variant).
+- **Fix 3 (`4277a4e`, P3 test gap):** smoke stage 6b — the SAME-controller
+  restart on the REAL molops stack + REAL graph after the stage-6 bad ending:
+  intro.preface, finished falsy (None), a NEW MockView turn, `_resolving_shuffle`
+  False, BOTH edit stashes None post-restart. SMOKE_RESULT: PASS (69 checks, was 60).
+
+### Symptom 2 VERDICT: Phase-6-EXPECTED content gap — mechanism PROVEN intact
+
+Every edit routes to a bad ending because the shipped `rpg/data/edits.json`
+contains ZERO real-enzyme entries (only the Phase-4/5 `fixture_enzyme_1`
+placeholder, whose `fixture.branch_1` branch node does not even exist in the
+glucose graph). With no table entry, EditDialog offers one generic wrong option
+(and already prints the "No known edits for this enzyme yet (Phase 7 content).
+Your edit will route to the bad-ending pool." notice) and EditRouter falls to the
+global bad-ending pool — exactly as designed for unknown edits. The routing
+mechanism is PROVEN correct headlessly: injecting a known `gly.pfk` entry routed
+to the branch node even with whitespace-noised input (signature canonicalization
+verified round-trip). The restoration branches the story promises
+(`gly.pfk_restored` etc.) DO NOT EXIST in the frozen 55-node skeleton — they were
+proposed in 05.1 research but never added. **Phase 7 content, citation-gated:**
+the edits.json entries (known-edit signatures incl. the reverse-mutation forms) +
+the restoration branch nodes + the 5.3 WT-aligned restore reveals in their
+on_enter, keeping the shared-manifest invariant (edits.json keys == cast ids ==
+graph `edit:enzyme:<id>` values). NOT touched in this round (rpg/data/edits.json,
+the skeleton, plugin_entry all unchanged).
+
+### Round-3 verification (all green)
+
+- `python3.6 -m py_compile rpg/ui/widgets.py rpg/ui/controller.py
+  tools/controller_integration_smoke.py` — exit 0.
+- `python3.6 -m unittest discover -s tests` — **324 tests OK** (322 prior + 2
+  probe-E stash tests).
+- `python3.6 tools/check_imports.py` — clean; `tools/check_alter_gate.py` —
+  exit 0.
+- `bash tools/run_headless.sh tools/controller_integration_smoke.py` —
+  **SMOKE_RESULT: PASS** (69 checks incl. the 9 new restart-stage checks).
+- `python3.6 -m unittest tests.test_glucose_reachability` — 20 OK (55 nodes /
+  21 endings untouched).
+
+### Human re-check list grows (after Fix 1)
+
+6. **Reach a bad ending → "Start a new game" (or Load)** → the gold
+   "Ending reached: <tier>" banner is GONE at intro.preface (and on every
+   non-ending render). If close→reopen still shows the last render, that is the
+   deferred P2 plugin_entry item — report it and the refresh-on-show fix will be
+   scheduled.
