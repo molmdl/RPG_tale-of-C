@@ -233,15 +233,27 @@ Plans:
   2. TCA-cycle shuffle nodes use RNG-weighted stochastic steps with weights drawn from approved sources (claim_ids approved in the registry); a seeded run produces a documented, reproducible fate (determinism test)
   3. Every choice point in the glucose path maps to a real pathway branch point (e.g. pyruvate → acetyl-CoA vs → lactate), with no invented branches — each mapping carrying an approved claim_id
   4. Every glucose story node carries both a dramatic-layer text (plain-language stakes) and a teaching-layer text (correct terminology, pathway logic, editable residues explained), both passing the per-claim citation gate
-**Plans**: 5–7 plans — one per pathway segment + its citations (see "Content Phase Plan Granularity" below). `/gsd-research-phase` for glucose pathway branch enumeration + ending-fate citations.
+**Plans**: 18 plans in 7 waves (fine-grained per user guidance — "split to more plans so each plan is focused, I accept more than 20"; approval-before-landing ordering: Wave 1 decision + 3 batch-by-source approval checkpoints → Wave 2 registry landing → Waves 3-5 per-segment content/topology/edit-system → Waves 6-7 cross-cutting passes + final verification). 4 parallel research files back the plans (glycolysis-pyruvate / tca-rng / etc-endings / content-mechanics in the phase dir); see 07-PLAN-INDEX.md for the authoritative roster. Topology change: +2 restoration-branch nodes (gly.pfk_restored, tca.aconitase_restored) per the restoration-narrative decision; OGDH promotion is a Wave-1 decision (D5) with its invariant update landing in plan 13.
 
 Plans:
-- [ ] 07-01: TBD — likely glycolysis segment (glucose → pyruvate): nodes + branch points + citations + two-layer text
-- [ ] 07-02: TBD — likely pyruvate transition branch (→ acetyl-CoA vs → lactate): the key STORY-07 branch point
-- [ ] 07-03: TBD — likely TCA cycle: RNG-weighted stochastic nodes (STORY-03), weights approved per-claim
-- [ ] 07-04: TBD — likely ETC / oxidative phosphorylation: True-ending soul-jump (hero's electrons → ATP via ETC/ATP synthase)
-- [ ] 07-05: TBD — likely glucose bad-endings pool + edit-routing tie-ins
-- [ ] 07-06: TBD — likely two-layer text pass + reachability green (4/4 endings) + citation gate green
+- [ ] 07-01-PLAN.md — Structural+mechanics decision checkpoint (restoration topology, PLACEHOLDER_PHASE8, host_o2_low, -cand policy) (Wave 1)
+- [ ] 07-02-PLAN.md — Approval batch A: glycolysis+pyruvate sources/claims/diseases (Wave 1)
+- [ ] 07-03-PLAN.md — Approval batch B: TCA/RNG shuffle design + weights + mutants (Wave 1)
+- [ ] 07-04-PLAN.md — Approval batch C: ETC/endings/bad-pool (Wave 1)
+- [ ] 07-05-PLAN.md — Registry landing: citations.json + sources.json; gate residual = placeholders only (Wave 2)
+- [ ] 07-06-PLAN.md — Pyruvate-branch content + anaerobic treatment + eligibility tests (Wave 4)
+- [ ] 07-07-PLAN.md — Intro content (light-touch; start-node shape preserved) (Wave 3)
+- [ ] 07-08-PLAN.md — Glycolysis content incl. gly.pfk_restored text (Wave 4)
+- [ ] 07-09-PLAN.md — ETC content + end.true metamorphosis + PDB loads (Wave 3)
+- [ ] 07-10-PLAN.md — Good+Normal endings content (proton-leak reframe) (Wave 3)
+- [ ] 07-11-PLAN.md — Bad-ending pool content (15 nodes) (Wave 3)
+- [ ] 07-12-PLAN.md — Restoration topology: +2 nodes, counts 55→57, tests, DESIGN, diagram (Wave 3)
+- [ ] 07-13-PLAN.md — TCA content: design-B weights, PDBs, OGDH-if-D5 (Wave 5)
+- [ ] 07-14-PLAN.md — edits.json authoring: 12 enzyme signatures + restoration routing (Wave 4)
+- [ ] 07-15-PLAN.md — cast.json + PDB assets + offline pre-population (Wave 5)
+- [ ] 07-16-PLAN.md — Cross-cutting: two-layer/claims/determinism/count tests + gate exit 0 (Wave 6)
+- [ ] 07-17-PLAN.md — 5.4 template-fill verification + 5.3 reveal wiring (Wave 7)
+- [ ] 07-18-PLAN.md — Final verification + human content-review checkpoint (Wave 7)
 
 ### Phase 8: Content Expansion II — Fatty Acid + Alcohol Characters
 **Goal**: The fatty acid and alcohol characters are authored with all four ending tiers each, completing the three-character roster — every character can reach every ending, fulfilling the v1 success measure ("all endings reachable for all characters").
