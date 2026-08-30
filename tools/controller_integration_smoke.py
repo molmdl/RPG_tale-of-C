@@ -23,6 +23,10 @@
 #   6. Advance to tca.shuffle -- assert is_mixed_weighted_node + spin + return
 #      6x to bump visits + take_choice(cycle_trap) -> bad.cycle_trap_host_death
 #      (a Bad ending reached -- SC3 Bad path) + bad_ending achievement unlocked.
+#   6b. SAME-CONTROLLER restart after that bad ending (06-14 re-verify round 3,
+#      debugger probe A formalized + probe-E stash symmetry): start_game AGAIN
+#      on the SAME controller -> intro.preface, finished falsy, a NEW turn
+#      rendered, _resolving_shuffle False, BOTH edit stashes cleared.
 #   7. Reach a True ending via the BFS-distance-guided walk (fresh controller,
 #      new seed) -- assert end.true + the milestone path + true_ending unlocked.
 #   8. Save/load round-trip with view (06-03) -- mid-game save + load into a
@@ -544,6 +548,83 @@ except Exception as e:
     check("trap_auto_fire_visits_6", False, repr(e))
     check("ach_bad_ending_unlocked", False, repr(e))
     check("shuffle_spin_deterministic_same_seed", False, repr(e))
+
+
+# =========================================================================
+# Stage 6b: SAME-CONTROLLER restart after the bad ending (06-14 re-verify
+# round 3 -- S1 regression guard on the REAL molops stack + REAL graph).
+#
+# The debugger (.planning/debug/bad-end-restart-and-edit-pool.md) proved the
+# controller/engine restart is CLEAN with WSL mocks (probe A: after the
+# auto-fired trap, start_game on the SAME controller landed intro.preface,
+# finished=None, guard False, view grew). This stage formalizes that proof
+# against the REAL stack, plus the probe-E stash symmetry (both edit stashes
+# cleared by the restart -- the Fix-2 start_game/load hardening).
+#
+# Reuses stage 6's flow result: the main `controller` is now FINISHED at
+# bad.cycle_trap_host_death (trap auto-fired at visits==6, offer declined).
+# The stage-5 gly.pfk edit seam left BOTH stashes set ('gly.pfk' / 'gly.pfk',
+# engine-level goto repositioning never clears them) -- probe E's exact
+# precondition. Then start_game AGAIN ON THE SAME CONTROLLER and assert the
+# fresh game.
+# =========================================================================
+try:
+    # Pre-restart context (probe A + probe E preconditions).
+    check("restart_pre_finished_bad",
+          bool(controller._engine.state.finished)
+          and controller._engine.state.ending_tier == "bad",
+          "finished=%r tier=%r" % (controller._engine.state.finished,
+                                   controller._engine.state.ending_tier))
+    check("restart_pre_guard_false",
+          controller._resolving_shuffle is False,
+          "guard=%r" % controller._resolving_shuffle)
+    check("restart_pre_stash_enzyme",
+          controller._pending_edit_enzyme_id == "gly.pfk",
+          "stash=%r" % controller._pending_edit_enzyme_id)
+    check("restart_pre_stash_source",
+          controller._pending_edit_source_node_id == "gly.pfk",
+          "source=%r" % controller._pending_edit_source_node_id)
+    turns_before = len(mock_view.turns)
+
+    # The SAME-controller restart (NOT a fresh controller -- stage 7 does
+    # that; the S1 report was "restart the game on the ending screen").
+    turn = controller.start_game("glucose", 42)
+
+    check("restart_returns_intro_preface",
+          turn.node.id == "intro.preface",
+          "node=%r" % turn.node.id)
+    # finished is falsy while playing (GameState.finished is None on a new
+    # game; truthy only after an ending node is marked).
+    check("restart_finished_falsy",
+          not controller._engine.state.finished,
+          "finished=%r" % controller._engine.state.finished)
+    check("restart_view_new_turn",
+          len(mock_view.turns) > turns_before
+          and mock_view.turns[-1].node.id == "intro.preface",
+          "turns %d->%d last=%r" % (
+              turns_before, len(mock_view.turns),
+              mock_view.turns[-1].node.id))
+    check("restart_guard_false",
+          controller._resolving_shuffle is False,
+          "guard=%r" % controller._resolving_shuffle)
+    # Probe-E symmetry (Fix 2): BOTH edit stashes are None post-restart.
+    check("restart_stashes_cleared",
+          controller._pending_edit_enzyme_id is None
+          and controller._pending_edit_source_node_id is None,
+          "enzyme=%r source=%r" % (controller._pending_edit_enzyme_id,
+                                   controller._pending_edit_source_node_id))
+except Exception as e:
+    import traceback
+    traceback.print_exc()
+    check("restart_pre_finished_bad", False, repr(e))
+    check("restart_pre_guard_false", False, repr(e))
+    check("restart_pre_stash_enzyme", False, repr(e))
+    check("restart_pre_stash_source", False, repr(e))
+    check("restart_returns_intro_preface", False, repr(e))
+    check("restart_finished_falsy", False, repr(e))
+    check("restart_view_new_turn", False, repr(e))
+    check("restart_guard_false", False, repr(e))
+    check("restart_stashes_cleared", False, repr(e))
 
 
 # =========================================================================
