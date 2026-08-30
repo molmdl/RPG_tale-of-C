@@ -4,7 +4,8 @@
     {"title": "Point mutation", "body": "Swap one residue in an enzyme's active site. Use the edit panel to pick a residue + a new identity. A known reverse-mutation (matching a disease allele) routes the story to a 'you restored it' branch; an unknown edit falls through to a bad ending."},
     {"title": "Substrate edit", "body": "Add or remove a group on the small molecule (the C14 hero or an intermediate). Pick the substrate + the group change in the edit panel."},
     {"title": "Protonation change", "body": "Switch a catalytic residue's or substrate's protonation state between curated variants (e.g. HIP/HIE/HID for histidine). Defaults are physiological pH; you can adjust."},
-    {"title": "Restore safety net", "body": "If an edit goes wrong, 'Reveal correct 3D model' restores the pre-edit snapshot without restarting (keeps gameplay smooth)."}
+    {"title": "Restore safety net", "body": "If an edit goes wrong, 'Reveal correct 3D model' restores the pre-edit snapshot without restarting (keeps gameplay smooth)."},
+    {"title": "More guidance is coming", "body": "More detailed step-by-step guidance is planned for a later update (Phase 11 -- documentation finalization). The wiki links below stay as further reference."}
   ],
   "wiki_links": [
     {"label": "alter (residue editing)", "url": "https://pymolwiki.org/index.php/Alter", "note": "Read-write atom properties; sort after altering identifiers. Verified live 2026-08-29 (redirects to Iterate)."},
