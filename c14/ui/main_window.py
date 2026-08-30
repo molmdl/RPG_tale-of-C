@@ -321,11 +321,29 @@ class MainWindow(QtWidgets.QMainWindow):
         # Normal node: render story + choices + status bar.
         self._story.render_node(node)
         self._choice.render_turn(turn, self._controller)
-        character = self._controller._engine.state.character
-        seed = self._controller._engine.state.seed
-        self.statusBar().showMessage(
-            "node={0}  character={1}  seed={2}".format(
-                node.id, character, seed))
+        character = self._engine_state("character")
+        seed = self._engine_state("seed")
+        # Orientation aid (06-14 SC2b human-verify fix): include the node's
+        # stage tag in the status bar so the player can tell WHERE they are
+        # (e.g. "node=gly.start  stage=glycolysis ..."). Nodes carry
+        # "stage:<x>" tags (c14/story/model.py Node.tags); a node without a
+        # stage tag simply omits the segment.
+        stage = next((t.split(":", 1)[1] for t in node.tags
+                      if t.startswith("stage:")), None)
+        status = "node={0}".format(node.id)
+        if stage:
+            status += "  stage={0}".format(stage)
+        status += "  character={0}  seed={1}".format(character, seed)
+        self.statusBar().showMessage(status)
+
+    def _engine_state(self, attr):
+        # type: (str) -> object
+        """Read one attribute off the controller's engine state (or None when
+        no game is running yet -- state is None before start_game/load)."""
+        state = self._controller._engine.state
+        if state is None:
+            return None
+        return getattr(state, attr, None)
 
     # ------------------------------------------------------------------
     # Toolbar handlers
