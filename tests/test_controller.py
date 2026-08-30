@@ -557,5 +557,228 @@ class TestController(unittest.TestCase):
         ]
 
 
+class TestShuffleAutoResolve(unittest.TestCase):
+    """tca.shuffle AUTO-RESOLVE tests (user decision 1, 2026-08-30): the soul
+    jump is NOT a player decision -- entering the shuffle via ANY controller
+    path auto-resolves (controller._render choke point):
+
+    - visits == 6 entry: the cycle-trap cond (visits > 5) is met -> the trap
+      AUTO-FIRES as a RESULT (bad.cycle_trap_host_death + bad_ending
+      achievement) with NO explicit take_choice call.
+    - FIRST entry (visits == 1): the aconitase edit is offered ONCE via the
+      injected edit_offer_fn (defaulting to prompt_fn). Declined -> AUTO-SPIN
+      (the engine RNG picks among the WEIGHTED choices ONLY -- the index is
+      ignored; NO new RNG outcomes/weights). Accepted -> request_edit ->
+      edit.prompt with the stash 'tca.aconitase' (the shuffle's own
+      edit:enzyme tag; guaranteed by the graph invariant test).
+    - The trap choice stays in the FROZEN skeleton JSON (the controller just
+      auto-takes it) -- 55 nodes / 21 endings untouched.
+
+    Entry positioning uses engine.goto (bypasses the controller render path)
+    to place the player at tca.aconitase, then the CONTROLLER choose() walks
+    into the shuffle -- mirroring a real UI click.
+    """
+
+    def _make_controller(self, prompt_fn=None, count_fn=None,
+                         edit_offer_fn=None, achievement_board=None):
+        # type: (object, object, object, object, object) -> Controller
+        """Controller over the real glucose graph + a real EditRouter + mocks.
+        count_fn defaults to a deterministic single-C (no hero prompt) so the
+        injected prompt fns are only exercised by the shuffle offer."""
+        edit_router = EditRouter(EditsTable.load(_edits_path()))
+        return Controller(
+            _story_dir(),
+            MockMolOps(),
+            None,  # cmd -- unused
+            edit_router,
+            view=MockView(),
+            prompt_fn=prompt_fn,
+            count_fn=count_fn if count_fn is not None else (lambda sele: 1),
+            achievement_board=achievement_board,
+            edit_offer_fn=edit_offer_fn)
+
+    def _goto_aconitase(self, c):
+        # type: (Controller) -> None
+        """Position the engine at tca.aconitase (engine-level -- no render,
+        no auto-resolve)."""
+        c._engine.goto("tca.aconitase")
+
+    def test_first_entry_declined_auto_spins_to_co2_turn(self):
+        """First shuffle entry with the offer DECLINED: the returned turn is
+        ALREADY the post-spin co2_turnX (the engine RNG picked among the
+        weighted ONLY) -- no Spin button, no player click on a shuffle
+        choice; the shuffle turn itself is never rendered (auto-resolves
+        pre-render); the offer prompt fired exactly once."""
+        offer_calls = []  # type: list
+        c = self._make_controller(
+            prompt_fn=lambda msg: offer_calls.append(msg) or False)
+        c.start_game("glucose", 42)
+        self._goto_aconitase(c)
+        view = c._view
+        turn = c.choose(0)  # "Continue to the shuffle" -> AUTO-RESOLVE
+        self.assertIn(
+            turn.node.id, ("tca.co2_turn1", "tca.co2_turn2"),
+            "the first entry auto-spun to a co2_turnX (RNG-weighted only); "
+            "got %r" % turn.node.id)
+        # The shuffle turn was NEVER rendered (superseded pre-render); the
+        # final render IS the returned (post-spin) turn.
+        rendered_ids = [t.node.id for t in view.turns]
+        self.assertNotIn("tca.shuffle", rendered_ids,
+                         "the shuffle turn is not rendered (auto-resolves "
+                         "pre-render); rendered=%r" % rendered_ids)
+        self.assertEqual(view.turns[-1].node.id, turn.node.id,
+                         "the final render is the post-spin turn")
+        # The edit offer fired EXACTLY once (first entry) and was declined.
+        self.assertEqual(len(offer_calls), 1,
+                         "the edit offer fired once on the first entry")
+        self.assertIn("aconitase", offer_calls[0],
+                      "the offer message names aconitase; got %r"
+                      % offer_calls[0])
+        # Exactly ONE shuffle visit so far (the trap cond is visits-based).
+        self.assertEqual(
+            c._engine.state.visit_counts.get("tca.shuffle", 0), 1)
+
+    def test_visits_6_entry_auto_fires_trap(self):
+        """The 6th shuffle entry (visits becomes 6) AUTO-FIRES the cycle-trap
+        as a RESULT: bad.cycle_trap_host_death + the bad_ending tier turn
+        recorded by the board -- with NO explicit take_choice call by the
+        caller (only 'The cycle turns again' choose clicks)."""
+        offer_calls = []  # type: list
+        board = MockAchievementBoard()
+        c = self._make_controller(
+            prompt_fn=lambda msg: offer_calls.append(msg) or False,
+            achievement_board=board)
+        c.start_game("glucose", 42)
+        self._goto_aconitase(c)
+        turn = c.choose(0)  # entry 1: offer declined -> auto-spin -> co2_turnX
+        self.assertIn(turn.node.id, ("tca.co2_turn1", "tca.co2_turn2"))
+        # 4 more returns (visits 2..5): each auto-spins again to co2_turnX.
+        for i in range(4):
+            turn = c.choose(0)  # "The cycle turns again" (index 0)
+            self.assertIn(
+                turn.node.id, ("tca.co2_turn1", "tca.co2_turn2"),
+                "return %d auto-spun (no offer, no trap yet); got %r"
+                % (i, turn.node.id))
+        # 5th return: visits -> 6 -> the trap cond is met -> AUTO-FIRE.
+        turn = c.choose(0)
+        self.assertEqual(
+            turn.node.id, "bad.cycle_trap_host_death",
+            "the 6th entry auto-fired the trap as a RESULT (no take_choice "
+            "call by the caller); got %r" % turn.node.id)
+        self.assertEqual(turn.node.is_ending, "bad")
+        self.assertTrue(c._engine.state.finished,
+                        "the playthrough finished at the Bad ending")
+        self.assertEqual(c._engine.state.ending_tier, "bad",
+                         "the recorded ending tier is bad")
+        self.assertEqual(
+            c._engine.state.visit_counts.get("tca.shuffle", 0), 6,
+            "the trap fired exactly at visits == 6")
+        # The bad-ending turn was recorded by the board (achievement path
+        # reused -- take_choice's internal _record_achievement).
+        self.assertEqual(
+            board.calls[-1][0].node.id, "bad.cycle_trap_host_death",
+            "the board recorded the auto-fired bad-ending turn")
+        # No second offer ever fired (the offer is one-time; visits != 1).
+        self.assertEqual(len(offer_calls), 1)
+
+    def test_first_entry_accepted_routes_to_edit_prompt(self):
+        """First shuffle entry with the offer ACCEPTED: routes through
+        request_edit -> edit.prompt with the stash 'tca.aconitase' (the
+        shuffle's own edit:enzyme:tca.aconitase tag) + the SOURCE stash
+        'tca.shuffle' (for the Cancel return); build_edit_intent then carries
+        enzyme_id 'tca.aconitase' with no raise."""
+        c = self._make_controller(prompt_fn=lambda msg: True)
+        c.start_game("glucose", 42)
+        self._goto_aconitase(c)
+        turn = c.choose(0)  # "Continue to the shuffle" -> offer -> YES
+        self.assertEqual(
+            turn.node.id, "edit.prompt",
+            "the accepted offer routed to edit.prompt via request_edit")
+        self.assertEqual(c._pending_edit_enzyme_id, "tca.aconitase",
+                         "the stash is the shuffle's edit:enzyme target")
+        self.assertEqual(c._pending_edit_source_node_id, "tca.shuffle",
+                         "the SOURCE stash is the shuffle (Cancel returns "
+                         "there -- which then auto-spins)")
+        intent = c.build_edit_intent("point_mutation", "resi 1",
+                                     {"new_res": "GLY"})
+        self.assertEqual(intent.enzyme_id, "tca.aconitase",
+                         "build_edit_intent used the stash (no raise)")
+
+    def test_edit_offer_fn_used_over_prompt_fn(self):
+        """A SEPARATE edit_offer_fn (MainWindow generalization): the shuffle
+        offer goes to edit_offer_fn (declined -> auto-spin), NOT to the
+        OQ-6 prompt_fn (which keeps its 'Hero ambiguity' hero-gate role)."""
+        prompt_calls = []  # type: list
+        offer_calls = []  # type: list
+        c = self._make_controller(
+            prompt_fn=lambda msg: prompt_calls.append(msg) or True,
+            edit_offer_fn=lambda msg: offer_calls.append(msg) or False)
+        c.start_game("glucose", 42)
+        self._goto_aconitase(c)
+        turn = c.choose(0)
+        self.assertIn(turn.node.id, ("tca.co2_turn1", "tca.co2_turn2"),
+                      "the declined edit_offer_fn led to an auto-spin")
+        self.assertEqual(len(offer_calls), 1, "the offer hit edit_offer_fn")
+        self.assertEqual(
+            prompt_calls, [],
+            "prompt_fn was NOT used for the shuffle offer (single-C "
+            "count_fn -> no hero prompt either)")
+
+    def test_offer_is_one_time_across_entries(self):
+        """The edit offer fires ONLY on the first entry (visits == 1):
+        entries 2..N auto-spin with NO second offer. The offer-already-made
+        fact lives in GameState.visit_counts -- no new state."""
+        offer_calls = []  # type: list
+        c = self._make_controller(
+            prompt_fn=lambda msg: offer_calls.append(msg) or False)
+        c.start_game("glucose", 42)
+        self._goto_aconitase(c)
+        c.choose(0)  # entry 1: offer fired (declined) -> spin
+        for i in range(3):
+            c.choose(0)  # entries 2..4: NO offer
+        self.assertEqual(len(offer_calls), 1,
+                         "the offer fired exactly once across 4 entries")
+
+    def test_spin_is_deterministic_same_seed(self):
+        """RNG determinism: the same seed -> the same spin outcome (two fresh
+        controllers, identical entry positioning, one RNG draw per spin)."""
+        spins = []
+        for seed in (42, 42):
+            c = self._make_controller(
+                prompt_fn=lambda msg: False)  # noqa: E731 -- declined offer
+            c.start_game("glucose", seed)
+            self._goto_aconitase(c)
+            spins.append(c.choose(0).node.id)
+        self.assertEqual(spins[0], spins[1],
+                         "same seed -> same spin outcome; got %r" % (spins,))
+
+    def test_load_returns_post_resolve_turn(self):
+        """load() returns the POST-auto-resolve turn: save at co2_turnX (after
+        the first declined offer), load, then the return choice auto-spins
+        with NO second offer (visit_counts survived the round-trip)."""
+        import os
+        import shutil
+        import tempfile
+        offer_calls = []  # type: list
+        c = self._make_controller(
+            prompt_fn=lambda msg: offer_calls.append(msg) or False)
+        c.start_game("glucose", 42)
+        self._goto_aconitase(c)
+        c.choose(0)  # entry 1: offer declined -> spin -> co2_turnX
+        tmpdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, tmpdir)
+        path = os.path.join(tmpdir, "save.json")
+        c.save(path)
+        turn = c.load(path)  # re-enters co2_turnX (record_visit=False)
+        self.assertIn(turn.node.id, ("tca.co2_turn1", "tca.co2_turn2"),
+                      "load restored the co2_turnX position")
+        turn = c.choose(0)  # entry 2: visits == 2 -> auto-spin, NO offer
+        self.assertIn(turn.node.id, ("tca.co2_turn1", "tca.co2_turn2"),
+                      "the return entry auto-spinned (post-resolve turn)")
+        self.assertEqual(len(offer_calls), 1,
+                         "no second offer after save/load (visits-based, "
+                         "no new state)")
+
+
 if __name__ == "__main__":
     unittest.main()

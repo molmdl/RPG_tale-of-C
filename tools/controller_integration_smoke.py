@@ -153,6 +153,18 @@ def _prompt_fn(message):
     return True
 
 
+# The tca.shuffle edit-offer callback (user decision 1, 2026-08-30: the wheel
+# auto-spins -- the aconitase edit is offered ONCE on the first entry). The
+# smoke DECLINES the offer so the shuffle auto-spins deterministically.
+# SEPARATE from _prompt_fn (the OQ-6 hero gate must keep auto-confirming).
+_edit_offer_calls = []  # type: list
+
+
+def _edit_offer_fn(message):
+    _edit_offer_calls.append(message)
+    return False
+
+
 # count_fn wraps cmd.count_atoms (the HeroResolver's hero-selector count). Bare
 # form per the plan -- the HeroResolver must be robust to a count on a
 # not-yet-loaded object (the pre-pass runs BEFORE the on_enter load dispatches).
@@ -182,7 +194,8 @@ def _make_controller(achievement_board=None):
         STORY_DIR, molops, cmd, edit_router, view=view,
         prompt_fn=_prompt_fn, count_fn=_count_fn,
         achievement_board=achievement_board,
-        view_provider=_view_provider, view_applier=_view_applier)
+        view_provider=_view_provider, view_applier=_view_applier,
+        edit_offer_fn=_edit_offer_fn)
     return controller, view, achievement_board
 
 
@@ -202,7 +215,8 @@ try:
         STORY_DIR, molops_main, cmd, edit_router_main, view=mock_view,
         prompt_fn=_prompt_fn, count_fn=_count_fn,
         achievement_board=ach_board,
-        view_provider=_view_provider, view_applier=_view_applier)
+        view_provider=_view_provider, view_applier=_view_applier,
+        edit_offer_fn=_edit_offer_fn)
 
     # Start a glucose game (seed=42 for reproducibility).
     turn = controller.start_game("glucose", seed=42)
@@ -383,17 +397,28 @@ except Exception as e:
 
 
 # =========================================================================
-# Stage 6: advance into TCA + verify tca.shuffle goto routing (06-06 Blocker B)
-# -> reach a Bad ending (SC3 Bad path) + bad_ending achievement unlocked.
+# Stage 6: tca.shuffle AUTO-RESOLVE (user decision 1, 2026-08-30) -> reach a
+# Bad ending (SC3 Bad path) + bad_ending achievement unlocked.
 #
-# Path: pyr.pdh -> (Continue into TCA) tca.entry -> (Continue)
-#   tca.citrate_synthase -> (Continue to aconitase) tca.aconitase ->
-#   (Continue to the shuffle) tca.shuffle.
-# At tca.shuffle: is_mixed_weighted_node True; spin the wheel (choose(0) --
-# RNG picks turn1/turn2); return via "The cycle turns again" (choose(0));
-# repeat 5x to bump tca.shuffle visits to 6; the cycle-trap cond
-# (visits.get('tca.shuffle', 0) > 5) becomes True; take_choice(cycle_trap)
-# -> bad.cycle_trap_host_death (a Bad ending).
+# Entering the shuffle via ANY controller path auto-resolves (the controller
+# _render choke point -- the soul jump is NOT a player decision):
+#   * FIRST entry (visits == 1): the aconitase edit is offered ONCE
+#     (_edit_offer_fn -> False here) -> AUTO-SPIN: the returned turn is
+#     ALREADY the post-spin co2_turnX (the engine RNG picks among the
+#     weighted ONLY; interpreter.pick_choice ignores the index) -- WITHOUT a
+#     player Spin click, and the shuffle turn itself is never rendered.
+#   * "The cycle turns again" (choose(0) at co2_turnX) re-enters the shuffle
+#     -> auto-spins again. After the 5th return visits == 6 -> the cycle-trap
+#     cond (visits > 5) is met -> the trap AUTO-FIRES as a RESULT ->
+#     bad.cycle_trap_host_death + bad_ending achievement -- NO take_choice
+#     call by this smoke.
+#   * NO new RNG outcomes/weights (TCA-RNG-WEIGHT-01 covers only the existing
+#     0.5/0.5); the FROZEN skeleton (55 nodes / 21 endings) is untouched --
+#     the trap choice stays in the JSON, the controller just auto-takes it.
+#
+# Path: pyr.pdh -> tca.entry -> tca.citrate_synthase -> tca.aconitase ->
+#   choose(0) "Continue to the shuffle" -> AUTO-SPIN -> co2_turnX -> 5x
+#   choose(0) "The cycle turns again" -> the 5th AUTO-FIRES the trap.
 # =========================================================================
 try:
     # pyr.pdh -> tca.entry (Continue into the TCA cycle, index 0)
@@ -408,66 +433,117 @@ try:
     turn = controller.choose(0)
     check("walk_cs_to_aconitase", turn.node.id == "tca.aconitase",
           "node=%r" % turn.node.id)
-    # tca.aconitase -> tca.shuffle (Continue to the shuffle, index 0)
-    turn = controller.choose(0)
-    check("walk_aconitase_to_shuffle", turn.node.id == "tca.shuffle",
-          "node=%r" % turn.node.id)
 
-    # Assert is_mixed_weighted_node (06-06): tca.shuffle has 2 weighted + 1
-    # non-weighted (edit:offer) eligible choice (cycle-trap cond not yet met).
+    # is_mixed_weighted_node still detects the shuffle's mixed shape (the
+    # ChoicePanel mixed mode stays; the auto-resolve just makes it
+    # dead-for-shuffle in practice).
     shuffle_node = controller._engine.graph.get_node("tca.shuffle")
     check("tca_shuffle_is_mixed",
           controller.is_mixed_weighted_node(shuffle_node) is True,
           "mixed=%r" % controller.is_mixed_weighted_node(shuffle_node))
 
-    # Spin + return 5 times to bump tca.shuffle visits to 6 (1 initial + 5
-    # returns). Each spin: choose(0) -> co2_turn1/2 (RNG picks). Each return:
-    # choose(0) -> "The cycle turns again" -> tca.shuffle.
-    for i in range(5):
-        turn = controller.choose(0)  # spin -> co2_turn1 or co2_turn2
-        check("tca_shuffle_spin_%d" % i,
+    # --- FIRST entry: choose(0) "Continue to the shuffle" -> the returned
+    # turn is ALREADY the post-spin co2_turnX (auto-resolved pre-render; the
+    # edit offer was declined once -> auto-spin; NO player Spin click).
+    first_spin_node = None
+    turn = controller.choose(0)
+    first_spin_node = turn.node.id
+    check("shuffle_auto_spin_no_click",
+          turn.node.id in ("tca.co2_turn1", "tca.co2_turn2"),
+          "node=%r (returned turn is already post-spin)" % turn.node.id)
+    check("shuffle_edit_offer_declined_once",
+          len(_edit_offer_calls) == 1,
+          "offers=%d message=%r" % (len(_edit_offer_calls),
+                                    _edit_offer_calls[0] if _edit_offer_calls
+                                    else None))
+    check("shuffle_first_entry_visits_1",
+          controller._engine.state.visit_counts.get("tca.shuffle", 0) == 1,
+          "visits=%r" % controller._engine.state.visit_counts.get(
+              "tca.shuffle", 0))
+    # The shuffle turn itself was never rendered (auto-resolves pre-render).
+    check("shuffle_never_rendered",
+          all(t.node.id != "tca.shuffle" for t in mock_view.turns),
+          "renders=%d shuffle_in_renders=%r" % (
+              len(mock_view.turns),
+              any(t.node.id == "tca.shuffle" for t in mock_view.turns)))
+
+    # --- Loop back 4x: each "The cycle turns again" (choose(0)) re-enters
+    # the shuffle -> visits 2..5 -> auto-spins again to a co2_turnX (no
+    # offer, no trap yet).
+    for i in range(4):
+        turn = controller.choose(0)
+        check("tca_shuffle_autospin_%d" % i,
               turn.node.id in ("tca.co2_turn1", "tca.co2_turn2"),
               "node=%r" % turn.node.id)
-        turn = controller.choose(0)  # "The cycle turns again" -> tca.shuffle
-        check("tca_shuffle_return_%d" % i,
-              turn.node.id == "tca.shuffle",
-              "node=%r" % turn.node.id)
 
-    # After 6 visits, the cycle-trap cond (visits > 5) is met.
-    visits = controller._engine.state.visit_counts.get("tca.shuffle", 0)
-    check("tca_shuffle_visits_6", visits == 6,
-          "visits=%r" % visits)
-    cycle_trap = next(ch for ch in shuffle_node.choices
-                      if "cycle_trap" in (ch.tags or []))
-    trap_met = controller._engine.choice_cond_met(cycle_trap)
-    check("tca_shuffle_cycle_trap_cond_met", trap_met is True,
-          "trap_cond=%r" % trap_met)
-
-    # take_choice(cycle_trap) -> bad.cycle_trap_host_death (via engine.goto,
-    # NOT choose -- 06-06 Blocker B fix). This is a Bad ending (SC3 Bad path).
-    turn = controller.take_choice(cycle_trap)
-    check("bad_ending_reached",
+    # --- 5th return: visits -> 6 -> the trap AUTO-FIRES as a RESULT
+    # (bad.cycle_trap_host_death; NO take_choice call by this smoke).
+    turn = controller.choose(0)
+    check("trap_auto_fired_bad_ending",
           turn.node.id == "bad.cycle_trap_host_death"
           and turn.node.is_ending == "bad",
           "node=%r is_ending=%r" % (turn.node.id, turn.node.is_ending))
-    # Assert the bad_ending achievement unlocked (06-04).
+    check("trap_auto_fire_finished_bad",
+          controller._engine.state.finished is True
+          and controller._engine.state.ending_tier == "bad",
+          "finished=%r tier=%r" % (controller._engine.state.finished,
+                                   controller._engine.state.ending_tier))
+    check("trap_auto_fire_visits_6",
+          controller._engine.state.visit_counts.get("tca.shuffle", 0) == 6,
+          "visits=%r" % controller._engine.state.visit_counts.get(
+              "tca.shuffle", 0))
+    # Assert the bad_ending achievement unlocked (06-04) -- the auto-fire
+    # reused take_choice's achievement path.
     ach_ids = [a["id"] for a in ach_board.data["achievements_unlocked"]]
     check("ach_bad_ending_unlocked", "bad_ending" in ach_ids,
           "unlocked=%r" % ach_ids)
+
+    # --- RNG determinism (same seed -> same spin outcome): a fresh
+    # controller with the SAME seed replays the SAME first-spin node.
+    molops_d, edit_router_d, _ab_d, _ = _build_molops_stack()
+    controller_d = Controller(
+        STORY_DIR, molops_d, cmd, edit_router_d, view=MockView(),
+        prompt_fn=_prompt_fn, count_fn=_count_fn,
+        achievement_board=AchievementBoard(
+            path=tempfile.mktemp(suffix="_smoke_ach_d.json")),
+        view_provider=_view_provider, view_applier=_view_applier,
+        edit_offer_fn=_edit_offer_fn)
+    controller_d.start_game("glucose", seed=42)
+    for _ in range(4):
+        controller_d.choose(0)  # intro.preface -> ... -> gly.g6p
+    controller_d.choose(0)  # gly.g6p -> gly.pfk
+    controller_d.choose(0)  # gly.pfk -> gly.fbp_to_pyruvate
+    controller_d.choose(0)  # -> gly.pyruvate_kinase
+    controller_d.choose(0)  # -> gly.pyruvate
+    controller_d.choose(0)  # -> pyr.branch
+    controller_d.choose(0)  # -> pyr.pdh
+    controller_d.choose(0)  # -> tca.entry
+    controller_d.choose(0)  # -> tca.citrate_synthase
+    controller_d.choose(0)  # -> tca.aconitase
+    spin_d = controller_d.choose(0).node.id  # -> shuffle -> AUTO-SPIN
+    check("shuffle_spin_deterministic_same_seed",
+          spin_d == first_spin_node,
+          "seed42 first=%r replay=%r" % (first_spin_node, spin_d))
 except Exception as e:
     import traceback
     traceback.print_exc()
     check("walk_pdh_to_tca_entry", False, repr(e))
     check("walk_tca_entry_to_cs", False, repr(e))
     check("walk_cs_to_aconitase", False, repr(e))
-    check("walk_aconitase_to_shuffle", False, repr(e))
     check("tca_shuffle_is_mixed", False, repr(e))
-    check("tca_shuffle_spin_0", False, repr(e))
-    check("tca_shuffle_return_0", False, repr(e))
-    check("tca_shuffle_visits_6", False, repr(e))
-    check("tca_shuffle_cycle_trap_cond_met", False, repr(e))
-    check("bad_ending_reached", False, repr(e))
+    check("shuffle_auto_spin_no_click", False, repr(e))
+    check("shuffle_edit_offer_declined_once", False, repr(e))
+    check("shuffle_first_entry_visits_1", False, repr(e))
+    check("shuffle_never_rendered", False, repr(e))
+    check("tca_shuffle_autospin_0", False, repr(e))
+    check("tca_shuffle_autospin_1", False, repr(e))
+    check("tca_shuffle_autospin_2", False, repr(e))
+    check("tca_shuffle_autospin_3", False, repr(e))
+    check("trap_auto_fired_bad_ending", False, repr(e))
+    check("trap_auto_fire_finished_bad", False, repr(e))
+    check("trap_auto_fire_visits_6", False, repr(e))
     check("ach_bad_ending_unlocked", False, repr(e))
+    check("shuffle_spin_deterministic_same_seed", False, repr(e))
 
 
 # =========================================================================
@@ -525,7 +601,14 @@ def _bfs_walk_to_true(controller, dist, seed):
     """Walk from intro.preface to end.true using the BFS-distance-guided choice
     selection. Returns the path list (non-ending node ids visited, in order) +
     the final turn (the end.true TurnResult). Fails the check() if the walk
-    exceeds a sane step bound (catches infinite loops)."""
+    exceeds a sane step bound (catches infinite loops).
+
+    Shuffle note (user decision 1, 2026-08-30): tca.shuffle AUTO-RESOLVES in
+    the controller, so choose() from tca.aconitase returns the POST-spin
+    co2_turnX already -- the shuffle never surfaces as a rendered turn. The
+    walk records the "tca.shuffle" milestone from the CHOICE TARGET (the
+    chosen goto) instead of the returned turn.
+    """
     path = []  # type: list
     turn = controller.start_game("glucose", seed=seed)
     max_steps = 100  # safety net (the natural path is ~28 steps)
@@ -537,31 +620,32 @@ def _bfs_walk_to_true(controller, dist, seed):
             check("true_walk_bounded", False,
                   "exceeded %d steps; path so far=%r" % (max_steps, path))
             return path, turn
-        if turn.node.id == "tca.shuffle":
-            # Spin the wheel (choose(0) -- RNG picks among the 2 weighted
-            # choices -> tca.co2_turn1 or tca.co2_turn2; both have finite dist).
-            turn = controller.choose(0)
-        else:
-            # Pure non-weighted node: pick the eligible choice with the MIN
-            # dist[goto]. Ties broken by list order (first wins).
-            node = turn.node
-            eligible = [c for c in node.choices
-                        if c.cond is None
-                        or controller._engine.choice_cond_met(c)]
-            if not eligible:
-                check("true_walk_no_eligible_at_%s" % turn.node.id, False,
-                      "no eligible choices at %s" % turn.node.id)
-                return path, turn
-            # Pick the choice with minimum dist[goto] (infinity for dead-ends).
-            best = None
-            best_dist = None
-            for c in eligible:
-                d = dist.get(c.goto, float("inf"))
-                if best is None or d < best_dist:
-                    best = c
-                    best_dist = d
-            index = eligible.index(best)
-            turn = controller.choose(index)
+        # Pure non-weighted node: pick the eligible choice with the MIN
+        # dist[goto]. Ties broken by list order (first wins). (The shuffle is
+        # never a rendered turn -- an incoming choice to it auto-resolves in
+        # the controller, so no shuffle special-case is needed here.)
+        node = turn.node
+        eligible = [c for c in node.choices
+                    if c.cond is None
+                    or controller._engine.choice_cond_met(c)]
+        if not eligible:
+            check("true_walk_no_eligible_at_%s" % turn.node.id, False,
+                  "no eligible choices at %s" % turn.node.id)
+            return path, turn
+        # Pick the choice with minimum dist[goto] (infinity for dead-ends).
+        best = None
+        best_dist = None
+        for c in eligible:
+            d = dist.get(c.goto, float("inf"))
+            if best is None or d < best_dist:
+                best = c
+                best_dist = d
+        if best.goto == "tca.shuffle":
+            # The shuffle milestone: record the CHOICE TARGET -- the returned
+            # turn is already the post-spin co2_turnX (auto-resolved).
+            path.append("tca.shuffle")
+        index = eligible.index(best)
+        turn = controller.choose(index)
     return path, turn
 
 
@@ -573,7 +657,8 @@ try:
         STORY_DIR, molops_t, cmd, edit_router_t, view=mock_view_t,
         prompt_fn=_prompt_fn, count_fn=_count_fn,
         achievement_board=ach_board_t,
-        view_provider=_view_provider, view_applier=_view_applier)
+        view_provider=_view_provider, view_applier=_view_applier,
+        edit_offer_fn=_edit_offer_fn)
 
     graph = controller_t._engine.graph
     dist = _compute_distances_to_end_true(graph)
@@ -670,7 +755,8 @@ try:
         prompt_fn=_prompt_fn, count_fn=_count_fn,
         achievement_board=AchievementBoard(
             path=tempfile.mktemp(suffix="_smoke_ach_s.json")),
-        view_provider=_view_provider, view_applier=_view_applier)
+        view_provider=_view_provider, view_applier=_view_applier,
+        edit_offer_fn=_edit_offer_fn)
     # Walk to gly.g6p (intro.preface -> intro.select -> intro.shell_glucose ->
     # gly.start -> gly.g6p). gly.g6p's on_enter is [hide_all] (no network).
     controller_s.start_game("glucose", seed=99)
@@ -702,7 +788,8 @@ try:
         prompt_fn=_prompt_fn, count_fn=_count_fn,
         achievement_board=AchievementBoard(
             path=tempfile.mktemp(suffix="_smoke_ach_l.json")),
-        view_provider=_view_provider, view_applier=_view_applier)
+        view_provider=_view_provider, view_applier=_view_applier,
+        edit_offer_fn=_edit_offer_fn)
     # Record the applied_views count BEFORE load.
     applied_before = len(_applied_views)
     controller_l.load(save_path)

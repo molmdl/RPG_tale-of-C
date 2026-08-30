@@ -228,6 +228,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 self, "Hero ambiguity", message,
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
             == QtWidgets.QMessageBox.Yes)
+        # edit_offer_fn = the tca.shuffle one-time edit offer (user decision 1,
+        # 2026-08-30: the wheel auto-spins -- the soul jump is not a decision;
+        # the aconitase edit is OFFERED exactly once on the first entry). A
+        # SEPARATE wrapper so the dialog title reads "The wheel is about to
+        # turn" instead of the OQ-6 "Hero ambiguity" title.
+        edit_offer_fn = lambda message: (
+            QtWidgets.QMessageBox.question(
+                self, "The wheel is about to turn", message,
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+            == QtWidgets.QMessageBox.Yes)
         # count_fn wraps cmd.count_atoms (the HeroResolver's hero-selector
         # count pre-check).
         count_fn = lambda sele: cmd.count_atoms(sele)
@@ -240,7 +250,8 @@ class MainWindow(QtWidgets.QMainWindow):
             story_dir, molops, cmd, edit_router, view=self,
             prompt_fn=prompt_fn, count_fn=count_fn,
             achievement_board=achievement_board,
-            view_provider=view_provider, view_applier=view_applier)
+            view_provider=view_provider, view_applier=view_applier,
+            edit_offer_fn=edit_offer_fn)
 
         # ---- build the UI ----
         self._build_toolbar()

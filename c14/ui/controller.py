@@ -221,8 +221,8 @@ class Controller(object):
 
     def __init__(self, story_dir, molops, cmd, edit_router, view=None,
                  prompt_fn=None, count_fn=None, achievement_board=None,
-                 view_provider=None, view_applier=None):
-        # type: (str, object, object, object, object, object, object, object, object, object) -> None
+                 view_provider=None, view_applier=None, edit_offer_fn=None):
+        # type: (str, object, object, object, object, object, object, object, object, object, object) -> None
         """Construct the controller over the story graph at ``story_dir``.
 
         Args:
@@ -253,6 +253,15 @@ class Controller(object):
                 (06-03 view-matrix injection). Passed to the engine for save.
             view_applier: callable taking the 18-float view list. Passed to the
                 engine for load.
+            edit_offer_fn: the tca.shuffle edit-offer callback
+                (``message -> bool``, user decision 1 of 2026-08-30: the soul
+                jump is not a player decision -- the wheel spins automatically;
+                the aconitase edit is OFFERED exactly once on the FIRST shuffle
+                entry). Defaults to ``prompt_fn`` when None; if BOTH are None
+                no offer is possible and the shuffle always auto-spins. The
+                MainWindow injects a separate wrapper so the dialog title can
+                say "The wheel is about to turn" instead of the OQ-6 "Hero
+                ambiguity" title.
         """
         self._graph = StoryGraph.load(story_dir)
         self._molops = molops
@@ -295,6 +304,15 @@ class Controller(object):
         # JSON change, NO save-format impact (never persisted). Cleared after
         # a successful apply (the seam is done) and on return.
         self._pending_edit_source_node_id = None
+        # The tca.shuffle edit-offer callback (user decision 1, 2026-08-30):
+        # offered ONCE on the FIRST shuffle entry; defaults to prompt_fn.
+        self._edit_offer_fn = (edit_offer_fn if edit_offer_fn is not None
+                               else prompt_fn)
+        # Re-entrancy guard for the shuffle auto-resolve (the auto-fire /
+        # auto-spin recurse into take_choice/choose, which re-enter _render;
+        # the ending/co2 targets are never the shuffle so depth is <= 2, but
+        # the guard makes any future loop structurally impossible).
+        self._resolving_shuffle = False
 
     # ---- the molaction_sink the engine calls (engine.py:203-205) ----
 
@@ -335,7 +353,7 @@ class Controller(object):
         finally:
             self._restore_hero_patch(patch)
         self._record_achievement(turn, character, is_new_game=True)
-        self._render(turn)
+        turn = self._render(turn)  # post-auto-resolve (shuffle choke point)
         return turn
 
     def choose(self, index):
@@ -354,7 +372,7 @@ class Controller(object):
         finally:
             self._restore_hero_patch(patch)
         self._record_achievement(turn, self._engine.state.character)
-        self._render(turn)
+        turn = self._render(turn)  # post-auto-resolve (shuffle choke point)
         return turn
 
     def take_choice(self, choice):
@@ -377,7 +395,7 @@ class Controller(object):
         finally:
             self._restore_hero_patch(patch)
         self._record_achievement(turn, self._engine.state.character)
-        self._render(turn)
+        turn = self._render(turn)  # post-auto-resolve (shuffle choke point)
         return turn
 
     def apply_edit(self, edit_intent):
@@ -414,7 +432,7 @@ class Controller(object):
         self._pending_edit_enzyme_id = None
         self._pending_edit_source_node_id = None
         self._record_achievement(turn, self._engine.state.character)
-        self._render(turn)
+        turn = self._render(turn)  # post-auto-resolve (shuffle choke point)
         return turn
 
     def request_edit(self, enzyme_id):
@@ -448,7 +466,7 @@ class Controller(object):
         finally:
             self._restore_hero_patch(patch)
         self._record_achievement(turn, self._engine.state.character)
-        self._render(turn)
+        turn = self._render(turn)  # post-auto-resolve (shuffle choke point)
         return turn
 
     def return_to_edit_source(self):
@@ -487,7 +505,7 @@ class Controller(object):
         finally:
             self._restore_hero_patch(patch)
         self._record_achievement(turn, self._engine.state.character)
-        self._render(turn)
+        turn = self._render(turn)  # post-auto-resolve (shuffle choke point)
         return turn
 
     def build_edit_intent(self, op, target, args):
@@ -523,7 +541,7 @@ class Controller(object):
         node's on_enter -> molops -> cmd.* to reconstruct the scene) + renders
         the restored turn."""
         turn = self._engine.load(path)
-        self._render(turn)
+        turn = self._render(turn)  # post-auto-resolve (shuffle choke point)
         return turn
 
     # ---- helpers ----
@@ -618,11 +636,107 @@ class Controller(object):
             self._achievement_board.on_turn(turn, character, is_new_game)
 
     def _render(self, turn):
-        # type: (TurnResult) -> None
-        """Render the TurnResult into the view (the widgets). No-op if no view
-        was injected (headless/tests)."""
+        # type: (TurnResult) -> TurnResult
+        """Render the TurnResult into the view (the widgets) + auto-resolve
+        the tca.shuffle (user decision 1, 2026-08-30). No-op render if no view
+        was injected (headless/tests).
+
+        This is the CHOKE POINT for the shuffle auto-resolve: every entry path
+        (start_game / choose / take_choice / request_edit / apply_edit / load /
+        return_to_edit_source) funnels through here, so the shuffle can never
+        surface as a player-facing decision regardless of how it was entered.
+
+        Returns the POST-auto-resolve TurnResult -- the final rendered turn
+        (callers MUST return this, not their pre-resolve turn, so the smoke's
+        BFS walk + the MockView observe the final state). When the turn WAS
+        auto-resolved, the superseded shuffle turn is NOT rendered (the nested
+        engine call already rendered the final turn; the shuffle is an
+        instantaneous RNG event, not a scene -- "auto-resolves pre-render").
+        """
+        resolved = self._auto_resolve_shuffle(turn)
+        if resolved is not turn:
+            # Auto-resolved (trap fired / auto-spun / edit offered): the
+            # nested controller call rendered the final turn already.
+            return resolved
         if self._view is not None:
             self._view.render_turn(turn)
+        return turn
+
+    def _auto_resolve_shuffle(self, turn):
+        # type: (TurnResult) -> TurnResult
+        """Auto-resolve the tca.shuffle node (user decision 1, 2026-08-30):
+        the soul jump is NOT a player decision -- entering the shuffle via ANY
+        controller path immediately (in order):
+
+        1. **Cycle-trap auto-fire** -- if the trap choice's cond is met
+           (``visits.get('tca.shuffle', 0) > 5``), the wheel has spun too
+           long: the trap AUTO-FIRES as a RESULT via ``take_choice(trap)``
+           (reuses the hero pre-pass + achievement + render; the ending is
+           never the shuffle, so the _render recursion depth is <= 2). The
+           trap stays in the FROZEN skeleton JSON -- the controller just
+           auto-takes it, so the reachability invariants pass untouched.
+        2. **One-time edit offer** -- on the FIRST entry
+           (``visit_counts['tca.shuffle'] == 1``; survives save/load via
+           GameState.visit_counts -- NO new state), offer the aconitase edit
+           ONCE via the injected ``edit_offer_fn`` ("Edit aconitase before
+           the wheel turns?"). Yes -> ``request_edit`` (the existing seam;
+           the shuffle's own ``edit:enzyme:tca.aconitase`` tag supplies the
+           enzyme, guaranteed non-None by the graph invariant test). The
+           offer is one-time: entries 2..5 go straight to the spin.
+        3. **Auto-spin** -- otherwise ``choose(0)``: the engine's RNG picks
+           among the WEIGHTED choices ONLY (interpreter.pick_choice ignores
+           the index when any weighted eligible choice exists -- debugger
+           probe, 40 seeds, landed exclusively on the approved 0.5/0.5
+           co2_turn outcomes). Exactly ONE RNG draw per spin. NO new RNG
+           outcomes/weights (TCA-RNG-WEIGHT-01 covers only the existing
+           0.5/0.5; Phase 7 approves any change).
+
+        The co2_turnX nodes KEEP their player buttons ("The cycle turns
+        again" / "Continue onward") -- only the shuffle itself is automated.
+        Guarded by ``_resolving_shuffle`` (re-entrancy: the nested
+        take_choice/choose re-enter _render; their targets are never the
+        shuffle, but the guard makes a future loop structurally impossible).
+        """
+        if getattr(turn.node, "id", None) != "tca.shuffle":
+            return turn
+        if self._resolving_shuffle:
+            return turn  # re-entrant call inside a resolve: render as-is
+        if self._engine.state is None:
+            return turn  # no game in progress (defensive)
+        self._resolving_shuffle = True
+        try:
+            return self._auto_resolve_shuffle_inner(turn)
+        finally:
+            self._resolving_shuffle = False
+
+    def _auto_resolve_shuffle_inner(self, turn):
+        # type: (TurnResult) -> TurnResult
+        """The three-step shuffle resolution (see
+        :meth:`_auto_resolve_shuffle` for the design contract)."""
+        shuffle = turn.node
+        # 1. Cycle-trap auto-fire: the cond-gated trap becomes a RESULT.
+        trap = next(
+            (c for c in shuffle.choices if "cycle_trap" in (c.tags or [])),
+            None)
+        if trap is not None and self._engine.choice_cond_met(trap):
+            return self.take_choice(trap)
+        # 2. First entry: offer the aconitase edit ONCE via the injected
+        #    edit-offer prompt. visit_counts is GameState state -> the
+        #    offer-already-made fact survives save/load with NO new state.
+        if self._engine.state.visit_counts.get("tca.shuffle", 0) == 1:
+            offer_fn = self._edit_offer_fn
+            enzyme_id = self._current_enzyme_id()
+            if offer_fn is not None and enzyme_id is not None:
+                if offer_fn("Edit aconitase before the wheel turns?"):
+                    # The existing edit seam: stash + goto edit.prompt (the
+                    # MainWindow opens the EditDialog). If the player then
+                    # CANCELS the dialog, return_to_edit_source gotos the
+                    # shuffle again -> the wheel simply turns (the offer is
+                    # one-time per first entry -- visits is now 2+).
+                    return self.request_edit(enzyme_id)
+        # 3. Auto-spin: the RNG picks among the weighted choices ONLY
+        #    (pick_choice ignores the index when weighted choices exist).
+        return self.choose(0)
 
     def __repr__(self):
         return "Controller(current={!r}, finished={!r})".format(

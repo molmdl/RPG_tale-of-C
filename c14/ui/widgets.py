@@ -268,6 +268,15 @@ class ChoicePanel(QtWidgets.QWidget):
         button (RNG picks among the weighted) + one button per NON-weighted
         choice (edit:offer -> request_edit; cycle-trap/other -> take_choice).
 
+        NOTE (user decision 1, 2026-08-30): the tca.shuffle node AUTO-RESOLVES
+        in the controller BEFORE any render (controller._auto_resolve_shuffle:
+        trap auto-fires at visits>5 / the aconitase edit is offered once on
+        the first entry / otherwise the wheel auto-spins), so this mixed mode
+        NO LONGER renders for the shuffle in practice (dead-for-shuffle). It
+        is KEPT: is_mixed_weighted_node stays for any future mixed
+        weighted+non-weighted node, and a defensive shuffle render (e.g. a
+        re-entrant _render call during resolution) still works.
+
         The non-weighted buttons are iterated over ALL non-weighted choices
         (not just cond-eligible) so a cond-gated cycle-trap shows greyed-out
         before its cond is met (the plan: 'grey out the cycle-trap until visits
