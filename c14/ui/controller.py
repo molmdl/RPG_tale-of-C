@@ -285,6 +285,16 @@ class Controller(object):
         # right enzyme_id. build_edit_intent falls back to this at edit.prompt
         # (which has no edit:enzyme: tag).
         self._pending_edit_enzyme_id = None
+        # B2 anti-stranding seam (06-14 re-verify round 2): request_edit ALSO
+        # stashes the SOURCE node id (the node the player was ON when they
+        # clicked the edit affordance). After an EditDialog CANCEL the player
+        # is at edit.prompt (an empty choice panel -- it has no player-facing
+        # choices); the MainWindow renders a single "Return to the enzyme"
+        # button wired to :meth:`return_to_edit_source`, which gotos this
+        # stashed source id. Controller-side attribute only -- NO skeleton
+        # JSON change, NO save-format impact (never persisted). Cleared after
+        # a successful apply (the seam is done) and on return.
+        self._pending_edit_source_node_id = None
 
     # ---- the molaction_sink the engine calls (engine.py:203-205) ----
 
@@ -395,6 +405,14 @@ class Controller(object):
                 "tag and the EditIntent carries no enzyme_id".format(
                     self._engine.state.current_node))
         turn = self._engine.apply_player_edit(edit_intent, enzyme_id)
+        # B1 stale-stash hardening (06-14 re-verify round 2): the edit seam is
+        # DONE once the edit routes + the routed node is entered -- clear BOTH
+        # pending values so a stale enzyme_id can never silently supply an
+        # enzyme for a future, unrelated dialog. (Without this, a later
+        # edit.prompt reached without request_edit would fall back to the old
+        # enzyme in build_edit_intent/apply_edit.)
+        self._pending_edit_enzyme_id = None
+        self._pending_edit_source_node_id = None
         self._record_achievement(turn, self._engine.state.character)
         self._render(turn)
         return turn
@@ -413,11 +431,59 @@ class Controller(object):
         render_turn detects ``turn.node.id == "edit.prompt"`` + opens the
         EditDialog (06-09) with ``self._pending_edit_enzyme_id``. Records +
         renders.
+
+        ALSO stashes the SOURCE node id (the node the player was ON -- the
+        edit-allowed node) in ``_pending_edit_source_node_id`` BEFORE the
+        goto (B2 anti-stranding seam, 06-14 re-verify round 2): after an
+        EditDialog CANCEL the MainWindow offers a "Return to the enzyme"
+        button wired to :meth:`return_to_edit_source`, which gotos this id.
         """
         self._pending_edit_enzyme_id = enzyme_id
+        # The source node is where the player IS right now (request_edit runs
+        # before the goto edit.prompt).
+        self._pending_edit_source_node_id = self._engine.state.current_node
         patch = self._resolve_hero_for_target("edit.prompt")
         try:
             turn = self._engine.goto("edit.prompt")
+        finally:
+            self._restore_hero_patch(patch)
+        self._record_achievement(turn, self._engine.state.character)
+        self._render(turn)
+        return turn
+
+    def return_to_edit_source(self):
+        # type: () -> object
+        """Return to the edit-allowed SOURCE node after an EditDialog CANCEL
+        (B2 anti-stranding fix, 06-14 re-verify round 2).
+
+        The player canceled the dialog while AT ``edit.prompt`` -- a node with
+        NO player-facing choices (its choices are structural BFS paths to bad
+        endings, consumed by the EditRouter, never rendered). Without this the
+        player is stranded at an empty choice panel. The skeleton is FROZEN
+        (55 nodes / 21 endings -- no new node/edge may be added), so the
+        return is a direct ``engine.goto`` of the stashed SOURCE node id
+        (:attr:`_pending_edit_source_node_id`, set by :meth:`request_edit`).
+
+        Clears BOTH pending values (the enzyme stash is stale once the player
+        leaves edit.prompt -- a fresh edit click re-stashes). Re-entering the
+        source node records a visit + replays its on_enter (the scene
+        rebuilds -- Pattern 6) + records the achievement + renders, mirroring
+        :meth:`request_edit`/take_choice. NOTE: if the source node is
+        ``tca.shuffle`` (the edit was offered by the shuffle's auto-resolve),
+        re-entering it re-triggers the controller's shuffle auto-resolve
+        (the wheel simply turns -- the offer is one-time per first entry).
+
+        Returns the SOURCE node's TurnResult, or None when there is no
+        stashed source (nothing to return to -- the caller shows a status
+        message)."""
+        source_id = self._pending_edit_source_node_id
+        if source_id is None:
+            return None
+        self._pending_edit_enzyme_id = None
+        self._pending_edit_source_node_id = None
+        patch = self._resolve_hero_for_target(source_id)
+        try:
+            turn = self._engine.goto(source_id)
         finally:
             self._restore_hero_patch(patch)
         self._record_achievement(turn, self._engine.state.character)

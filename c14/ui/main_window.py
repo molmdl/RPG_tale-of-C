@@ -399,26 +399,17 @@ class MainWindow(QtWidgets.QMainWindow):
         The stashed ``_pending_edit_enzyme_id`` was set by
         ``controller.request_edit`` (06-06) at the edit-allowed SOURCE node
         BEFORE the goto edit.prompt -- this is the seam 06-06 provides + 06-09
-        consumes; 06-08 only wires it in render_turn (NO modification to 06-06's
-        controller or 06-09's dialog -- it calls the existing API).
+        consumes; 06-08 only wires it in render_turn.
 
-        DEVIATION (Rule 1 -- bug in the plan's prescribed flow): the plan
-        prescribed ``controller.apply_edit(intent)`` here, but ``apply_edit``
-        re-reads the enzyme_id from the CURRENT node's ``edit:enzyme:<id>``
-        tag (controller.py:361) + raises ``RuntimeError`` at edit.prompt (which
-        has NO such tag -- verified by test_apply_edit_raises_when_no_enzyme_tag
-        in tests/test_controller.py). The controller's ``apply_edit`` is
-        designed for the edit-allowed SOURCE node, NOT edit.prompt (its
-        docstring: "do NOT use the pending stash here; that's for
-        build_edit_intent at edit.prompt"). ``build_edit_intent`` IS designed
-        for edit.prompt (it falls back to ``_pending_edit_enzyme_id``), so the
-        EditIntent it returns already carries the stashed enzyme_id. This method
-        therefore routes via the engine directly using ``intent.enzyme_id`` +
-        records the achievement + renders -- mirroring ``apply_edit``'s logic
-        exactly (engine.apply_player_edit -> _record_achievement -> _render)
-        but using the EditIntent's enzyme_id instead of re-reading the (absent)
-        node tag. This keeps 06-06's controller + 06-09's dialog unmodified
-        (the plan's constraint) while making the edit.prompt seam functional.
+        History note (06-14 re-verify round 2): the 06-08 deviation (routing
+        via the engine directly instead of ``controller.apply_edit``) was
+        written when ``apply_edit`` raised RuntimeError at edit.prompt. That
+        fallback has since LANDED in 06-06 (``apply_edit`` now falls back to
+        ``edit_intent.enzyme_id`` when the current node has no
+        edit:enzyme:<id> tag), so ``controller.apply_edit(intent)`` would work
+        here too. The inline routing is KEPT (verified behavior; also covered
+        by the B1 stale-stash clear below, mirroring apply_edit's own
+        success-path clear).
 
         The import is deferred (inside this handler) so this file py_compiles
         without 06-09's edit_dialog.py (parallel execution); the import resolves
@@ -440,4 +431,38 @@ class MainWindow(QtWidgets.QMainWindow):
                 intent, intent.enzyme_id)
             self._controller._record_achievement(
                 turn, self._controller._engine.state.character)
+            # B1 stale-stash hardening (06-14 re-verify round 2): the seam is
+            # DONE once the edit routes + enters the routed node -- clear both
+            # pending values so a stale enzyme_id can never silently supply an
+            # enzyme for a future, unrelated dialog. (controller.apply_edit
+            # does the same on ITS success path; this inline path mirrors it.)
+            self._controller._pending_edit_enzyme_id = None
+            self._controller._pending_edit_source_node_id = None
             self._controller._render(turn)
+        else:
+            # B2 anti-stranding fix (06-14 re-verify round 2): CANCEL leaves
+            # the player AT edit.prompt -- a node with NO player-facing
+            # choices (its choices are structural BFS paths consumed by the
+            # EditRouter, never rendered), i.e. an empty choice panel with no
+            # way forward. The skeleton is FROZEN (55 nodes / 21 endings --
+            # no return node/edge may be added), so show a status message +
+            # ONE "Return to the enzyme" button wired to the controller's
+            # return_to_edit_source (engine.goto of the SOURCE node id that
+            # request_edit stashed). The scene rebuilds from the source
+            # node's on_enter replay + its choices re-render -- the player is
+            # back at the enzyme node, not stranded.
+            self.statusBar().showMessage(
+                "Edit canceled -- return to the enzyme to keep going.")
+            self._choice.render_single_action(
+                "Return to the enzyme", self._return_to_enzyme)
+
+    def _return_to_enzyme(self):
+        """The B2 'Return to the enzyme' button handler: goto the stashed
+        SOURCE node via the controller (which re-renders the node + its
+        choices through the normal render_turn path). No-op guard: without a
+        stashed source there is nowhere to return to -- say so in the status
+        bar instead of silently doing nothing."""
+        turn = self._controller.return_to_edit_source()
+        if turn is None:
+            self.statusBar().showMessage(
+                "No enzyme to return to -- start or load a game.")

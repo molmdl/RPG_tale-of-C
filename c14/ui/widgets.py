@@ -229,6 +229,24 @@ class ChoicePanel(QtWidgets.QWidget):
         self._buttons = []
         self._info.setText("")
 
+    def render_single_action(self, label, callback):
+        """Render ONE action button wired to ``callback`` (B2 anti-stranding
+        seam, 06-14 re-verify round 2).
+
+        Used by the MainWindow after an EditDialog CANCEL at ``edit.prompt``:
+        the player is on a node with no player-facing choices, so instead of
+        an empty choice panel a single "Return to the enzyme" button is shown
+        (the skeleton is FROZEN -- no return node/edge could be added). The
+        panel stays a DUMB renderer: it clears prior buttons + renders the
+        button; the ``callback`` (owned by the MainWindow) performs the
+        controller call (``controller.return_to_edit_source()``)."""
+        self.clear()
+        btn = QtWidgets.QPushButton(label)
+        # `_=False` receives the clicked bool signal (default-arg capture --
+        # no closure over loop vars here; callback is a single bound callable).
+        btn.clicked.connect(lambda _=False: callback())
+        self._add_widget(btn)
+
     # ------------------------------------------------------------------
     # INTERNAL: the three rendering modes
     # ------------------------------------------------------------------

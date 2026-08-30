@@ -397,6 +397,69 @@ class TestController(unittest.TestCase):
         self.assertEqual(c._engine.state.current_node, "edit.prompt",
                          "request_edit used engine.goto -> edit.prompt (NOT choose)")
 
+    # 16b. B2: request_edit ALSO stashes the SOURCE node id
+    def test_request_edit_stashes_source_node_id(self):
+        """request_edit stashes the node the player was ON (the edit-allowed
+        SOURCE) in _pending_edit_source_node_id BEFORE the goto edit.prompt
+        (B2 anti-stranding seam: the Cancel 'Return to the enzyme' button
+        gotos this id; controller-side attribute only -- no skeleton change)."""
+        c = self._make_controller()
+        c.start_game("glucose", 42)  # intro.preface == the source here
+        c.request_edit("tca.citrate_synthase")
+        self.assertEqual(c._pending_edit_source_node_id, "intro.preface",
+                         "the SOURCE node id (where the player was) is stashed")
+
+    # 16c. B2: return_to_edit_source gotos the stashed source + clears BOTH
+    def test_return_to_edit_source_returns_and_clears(self):
+        """After request_edit (player at edit.prompt), return_to_edit_source
+        gotos the stashed SOURCE node (the player is back at the enzyme node
+        with its choices -- NOT stranded at the empty edit.prompt panel) and
+        clears BOTH pending values (a fresh edit click re-stashes)."""
+        molops = MockMolOps()
+        view = MockView()
+        c = self._make_controller(molops=molops, view=view)
+        c.start_game("glucose", 42)  # intro.preface
+        c.request_edit("tca.citrate_synthase")
+        self.assertEqual(c._engine.state.current_node, "edit.prompt")
+        turn = c.return_to_edit_source()
+        self.assertEqual(turn.node.id, "intro.preface",
+                         "returned to the SOURCE node (anti-stranding)")
+        self.assertEqual(c._engine.state.current_node, "intro.preface")
+        self.assertIsNone(c._pending_edit_enzyme_id,
+                          "the enzyme stash is cleared on return")
+        self.assertIsNone(c._pending_edit_source_node_id,
+                          "the source stash is cleared on return")
+        self.assertEqual(view.turns[-1].node.id, "intro.preface",
+                         "the returned turn was rendered (choices re-render)")
+
+    # 16d. B2: return_to_edit_source without a stash is a safe no-op
+    def test_return_to_edit_source_noop_without_stash(self):
+        """No stashed source (never requested an edit) -> returns None, no
+        raise, no engine state change (the MainWindow shows a status message)."""
+        c = self._make_controller()
+        c.start_game("glucose", 42)
+        turn = c.return_to_edit_source()
+        self.assertIsNone(turn, "no stash -> None")
+        self.assertEqual(c._engine.state.current_node, "intro.preface",
+                         "no state change")
+
+    # 16e. B1: a successful apply clears the pending stashes
+    def test_apply_edit_clears_pending_stash_on_success(self):
+        """After a successful apply_edit the edit seam is DONE: both pending
+        values are cleared so a stale enzyme_id can never silently supply an
+        enzyme for a future, unrelated dialog (B1 stale-stash hardening)."""
+        c = self._make_controller()
+        c.start_game("glucose", 42)  # intro.preface
+        c.request_edit("tca.citrate_synthase")  # stashes + gotos edit.prompt
+        intent = c.build_edit_intent("point_mutation", "resi 1",
+                                     {"new_res": "GLY"})
+        self.assertEqual(intent.enzyme_id, "tca.citrate_synthase")
+        c.apply_edit(intent)  # routes to the bad-ending pool (unknown enzyme)
+        self.assertIsNone(c._pending_edit_enzyme_id,
+                          "the enzyme stash is cleared after a successful apply")
+        self.assertIsNone(c._pending_edit_source_node_id,
+                          "the source stash is cleared after a successful apply")
+
     # 17. build_edit_intent falls back to pending enzyme_id at edit.prompt
     def test_build_edit_intent_falls_back_to_pending_enzyme_id_at_edit_prompt(self):
         """After request_edit lands at edit.prompt, build_edit_intent falls back

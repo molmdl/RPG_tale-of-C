@@ -216,17 +216,17 @@ class EditDialog(QtWidgets.QDialog):
         Returns the TurnResult from ``apply_edit`` on accept, or None if the
         dialog was canceled / no option was selected.
 
-        Seam note (Warning 4): 06-06's ``Controller.apply_edit`` reads the
-        enzyme_id from the CURRENT node's ``edit:enzyme:<id>`` tag and raises
-        ``RuntimeError`` when that node has no such tag (e.g. at
-        ``edit.prompt``). The 06-08 seam calls ``build_edit_intent`` (which
-        falls back to the stash at edit.prompt) + ``apply_edit`` at
-        ``edit.prompt``; for ``apply_edit`` to succeed there, 06-06's
-        ``apply_edit`` must also fall back to ``_pending_edit_enzyme_id`` (or
-        use ``edit_intent.enzyme_id``). That fix is in 06-06's file
-        (controller.py) -- OUT OF SCOPE for 06-09 (this plan owns only
-        edit_dialog.py per Warning 4 file ownership). This helper calls the
-        declared seam verbatim; the integration is verified in 06-14.
+        Seam status (updated 06-14 re-verify round 2): the original Warning-4
+        caveat is RESOLVED -- 06-06's ``Controller.apply_edit`` now falls back
+        to ``edit_intent.enzyme_id`` when the current node has no
+        edit:enzyme:<id> tag (the edit.prompt case), so step 5 works verbatim:
+        ``build_edit_intent`` fills the intent's enzyme_id from the stash at
+        edit.prompt and ``apply_edit`` routes with it. NOTE: this convenience
+        helper is currently UNUSED by the MainWindow -- 06-08's
+        ``_open_edit_dialog`` inlines the same three calls (build_edit_intent
+        + engine apply + record + render) with its own cancel handling; this
+        static helper remains the declared seam for programmatic/headless use
+        and its flow matches the inline path's behavior.
         """
         dialog = EditDialog(controller, enzyme_id, parent=parent)
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
