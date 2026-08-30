@@ -2,7 +2,7 @@
 
 Citation registry for the no-fabricated-science gate. Each `claim_id` maps to a source + `approval_status`. Populated from Phase 5 (CITE-01); Phase 1 ships an empty stub (`{}`) to bake the path convention into the codebase early.
 
-The pre-ship gate (`tools/check_citations.py`) cross-references story nodes' `claim_ids` against this registry and exits non-zero on any missing or non-`approved` claim. **This file is a repo-root content source file** (NOT a bundled plugin runtime asset — that lives in `c14/data/`); it is read at pre-ship time by the gate, not at plugin runtime.
+The pre-ship gate (`tools/check_citations.py`) cross-references story nodes' `claim_ids` against this registry and exits non-zero on any missing or non-`approved` claim. **This file is a repo-root content source file** (NOT a bundled plugin runtime asset — that lives in `rpg/data/`); it is read at pre-ship time by the gate, not at plugin runtime.
 
 ## Top-level shape
 
@@ -15,7 +15,7 @@ A bare JSON object keyed by `claim_id`. No top-level wrapper (no `{"claims": {..
 }
 ```
 
-Duplicate `claim_id` keys are rejected at load time (`object_pairs_hook` in `c14/citations.py`). The loader raises `ValueError("duplicate claim_id in registry: ...")` rather than silently last-wins.
+Duplicate `claim_id` keys are rejected at load time (`object_pairs_hook` in `rpg/citations.py`). The loader raises `ValueError("duplicate claim_id in registry: ...")` rather than silently last-wins.
 
 ## Per-claim record schema
 
@@ -48,9 +48,9 @@ Duplicate `claim_id` keys are rejected at load time (`object_pairs_hook` in `c14
 
 ### Load-time validation vs documented-required (Phase 1 + Phase 5+)
 
-The loader (`c14/citations.py:87-97`) enforces ONLY two things at load time: (1) each entry is a **dict**, and (2) `approval_status ∈ {pending, approved, rejected}`. It does **NOT** validate `claim`, `source_type`, or `source` at load time — those remain **documented-required** fields (authors must include them for human-review consistency; the Phase 5 seed entries include them), but they are NOT load-time-enforced. Per-source-type field validation can be added later (the gate only reads `approval_status`).
+The loader (`rpg/citations.py:87-97`) enforces ONLY two things at load time: (1) each entry is a **dict**, and (2) `approval_status ∈ {pending, approved, rejected}`. It does **NOT** validate `claim`, `source_type`, or `source` at load time — those remain **documented-required** fields (authors must include them for human-review consistency; the Phase 5 seed entries include them), but they are NOT load-time-enforced. Per-source-type field validation can be added later (the gate only reads `approval_status`).
 
-**Backward compatibility (Phase 5+):** the extended fields (`source_id`, `review_tier`, `claim_text`, `inherits_source_approval`, `review_notes`) are **ignored by the loader** — `c14/citations.py:87-97` only checks `dict` + `approval_status`, so the extended claim records load cleanly with zero loader change. The Phase 1 gate (`tools/check_citations.py`) is UNCHANGED: its predicate `approval_status == "approved"` (strict equality, NOT `!= "pending"` — research Pitfall 6 preserved) is untouched, and `data/sources.json` (below) is a separate file the gate never opens.
+**Backward compatibility (Phase 5+):** the extended fields (`source_id`, `review_tier`, `claim_text`, `inherits_source_approval`, `review_notes`) are **ignored by the loader** — `rpg/citations.py:87-97` only checks `dict` + `approval_status`, so the extended claim records load cleanly with zero loader change. The Phase 1 gate (`tools/check_citations.py`) is UNCHANGED: its predicate `approval_status == "approved"` (strict equality, NOT `!= "pending"` — research Pitfall 6 preserved) is untouched, and `data/sources.json` (below) is a separate file the gate never opens.
 
 ### Routine-claim warning flag (hybrid workflow c)
 
@@ -88,7 +88,7 @@ The gate predicate is **`approval_status == "approved"`**. A `rejected` claim fa
 
 ## Notes
 
-- **Duplicate `claim_id` keys are rejected at load time** (`object_pairs_hook` in `c14/citations.py`). Two authors adding the same `claim_id` will get a clear `ValueError` instead of silent last-wins clobbering.
+- **Duplicate `claim_id` keys are rejected at load time** (`object_pairs_hook` in `rpg/citations.py`). Two authors adding the same `claim_id` will get a clear `ValueError` instead of silent last-wins clobbering.
 - **Unreferenced claims are OK.** A pre-approved-but-not-yet-used claim does not fail the gate — front-loaded source approval (Phase 5) intentionally creates these. The gate checks *referenced* claims only.
 - **Phase 1 ships an empty stub (`{}`).** The gate is demonstrated on `tests/fixtures/`, not on this file. Real claims land in Phase 5+ (CITE-01).
 
@@ -125,11 +125,11 @@ A bare JSON object keyed by `source_id` (mirrors the `citations.json` shape — 
 
 ### Duplicate-key hook convention
 
-`data/sources.json` is not yet opened by any loader (the Phase 1 gate does not read it; an optional `tools/check_sources.py` drift-detection gate is deferred advisory work). When a `sources.json` loader is eventually built, it MUST use the same `object_pairs_hook` convention as `c14/citations.py` (`_no_duplicate_keys`) to reject duplicate `source_id` keys at load time rather than silently last-wins. (Two authors adding the same `source_id` with different references would otherwise clobber each other with no warning.)
+`data/sources.json` is not yet opened by any loader (the Phase 1 gate does not read it; an optional `tools/check_sources.py` drift-detection gate is deferred advisory work). When a `sources.json` loader is eventually built, it MUST use the same `object_pairs_hook` convention as `rpg/citations.py` (`_no_duplicate_keys`) to reject duplicate `source_id` keys at load time rather than silently last-wins. (Two authors adding the same `source_id` with different references would otherwise clobber each other with no warning.)
 
 ## See also
 
-- `c14/citations.py` — the loader (`CitationRegistry.load()` + `.is_approved()`).
+- `rpg/citations.py` — the loader (`CitationRegistry.load()` + `.is_approved()`).
 - `tools/check_citations.py` — the pre-ship gate (`--story` + `--registry`, exits 0/1/2).
 - `data/sources.json` — the Phase 5+ source registry (separate file; the Phase 1 gate never reads it; used by the batch/hybrid/per-source workflows to approve sources up front).
 - `tests/fixtures/` — fixture data demonstrating pass + fail paths.

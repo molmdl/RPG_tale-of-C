@@ -16,10 +16,10 @@ biochemeleon.zip
 
 # Runtime cache for fetched (downloaded) molecular structures -- machine-specific,
 # regenerable, possibly large. NOT committed. (Bundled fixtures in
-# c14/data/assets/bundled/ ARE committed -- they ship in the plugin zip.)
-c14/data/assets/downloaded/
+# rpg/data/assets/bundled/ ARE committed -- they ship in the plugin zip.)
+rpg/data/assets/downloaded/
 
 # Build output for the PyMOL Plugin-Manager-installable zip (produced by
 # tools/build_plugin_zip.sh). NOT committed -- regenerable on demand.
-# The zip bundles c14/ + data/story_glucose at build time; source is in c14/.
+# The zip bundles rpg/ + data/story_glucose at build time; source is in rpg/.
 dist/

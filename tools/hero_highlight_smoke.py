@@ -32,7 +32,7 @@
 #     the SMOKE_RESULT: stdout sentinel is the ONLY reliable verdict.
 #   * Gotcha #2: __file__ in a PyMOL-run script resolves to the pymol package's
 #     __init__.py, NOT this script's path. So we use os.getcwd() (= repo root
-#     when run with cwd=repo-root) + import c14.paths (whose __file__ IS
+#     when run with cwd=repo-root) + import rpg.paths (whose __file__ IS
 #     correct) to locate bundled fixtures.
 #   * Gotcha #6: pymol.finish_launching() completes PyMOL startup before any
 #     cmd.* call.
@@ -58,14 +58,14 @@ import sys
 import os
 
 # Gotcha #2/#3/#4: cwd=repo root when run via the harness, so os.getcwd() is
-# the workspace and `import c14` works (sys.path includes '' = cwd). Insert
+# the workspace and `import rpg` works (sys.path includes '' = cwd). Insert
 # cwd explicitly as belt-and-suspenders so this script is robust if sys.path
 # lacks ''.
 sys.path.insert(0, os.getcwd())
 
 import pymol
 from pymol import cmd
-import c14.paths
+import rpg.paths
 
 # Gotcha #6: complete PyMOL startup before any cmd.* call.
 pymol.finish_launching()
@@ -134,7 +134,7 @@ check("hero_cyan_defined",
 # OQ-3 OVERRIDE sequence: all-C cyan sticks + ball-and-stick + "YOU" label;
 # no scoped-dim).
 # =========================================================================
-smoke_path = str(c14.paths.data_path("data", "assets", "bundled", "_smoke.pdb"))
+smoke_path = str(rpg.paths.data_path("data", "assets", "bundled", "_smoke.pdb"))
 try:
     # src: tmp/pymol-src/modules/pymol/importing.py:635 cmd.load  (load a structure file into a named object)
     cmd.load(smoke_path, "mol")
@@ -302,7 +302,7 @@ except Exception as e:
 # the enzyme keeps its cast cartoon gray (the all-C-cyan applies to the
 # SUBSTRATE only, NOT the enzyme -- convention section 3.3 critical scoping).
 # =========================================================================
-edit_smoke_path = str(c14.paths.data_path("data", "assets", "bundled", "_edit_smoke.pdb"))
+edit_smoke_path = str(rpg.paths.data_path("data", "assets", "bundled", "_edit_smoke.pdb"))
 try:
     # src: tmp/pymol-src/modules/pymol/importing.py:635 cmd.load  (the placeholder enzyme/cast: 17-atom ALA-GLY)
     cmd.load(edit_smoke_path, "enzyme")

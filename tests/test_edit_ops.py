@@ -3,7 +3,7 @@
 # tests/test_molops.py:39-65). Python 3.6 compatible (unittest, os, re -- all
 # stdlib; NO pymol import).
 #
-# Pure-WSL unit tests for c14.pymol_layer.edit_ops.EditOps. The module under
+# Pure-WSL unit tests for rpg.pymol_layer.edit_ops.EditOps. The module under
 # test has `cmd` INJECTED via the constructor (NO pymol import at module top),
 # so these tests run under python3.6 with no pymol installed. A MockCmd
 # records every cmd.* dispatch (name/args/kwargs) via __getattr__; count_atoms
@@ -42,7 +42,7 @@ import os
 import re
 import unittest
 
-from c14.pymol_layer.edit_ops import EditOps, RestoreHandle
+from rpg.pymol_layer.edit_ops import EditOps, RestoreHandle
 
 
 class MockCmd(object):
@@ -93,9 +93,9 @@ class MockCmd(object):
 
 
 def _read_edit_ops_source():
-    """Read c14/pymol_layer/edit_ops.py as text (for citation/pitfall tests)."""
+    """Read rpg/pymol_layer/edit_ops.py as text (for citation/pitfall tests)."""
     repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    src_path = os.path.join(repo, "c14", "pymol_layer", "edit_ops.py")
+    src_path = os.path.join(repo, "rpg", "pymol_layer", "edit_ops.py")
     with open(src_path, "r") as fh:
         return fh.read()
 

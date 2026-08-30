@@ -14,13 +14,13 @@ Usage::
 
     python3.6 tools/check_citations.py --story <path> --registry <path>
 
-The gate imports ``c14.citations.CitationRegistry`` (the loader) via a
+The gate imports ``rpg.citations.CitationRegistry`` (the loader) via a
 ``sys.path`` insertion of the repo root -- the script lives in ``tools/``,
-not in ``c14/``, so it must put the repo root on ``sys.path`` to import the
+not in ``rpg/``, so it must put the repo root on ``sys.path`` to import the
 package without install.
 
 Phase 2 refactor complete: the story walker now lives in
-``c14.story.validate.collect_claim_ids`` (imported below). It accepts a single
+``rpg.story.validate.collect_claim_ids`` (imported below). It accepts a single
 ``.json`` file (backward-compatible with the Phase 1 fixtures) OR a story
 directory (reads ``manifest.json`` + merges the listed files). The gate's
 core logic (registry load + is_approved check + report + exit) is unchanged
@@ -34,11 +34,11 @@ import argparse
 import os
 import sys
 
-# Make the c14 package importable when run as a loose script from the repo.
+# Make the rpg package importable when run as a loose script from the repo.
 # Resolves repo root from __file__ so the script runs regardless of CWD.
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from c14.citations import CitationRegistry  # noqa: E402  (sys.path setup above)
-from c14.story.validate import collect_claim_ids  # noqa: E402  (sys.path setup above)
+from rpg.citations import CitationRegistry  # noqa: E402  (sys.path setup above)
+from rpg.story.validate import collect_claim_ids  # noqa: E402  (sys.path setup above)
 
 
 def run_gate(story_path, registry_path):

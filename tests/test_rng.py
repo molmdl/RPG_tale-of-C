@@ -1,4 +1,4 @@
-"""Unit tests for c14.rng.RngEngine. Pure-Python, stdlib only.
+"""Unit tests for rpg.rng.RngEngine. Pure-Python, stdlib only.
 
 Run: ``python3.6 -m unittest tests.test_rng -v``
 
@@ -9,7 +9,7 @@ determinism.
 import json
 import unittest
 
-from c14.rng import RngEngine
+from rpg.rng import RngEngine
 
 
 class TestRngEngine(unittest.TestCase):

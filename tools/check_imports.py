@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.6
 """tools/check_imports.py -- enforce the pure-Python testability boundary.
 
-Scans all .py under c14/ EXCLUDING c14/pymol_layer/ and c14/ui/.
+Scans all .py under rpg/ EXCLUDING rpg/pymol_layer/ and rpg/ui/.
 Fails (exit 1) if any scanned file imports pymol.* or PyQt5.* (any form:
 ``import pymol``, ``from pymol.Qt import ...``, ``import pymol.cmd as c``,
 etc.). Also flags dynamic imports (__import__/importlib) naming pymol/PyQt5
@@ -29,7 +29,7 @@ import ast
 import os
 import sys
 
-ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "c14")
+ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "rpg")
 SKIP_DIRS = {"pymol_layer", "ui", "__pycache__"}
 BANNED_TOP = ("pymol", "PyQt5")
 
@@ -90,9 +90,9 @@ def main():
         for b in sorted(bad):
             sys.stderr.write("  " + b + "\n")
         sys.stderr.write("Domain-tier files must not import pymol/PyQt5. "
-                         "Move the import into c14/pymol_layer/ or c14/ui/.\n")
+                         "Move the import into rpg/pymol_layer/ or rpg/ui/.\n")
         return 1
-    print("check_imports: clean (no pymol/PyQt5 imports in c14/ domain tier)")
+    print("check_imports: clean (no pymol/PyQt5 imports in rpg/ domain tier)")
     return 0
 
 

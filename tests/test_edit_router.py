@@ -19,11 +19,11 @@ Tests map to the SC3 sub-claims (04-RESEARCH-edit-routing.md test list):
 import os
 import unittest
 
-from c14.story.model import EditIntent
-from c14.story.graph import StoryGraph
-from c14.rng import RngEngine
-from c14.engine import GameEngine
-from c14.edit_router import (
+from rpg.story.model import EditIntent
+from rpg.story.graph import StoryGraph
+from rpg.rng import RngEngine
+from rpg.engine import GameEngine
+from rpg.edit_router import (
     EditRoutingError, EditsTable, EditRouter,
     validate_edits_table, scan_edit_coverage,
 )

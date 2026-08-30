@@ -45,11 +45,11 @@ import os
 import re
 import unittest
 
-from c14.story.graph import StoryGraph
-from c14.story.interpreter import StoryInterpreter
-from c14.story.model import Node
-from c14.story.validate import check_reachability
-from c14.state import GameState
+from rpg.story.graph import StoryGraph
+from rpg.story.interpreter import StoryInterpreter
+from rpg.story.model import Node
+from rpg.story.validate import check_reachability
+from rpg.state import GameState
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GLUCOSE_STORY_DIR = os.path.join(HERE, "..", "data", "story_glucose")

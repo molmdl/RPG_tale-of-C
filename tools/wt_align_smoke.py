@@ -23,14 +23,14 @@
 #     the SMOKE_RESULT: stdout sentinel is the ONLY reliable verdict.
 #   * Gotcha #2: __file__ in a PyMOL-run script resolves to the pymol package's
 #     __init__.py, NOT this script's path. So we use os.getcwd() (= repo root
-#     when run with cwd=repo-root) + import c14.paths (whose __file__ IS
+#     when run with cwd=repo-root) + import rpg.paths (whose __file__ IS
 #     correct) to locate bundled fixtures.
 #   * Gotcha #6: pymol.finish_launching() completes PyMOL startup before any
 #     cmd.* call.
 #
 # Every direct cmd.* call in THIS smoke carries a `# src:` citation (Phase 3
 # convention; line numbers verified against tmp/pymol-src/modules/pymol/).
-# The EditOps internal cmd.* calls are cited in c14/pymol_layer/edit_ops.py.
+# The EditOps internal cmd.* calls are cited in rpg/pymol_layer/edit_ops.py.
 #
 # Usage (from repo root):
 #   bash tools/run_headless.sh tools/wt_align_smoke.py
@@ -41,15 +41,15 @@ import os
 import math
 
 # Gotcha #2/#3/#4: cwd=repo root when run via the harness, so os.getcwd() is
-# the workspace and `import c14` works (sys.path includes '' = cwd). Insert
+# the workspace and `import rpg` works (sys.path includes '' = cwd). Insert
 # cwd explicitly as belt-and-suspenders so this script is robust if sys.path
 # lacks ''.
 sys.path.insert(0, os.getcwd())
 
 import pymol
 from pymol import cmd
-import c14.paths
-from c14.pymol_layer.edit_ops import EditOps
+import rpg.paths
+from rpg.pymol_layer.edit_ops import EditOps
 
 # Gotcha #6: complete PyMOL startup before any cmd.* call.
 pymol.finish_launching()
@@ -74,11 +74,11 @@ editops = EditOps(cmd)
 # =========================================================================
 # Stage 1: load the MUTANT placeholder fixture (the "disease" state).
 # The fixture is a 2-residue ALA-GLY peptide (17 atoms). Resi 1 = ALA (the
-# "disease" residue); resi 2 = GLY. Use c14.paths to resolve the bundled
+# "disease" residue); resi 2 = GLY. Use rpg.paths to resolve the bundled
 # fixture path cwd-independently (Gotcha #2: __file__ in a PyMOL-run script
-# is wrong; c14.paths.__file__ IS correct).
+# is wrong; rpg.paths.__file__ IS correct).
 # =========================================================================
-mut_path = str(c14.paths.data_path("data", "assets", "bundled", "_wt_align_mut.pdb"))
+mut_path = str(rpg.paths.data_path("data", "assets", "bundled", "_wt_align_mut.pdb"))
 try:
     # src: tmp/pymol-src/modules/pymol/importing.py:635 cmd.load
     cmd.load(mut_path, "mut")
@@ -117,7 +117,7 @@ except Exception as e:
 # structure). A 2-residue GLY-GLY peptide (14 atoms, no CB). Coords are
 # OFFSET ~5 A in x from the mutant's GLY region so cmd.super does real work.
 # =========================================================================
-wt_path = str(c14.paths.data_path("data", "assets", "bundled", "_wt_align_wt.pdb"))
+wt_path = str(rpg.paths.data_path("data", "assets", "bundled", "_wt_align_wt.pdb"))
 try:
     # src: tmp/pymol-src/modules/pymol/importing.py:635 cmd.load
     cmd.load(wt_path, "wt")

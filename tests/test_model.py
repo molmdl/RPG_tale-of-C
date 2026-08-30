@@ -1,10 +1,10 @@
-"""Unit tests for c14.story.model (Node, Choice, MolAction). Pure-Python, stdlib only.
+"""Unit tests for rpg.story.model (Node, Choice, MolAction). Pure-Python, stdlib only.
 
 Run: ``python3.6 -m unittest tests.test_model -v``
 """
 import unittest
 
-from c14.story.model import Node, Choice, MolAction
+from rpg.story.model import Node, Choice, MolAction
 
 
 class TestModel(unittest.TestCase):

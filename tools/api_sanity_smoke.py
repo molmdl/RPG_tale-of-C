@@ -13,7 +13,7 @@
 #     the SMOKE_RESULT: stdout sentinel is the ONLY reliable verdict.
 #   * Gotcha #2: __file__ in a PyMOL-run script resolves to the pymol package's
 #     __init__.py, NOT this script's path. So we use os.getcwd() (= repo root
-#     when run with cwd=repo-root) + import c14.paths (whose __file__ IS
+#     when run with cwd=repo-root) + import rpg.paths (whose __file__ IS
 #     correct) to locate bundled fixtures.
 #   * Gotcha #6: pymol.finish_launching() completes PyMOL startup before any
 #     cmd.* call.
@@ -31,13 +31,13 @@ import sys
 import os
 
 # Gotcha #2/#3/#4: cwd=repo root when run via the harness, so os.getcwd() is the
-# workspace and `import c14` works (sys.path includes '' = cwd). Insert cwd
+# workspace and `import rpg` works (sys.path includes '' = cwd). Insert cwd
 # explicitly as belt-and-suspenders so this script is robust if sys.path lacks ''.
 sys.path.insert(0, os.getcwd())
 
 import pymol
 from pymol import cmd
-import c14.paths
+import rpg.paths
 
 # Gotcha #6: complete PyMOL startup before any cmd.* call.
 pymol.finish_launching()
@@ -55,7 +55,7 @@ def check(name, ok, detail=""):
 
 # --- load (bundled fixture) ---
 try:
-    p = str(c14.paths.data_path("data", "assets", "bundled", "_smoke.pdb"))
+    p = str(rpg.paths.data_path("data", "assets", "bundled", "_smoke.pdb"))
     # src: tmp/pymol-src/modules/pymol/importing.py:635 cmd.load
     cmd.load(p, "smk")
     # src: tmp/pymol-src/modules/pymol/querying.py:1412 cmd.count_atoms
@@ -68,7 +68,7 @@ except Exception as e:
 # Pitfall 5: offline is a real deployment concern; the non-network stages still
 # validate. cmd.fetch skips download if the file already exists (idempotent cache).
 try:
-    d = str(c14.paths.data_path("data", "assets", "downloaded"))
+    d = str(rpg.paths.data_path("data", "assets", "downloaded"))
     if not os.path.isdir(d):
         os.makedirs(d, exist_ok=True)
     # src: tmp/pymol-src/modules/pymol/importing.py:1323 cmd.fetch
@@ -83,7 +83,7 @@ except Exception as e:
 # Confirms the type='pdb', async_=0, path= mitigation works for PDB too. Does
 # NOT hard-fail (small PDB fetch; may be slow/offline).
 try:
-    d = str(c14.paths.data_path("data", "assets", "downloaded"))
+    d = str(rpg.paths.data_path("data", "assets", "downloaded"))
     if not os.path.isdir(d):
         os.makedirs(d, exist_ok=True)
     # src: tmp/pymol-src/modules/pymol/importing.py:1323 cmd.fetch

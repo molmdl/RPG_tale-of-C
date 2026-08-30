@@ -1,4 +1,4 @@
-"""Unit tests for c14.persist.SaveStore. Pure-Python, stdlib only.
+"""Unit tests for rpg.persist.SaveStore. Pure-Python, stdlib only.
 
 Run: ``python3.6 -m unittest tests.test_persist -v``
 
@@ -13,8 +13,8 @@ import shutil
 import tempfile
 import unittest
 
-from c14.persist import SaveStore
-from c14.state import GameState
+from rpg.persist import SaveStore
+from rpg.state import GameState
 
 
 class TestSaveStore(unittest.TestCase):

@@ -17,7 +17,7 @@ sys.path.insert(0, os.getcwd())
 from pymol import cmd  # noqa: E402
 import pymol  # noqa: E402
 
-import c14.paths  # noqa: E402
+import rpg.paths  # noqa: E402
 
 FAILS = []
 
@@ -31,7 +31,7 @@ def check(name, cond, detail=""):
 
 pymol.finish_launching()
 
-pdb_path = str(c14.paths.data_path("data", "assets", "bundled", "_smoke.pdb"))
+pdb_path = str(rpg.paths.data_path("data", "assets", "bundled", "_smoke.pdb"))
 cmd.load(pdb_path, "hero_atom")
 
 # Baseline: the fixture is ETHANOL with 2 carbons.

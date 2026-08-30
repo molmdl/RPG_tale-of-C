@@ -1,8 +1,8 @@
 #!/usr/bin/env python3.6
 """tools/check_edit_coverage.py -- per-enzyme minimum-coverage scan (SC5).
 
-Data-driven scan: loads ``c14/data/cast.json`` (enzymes represented so far) +
-``c14/data/edits.json`` (known-edit entries per enzyme). For each enzyme id in
+Data-driven scan: loads ``rpg/data/cast.json`` (enzymes represented so far) +
+``rpg/data/edits.json`` (known-edit entries per enzyme). For each enzyme id in
 cast.json, asserts it has >=1 entry in edits.json's ``enzymes`` dict (i.e.
 ``enzyme_id in edits["enzymes"]`` AND
 ``len(edits["enzymes"][enzyme_id].get("edits", [])) >= 1``).
@@ -15,7 +15,7 @@ citations) is Phase 9; real edits.json (per-enzyme known-edit entries with real
 claim_ids) is Phase 5+.
 
 This scan re-implements the coverage check INLINE (does NOT import
-c14.edit_router) so it stays independent of c14.edit_router, matching the
+rpg.edit_router) so it stays independent of rpg.edit_router, matching the
 check_citations.py does-its-own-loading precedent. This keeps 04-04's
 ``depends_on: ["04-01"]`` honest -- the scan needs only the two JSON files
 (Task 2), not the router module (04-02).
@@ -38,8 +38,8 @@ import sys
 
 # Repo root resolved from __file__ (mirrors check_citations.py:39).
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CAST_PATH = os.path.join(REPO_ROOT, "c14", "data", "cast.json")
-EDITS_PATH = os.path.join(REPO_ROOT, "c14", "data", "edits.json")
+CAST_PATH = os.path.join(REPO_ROOT, "rpg", "data", "cast.json")
+EDITS_PATH = os.path.join(REPO_ROOT, "rpg", "data", "edits.json")
 
 
 def _load_json(path, label):

@@ -20,11 +20,11 @@ session -- Anti-Pattern 5 avoided).
 
 Design constraints honored:
 - Python 3.6 stdlib ONLY (``os``, ``sys``, ``tempfile``, ``json``). NO
-  pymol/PyQt5 imports -- the demo imports only ``c14.*`` pure-Python modules
+  pymol/PyQt5 imports -- the demo imports only ``rpg.*`` pure-Python modules
   and runs entirely in WSL.
 - ``sys.path`` insertion of the repo root (same pattern as
   ``tools/check_citations.py`` -- this script lives in ``tools/``, not in
-  ``c14/``, so it must put the repo root on ``sys.path`` to import the
+  ``rpg/``, so it must put the repo root on ``sys.path`` to import the
   package without install).
 - ``GameEngine`` dispatches MolActions PER-ACTION to the sink (the 02-04
   contract): the sink receives an individual ``MolAction`` per call, so the
@@ -39,12 +39,12 @@ import sys
 import tempfile
 import json
 
-# Make the c14 package importable when run as a loose script from the repo.
+# Make the rpg package importable when run as a loose script from the repo.
 # Resolves repo root from __file__ so the script runs regardless of CWD
 # (same pattern as tools/check_citations.py).
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from c14.engine import GameEngine  # noqa: E402  (sys.path setup above)
-from c14.story.graph import StoryGraph  # noqa: E402  (sys.path setup above)
+from rpg.engine import GameEngine  # noqa: E402  (sys.path setup above)
+from rpg.story.graph import StoryGraph  # noqa: E402  (sys.path setup above)
 
 # Story directory resolved relative to this file (CWD-independent).
 STORY_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),

@@ -3,12 +3,12 @@
 # the inject pattern from tests/test_molops.py:39-65 + tests/test_edit_ops.py).
 # Python 3.6 compatible (unittest, os -- all stdlib; NO pymol import).
 #
-# Pure-WSL unit tests for c14.pymol_layer.protonation.ProtonationManager. The
+# Pure-WSL unit tests for rpg.pymol_layer.protonation.ProtonationManager. The
 # module under test has cmd + edit_ops + catalog + assets INJECTED via the
 # constructor (NO pymol import at module top), so these tests run under
 # python3.6 with no pymol installed. MockCmd records cmd.* dispatches;
 # MockEditOps records apply_edit/take_backup/restore_from_handle calls;
-# MockCatalog is the real c14.protonation_catalog module (pure data); MockAssets
+# MockCatalog is the real rpg.protonation_catalog module (pure data); MockAssets
 # records load_bundled calls.
 #
 # The REAL cmd.* sequence is verified by tools/protonation_smoke.py (04-05,
@@ -37,8 +37,8 @@ import ast
 import os
 import unittest
 
-import c14.protonation_catalog as catalog_mod
-from c14.pymol_layer.protonation import ProtonationManager
+import rpg.protonation_catalog as catalog_mod
+from rpg.pymol_layer.protonation import ProtonationManager
 
 
 # ----------------------------------------------------------------------
@@ -128,7 +128,7 @@ class MockAssets(object):
 
 
 # A small Mode-(a) catalog for the load-routing test. The real
-# c14.protonation_catalog ships only Mode-(b) alter entries in Phase 4; this
+# rpg.protonation_catalog ships only Mode-(b) alter entries in Phase 4; this
 # fake catalog lets us exercise Mode (a) dispatch without touching the real
 # CATALOG. Matches the schema (mode=load, source_file, claim_id, label).
 LOAD_CATALOG = {
@@ -174,9 +174,9 @@ def _make_load_catalog_module():
 
 
 def _read_protonation_source():
-    """Read c14/pymol_layer/protonation.py as text (for citation/gate tests)."""
+    """Read rpg/pymol_layer/protonation.py as text (for citation/gate tests)."""
     repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    src_path = os.path.join(repo, "c14", "pymol_layer", "protonation.py")
+    src_path = os.path.join(repo, "rpg", "pymol_layer", "protonation.py")
     with open(src_path, "r") as fh:
         return fh.read()
 

@@ -1,13 +1,13 @@
-"""Unit tests for c14.ui.controller (Controller + HeroResolver). Pure WSL.
+"""Unit tests for rpg.ui.controller (Controller + HeroResolver). Pure WSL.
 
 Run: ``python3.6 -m unittest tests.test_controller -v``
 
 The controller is the Qt-free mediator (06-06 Task 2): it wires QtWidgets
 events -> GameEngine -> MolOps. These tests inject MockMolOps + MockView + mock
-prompt_fn/count_fn + a real EditRouter (loaded from c14/data/edits.json) and
+prompt_fn/count_fn + a real EditRouter (loaded from rpg/data/edits.json) and
 drive the controller over the REAL data/story_glucose graph. NO pymol import
-(the controller is Qt-free; the test module imports c14.ui.controller which
-imports only c14.* domain modules + stdlib -- the implicit Qt-free gate).
+(the controller is Qt-free; the test module imports rpg.ui.controller which
+imports only rpg.* domain modules + stdlib -- the implicit Qt-free gate).
 
 Covers (06-06 Task 3's 18 tests):
 - engine wiring (molaction_sink = controller's dispatch)
@@ -28,10 +28,10 @@ import shutil
 import tempfile
 import unittest
 
-import c14.paths
-from c14.edit_router import EditRouter, EditsTable
-from c14.story.model import Choice, EditIntent, MolAction, Node
-from c14.ui.controller import Controller, HeroResolver
+import rpg.paths
+from rpg.edit_router import EditRouter, EditsTable
+from rpg.story.model import Choice, EditIntent, MolAction, Node
+from rpg.ui.controller import Controller, HeroResolver
 
 
 def _story_dir():
@@ -43,8 +43,8 @@ def _story_dir():
 
 def _edits_path():
     # type: () -> str
-    """The bundled c14/data/edits.json placeholder fixture."""
-    return str(c14.paths.data_path("data", "edits.json"))
+    """The bundled rpg/data/edits.json placeholder fixture."""
+    return str(rpg.paths.data_path("data", "edits.json"))
 
 
 # ---- mocks (no pymol -- the controller is Qt-free + cmd-injected) ----
@@ -94,7 +94,7 @@ class TestController(unittest.TestCase):
                          count_fn=None, achievement_board=None):
         # type: (object, object, object, object, object) -> Controller
         """Build a Controller over the real glucose graph with a real EditRouter
-        (from c14/data/edits.json) + the injected mocks. cmd=None (count_fn is
+        (from rpg/data/edits.json) + the injected mocks. cmd=None (count_fn is
         injected or unused when prompt_fn is None)."""
         edit_router = EditRouter(EditsTable.load(_edits_path()))
         return Controller(
@@ -370,13 +370,13 @@ class TestController(unittest.TestCase):
 
     # 15. controller Qt-free import (implicit gate)
     def test_controller_qt_free_imports(self):
-        """Importing c14.ui.controller succeeds in pure WSL (no pymol/PyQt5).
+        """Importing rpg.ui.controller succeeds in pure WSL (no pymol/PyQt5).
         This test's module-level import already proves this; re-import +
         assert no pymol/PyQt5 leaked into sys.modules."""
         import importlib
         import sys
-        mod = importlib.import_module("c14.ui.controller")
-        self.assertIsNotNone(mod, "c14.ui.controller imports cleanly in pure WSL")
+        mod = importlib.import_module("rpg.ui.controller")
+        self.assertIsNotNone(mod, "rpg.ui.controller imports cleanly in pure WSL")
         self.assertNotIn("pymol", sys.modules,
                          "controller import did not pull in pymol")
         self.assertNotIn("PyQt5", sys.modules,

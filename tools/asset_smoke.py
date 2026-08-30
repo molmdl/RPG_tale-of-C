@@ -15,14 +15,14 @@
 #     the SMOKE_RESULT: stdout sentinel is the ONLY reliable verdict.
 #   * Gotcha #2: __file__ in a PyMOL-run script resolves to the pymol package's
 #     __init__.py, NOT this script's path. So we use os.getcwd() (= repo root
-#     when run with cwd=repo-root) + import c14.paths (whose __file__ IS
+#     when run with cwd=repo-root) + import rpg.paths (whose __file__ IS
 #     correct) to locate bundled fixtures.
 #   * Gotcha #6: pymol.finish_launching() completes PyMOL startup before any
 #     cmd.* call.
 #
 # STAGES:
 #   * load_bundled (NO network -- uses the committed Plan 01 fixture
-#     c14/data/assets/bundled/_smoke.pdb): MUST pass (count_atoms > 0).
+#     rpg/data/assets/bundled/_smoke.pdb): MUST pass (count_atoms > 0).
 #   * fetch_pubchem (NETWORK -- PubChem CID 2244 aspirin): if offline, reports
 #     failure but does NOT block the plan (the unit tests prove the logic).
 #     Also asserts the file landed in the downloaded dir (cwd-independence --
@@ -32,7 +32,7 @@
 #
 # Every direct cmd.* call in THIS smoke (the count_atoms post-conditions)
 # carries a `# src:` citation. The AssetManager's internal cmd.load/cmd.fetch
-# calls are cited in c14/pymol_layer/asset_manager.py (verified by the unit
+# calls are cited in rpg/pymol_layer/asset_manager.py (verified by the unit
 # test test_citations_present_in_source).
 #
 # Usage (from repo root):
@@ -43,15 +43,15 @@ import sys
 import os
 
 # Gotcha #2/#3/#4: cwd=repo root when run via the harness, so os.getcwd() is
-# the workspace and `import c14` works (sys.path includes '' = cwd). Insert
+# the workspace and `import rpg` works (sys.path includes '' = cwd). Insert
 # cwd explicitly as belt-and-suspenders so this script is robust if sys.path
 # lacks ''.
 sys.path.insert(0, os.getcwd())
 
 import pymol
 from pymol import cmd
-import c14.paths
-from c14.pymol_layer.asset_manager import AssetManager
+import rpg.paths
+from rpg.pymol_layer.asset_manager import AssetManager
 
 # Gotcha #6: complete PyMOL startup before any cmd.* call.
 pymol.finish_launching()
@@ -69,7 +69,7 @@ def check(name, ok, detail=""):
 
 # --- load_bundled (NO network -- uses the committed Plan 01 fixture) ---
 # AssetManager.load_bundled resolves the ABSOLUTE bundled path via
-# c14.paths.data_path (cwd-independent) and calls cmd.load; the count_atoms
+# rpg.paths.data_path (cwd-independent) and calls cmd.load; the count_atoms
 # post-condition (inside load_bundled) raises if the object is empty. This
 # stage MUST pass -- it uses the committed _smoke.pdb fixture, no network.
 try:
@@ -104,7 +104,7 @@ except Exception as e:
 # importing.py:1211-1213, free idempotent cache).
 try:
     f = os.path.join(
-        str(c14.paths.data_path("data", "assets", "downloaded")),
+        str(rpg.paths.data_path("data", "assets", "downloaded")),
         "cid_2244.sdf",
     )
     check("fetch_pubchem_file_landed", os.path.exists(f), "path=%s" % f)

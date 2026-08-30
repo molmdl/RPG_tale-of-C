@@ -1,4 +1,4 @@
-"""Unit tests for c14.achievements.AchievementBoard. Pure-Python, stdlib only.
+"""Unit tests for rpg.achievements.AchievementBoard. Pure-Python, stdlib only.
 
 Run: ``python3.6 -m unittest tests.test_achievements -v``
 
@@ -32,7 +32,7 @@ import shutil
 import tempfile
 import unittest
 
-from c14.achievements import (
+from rpg.achievements import (
     AchievementBoard,
     ACHIEVEMENT_CATALOG_V1,
     TIER_ACHIEVEMENT_ID,
@@ -40,8 +40,8 @@ from c14.achievements import (
 
 
 # --- Tiny mock TurnResult / Node (duck-typed: the board only reads .node.id +
-# .node.is_ending). Mirrors c14.engine.TurnResult (engine.py:54-55) +
-# c14.story.model.Node (model.py:251-252,310-314) for the attributes the board
+# .node.is_ending). Mirrors rpg.engine.TurnResult (engine.py:54-55) +
+# rpg.story.model.Node (model.py:251-252,310-314) for the attributes the board
 # actually inspects. ---------------------------------------------------------
 class FakeNode(object):
     def __init__(self, id, is_ending=None):
@@ -62,7 +62,7 @@ class TestAchievementBoard(unittest.TestCase):
 
     def setUp(self):
         # Track temp dirs created per-test; clean in tearDown so tests never
-        # touch the real user data dir (~/.pymol/c14-tale-of-c/...).
+        # touch the real user data dir (~/.pymol/rpg-tale-of-c/...).
         self._dirs = []
 
     def tearDown(self):

@@ -36,7 +36,7 @@
 #     the SMOKE_RESULT: stdout sentinel is the ONLY reliable verdict.
 #   * Gotcha #2: __file__ in a PyMOL-run script resolves to the pymol package's
 #     __init__.py, NOT this script's path. So we use os.getcwd() (= repo root
-#     when run with cwd=repo-root) + import c14.paths (whose __file__ IS
+#     when run with cwd=repo-root) + import rpg.paths (whose __file__ IS
 #     correct) to locate bundled fixtures.
 #   * Gotcha #6: pymol.finish_launching() completes PyMOL startup before any
 #     cmd.* call.
@@ -54,14 +54,14 @@ import sys
 import os
 
 # Gotcha #2/#3/#4: cwd=repo root when run via the harness, so os.getcwd() is
-# the workspace and `import c14` works (sys.path includes '' = cwd). Insert
+# the workspace and `import rpg` works (sys.path includes '' = cwd). Insert
 # cwd explicitly as belt-and-suspenders so this script is robust if sys.path
 # lacks ''.
 sys.path.insert(0, os.getcwd())
 
 import pymol
 from pymol import cmd
-import c14.paths
+import rpg.paths
 
 # Gotcha #6: complete PyMOL startup before any cmd.* call.
 pymol.finish_launching()
@@ -143,8 +143,8 @@ except Exception as e:
 # tracking label).
 # =========================================================================
 try:
-    smoke_path = str(c14.paths.data_path("data", "assets", "bundled", "_smoke.pdb"))
-    edit_path = str(c14.paths.data_path("data", "assets", "bundled", "_edit_smoke.pdb"))
+    smoke_path = str(rpg.paths.data_path("data", "assets", "bundled", "_smoke.pdb"))
+    edit_path = str(rpg.paths.data_path("data", "assets", "bundled", "_edit_smoke.pdb"))
     # src: tmp/pymol-src/modules/pymol/importing.py:635 cmd.load
     cmd.load(smoke_path, "smoke")
     # src: tmp/pymol-src/modules/pymol/creating.py:960 cmd.create  (def line; plan-listed 1001 is inside the body)
@@ -499,7 +499,7 @@ try:
           n_before > 0 and color_name_for("enzyme and resi 1 and name CA") == "magenta",
           "spheres=%d color=%r" % (n_before, color_name_for("enzyme and resi 1 and name CA")))
     # AFTER: load the pre-built WT fixture as `enzyme_wt` (the restored WT).
-    wt_path = str(c14.paths.data_path("data", "assets", "bundled", "_wt_align_wt.pdb"))
+    wt_path = str(rpg.paths.data_path("data", "assets", "bundled", "_wt_align_wt.pdb"))
     # src: tmp/pymol-src/modules/pymol/importing.py:635 cmd.load
     cmd.load(wt_path, "enzyme_wt")
     # src: tmp/pymol-src/modules/pymol/viewing.py:528 cmd.show_as

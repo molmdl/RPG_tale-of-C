@@ -1,4 +1,4 @@
-"""Unit tests for c14.engine.GameEngine + TurnResult. Pure-Python, stdlib only.
+"""Unit tests for rpg.engine.GameEngine + TurnResult. Pure-Python, stdlib only.
 
 Run: ``python3.6 -m unittest tests.test_engine -v``
 
@@ -17,8 +17,8 @@ import sys
 import tempfile
 import unittest
 
-from c14.engine import GameEngine, TurnResult
-from c14.story.graph import StoryGraph
+from rpg.engine import GameEngine, TurnResult
+from rpg.story.graph import StoryGraph
 
 
 def _story_dir():
@@ -467,7 +467,7 @@ class TestEngineGoto(unittest.TestCase):
         """A Choice with cond=None is always eligible (choice_cond_met -> True)."""
         eng, _ = self._make_engine()
         eng.start('glucose', 0)
-        from c14.story.model import Choice
+        from rpg.story.model import Choice
         c = Choice(label='x', goto='intro.ending_good', cond=None)
         self.assertTrue(eng.choice_cond_met(c),
                         "cond=None -> choice_cond_met returns True")
@@ -478,7 +478,7 @@ class TestEngineGoto(unittest.TestCase):
         fatty_acid -> False."""
         eng, _ = self._make_engine()
         eng.start('glucose', 0)
-        from c14.story.model import Choice
+        from rpg.story.model import Choice
         c_glu = Choice(label='x', goto='intro.ending_good',
                        cond="char=='glucose'")
         c_fa = Choice(label='y', goto='intro.ending_bad',
@@ -493,7 +493,7 @@ class TestEngineGoto(unittest.TestCase):
         cond-less choices (fail-safe: the controller should not present choices
         before start, but the guard avoids an AttributeError crash)."""
         eng, _ = self._make_engine()
-        from c14.story.model import Choice
+        from rpg.story.model import Choice
         c_none = Choice(label='x', goto='intro.ending_good', cond=None)
         c_cond = Choice(label='y', goto='intro.ending_bad', cond="char=='glucose'")
         self.assertTrue(eng.choice_cond_met(c_none),

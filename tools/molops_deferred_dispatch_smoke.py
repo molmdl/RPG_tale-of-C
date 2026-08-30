@@ -36,7 +36,7 @@
 #     the SMOKE_RESULT: stdout sentinel is the ONLY reliable verdict.
 #   * Gotcha #2: __file__ in a PyMOL-run script resolves to the pymol package's
 #     __init__.py, NOT this script's path. So we use os.getcwd() (= repo root
-#     when run with cwd=repo-root) + import c14.paths (whose __file__ IS
+#     when run with cwd=repo-root) + import rpg.paths (whose __file__ IS
 #     correct) to locate bundled fixtures.
 #   * Gotcha #6: pymol.finish_launching() completes PyMOL startup before any
 #     cmd.* call.
@@ -54,17 +54,17 @@ import sys
 import os
 
 # Gotcha #2/#3/#4: cwd=repo root when run via the harness, so os.getcwd() is
-# the workspace and `import c14` works (sys.path includes '' = cwd). Insert
+# the workspace and `import rpg` works (sys.path includes '' = cwd). Insert
 # cwd explicitly as belt-and-suspenders so this script is robust if sys.path
 # lacks ''.
 sys.path.insert(0, os.getcwd())
 
 import pymol
 from pymol import cmd
-import c14.paths
-from c14.pymol_layer.molops import MolOps
-from c14.pymol_layer.asset_manager import AssetManager
-from c14.story.model import MolAction
+import rpg.paths
+from rpg.pymol_layer.molops import MolOps
+from rpg.pymol_layer.asset_manager import AssetManager
+from rpg.story.model import MolAction
 
 # Gotcha #6: complete PyMOL startup before any cmd.* call.
 pymol.finish_launching()
@@ -136,7 +136,7 @@ class MockAssets(object):
 # cmd.create (hero_highlight_smoke.py Stage 1 Strategy A). The hero-highlight
 # sequence (Stage 2) is then dispatched VIA molops.apply (NOT cmd.* directly).
 # =========================================================================
-smoke_path = str(c14.paths.data_path("data", "assets", "bundled", "_smoke.pdb"))
+smoke_path = str(rpg.paths.data_path("data", "assets", "bundled", "_smoke.pdb"))
 try:
     # src: tmp/pymol-src/modules/pymol/importing.py:635 cmd.load  (load a structure file into a named object)
     cmd.load(smoke_path, "mol")
@@ -236,8 +236,8 @@ except Exception as e:
 # Mirrors wt_align_smoke.py Stage 4 (capture pre/post x via iterate_state --
 # x/y/z are only in the iterate_state namespace, NOT cmd.iterate).
 # =========================================================================
-mut_path = str(c14.paths.data_path("data", "assets", "bundled", "_wt_align_mut.pdb"))
-wt_path = str(c14.paths.data_path("data", "assets", "bundled", "_wt_align_wt.pdb"))
+mut_path = str(rpg.paths.data_path("data", "assets", "bundled", "_wt_align_mut.pdb"))
+wt_path = str(rpg.paths.data_path("data", "assets", "bundled", "_wt_align_wt.pdb"))
 try:
     # src: tmp/pymol-src/modules/pymol/importing.py:635 cmd.load  (the mutant fixture: 17-atom ALA-GLY)
     cmd.load(mut_path, "mut")

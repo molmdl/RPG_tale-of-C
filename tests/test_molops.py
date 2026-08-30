@@ -4,8 +4,8 @@
 # edit/restore/protonate delegation branches).
 # Python 3.6 compatible (unittest, os.path -- all stdlib; NO pymol import).
 #
-# Pure-WSL unit tests for c14.pymol_layer.molops.MolOps. The module under test
-# imports ONLY `MolAction` from c14.story.model (which is pure data -- no
+# Pure-WSL unit tests for rpg.pymol_layer.molops.MolOps. The module under test
+# imports ONLY `MolAction` from rpg.story.model (which is pure data -- no
 # pymol import) and has `cmd` + `asset_manager` + `editops` + `protonation`
 # INJECTED via the constructor, so these tests run under python3.6 with no
 # pymol installed. A MockCmd records every cmd.* dispatch (name/args/kwargs);
@@ -47,8 +47,8 @@ Verifies:
 import os
 import unittest
 
-from c14.pymol_layer.molops import MolOps
-from c14.story.model import MolAction
+from rpg.pymol_layer.molops import MolOps
+from rpg.story.model import MolAction
 
 
 class MockCmd(object):
@@ -373,7 +373,7 @@ class TestSourceCitationsPresent(unittest.TestCase):
 
     def test_citations_present_in_source(self):
         repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        src_path = os.path.join(repo, "c14", "pymol_layer", "molops.py")
+        src_path = os.path.join(repo, "rpg", "pymol_layer", "molops.py")
         with open(src_path, "r") as fh:
             src = fh.read()
         # One citation per direct self._cmd.* call site (7 total):
@@ -514,7 +514,7 @@ class TestMolOpsDeferredDispatch(unittest.TestCase):
         # for the 8 original ops). One citation per cmd.* call site -- the
         # align branch has 3 (super/align/cealign), so 6 citations across 4 ops.
         repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        src_path = os.path.join(repo, "c14", "pymol_layer", "molops.py")
+        src_path = os.path.join(repo, "rpg", "pymol_layer", "molops.py")
         with open(src_path, "r") as fh:
             src = fh.read()
         expected = [

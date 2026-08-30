@@ -1,4 +1,4 @@
-"""Unit tests for c14.state.GameState. Pure-Python, stdlib only.
+"""Unit tests for rpg.state.GameState. Pure-Python, stdlib only.
 
 Run: ``python3.6 -m unittest tests.test_state -v``
 
@@ -9,7 +9,7 @@ of missing fields.
 import json
 import unittest
 
-from c14.state import GameState
+from rpg.state import GameState
 
 
 class TestGameState(unittest.TestCase):

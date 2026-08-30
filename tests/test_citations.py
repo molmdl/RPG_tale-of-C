@@ -2,7 +2,7 @@
 
 Two test classes:
 
-1. ``TestCitationRegistry`` -- unit tests importing ``c14.citations`` directly
+1. ``TestCitationRegistry`` -- unit tests importing ``rpg.citations`` directly
    (no subprocess). Covers load() on all 4 fixture registries (pass/pending/
    missing/rejected) + error paths (bad status, malformed JSON, duplicate keys).
 
@@ -29,7 +29,7 @@ import sys
 import tempfile
 import unittest
 
-from c14.citations import CitationRegistry
+from rpg.citations import CitationRegistry
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.join(HERE, "..")
@@ -54,7 +54,7 @@ def _write_temp_registry(content):
 
 
 class TestCitationRegistry(unittest.TestCase):
-    """Unit tests for ``c14.citations.CitationRegistry`` (direct import, no subprocess)."""
+    """Unit tests for ``rpg.citations.CitationRegistry`` (direct import, no subprocess)."""
 
     def test_load_pass_registry(self):
         reg = CitationRegistry.load(os.path.join(FIXTURES, "citations_pass.json"))

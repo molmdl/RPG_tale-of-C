@@ -25,7 +25,7 @@
 #     the SMOKE_RESULT: stdout sentinel is the ONLY reliable verdict.
 #   * Gotcha #2: __file__ in a PyMOL-run script resolves to the pymol package's
 #     __init__.py, NOT this script's path. So we use os.getcwd() (= repo root
-#     when run with cwd=repo-root) + import c14.paths (whose __file__ IS
+#     when run with cwd=repo-root) + import rpg.paths (whose __file__ IS
 #     correct) to locate bundled fixtures.
 #   * Gotcha #6: pymol.finish_launching() completes PyMOL startup before any
 #     cmd.* call.
@@ -33,7 +33,7 @@
 # This smoke exercises editops.point_mutation / substrate_remove_group /
 # protonation_change (the sanctioned apply_edit path -- NO bare cmd.alter in
 # this file; the alter gate allowlist stays at edit_ops.py only). The EditOps
-# internal cmd.* calls are cited in c14/pymol_layer/edit_ops.py (verified by
+# internal cmd.* calls are cited in rpg/pymol_layer/edit_ops.py (verified by
 # 04-01's test_citations_present_in_source).
 #
 # Every direct cmd.count_atoms / cmd.load call in THIS smoke carries a `# src:`
@@ -48,15 +48,15 @@ import sys
 import os
 
 # Gotcha #2/#3/#4: cwd=repo root when run via the harness, so os.getcwd() is
-# the workspace and `import c14` works (sys.path includes '' = cwd). Insert
+# the workspace and `import rpg` works (sys.path includes '' = cwd). Insert
 # cwd explicitly as belt-and-suspenders so this script is robust if sys.path
 # lacks ''.
 sys.path.insert(0, os.getcwd())
 
 import pymol
 from pymol import cmd
-import c14.paths
-from c14.pymol_layer.edit_ops import EditOps
+import rpg.paths
+from rpg.pymol_layer.edit_ops import EditOps
 
 # Gotcha #6: complete PyMOL startup before any cmd.* call.
 pymol.finish_launching()
@@ -79,10 +79,10 @@ def check(name, ok, detail=""):
 editops = EditOps(cmd)
 
 # --- Stage 1: load the bundled _edit_smoke.pdb fixture (NO network) ---
-# The fixture is a 2-residue ALA-GLY peptide (17 atoms). Use c14.paths to
+# The fixture is a 2-residue ALA-GLY peptide (17 atoms). Use rpg.paths to
 # resolve the bundled fixture path cwd-independently (Gotcha #2: __file__ in
-# a PyMOL-run script is wrong; c14.paths.__file__ IS correct).
-fixture_path = str(c14.paths.data_path("data", "assets", "bundled", "_edit_smoke.pdb"))
+# a PyMOL-run script is wrong; rpg.paths.__file__ IS correct).
+fixture_path = str(rpg.paths.data_path("data", "assets", "bundled", "_edit_smoke.pdb"))
 try:
     # src: tmp/pymol-src/modules/pymol/importing.py:635 cmd.load
     cmd.load(fixture_path, "pep")

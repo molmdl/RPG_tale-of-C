@@ -6,7 +6,7 @@ NO pymol/PyQt5 imports (the AST import gate scans this directory). NO external
 deps (graphviz/mermaid/networkx) -- the layout is a hand-rolled swim-lane grid.
 
 Reads a story bundle (manifest.json + per-file node fragments -- the same shape
-``c14.story.graph.StoryGraph.load`` consumes) and produces two visualizations of
+``rpg.story.graph.StoryGraph.load`` consumes) and produces two visualizations of
 the graph:
 
   1. <output-dir>/<stem>.svg -- a swim-lane SVG (rows by pathway stage,
@@ -235,8 +235,8 @@ def _ascii_markers(node_id, node):
 
 
 # ---------------------------------------------------------------------------
-# Story loading (standalone -- mirrors c14.story.graph.StoryGraph.load so the
-# script has no c14 import dependency and runs from any cwd)
+# Story loading (standalone -- mirrors rpg.story.graph.StoryGraph.load so the
+# script has no rpg import dependency and runs from any cwd)
 # ---------------------------------------------------------------------------
 
 def load_story(story_dir):

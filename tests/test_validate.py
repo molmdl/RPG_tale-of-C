@@ -1,4 +1,4 @@
-"""Unit tests for ``c14.story.validate``.
+"""Unit tests for ``rpg.story.validate``.
 
 Covers:
 - ``check_reachability`` -- green (well-formed), red (orphaned ending),
@@ -26,7 +26,7 @@ import shutil
 import tempfile
 import unittest
 
-from c14.story.validate import (
+from rpg.story.validate import (
     check_reachability,
     validate_graph,
     collect_claim_ids,

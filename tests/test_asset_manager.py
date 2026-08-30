@@ -1,8 +1,8 @@
 # Source: stdlib unittest + MockCmd inject pattern (03-RESEARCH.md §7).
 # Python 3.6 compatible (unittest, os.path -- all stdlib; NO pymol import).
 #
-# Pure-WSL unit tests for c14.pymol_layer.asset_manager.AssetManager. The
-# module under test imports ONLY `os` + `c14.paths` (cmd is INJECTED), so
+# Pure-WSL unit tests for rpg.pymol_layer.asset_manager.AssetManager. The
+# module under test imports ONLY `os` + `rpg.paths` (cmd is INJECTED), so
 # these tests run under python3.6 with no pymol installed. A MockCmd records
 # the dispatch (name/args/kwargs) and returns a configurable count_atoms so
 # the post-condition branches are exercisable.
@@ -25,7 +25,7 @@ condition branches. Verifies:
 import os
 import unittest
 
-from c14.pymol_layer.asset_manager import AssetManager
+from rpg.pymol_layer.asset_manager import AssetManager
 
 
 class MockCmd(object):
@@ -155,7 +155,7 @@ class TestSourceCitationsPresent(unittest.TestCase):
 
     def test_citations_present_in_source(self):
         repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        src_path = os.path.join(repo, "c14", "pymol_layer", "asset_manager.py")
+        src_path = os.path.join(repo, "rpg", "pymol_layer", "asset_manager.py")
         with open(src_path, "r") as fh:
             src = fh.read()
         # cmd.load citation (importing.py:635) -- load_bundled.

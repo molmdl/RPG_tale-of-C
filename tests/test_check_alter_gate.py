@@ -4,10 +4,10 @@ Covers:
 - alter_calls_in() catches every *.alter(...) Attribute CALL form uniformly
   (cmd.alter, self._cmd.alter, pymol.cmd.alter).
 - alter_calls_in() does NOT false-positive on "alter" in comments, docstrings,
-  or string literals (e.g. {"mode": "alter"} in c14/protonation_catalog.py) --
+  or string literals (e.g. {"mode": "alter"} in rpg/protonation_catalog.py) --
   AST precision over grep.
-- find_violations() allowlist: an alter call in c14/pymol_layer/edit_ops.py is
-  OK; the SAME call in c14/pymol_layer/molops.py is a violation (exit 1 path).
+- find_violations() allowlist: an alter call in rpg/pymol_layer/edit_ops.py is
+  OK; the SAME call in rpg/pymol_layer/molops.py is a violation (exit 1 path).
 - find_violations() maps a SyntaxError to the errors list (exit 2 path).
 - The real repo passes the gate with exit 0 (integration, like
   test_imports.py:test_gate_passes_on_clean_skeleton).
@@ -38,7 +38,7 @@ class TestAlterCallsInCatchesAllForms(unittest.TestCase):
     ]
 
     def test_alter_calls_in_catches_all_attribute_forms(self):
-        d = tempfile.mkdtemp(prefix="c14_altergate_test_")
+        d = tempfile.mkdtemp(prefix="rpg_altergate_test_")
         for idx, src in enumerate(self.ALTER_FORMS):
             path = os.path.join(d, "alter_%d.py" % idx)
             with open(path, "w", encoding="utf-8") as fh:
@@ -65,7 +65,7 @@ class TestAlterCallsInNoFalsePositives(unittest.TestCase):
             "config = {\"mode\": \"alter\"}  # dict value, AST = ast.Str\n"
             "import json  # a real, allowed import\n"
         )
-        d = tempfile.mkdtemp(prefix="c14_altergate_clean_")
+        d = tempfile.mkdtemp(prefix="rpg_altergate_clean_")
         path = os.path.join(d, "clean.py")
         with open(path, "w", encoding="utf-8") as fh:
             fh.write(src)
@@ -80,14 +80,14 @@ class TestFindViolationsAllowlist(unittest.TestCase):
     """find_violations() must honor the allowlist: edit_ops.py OK, molops.py NOT."""
 
     def _make_repo_tree(self, allowlisted_src, stray_src):
-        """Build a temp c14/ tree with pymol_layer/edit_ops.py + pymol_layer/molops.py.
+        """Build a temp rpg/ tree with pymol_layer/edit_ops.py + pymol_layer/molops.py.
 
         Returns (roots, allowlist, edit_ops_rel, molops_rel) so the test can
         call find_violations(roots, allowlist) and inspect the result.
         """
-        d = tempfile.mkdtemp(prefix="c14_altergate_repo_")
-        # Mirror the real layout: <d>/c14/pymol_layer/edit_ops.py + molops.py
-        pymol_layer = os.path.join(d, "c14", "pymol_layer")
+        d = tempfile.mkdtemp(prefix="rpg_altergate_repo_")
+        # Mirror the real layout: <d>/rpg/pymol_layer/edit_ops.py + molops.py
+        pymol_layer = os.path.join(d, "rpg", "pymol_layer")
         os.makedirs(pymol_layer)
         edit_ops_path = os.path.join(pymol_layer, "edit_ops.py")
         molops_path = os.path.join(pymol_layer, "molops.py")
@@ -101,8 +101,8 @@ class TestFindViolationsAllowlist(unittest.TestCase):
         orig = check_alter_gate.REPO_ROOT
         check_alter_gate.REPO_ROOT = d
         self.addCleanup(setattr, check_alter_gate, "REPO_ROOT", orig)
-        roots = [os.path.join(d, "c14")]
-        allowlist = {"c14/pymol_layer/edit_ops.py"}
+        roots = [os.path.join(d, "rpg")]
+        allowlist = {"rpg/pymol_layer/edit_ops.py"}
         return roots, allowlist
 
     def test_allowlisted_alter_in_edit_ops_not_flagged(self):
@@ -129,15 +129,15 @@ class TestFindViolationsSyntaxError(unittest.TestCase):
     """A .py with a SyntaxError maps to the errors list (exit 2), not exit 1."""
 
     def test_syntax_error_reported_as_error_not_violation(self):
-        d = tempfile.mkdtemp(prefix="c14_altergate_syntax_")
-        bad_path = os.path.join(d, "c14", "broken.py")
+        d = tempfile.mkdtemp(prefix="rpg_altergate_syntax_")
+        bad_path = os.path.join(d, "rpg", "broken.py")
         os.makedirs(os.path.dirname(bad_path))
         with open(bad_path, "w", encoding="utf-8") as fh:
             fh.write("def f(:\n    cmd.alter('sele','x')\n")  # SyntaxError
         orig = check_alter_gate.REPO_ROOT
         check_alter_gate.REPO_ROOT = d
         self.addCleanup(setattr, check_alter_gate, "REPO_ROOT", orig)
-        roots = [os.path.join(d, "c14")]
+        roots = [os.path.join(d, "rpg")]
         violations, errors = check_alter_gate.find_violations(roots, set())
         # The broken file must NOT be silently ignored -- it surfaces as an error.
         # e.msg on 3.6 is "invalid syntax" (not the literal word "SyntaxError");

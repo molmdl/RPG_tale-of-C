@@ -1,9 +1,9 @@
 # Source: stdlib unittest + MockCmd inject pattern (mirrors tests/test_asset_manager.py).
 # Python 3.6 compatible (unittest, os, tempfile, shutil, json -- all stdlib; NO pymol import).
 #
-# Pure-WSL unit tests for c14.ui.bulk_download (the Qt-free bulk-download runner).
-# The module under test imports ONLY `os`, `json`, `c14.paths`, +
-# `c14.pymol_layer.asset_manager.AssetManager` (cmd is INJECTED as a function
+# Pure-WSL unit tests for rpg.ui.bulk_download (the Qt-free bulk-download runner).
+# The module under test imports ONLY `os`, `json`, `rpg.paths`, +
+# `rpg.pymol_layer.asset_manager.AssetManager` (cmd is INJECTED as a function
 # param, like AssetManager) -- so these tests run under python3.6 with no
 # pymol/Qt installed. A MockCmd records `fetch` dispatches + returns a
 # configurable count_atoms per object name so the AssetManager.fetch_pdb
@@ -15,7 +15,7 @@
 # runner's loop logic (per-file progress, cancel-between-files, failure
 # recorded + continues, per-character lock mapping, PLACEHOLDER skip,
 # Pitfall 3 lowercase filename check, Qt-free importability).
-"""Unit tests for c14.ui.bulk_download (Qt-free runner, MockCmd inject).
+"""Unit tests for rpg.ui.bulk_download (Qt-free runner, MockCmd inject).
 
 Pure WSL python3.6 -- NO pymol/Qt import. Tests:
   1. missing_large_pdbs skips PLACEHOLDER (Phase 6 -> []).
@@ -28,7 +28,7 @@ Pure WSL python3.6 -- NO pymol/Qt import. Tests:
   7. run_bulk_download on_progress callback fired per file (i, total, pdb_id).
   8. characters_to_lock maps failed -> set of character ids (Pattern 2).
   9. characters_to_lock empty when no failures (glucose stays playable -- SC4).
-  10. Qt-free import: `import c14.ui.bulk_download` succeeds in pure WSL.
+  10. Qt-free import: `import rpg.ui.bulk_download` succeeds in pure WSL.
 """
 import json
 import os
@@ -37,9 +37,9 @@ import sys
 import tempfile
 import unittest
 
-import c14.paths
-import c14.ui.bulk_download as bulk_download
-from c14.ui.bulk_download import (
+import rpg.paths
+import rpg.ui.bulk_download as bulk_download
+from rpg.ui.bulk_download import (
     characters_to_lock,
     expected_download_characters,
     missing_large_pdbs,
@@ -100,7 +100,7 @@ class TestMissingLargePdbsTempCast(unittest.TestCase):
     """Tests 2-3: missing-large-pdbs detection with a temp cast.json + temp downloaded dir.
 
     setUp writes a temp cast.json with a real-looking pdb_id "1abc" +
-    source="download", and monkeypatches c14.paths.data_path to a temp root
+    source="download", and monkeypatches rpg.paths.data_path to a temp root
     so _downloaded_dir() probes a temp dir (NOT the real bundled downloaded
     dir -- keeps the test hermetic). The fake data_path returns <tmp>/<parts>
     so _downloaded_dir() -> <tmp>/data/assets/downloaded (Pitfall 3 lowercase
@@ -108,9 +108,9 @@ class TestMissingLargePdbsTempCast(unittest.TestCase):
     """
 
     def setUp(self):
-        self._tmp = tempfile.mkdtemp(prefix="c14_bulkdl_missing_")
-        self._orig_data_path = c14.paths.data_path
-        c14.paths.data_path = self._fake_data_path
+        self._tmp = tempfile.mkdtemp(prefix="rpg_bulkdl_missing_")
+        self._orig_data_path = rpg.paths.data_path
+        rpg.paths.data_path = self._fake_data_path
         # Temp cast.json with a real-looking download enzyme (non-PLACEHOLDER).
         self._cast_path = os.path.join(self._tmp, "cast.json")
         cast = {
@@ -128,7 +128,7 @@ class TestMissingLargePdbsTempCast(unittest.TestCase):
             json.dump(cast, fh)
 
     def tearDown(self):
-        c14.paths.data_path = self._orig_data_path
+        rpg.paths.data_path = self._orig_data_path
         shutil.rmtree(self._tmp, ignore_errors=True)
 
     def _fake_data_path(self, *parts):
@@ -162,19 +162,19 @@ class TestMissingLargePdbsTempCast(unittest.TestCase):
 class TestRunBulkDownload(unittest.TestCase):
     """Tests 4-7: the Qt-free fetch loop (success / failure / cancel / progress).
 
-    setUp monkeypatches c14.paths.data_path to a temp root so
+    setUp monkeypatches rpg.paths.data_path to a temp root so
     AssetManager._download_dir() makedirs + writes into a temp dir (NOT the
     real bundled downloaded dir -- keeps the test hermetic). The missing_codes
     list is built directly (no cast.json needed for the loop logic).
     """
 
     def setUp(self):
-        self._tmp = tempfile.mkdtemp(prefix="c14_bulkdl_run_")
-        self._orig_data_path = c14.paths.data_path
-        c14.paths.data_path = self._fake_data_path
+        self._tmp = tempfile.mkdtemp(prefix="rpg_bulkdl_run_")
+        self._orig_data_path = rpg.paths.data_path
+        rpg.paths.data_path = self._fake_data_path
 
     def tearDown(self):
-        c14.paths.data_path = self._orig_data_path
+        rpg.paths.data_path = self._orig_data_path
         shutil.rmtree(self._tmp, ignore_errors=True)
 
     def _fake_data_path(self, *parts):
@@ -284,7 +284,7 @@ class TestCharactersToLock(unittest.TestCase):
 class TestRunnerQtFreeImport(unittest.TestCase):
     """Test 10: the runner imports cleanly in pure WSL python3.6 (no Qt/pymol).
 
-    c14/ui/ is gate-EXEMPT (tools/check_imports.py SKIP_DIRS) so the AST gate
+    rpg/ui/ is gate-EXEMPT (tools/check_imports.py SKIP_DIRS) so the AST gate
     never scans bulk_download.py. This test is the runtime twin: importing
     the module must not pull in pymol/PyQt5 as a side effect (it stays Qt-free
     by design -- cmd is injected, NOT imported at module top).
@@ -298,10 +298,10 @@ class TestRunnerQtFreeImport(unittest.TestCase):
         importlib.reload(bulk_download)
         self.assertNotIn(
             "pymol", sys.modules,
-            "c14.ui.bulk_download must not import pymol (Qt-free runner)")
+            "rpg.ui.bulk_download must not import pymol (Qt-free runner)")
         self.assertNotIn(
             "PyQt5", sys.modules,
-            "c14.ui.bulk_download must not import PyQt5 (Qt-free runner)")
+            "rpg.ui.bulk_download must not import PyQt5 (Qt-free runner)")
 
 
 if __name__ == "__main__":

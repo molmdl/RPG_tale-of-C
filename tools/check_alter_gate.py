@@ -3,14 +3,14 @@
 
 Rule: any ``*.alter(...)`` Attribute CALL (i.e. an ``ast.Call`` whose ``func``
 is an ``ast.Attribute`` with ``attr == "alter"``) may appear ONLY in
-``c14/pymol_layer/edit_ops.py`` (the allowlist). Nowhere else in ``c14/``
-(INCLUDING ``c14/pymol_layer/`` and ``c14/ui/`` -- unlike check_imports.py
+``rpg/pymol_layer/edit_ops.py`` (the allowlist). Nowhere else in ``rpg/``
+(INCLUDING ``rpg/pymol_layer/`` and ``rpg/ui/`` -- unlike check_imports.py
 which skips them) or ``tools/``.
 
 Why AST (not grep): AST on ``Attribute(attr='alter')`` is precise -- it catches
 ``cmd.alter(...)``, ``self._cmd.alter(...)``, ``pymol.cmd.alter(...)`` uniformly,
 and will NOT false-positive on the word "alter" in comments, docstrings, or
-string literals (e.g. ``{"mode": "alter"}`` in c14/protonation_catalog.py is an
+string literals (e.g. ``{"mode": "alter"}`` in rpg/protonation_catalog.py is an
 ast.Str/ast.Constant node, NOT an ast.Call -- correctly ignored). A grep on
 ``.alter(`` would false-positive on those string values; AST does not.
 
@@ -18,7 +18,7 @@ This makes SC1 ("apply_edit is the only sanctioned alter path -- grep finds no
 bare cmd.alter outside it") a hard, machine-checkable invariant, NOT just a
 unit-tested one. The unit tests (tests/test_edit_ops.py) prove apply_edit sorts;
 THIS gate proves no stray ``cmd.alter`` elsewhere in the repo bypasses the
-safety net. ProtonationManager (c14/pymol_layer/protonation.py, 04-03) is NOT
+safety net. ProtonationManager (rpg/pymol_layer/protonation.py, 04-03) is NOT
 in the allowlist -- it delegates to edit_ops.apply_edit, so it has no
 ``cmd.alter`` call (the 04-03 unit test ``test_protonation_manager_no_direct_alter``
 asserts this at the unit-test level; THIS gate is the repo-wide enforcement).
@@ -46,11 +46,11 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # The SOLE allowlisted file. Stored with forward-slash + relative to repo root
 # so the comparison is OS-independent (os.walk yields OS-sep paths; we normalize
 # via os.path.relpath + .replace(os.sep, "/") before the membership test).
-ALLOWLIST = {"c14/pymol_layer/edit_ops.py"}
+ALLOWLIST = {"rpg/pymol_layer/edit_ops.py"}
 
-# Scan roots: c14/ (INCLUDING pymol_layer/ + ui/ -- the alter gate does NOT
+# Scan roots: rpg/ (INCLUDING pymol_layer/ + ui/ -- the alter gate does NOT
 # skip them, unlike check_imports.py) and tools/. We DO skip __pycache__.
-SCAN_ROOTS = [os.path.join(REPO_ROOT, "c14"), os.path.join(REPO_ROOT, "tools")]
+SCAN_ROOTS = [os.path.join(REPO_ROOT, "rpg"), os.path.join(REPO_ROOT, "tools")]
 SKIP_DIRS = {"__pycache__"}
 
 
@@ -155,12 +155,12 @@ def main():
         for v in sorted(violations):
             sys.stderr.write("  " + v + "\n")
         sys.stderr.write(
-            "cmd.alter is only allowed in c14/pymol_layer/edit_ops.py (the "
+            "cmd.alter is only allowed in rpg/pymol_layer/edit_ops.py (the "
             "sanctioned apply_edit helper); route other alter needs through "
             "EditOps.apply_edit.\n")
         return 1
     print("check_alter_gate: clean (no *.alter(...) Attribute calls outside "
-          "c14/pymol_layer/edit_ops.py)")
+          "rpg/pymol_layer/edit_ops.py)")
     return 0
 
 

@@ -36,7 +36,7 @@
 #   * Gotcha #1: the process ALWAYS exits 0 through run-conda-pymol.bat. The
 #     SMOKE_RESULT: stdout sentinel is the ONLY reliable verdict (NOT exit code).
 #   * Gotcha #2: __file__ in a PyMOL-run script resolves to the pymol package's
-#     __init__.py. So os.getcwd() (= repo root) + import c14.paths locates
+#     __init__.py. So os.getcwd() (= repo root) + import rpg.paths locates
 #     bundled fixtures.
 #   * Gotcha #6: pymol.finish_launching() completes PyMOL startup before any
 #     cmd.* call.
@@ -55,22 +55,22 @@ import sys
 import os
 
 # Gotcha #2/#3/#4: cwd=repo root when run via the harness, so os.getcwd() is
-# the workspace and `import c14` works (sys.path includes '' = cwd). Insert
+# the workspace and `import rpg` works (sys.path includes '' = cwd). Insert
 # cwd explicitly as belt-and-suspenders so this script is robust if sys.path
 # lacks ''.
 sys.path.insert(0, os.getcwd())
 
 import pymol
 from pymol import cmd
-import c14.paths
-import c14.protonation_catalog  # pure-data catalog MODULE (passed by reference)
-from c14.pymol_layer.molops import MolOps
-from c14.pymol_layer.asset_manager import AssetManager
-from c14.pymol_layer.edit_ops import EditOps
-from c14.pymol_layer.protonation import ProtonationManager
-from c14.edit_router import EditRouter, EditsTable
-from c14.achievements import AchievementBoard
-from c14.ui.controller import Controller
+import rpg.paths
+import rpg.protonation_catalog  # pure-data catalog MODULE (passed by reference)
+from rpg.pymol_layer.molops import MolOps
+from rpg.pymol_layer.asset_manager import AssetManager
+from rpg.pymol_layer.edit_ops import EditOps
+from rpg.pymol_layer.protonation import ProtonationManager
+from rpg.edit_router import EditRouter, EditsTable
+from rpg.achievements import AchievementBoard
+from rpg.ui.controller import Controller
 
 # Gotcha #6: complete PyMOL startup before any cmd.* call.
 pymol.finish_launching()
@@ -114,9 +114,9 @@ def _build_molops_stack():
     assets = AssetManager(cmd)
     editops = EditOps(cmd)
     protonation = ProtonationManager(
-        cmd, editops, c14.protonation_catalog, assets)
+        cmd, editops, rpg.protonation_catalog, assets)
     molops = MolOps(cmd, assets, editops, protonation)
-    edits_path = str(c14.paths.data_path("data", "edits.json"))
+    edits_path = str(rpg.paths.data_path("data", "edits.json"))
     edit_router = EditRouter(EditsTable.load(edits_path))
     # Temp achievements path (NOT the real user_data_path -- no pollution).
     ach_path = tempfile.mktemp(suffix="_smoke_ach.json")
@@ -847,7 +847,7 @@ except Exception as e:
 # content. This is the mechanism check (the full bulk-download is human-verify).
 # =========================================================================
 try:
-    from c14.ui.bulk_download import (
+    from rpg.ui.bulk_download import (
         missing_large_pdbs, run_bulk_download, characters_to_lock,
         expected_download_characters)
     missing = missing_large_pdbs(cmd)

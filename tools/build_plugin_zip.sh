@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # tools/build_plugin_zip.sh -- build the PyMOL Plugin-Manager-installable zip.
 #
-# Produces dist/c14-<version>.zip with Case-1 layout (c14/__init__.py at the
+# Produces dist/rpg-<version>.zip with Case-1 layout (rpg/__init__.py at the
 # zip root per tmp/pymol-src/modules/pymol/plugins/installation.py:90-143) so
 # Plugin Manager can install it (PLGN-02). Bundles data/story_glucose/ into
-# c14/data/story_glucose/ so the shipped plugin finds the story. Excludes
-# __pycache__/*.pyc and the gitignored runtime cache c14/data/assets/downloaded/
+# rpg/data/story_glucose/ so the shipped plugin finds the story. Excludes
+# __pycache__/*.pyc and the gitignored runtime cache rpg/data/assets/downloaded/
 # (Pitfall 4). See 06-RESEARCH-qt-packaging.md Pattern 4 + Pitfall 4.
 #
 # DEVIATION from 06-07-PLAN.md Task 3 (Rule 3 - blocking): the plan prescribed
@@ -24,12 +24,12 @@
 #
 # DEV INSTALL (no zip rebuild per change): instead of installing the zip via
 # Plugin Manager, point PyMOL's plugin search path at THIS REPO ROOT so PyMOL
-# loads c14/ straight from source. Edits to c14/ui/*.py then take effect on
+# loads rpg/ straight from source. Edits to rpg/ui/*.py then take effect on
 # PyMOL restart with NO rebuild. Two equivalent ways:
 #   - GUI:  PyMOL -> Plugin -> Plugin Manager -> Settings -> add the repo root
-#           (the dir containing c14/) to "Plugin Directories", then restart.
+#           (the dir containing rpg/) to "Plugin Directories", then restart.
 #   - Env:  set PYMOL_GIT_MOD=<repo-root> before launching PyMOL.
-# On restart PyMOL scans the path, finds c14/__init__.py exposing
+# On restart PyMOL scans the path, finds rpg/__init__.py exposing
 # __init_plugin__, and registers the "RPG: Tale of C" menu item. The
 # MainWindow's _resolve_story_dir() already falls back to repo-root
 # data/story_glucose in dev (06-08), so the story resolves without bundling.
@@ -43,8 +43,8 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
 # Sanity: the package + story data must exist.
-if [ ! -f c14/__init__.py ]; then
-    echo "error: c14/__init__.py not found (run from repo root)" >&2
+if [ ! -f rpg/__init__.py ]; then
+    echo "error: rpg/__init__.py not found (run from repo root)" >&2
     exit 2
 fi
 if [ ! -d data/story_glucose ]; then
@@ -52,13 +52,13 @@ if [ ! -d data/story_glucose ]; then
     exit 2
 fi
 
-# 1. Read __version__ from c14/__init__.py (prefer the __version__ string per plan).
-VERSION="$(grep -m1 '__version__' c14/__init__.py | sed 's/.*"\(.*\)".*/\1/')"
+# 1. Read __version__ from rpg/__init__.py (prefer the __version__ string per plan).
+VERSION="$(grep -m1 '__version__' rpg/__init__.py | sed 's/.*"\(.*\)".*/\1/')"
 if [ -z "${VERSION}" ]; then
-    echo "error: could not parse __version__ from c14/__init__.py" >&2
+    echo "error: could not parse __version__ from rpg/__init__.py" >&2
     exit 2
 fi
-OUT_NAME="c14-${VERSION}.zip"
+OUT_NAME="rpg-${VERSION}.zip"
 OUT_PATH="dist/${OUT_NAME}"
 
 echo "Building ${OUT_NAME} (version=${VERSION}) ..."
@@ -72,9 +72,9 @@ import os, sys, shutil, zipfile, tempfile
 out_path, version = sys.argv[1], sys.argv[2]
 repo = os.getcwd()
 
-stage = tempfile.mkdtemp(prefix="c14zip_")
+stage = tempfile.mkdtemp(prefix="rpgzip_")
 try:
-    stage_c14 = os.path.join(stage, "c14")
+    stage_rpg = os.path.join(stage, "rpg")
 
 
     def _ignore_pyc_and_cache(directory, names):
@@ -89,26 +89,26 @@ try:
         return skipped
 
 
-    # 2. Stage c14/ -> stage/c14/ (excluding __pycache__ + *.pyc).
-    shutil.copytree(os.path.join(repo, "c14"), stage_c14,
+    # 2. Stage rpg/ -> stage/rpg/ (excluding __pycache__ + *.pyc).
+    shutil.copytree(os.path.join(repo, "rpg"), stage_rpg,
                     ignore=_ignore_pyc_and_cache)
 
     # 3. Copy the story data into the staged package so it ships + resolves via
-    #    c14.paths.data_path("data","story_glucose") at runtime. The dev
+    #    rpg.paths.data_path("data","story_glucose") at runtime. The dev
     #    controller/tests load repo-root data/story_glucose; this build bridges
-    #    them so the installed plugin finds the story (c14/data/ already exists
+    #    them so the installed plugin finds the story (rpg/data/ already exists
     #    via the copytree above).
     story_src = os.path.join(repo, "data", "story_glucose")
-    story_dst = os.path.join(stage_c14, "data", "story_glucose")
+    story_dst = os.path.join(stage_rpg, "data", "story_glucose")
     shutil.copytree(story_src, story_dst, ignore=_ignore_pyc_and_cache)
 
     # 4. Clean the staged tree: exclude the gitignored runtime cache
-    #    (c14/data/assets/downloaded/) + belt-and-suspenders sweep of any
+    #    (rpg/data/assets/downloaded/) + belt-and-suspenders sweep of any
     #    __pycache__/*.pyc that survived (e.g. inside data/).
-    downloaded = os.path.join(stage_c14, "data", "assets", "downloaded")
+    downloaded = os.path.join(stage_rpg, "data", "assets", "downloaded")
     if os.path.isdir(downloaded):
         shutil.rmtree(downloaded)
-    for root, dirs, files in os.walk(stage_c14):
+    for root, dirs, files in os.walk(stage_rpg):
         for d in list(dirs):
             if d == "__pycache__":
                 shutil.rmtree(os.path.join(root, d))
@@ -117,17 +117,17 @@ try:
             if f.endswith(".pyc"):
                 os.remove(os.path.join(root, f))
 
-    # 5. Build the zip with Case-1 layout: c14/__init__.py is written FIRST so
+    # 5. Build the zip with Case-1 layout: rpg/__init__.py is written FIRST so
     #    it is the first entry (06-RESEARCH-qt-packaging.md Example 3 expects
-    #    c14/__init__.py as the first file). Then walk the rest of stage/c14.
+    #    rpg/__init__.py as the first file). Then walk the rest of stage/rpg.
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     if os.path.exists(out_path):
         os.remove(out_path)
-    init_arc = "c14/__init__.py"
-    init_full = os.path.join(stage_c14, "__init__.py")
+    init_arc = "rpg/__init__.py"
+    init_full = os.path.join(stage_rpg, "__init__.py")
     with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED) as z:
         z.write(init_full, init_arc)  # first entry (Case 1)
-        for root, dirs, files in os.walk(stage_c14):
+        for root, dirs, files in os.walk(stage_rpg):
             dirs.sort()
             for f in sorted(files):
                 full = os.path.join(root, f)
@@ -145,28 +145,28 @@ try:
             raise SystemExit("SANITY CHECK FAILED: " + msg)
 
     must(len(names) > 0, "zip is empty")
-    must(names[0] == "c14/__init__.py",
-         "first entry is not c14/__init__.py: " + repr(names[0]))
+    must(names[0] == "rpg/__init__.py",
+         "first entry is not rpg/__init__.py: " + repr(names[0]))
     required = [
-        "c14/__init__.py",
-        "c14/ui/plugin_entry.py",
-        "c14/ui/__init__.py",
-        "c14/data/story_glucose/manifest.json",
+        "rpg/__init__.py",
+        "rpg/ui/plugin_entry.py",
+        "rpg/ui/__init__.py",
+        "rpg/data/story_glucose/manifest.json",
     ]
     for r in required:
         must(r in names, "missing required entry: " + r)
     for n in names:
-        must(n.startswith("c14/"),
-             "entry outside c14/ package dir: " + repr(n))
-        must("c14/data/assets/downloaded/" not in n,
+        must(n.startswith("rpg/"),
+             "entry outside rpg/ package dir: " + repr(n))
+        must("rpg/data/assets/downloaded/" not in n,
              "forbidden downloaded/ entry: " + n)
         must(not n.endswith(".pyc"), "forbidden .pyc entry: " + n)
         must("__pycache__" not in n, "forbidden __pycache__ entry: " + n)
     # Exactly one package dir at the zip root (Case 1): every top-level segment
-    # is "c14".
+    # is "rpg".
     top_segs = set(n.split("/", 1)[0] for n in names)
-    must(top_segs == {"c14"},
-         "more than one top-level dir (must be only c14/): " + repr(top_segs))
+    must(top_segs == {"rpg"},
+         "more than one top-level dir (must be only rpg/): " + repr(top_segs))
 
     print("BUILD OK: " + out_path)
     print("entries: " + str(len(names)))

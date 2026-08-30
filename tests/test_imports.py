@@ -3,7 +3,7 @@
 Covers:
 - banned import forms are caught (7 forms incl. aliased submodule imports)
 - no false positives on comments / string literals (AST > grep)
-- the gate exits 0 on the clean c14/ skeleton
+- the gate exits 0 on the clean rpg/ skeleton
 - every domain-tier .py passes py_compile (syntax) -- pairs with the gate
   per 01-RESEARCH-testability.md Pitfall 3 (py_compile necessary but not sufficient).
 """
@@ -16,7 +16,7 @@ import unittest
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 GATE_SCRIPT = os.path.join(REPO_ROOT, "tools", "check_imports.py")
-C14_ROOT = os.path.join(REPO_ROOT, "c14")
+C14_ROOT = os.path.join(REPO_ROOT, "rpg")
 
 # Make tools/ importable so we can import check_imports directly.
 sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
@@ -39,7 +39,7 @@ class TestViolationsInCatchesBannedImports(unittest.TestCase):
     ]
 
     def test_violations_in_catches_banned_imports(self):
-        d = tempfile.mkdtemp(prefix="c14_gate_test_")
+        d = tempfile.mkdtemp(prefix="rpg_gate_test_")
         for idx, src in enumerate(self.BANNED_FORMS):
             path = os.path.join(d, "violation_%d.py" % idx)
             with open(path, "w", encoding="utf-8") as fh:
@@ -62,7 +62,7 @@ class TestViolationsInNoFalsePositives(unittest.TestCase):
             "y = \"import PyQt5.QtCore\"\n"
             "import json  # a real, allowed import\n"
         )
-        d = tempfile.mkdtemp(prefix="c14_gate_clean_")
+        d = tempfile.mkdtemp(prefix="rpg_gate_clean_")
         path = os.path.join(d, "clean.py")
         with open(path, "w", encoding="utf-8") as fh:
             fh.write(src)
@@ -74,7 +74,7 @@ class TestViolationsInNoFalsePositives(unittest.TestCase):
 
 
 class TestGatePassesOnCleanSkeleton(unittest.TestCase):
-    """The real c14/ skeleton (domain tier) must pass the gate with exit 0."""
+    """The real rpg/ skeleton (domain tier) must pass the gate with exit 0."""
 
     def test_gate_passes_on_clean_skeleton(self):
         # The gate resolves ROOT from its own __file__, so cwd does not matter.

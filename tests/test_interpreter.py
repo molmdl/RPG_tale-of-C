@@ -13,11 +13,11 @@ import os
 import sys
 import unittest
 
-from c14.story.graph import StoryGraph
-from c14.story.interpreter import StoryInterpreter
-from c14.story.model import Choice
-from c14.rng import RngEngine
-from c14.state import GameState
+from rpg.story.graph import StoryGraph
+from rpg.story.interpreter import StoryInterpreter
+from rpg.story.model import Choice
+from rpg.rng import RngEngine
+from rpg.state import GameState
 
 
 def _story_dir():

@@ -49,13 +49,13 @@ import unittest
 
 # Full-domain-stack import: proves every module imports in pure Python (the
 # test_no_pymol/pyqt checks below confirm none of these pulled PyMOL/Qt).
-from c14.engine import GameEngine  # noqa: F401 (used directly)
-from c14.story.graph import StoryGraph  # noqa: F401 (used directly)
-from c14.rng import RngEngine  # noqa: F401 (imported to prove clean import)
-from c14.state import GameState  # noqa: F401 (imported to prove clean import)
-from c14.persist import SaveStore  # noqa: F401 (imported to prove clean import)
-from c14.story.validate import check_reachability, validate_graph  # noqa: F401
-from c14.story.model import Node  # noqa: F401 (used for the orphaned variant)
+from rpg.engine import GameEngine  # noqa: F401 (used directly)
+from rpg.story.graph import StoryGraph  # noqa: F401 (used directly)
+from rpg.rng import RngEngine  # noqa: F401 (imported to prove clean import)
+from rpg.state import GameState  # noqa: F401 (imported to prove clean import)
+from rpg.persist import SaveStore  # noqa: F401 (imported to prove clean import)
+from rpg.story.validate import check_reachability, validate_graph  # noqa: F401
+from rpg.story.model import Node  # noqa: F401 (used for the orphaned variant)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.join(HERE, "..")
@@ -374,7 +374,7 @@ class TestEndToEndArchitecture(unittest.TestCase):
 
     def test_citation_gate_on_toy_story(self):
         """The refactored citation gate (Phase 2 walker in
-        c14.story.validate.collect_claim_ids) works on the multi-file
+        rpg.story.validate.collect_claim_ids) works on the multi-file
         data/story directory end-to-end: with the toy story's 3 placeholder
         claim_ids all approved, the gate exits 0."""
         # temp registry: the toy story's 3 placeholder claims, all approved

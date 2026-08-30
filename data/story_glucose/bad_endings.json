@@ -155,7 +155,7 @@
       "choices": []
     },
     "edit.prompt": {
-      "text_dramatic": "TBD — you stand before the enzyme. [STRUCTURAL STUB: at runtime, the EditRouter (c14/edit_router.py) routes known edits to a defined branch node and unknown edits to the bad-ending pool; this stub's choices are structural BFS paths, not player-facing options.]",
+      "text_dramatic": "TBD — you stand before the enzyme. [STRUCTURAL STUB: at runtime, the EditRouter (rpg/edit_router.py) routes known edits to a defined branch node and unknown edits to the bad-ending pool; this stub's choices are structural BFS paths, not player-facing options.]",
       "text_teaching": "",
       "claim_ids": ["PLACEHOLDER_PHASE7_EDIT"],
       "tags": ["edit:prompt"],

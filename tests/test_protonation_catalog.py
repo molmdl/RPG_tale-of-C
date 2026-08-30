@@ -1,7 +1,7 @@
-# Source: stdlib unittest + the pure-data catalog under c14/protonation_catalog.py.
+# Source: stdlib unittest + the pure-data catalog under rpg/protonation_catalog.py.
 # Python 3.6 compatible (unittest, re -- all stdlib; NO pymol import).
 #
-# Pure-WSL unit tests for c14.protonation_catalog. The module under test is
+# Pure-WSL unit tests for rpg.protonation_catalog. The module under test is
 # pure data (NO pymol import; passes the Phase 1 AST gate), so these tests
 # run under python3.6 with no pymol installed. Verifies:
 #   * Catalog schema: every entry has mode in {"load","alter"}; alter entries
@@ -20,7 +20,7 @@
 #     the OLD residue name (the residue_key); every add op's sele contains
 #     the NEW resn (the entry's resn field). Encodes Pitfall 2 as a
 #     catalog-level invariant.
-"""Unit tests for c14.protonation_catalog (schema, lookup, Phase 4 boundary
+"""Unit tests for rpg.protonation_catalog (schema, lookup, Phase 4 boundary
 guards, h_ops resn-phase ordering).
 
 Pure WSL python3.6 -- NO pymol import. The catalog is pure data; these
@@ -34,7 +34,7 @@ import os
 import re
 import unittest
 
-import c14.protonation_catalog as catalog
+import rpg.protonation_catalog as catalog
 
 
 def _catalog_as_string():

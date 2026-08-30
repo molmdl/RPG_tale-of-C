@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tools/run_headless.sh -- reusable WSL->Windows headless PyMOL bridge wrapper.
 # Usage: bash tools/run_headless.sh <script.py>
-# MUST run with cwd = repo root (so os.getcwd()=workspace and `import c14` works
+# MUST run with cwd = repo root (so os.getcwd()=workspace and `import rpg` works
 # -- see 03-RESEARCH.md Gotcha #2/#3/#4). The caller (execute-plan) runs with
 # workdir=repo-root, so cwd is already correct when invoked the normal way.
 #
