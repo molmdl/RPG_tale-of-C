@@ -1,30 +1,104 @@
 ---
 phase: 06-qt-ui-minimal-playable-mvp
-verified: 2026-08-30T00:00:00Z
-status: human_needed
-score: 60/60 machine-verifiable must-haves (33 artifacts + 27 key links) verified; 4/5 ROADMAP SCs human-PASSED; SC2 fixes machine-verified, GUI re-check pending
+verified: 2026-08-30T12:05:29Z
+status: passed
+score: 5/5 ROADMAP Success Criteria passed (60/60 machine-verifiable must-haves verified; all headline fixes human-confirmed across rounds 1-3; remaining items are documented Phase-7/11/12 queues, not phase gaps)
 date: 2026-08-30
-re_verification: null
-human_verification:
-  - test: "Start a new glucose game in a real Windows PyMOL session (after the OQ-6 warn+confirm prompt)."
-    expected: "EXACTLY ONE carbon on hero_atom has the sphere + 'YOU' label (cyan); the other carbon(s) are cyan sticks only — NOT two 'YOU' spheres."
-    why_human: "Qt/GUI rendering cannot be exercised from WSL (AGENTS.md); the fix is headless-proven (probe 9/9 + smoke exactly_one_YOU=True) but not yet re-confirmed in a live session."
-  - test: "At an edit-allowed node, click 'Edit enzyme' → pick an option → OK."
-    expected: "The EditDialog opens, OK does NOT crash (no ValueError), and the story routes to a branch or bad ending."
-    why_human: "Qt dialog interaction; the selected_edit 3-tuple fix is code-verified (edit_dialog.py:193 returns self._selected[1:]) but the click-through is GUI-only."
-  - test: "Advance a node or two and glance at the status bar."
-    expected: "It shows node=<id> (and stage=<tag> where the node carries one), e.g. 'node=gly.start  stage=glycolysis  character=glucose  seed=42'."
-    why_human: "Qt status-bar display; wiring is code-verified (main_window.py:333-335) but the on-screen result is GUI-only."
+re_verification:
+  previous_status: human_needed
+  previous_score: 60/60 machine-verifiable must-haves (33 artifacts + 27 key links) verified; 4/5 ROADMAP SCs human-PASSED; SC2 fixes pending GUI re-check
+  gaps_closed:
+    - "SC2a single-hero highlight — fix 389ee3e (`first (obj and elem C)`) human-confirmed 'SC2a pass'; smoke exactly_one_YOU=True re-proven this session"
+    - "SC2f edit-dialog crash + empty-stash seam — fixes c2d1008 (3-tuple) + 68631dd (request_edit in pure-MC mode) exercised end-to-end by the human's round-3 play (edits reached edit.prompt and routed through the dialog)"
+    - "SC2b orientation — fix 3f483aa (status bar node+stage) shipped and in use across rounds 2-3"
+    - "Bad-end banner persistence — fix 8c2d344 human-confirmed: 'ok the bad end banner gone' (+ 33ddbc1 stash clear, 4277a4e smoke stage 6b)"
+    - "Symptom 2 (every edit → bad ending) — accepted verdict: Phase-6-EXPECTED content gap, routing mechanism PROVEN; Phase 7 content queue"
+    - "Design decisions resolved by the human: cycle-trap auto-fire + soul-jump auto-RNG (81b1a48); fuller inline help deferred to Phase 11 (f413dbb); package rename c14→rpg (bacbb09, machine-proven)"
+  gaps_remaining: []
+  regressions: []
 ---
 
 # Phase 6: Qt UI + Minimal Playable MVP — Verification Report
 
 **Phase Goal:** The game is playable end-to-end for the first time in a real Windows PyMOL session — install the plugin, start a glucose game, see the C14 hero highlighted (5.4 convention), make choices (5.1 choice-point contract), edit molecules (5.1 edit-node contract), save/load, reach a True or Bad ending — with the UI as a thin adapter over the proven engine + molecular layer. FIRST human-verify milestone.
-**Verified:** 2026-08-30
-**Status:** human_needed (all machine checks green; 4/5 SCs already human-PASSED in the real session; the 3 SC2 fixes are machine-verified headlessly and need ONE quick GUI re-check to close)
-**Re-verification:** No — initial verification (no previous VERIFICATION.md existed)
+**Verified:** 2026-08-30T12:05:29Z (FINAL close-out after 3 re-verify rounds)
+**Status:** PASSED — all machine gates green this session; the human confirmed the headline fixes across rounds 1-3 and closed the phase; the remaining items are documented Phase-7/11/12 content queues, not Phase 6 gaps.
+**Re-verification:** Yes — final close-out (round-1 report below kept intact for history)
 
 ---
+
+## Final close-out (2026-08-30)
+
+### Final machine-gate results (run in THIS session, 2026-08-30T12:05Z)
+
+| Gate | Command | Result |
+| --- | --- | --- |
+| Unit suite | `python3.6 -m unittest discover -s tests` | **Ran 324 tests … OK** (5.3s) |
+| Import gate | `python3.6 tools/check_imports.py` | **clean (no pymol/PyQt5 imports in rpg/ domain tier)**, exit 0 |
+| Alter gate | `python3.6 tools/check_alter_gate.py` | **clean (no *.alter(...) outside rpg/pymol_layer/edit_ops.py)**, exit 0 |
+| Frozen-skeleton invariants | `python3.6 -m unittest tests.test_glucose_reachability` | **Ran 20 tests … OK** — 55 nodes / 21 endings asserted (test file line 144) |
+| Headless integration smoke | `bash tools/run_headless.sh tools/controller_integration_smoke.py` | **SMOKE_RESULT: PASS** — exactly **69** `SMOKE: PASS` checks incl. stage 6b same-controller restart (`restart_returns_intro_preface node='intro.preface'`, `restart_finished_falsy finished=None`, `restart_guard_false guard=False`, `restart_stashes_cleared enzyme=None source=None`) and `exactly_one_YOU=True` |
+| Hero highlight smoke | `bash tools/run_headless.sh tools/hero_highlight_smoke.py` | **PASSED** (raw exit=0) |
+| Plugin zip | `dist/rpg-0.0.1-dev.zip` via python3.6 zipfile namelist | **EXISTS** — first entry `rpg/__init__.py` (Case-1 PLGN-02 layout), 49 entries, **0** c14 entries |
+| Citation gate | `python3.6 tools/check_citations.py --story data/story_glucose --registry data/citations.json` | **exit 1 — 63 [MISSING], 0 [UNAPPROVED]** — UNCHANGED expected pre-content red (placeholder claim_ids), NOT a regression; must go green by the Phase 10 pre-ship gate |
+
+### ROADMAP Success Criteria — final score: 5/5 PASSED
+
+| SC | Verdict | Evidence |
+| --- | --- | --- |
+| SC1 install/menu/window | **PASS** | Human PASS (round 1, real session). Post-rename menu re-check was queued, but the rename is machine-proven this session: zip first entry `rpg/__init__.py` + zero c14 entries + entry point `rpg/__init__.py __init_plugin__ → plugin_entry.init_plugin → addmenuitemqt('RPG: Tale of C', …)` + both headless smokes import rpg.* end-to-end on real Windows PyMOL; user data migrated to %APPDATA%\pymol\rpg-tale-of-c. Human accepted the closure. |
+| SC2 hero highlight + scenes | **PASS** (mechanism; content queued) | Hero highlight human-PASSED after the first-operator fix (human: "SC2a pass"); `exactly_one_YOU=True` re-proven in this session's smoke; status-bar node+stage orientation shipped (3f483aa). Scene/representation CONTENT is placeholder-by-design: the start node bundles `_smoke.pdb`, and per-node content = Phase 7 filling the FROZEN 5.4 scene templates. |
+| SC3 True+Bad endings + save/load | **PASS** | Human PASS (round 1: both endings reachable, save/load restores story position + RNG + camera). Colors/reps rebuild via on_enter replay (by design, documented — 06-03 view = CAMERA-only). Round-3 banner-reset fix machine-verified (smoke stage 6b) + human-confirmed ("ok the bad end banner gone"). |
+| SC4 bulk-download | **PASS** (mechanism; real list queued) | Human PASS (round 1: glucose starts instantly on bundled assets). Mechanism headless-verified (runner/progress/cancel/retry/per-character lock in unit tests + smoke stages); the prompt correctly does NOT fire for the placeholder cast (PLACEHOLDER guard). Real large-PDB list = Phase 7. |
+| SC5 achievements + help | **PASS** | Human PASS (round 1: unlocks + cross-session persistence + wiki links). ACH-02 persistence to user_data_path; fuller inline help deferred to Phase 11 per the human decision (visible placeholder pointer card shipped in help.json). |
+
+### Three-round verification history (symptom → root cause → fix → human verdict)
+
+| Round | Symptom | Root cause | Fix (commit) | Human verdict |
+| --- | --- | --- | --- | --- |
+| 1 | SC2a: BOTH carbons highlighted as "YOU" | Default sele `<obj> and elem C` matched ALL carbons on the 2-carbon `_smoke.pdb` | `389ee3e` — sele → `first (obj and elem C)`; empirically probed on real PyMOL (tools/probe_first_operator.py, 9/9); smoke strengthened to exactly-one-YOU | **"SC2a pass"** (confirmed in the round-2 session) |
+| 1 | SC2f: clicking "Edit enzyme" crashed (`ValueError: too many values to unpack (expected 3)` at main_window.py:413) | `EditDialog.selected_edit()` returned the raw stored 4-tuple `(label, op, target, args)` instead of the documented 3-tuple | `c2d1008` — `selected_edit()` returns `self._selected[1:]` | Exercised by the human's subsequent playthroughs (edits opened + routed) |
+| 1 | SC2b: orientation — "not sure which point it is" | Status bar showed only character + seed (no node/stage) | `3f483aa` — status bar shows `node=<id>  stage=<tag>  character=<c>  seed=<s>` | In use across rounds 2-3 |
+| 2 | SC2f (round 2): edit affordance at the first enzyme (gly.pfk) → `RuntimeError: … 'edit.prompt' has no edit:enzyme:<id> tag and no pending enzyme_id stash` | edit:offer→request_edit routing existed ONLY in ChoicePanel._render_mixed; the 5.1 replan added edit:offer to 13 PURE-MC enzyme nodes which routed via generic choose(i), never setting the stash (debug session: .planning/debug/edit-prompt-empty-stash.md) | `68631dd` — _render_pure dual-predicate special-case → request_edit at the SOURCE node + graph-invariant test + 4 smoke checks at gly.pfk | Exercised end-to-end by the human's round-3 play; phase closure confirmed |
+| 2 | Design: cycle-trap felt like it should HAPPEN (a RESULT), not be chosen; soul-jump should not be a decision | Open design decision from round 1 | `81b1a48` — controller auto-resolve at the _render choke point: trap AUTO-FIRES at visits>5, one-time aconitase edit offer on first entry, else AUTO-SPIN (engine RNG picks among weighted only; NO skeleton/weights change) | **Human decision "auto fire"** — implemented as decided |
+| 2 | Latent seam: stale edit stash could survive; Cancel stranded the player at edit.prompt | Stash never cleared after apply; no return path from edit.prompt | `245f88f` — stashes cleared after successful apply; Cancel → "Return to the enzyme" (controller.return_to_edit_source, controller-side source stash; NO skeleton change) | Used in the human's round-3 play |
+| 2 | Design: fuller inline help | User preference (round 1) vs docs-finalization scope | `f413dbb` — DEFERRED to Phase 11 per the human; visible placeholder pointer card added to help.json (zero code change) | **Human decision "defer to 11"** — closed |
+| rename | c14 → rpg package rename (user-approved quick task) | PEP8 lowercase package name; code-only scope | `bacbb09` — 513 replacements / 71 files; gates updated; zip → dist/rpg-0.0.1-dev.zip; user data migrated to %APPDATA%\pymol\rpg-tale-of-c | Machine-proven (this session: zip first entry rpg/__init__.py, 0 c14 entries, all gates identical); menu re-check accepted by the human at closure |
+| 3 | S1: bad ending persisted after New Game AND after window close/reopen | Controller/engine restart PROVEN CLEAN (42/42 probes); PRIMARY: StoryPanel.render_node never reset the "Ending reached" banner (only clear() hides it, never called); SECONDARY: plugin_entry re-shows the same hidden MainWindow singleton on reopen | `8c2d344` — render_node blanks+hides the banner first, render_ending reordered (render_node then set+show; identical final state) + `33ddbc1` — both edit stashes cleared on start_game/load (+2 tests) + `4277a4e` — smoke stage 6b same-controller restart (9 checks) | **"ok the bad end banner gone."** (debug session: .planning/debug/bad-end-restart-and-edit-pool.md) |
+| 3 | S2: every edit attempt → bad ending ("shouldnt we be restoring mutant from our story?") | Phase-6-EXPECTED CONTENT GAP — rpg/data/edits.json has zero real-enzyme entries (fixture only); routing MECHANISM PROVEN (injected known gly.pfk entry → restoration branch, even with noised input); restoration branch nodes DO NOT EXIST in the frozen skeleton | No code fix — Phase 7 citation-gated content (edits.json entries + restoration branch nodes + 5.3 WT-aligned reveals); the dialog already prints the Phase-7 notice | Verdict accepted; Phase 7 queue |
+
+### Design decisions applied (all human-made)
+
+1. **Cycle-trap auto-fire + soul-jump auto-RNG** (`81b1a48`) — human verbatim "decision 1 auto fire. also the soul jump shouldnt be a decision too, its rng jump success or keep on loop or out as CO2." Implemented in the controller at the _render choke point; NO new RNG outcomes/weights; NO skeleton JSON change (55 nodes / 21 endings untouched).
+2. **Fuller inline help DEFERRED to Phase 11** (`f413dbb`) — human decision 2026-08-30; placeholder pointer card shipped in help.json.
+3. **Package rename c14 → rpg** (`bacbb09`) — user-approved; machine-proven; historical planning docs keep their c14 references by design.
+4. **One-time edit offer on first shuffle entry** — part of the 81b1a48 auto-resolve design (visit_counts==1; survives save/load via GameState).
+5. **Cancel returns to the source enzyme** (`245f88f`) — controller-side source stash; FROZEN skeleton untouched.
+
+### Phase-7 / 11 / 12 queue (recorded at close-out; NOT Phase 6 gaps)
+
+- **Phase 7 (citation-gated content):** the 5.1 restoration branch nodes + known-edit signatures (real-enzyme edits.json entries, keeping the shared-manifest invariant edits.json keys == cast ids == graph edit:enzyme:<id> values) + the 5.3 WT-aligned reveal; shuffle→CO2 outcome (needs an approved RNG weight); citrate-synthase dimer (biological assembly) loading (cast convention); per-node scene/representation content filling the FROZEN 5.4 templates; real bulk-download large-PDB list; approved TCA RNG weights (may add the shuffle→end.normal.co2 early-exit edge considered and rejected this round).
+- **Phase 11:** fuller inline step-by-step help (placeholder pointer card shipped in its place).
+- **Phase 12:** ending cutscene/CG rendering.
+
+### Residual risks (accepted at close-out)
+
+1. **plugin_entry refresh-on-show (P2) deferred** — close→reopen in the SAME PyMOL process re-shows the same hidden MainWindow singleton with the last render (no closeEvent, no re-render on show). Per the debugger's recommendation, revisit only if the human still finds close→reopen confusing after the banner fix (a full PyMOL restart cannot show an ending without playing).
+2. **Qt behaviors are permanently human-only from WSL** (AGENTS.md) — dialog modality, prompt flow, link-opening, visual rendering can never be machine-verified in this environment; future GUI regressions will always need a human session.
+3. **Citation gate is red until Phase 7 content lands** (63 MISSING placeholder claim_ids) — expected pre-content state by design (no-fabricated-science gate working as intended); must be green before any release (Phase 10 pre-ship gate).
+4. **dist/rpg-0.0.1-dev.zip is a gitignored build artifact** — verified against the current tree this session (first entry rpg/__init__.py, zero c14 entries); rebuild before any reinstall after future edits.
+5. **The OQ-6 hero prompt fires on every new game** (the hero object never exists at pre-pass time) — correct per the 5.4 override; noted as a Phase 7 polish candidate.
+6. **Status-bar `stage=` is omitted for nodes without a `stage:<x>` tag** — per Fix-3 design; Phase 7 content adds the tags.
+
+### Close-out justification
+
+1. Every machine gate is green on the actual codebase in this session (324 unit tests, both AST gates, 20/20 reachability invariants, 69-check integration smoke incl. the round-3 restart stage, hero smoke, zip layout) — and the citation gate's exit-1 red is the EXPECTED pre-content placeholder state, unchanged and documented, not a regression.
+2. The human — the only authority for the Qt layer per AGENTS.md — played the game end-to-end across three rounds, confirmed each headline fix verbatim ("SC2a pass", "ok the bad end banner gone"), resolved both open design decisions, accepted the Phase-7 content-gap verdict, and closed the phase.
+3. All remaining work items are routed to Phase 7/11/12 queues with named owners and gating (citation approval), matching the ROADMAP's own scoping of those phases — there is no missing, stubbed, or unwired Phase 6 artifact.
+
+---
+
+## Round-1 verification report (kept intact for history)
 
 ## Goal Assessment
 
