@@ -143,7 +143,8 @@ def _view_applier(v):
 
 # The OQ-6 warn+confirm gate (auto-confirm True -- the smoke auto-confirms so
 # the hero-highlight rewrite fires deterministically; the _smoke.pdb has 2
-# carbons so the resolver WOULD prompt + rewrite to "hero_atom and elem C").
+# carbons so the resolver WOULD prompt + rewrite to the single-carbon default
+# "first (hero_atom and elem C)" -- the 06-14 SC2a fix: exactly ONE hero).
 _prompt_calls = []  # type: list
 
 
@@ -240,13 +241,15 @@ try:
     # The "YOU" label dispatched -- read the label atom PROPERTY via
     # cmd.iterate (NOT count_atoms("... and label") -- `label` is an atom
     # property, NOT a selection keyword; hero_highlight_smoke.py:191-194 uses
-    # the same iterate approach). At least 1 atom in hero_atom has label "YOU".
+    # the same iterate approach). EXACTLY ONE atom has the "YOU" label (the
+    # 06-14 SC2a fix: the OQ-6 default sele resolves to one hero carbon --
+    # the pre-fix "<obj> and elem C" default labeled BOTH carbons).
     lbls = []
     # src: tmp/pymol-src/modules/pymol/editing.py:1490 cmd.iterate  (read label text; collector `lbls` avoids collision)
     cmd.iterate("hero_atom", "lbls.append(label)", space={"lbls": lbls})
     check("hero_you_label_dispatched",
-          any(l == "YOU" for l in lbls),
-          "labels=%r" % lbls)
+          lbls.count("YOU") == 1,
+          "exactly_one_YOU=%r labels=%r" % (lbls.count("YOU") == 1, lbls))
 except Exception as e:
     import traceback
     traceback.print_exc()

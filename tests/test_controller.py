@@ -294,22 +294,30 @@ class TestController(unittest.TestCase):
         self.assertEqual(len(prompt_calls), 1, "prompt_fn called once")
         self.assertIn("3 carbons", prompt_calls[0],
                       "prompt message mentions the carbon count")
-        # The hero ops' sele rewritten to the default first-C.
+        # The hero ops' sele rewritten to the default first-C: the sele MUST
+        # resolve to EXACTLY ONE carbon (06-14 SC2a fix -- the old
+        # "<obj> and elem C" matched ALL carbons; `first (...)` picks one;
+        # empirically verified headlessly -- tools/probe_first_operator.py).
+        expected_default_sele = "first (hero_atom and elem C)"
         label = next(a for a in result if a.op == "label")
-        self.assertEqual(label.args["sele"], "hero_atom and elem C",
-                         "label sele rewritten to default first-C")
+        self.assertEqual(label.args["sele"], expected_default_sele,
+                         "label sele rewritten to default first-C (exactly 1 atom)")
         show_spheres = next(a for a in result
                             if a.op == "show" and a.args.get("rep") == "spheres")
-        self.assertEqual(show_spheres.args["sele"], "hero_atom and elem C",
+        self.assertEqual(show_spheres.args["sele"], expected_default_sele,
                          "show spheres sele rewritten")
         set_sphere = next(a for a in result
                           if a.op == "set" and a.args.get("name") == "sphere_scale")
-        self.assertEqual(set_sphere.args["sele"], "hero_atom and elem C",
+        self.assertEqual(set_sphere.args["sele"], expected_default_sele,
                          "set sphere_scale sele rewritten")
-        # show_as sticks + color KEEP their object-wide sele (not rewritten).
+        # show_as sticks + color KEEP their object-wide sele (not rewritten;
+        # the all-C-cyan scopes to elem C per the 5.4 convention).
         show_as = next(a for a in result if a.op == "show_as")
         self.assertNotIn("sele", show_as.args,
                          "show_as sticks keeps object-wide sele (no sele key)")
+        color = next(a for a in result if a.op == "color")
+        self.assertEqual(color.args["sele"], "hero_atom and elem C",
+                         "color keeps the all-C object-wide sele (5.4 convention)")
 
     # 11. HeroResolver rejected leaves unchanged
     def test_hero_resolver_rejected_leaves_unchanged(self):

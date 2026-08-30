@@ -80,11 +80,11 @@ class HeroResolver(object):
        hero-highlight, no-op).
     2. Count the atoms in the hero sele (``count_fn(hero_sele)``). If ``n == 1``
        (single-C, deterministic), return unchanged (no prompt).
-    3. If ``n != 1`` (multi-C, ambiguous), pick a default (the first carbon:
-       ``"<hero_obj> and elem C"``) + warn + confirm via ``prompt_fn``. The
-       confirm IS the no-fabricated-science guard (silently highlighting the
-       wrong carbon would be a science error -- the hero-identity is
-       load-bearing for the narrative).
+   3. If ``n != 1`` (multi-C, ambiguous), pick a default (the first carbon:
+      ``"first (<hero_obj> and elem C)"``) + warn + confirm via ``prompt_fn``.
+      The confirm IS the no-fabricated-science guard (silently highlighting
+      the wrong carbon would be a science error -- the hero-identity is
+      load-bearing for the narrative).
     4. On confirm, return a NEW on_enter list with the hero ops' sele rewritten
        to the default. On reject, return unchanged.
 
@@ -140,7 +140,17 @@ class HeroResolver(object):
         if n == 1:
             return on_enter_actions  # single-C: deterministic, no prompt
         # 3. Multi-C (n != 1): default + warn + confirm (OQ-6 OVERRIDE).
-        default_sele = "{0} and elem C".format(hero_obj)
+        # The default sele MUST resolve to EXACTLY ONE carbon (06-14 SC2a
+        # human-verify bug fix): the old "<hero_obj> and elem C" matched ALL
+        # carbons (the bundled _smoke.pdb ethanol has 2 -> BOTH got spheres +
+        # the "YOU" label). `first (...)` resolves to exactly 1 atom (the
+        # first carbon by internal order -- C1 id=1 on the fixture),
+        # EMPIRICALLY VERIFIED headlessly in PyMOL 2.5.0
+        # (tools/probe_first_operator.py: count_atoms == 1, picks C1,
+        # spheres+label post-conditions work on the sele; 03-01 precedent:
+        # C-backed selectors cannot be confirmed from selector.py source
+        # alone).
+        default_sele = "first ({0} and elem C)".format(hero_obj)
         confirmed = self._prompt_fn(
             "This structure has {0} carbons. The hero (C14) is ambiguous. "
             "Highlight the first carbon as the hero?".format(n))
