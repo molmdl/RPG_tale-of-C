@@ -240,7 +240,7 @@ Plans:
 - [ ] 07-02-PLAN.md — Approval batch A: glycolysis+pyruvate sources/claims/diseases (Wave 1)
 - [ ] 07-03-PLAN.md — Approval batch B: TCA/RNG shuffle design + weights + mutants (Wave 1)
 - [ ] 07-04-PLAN.md — Approval batch C: ETC/endings/bad-pool (Wave 1)
-- [ ] 07-05-PLAN.md — Registry landing: citations.json + sources.json; gate residual = placeholders only (Wave 2)
+- [x] 07-05-PLAN.md — Registry landing: citations.json + sources.json; gate residual = placeholders only (Wave 2) ✓ COMPLETE (2026-09-01; registry 5→77 claims [73 approved + 4 pending] / 5→81 sources [72 approved + 6 rejected + 3 pending]; all 13 -cand ids kept verbatim; D1=B + D5 fired claims landed; J&F 19.1/19.2/19.3 + 16.04 landing-time subpage confirms discharged live; 1ZP0 fetched; rejections provenance-tracked; Gaignard/Pillai corrections landed; gate residual = exactly the 9 documented placeholder buckets, 0 unapproved; 324 tests green; commit dde6663)
 - [ ] 07-06-PLAN.md — Pyruvate-branch content + anaerobic treatment + eligibility tests (Wave 4)
 - [ ] 07-07-PLAN.md — Intro content (light-touch; start-node shape preserved) (Wave 3)
 - [ ] 07-08-PLAN.md — Glycolysis content incl. gly.pfk_restored text (Wave 4)
