@@ -245,7 +245,7 @@ Plans:
 - [ ] 07-07-PLAN.md — Intro content (light-touch; start-node shape preserved) (Wave 3)
 - [ ] 07-08-PLAN.md — Glycolysis content incl. gly.pfk_restored text (Wave 4)
 - [ ] 07-09-PLAN.md — ETC content + end.true metamorphosis + PDB loads (Wave 3)
-- [ ] 07-10-PLAN.md — Good+Normal endings content (proton-leak reframe) (Wave 3)
+- [x] 07-10-PLAN.md — Good+Normal endings content (proton-leak reframe) (Wave 3) ✓ COMPLETE (2026-09-02; endings.json 3/3 nodes authored with approved claims only — good.fatty_acid citrate-export/ATP-citrate-lyase exit-event scope [TCA-CITRATE-EXPORT-01 + AMPHIBOLIC + CO2-EXIT], good.amino_acid transamination/PLP [TCA-TRANSAMINATION-01 + AMPHIBOLIC], normal.co2 oq2-uncoupling reframe [TCA-CO2-EXIT-01 + PYR-PDH-01 + ETC-PMF-01 + ATP-SOUL-07 + ETC-UCP-01 + ATP-SOUL-08; PROTONS never "electrons leak"; zero ROS; zero numeric yields]; NARRATIVE-FRAMING FLAG deleted; on_enter/choices/tags untouched; 55 nodes / 21 endings unchanged; 324 tests + 20 reachability green; ENDINGS placeholder bucket 0; commit 0cd8d67)
 - [ ] 07-11-PLAN.md — Bad-ending pool content (15 nodes) (Wave 3)
 - [ ] 07-12-PLAN.md — Restoration topology: +2 nodes, counts 55→57, tests, DESIGN, diagram (Wave 3)
 - [ ] 07-13-PLAN.md — TCA content: design-B weights, PDBs, OGDH-if-D5 (Wave 5)
