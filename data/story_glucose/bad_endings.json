@@ -1,9 +1,9 @@
 {
   "nodes": {
     "bad.lost_connection": {
-      "text_dramatic": "TBD — lost connection to the host.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "The thread goes slack. Whatever your edit just did, the game has no story for it — the connection between you and the host is simply lost, and the pathway closes around the silence.",
+      "text_teaching": "This edit isn't one the game models. In reality, almost any enzyme residue can be mutated; this game carries a curated set of meaningful edits per enzyme, and anything outside that set falls through to an ending like this one. An unmodeled edit isn't necessarily wrong — it is simply unknown territory for the story. Try a modeled edit, or the restore safety net, to keep the journey going.",
+      "claim_ids": [],
       "tags": ["ending:bad", "edit:unknown"],
       "on_enter": [
         {"op": "hide_all"}
@@ -12,9 +12,9 @@
       "choices": []
     },
     "bad.released_from_host": {
-      "text_dramatic": "TBD — released from the host.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "The host lets go. One edit the story cannot narrate, and the weave of reactions that carried you simply releases its hold — you drift out of the pathway, free and uncarried.",
+      "text_teaching": "Same rule, different flavor: the game can only narrate the edits it models. This edit isn't in the curated set, so the story releases you from the host rather than invent a consequence it cannot ground. Nothing was claimed about the chemistry — the game simply does not know.",
+      "claim_ids": [],
       "tags": ["ending:bad", "edit:unknown"],
       "on_enter": [
         {"op": "hide_all"}
@@ -23,9 +23,9 @@
       "choices": []
     },
     "bad.cycle_trap_host_death": {
-      "text_dramatic": "TBD — the cycle has spun too long; the host fades and you are lost.",
-      "text_teaching": "TBD — Phase 7 teaching text (the cycle-trap mechanism: the TCA RNG 0.5/0.5 keeps drawing the 'next turn' loop; after N turns the host cannot sustain the cycle).",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "The wheel turns, and turns, and turns. One more turn of the cycle, the shuffle keeps saying — and the host, waiting for an energy harvest that never completes, fades. The wheel stops. You are lost with it.",
+      "text_teaching": "The trap is mechanical: the TCA shuffle's 0.5/0.5 wheel kept drawing \"one more turn\", and a run that loops without ever completing its harvest ends here. The death itself is the grounded part: sustained failure of the respiratory chain starves the organism of usable energy — the flow of electrons to oxygen is vital for survival. The looping itself is a game device, not a chemistry claim; the verified grounding is simply that energy-harvest failure is lethal.",
+      "claim_ids": ["BAD-HOST-01"],
       "tags": ["ending:bad", "cycle_trap"],
       "on_enter": [
         {"op": "hide_all"}
@@ -34,9 +34,9 @@
       "choices": []
     },
     "bad.critical_residue_break": {
-      "text_dramatic": "TBD — you broke a critical residue; the host cannot survive.",
-      "text_teaching": "TBD — Phase 7 teaching text (the critical-residue-break mechanism: the EditRouter routes known critical-residue edits here).",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "The residue you broke was load-bearing. The enzyme's catalytic core buckles under the change, and the reaction it was built to carry stops mid-stride.",
+      "text_teaching": "Mutating a catalytic or structurally critical residue can abolish enzyme activity outright. This is the inverse of the restoration arc: the same sensitivity that makes one disease mutation devastating is what a correct edit repairs. The disease alleles featured in this game — in pyruvate dehydrogenase, isocitrate dehydrogenase, the respiratory chain — all sit on residues exactly like this one.",
+      "claim_ids": ["BAD-CRIT-01"],
       "tags": ["ending:bad", "edit:known_critical"],
       "on_enter": [
         {"op": "hide_all"}
@@ -45,9 +45,9 @@
       "choices": []
     },
     "bad.enzyme_collapse": {
-      "text_dramatic": "TBD — your edit misfolded the enzyme; it collapses into a useless tangle.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "Your edit unsettled the enzyme from the inside. The precise fold it depended on gives way, and with it goes the shape that made it an enzyme — a working machine collapsing into inert protein.",
+      "text_teaching": "An enzyme works only while it holds its folded shape. An edit that destabilizes that shape leaves the enzyme unable to do its job — a loss at the level of the single enzyme. (Its sibling ending, the misfolded aggregate, tells the cell-level version of this story.)",
+      "claim_ids": [],
       "tags": ["ending:bad", "edit:unknown"],
       "on_enter": [
         {"op": "hide_all"}
@@ -56,9 +56,9 @@
       "choices": []
     },
     "bad.wrong_substrate_trapped": {
-      "text_dramatic": "TBD — a foreign substrate is jammed in the active site; the reaction stalls.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "Something that is not the rightful substrate sits wedged in the active site — close enough to bind, wrong enough to jam. The reaction stalls with the impostor in the doorway.",
+      "text_teaching": "Enzymes can be stalled by impostors: molecules shaped enough like the substrate to occupy the active site, but unable to be turned over. With the site occupied, the real substrate waits, and the reaction grinds to a halt.",
+      "claim_ids": [],
       "tags": ["ending:bad", "edit:unknown"],
       "on_enter": [
         {"op": "hide_all"}
@@ -67,9 +67,9 @@
       "choices": []
     },
     "bad.broken_active_site": {
-      "text_dramatic": "TBD — the catalytic residues are scattered; the active site is broken.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "The catalytic residues are scattered. The active site — the pocket cut to fit one reaction — no longer holds its pieces in working reach, and the chemistry it hosted stops.",
+      "text_teaching": "When the residues that make up an active site are disrupted, catalysis fails — the pocket is where the enzyme actually does its work. This is the site-scoped face of the critical-residue rule: the same principle, focused on the reaction pocket itself.",
+      "claim_ids": ["BAD-ACTSITE-01"],
       "tags": ["ending:bad", "edit:unknown"],
       "on_enter": [
         {"op": "hide_all"}
@@ -78,9 +78,9 @@
       "choices": []
     },
     "bad.lost_in_cytosol": {
-      "text_dramatic": "TBD — with no enzyme to bind you, you drift free in the cytosol, adrift and purposeless.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "With no enzyme to bind you, you drift free in the cytosol — one molecule among thousands, jostled by diffusion, going nowhere in particular.",
+      "text_teaching": "A metabolite reacts only when its enzyme binds it. Unbound, it is carried by diffusion alone — present, mobile, and chemically idle. The cell's chemistry happens in encounters, and without your enzyme there is no encounter that matters.",
+      "claim_ids": ["BAD-DIFFUSE-01"],
       "tags": ["ending:bad", "edit:unknown"],
       "on_enter": [
         {"op": "hide_all"}
@@ -89,9 +89,9 @@
       "choices": []
     },
     "bad.proton_leak": {
-      "text_dramatic": "TBD — the proton gradient bleeds away; your electrons leak to nowhere.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "The gradient bleeds away. Protons slip back across the membrane without turning the great turbine, and the pressure that should have driven ATP synthesis dissipates as warmth. The current below goes on — but the harvest is lost.",
+      "text_teaching": "Proton leak — uncoupling — lets protons re-enter the mitochondrial matrix without passing through ATP synthase: the proton-motive force dissipates without driving ATP synthesis, while electron transport and CO2 production continue. Brown fat tissue even uses this deliberately, diverting the gradient into heat (UCP1) to keep the body warm. This is a story about protons and the gradient — the electrons themselves keep flowing.",
+      "claim_ids": ["ETC-UCP-01"],
       "tags": ["ending:bad", "edit:unknown"],
       "on_enter": [
         {"op": "hide_all"}
@@ -100,9 +100,9 @@
       "choices": []
     },
     "bad.misfolded_aggregate": {
-      "text_dramatic": "TBD — the enzyme aggregates into a proteostasis tangle; the cell flags it for destruction.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "The misfolded enzyme does not stay alone. Broken shapes find each other, clump, and tangle — a mass the cell marks for disposal, carting it away piece by piece.",
+      "text_teaching": "When proteins misfold badly, the cell's quality-control machinery recognizes the damage: misfolded and aggregated proteins are flagged and cleared. This ending is the cell-level story — the enzyme is not merely inert, it is marked for destruction — while the sibling ending, the enzyme collapse, is the single-enzyme story of losing the working fold.",
+      "claim_ids": [],
       "tags": ["ending:bad", "edit:unknown"],
       "on_enter": [
         {"op": "hide_all"}
@@ -111,9 +111,9 @@
       "choices": []
     },
     "bad.active_site_destroyed": {
-      "text_dramatic": "TBD — this specific edit shredded the active site; the enzyme is definitively dead.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "This edit did not disturb the active site. It destroyed it. The pocket that held the reaction is gone, and with it any question of what the enzyme might still do.",
+      "text_teaching": "A known-wrong edit aimed inside the active site is the most direct way to kill an enzyme: disrupt the catalytic residues and catalysis fails outright. This is the severe sibling of the broken active site — the same rule at full force, and no way back except the restore safety net.",
+      "claim_ids": ["BAD-ACTSITE-01"],
       "tags": ["ending:bad", "edit:known"],
       "on_enter": [
         {"op": "hide_all"}
@@ -122,9 +122,9 @@
       "choices": []
     },
     "bad.substrate_channel_blocked": {
-      "text_dramatic": "TBD — the substrate channel is plugged; nothing enters, nothing leaves.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "The way in is plugged. The substrate crowds at a doorway that no longer opens, and a reaction built on access dies of isolation.",
+      "text_teaching": "The substrate can no longer reach the active site. The site itself may be perfectly intact — but a buried reaction pocket is only as good as its access path, and the path is blocked. The game keeps this explanation at the level of the principle; channel structures differ from enzyme to enzyme.",
+      "claim_ids": ["BAD-CHANNEL-01"],
       "tags": ["ending:bad", "edit:known"],
       "on_enter": [
         {"op": "hide_all"}
@@ -133,9 +133,9 @@
       "choices": []
     },
     "bad.cofactor_lost": {
-      "text_dramatic": "TBD — the cofactor (NAD+/FAD) can no longer bind; the reaction is starved.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "The cofactor no longer fits. The enzyme's helper — the piece it cannot work without — reaches for its seat and finds the doorway changed. NAD+ and FAD pass by unbound, and the reaction starves.",
+      "text_teaching": "Mutations in cofactor-binding residues can prevent the cofactor from binding, and without its cofactor the enzyme has no chemistry to conduct. The game's own respiratory-chain cast depends on this: Complex I carries FMN and iron–sulfur clusters, Complex II carries FAD — in this story, cofactors are cast members too.",
+      "claim_ids": ["BAD-COFACTOR-01"],
       "tags": ["ending:bad", "edit:known"],
       "on_enter": [
         {"op": "hide_all"}
@@ -144,9 +144,9 @@
       "choices": []
     },
     "bad.denature_ph_change": {
-      "text_dramatic": "TBD — extreme pH shatters the enzyme's ionic bonds and salt bridges; it unfolds into a useless tangle and its catalytic fire goes out.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_BAD"],
+      "text_dramatic": "The shift in acidity is too much, too fast. The interactions that held the enzyme's shape give way, and it unfolds — the catalytic fire going out with the fold.",
+      "text_teaching": "This is not a routine event in a living cell: the mitochondrial matrix holds a stable, slightly alkaline pH (about 7.8), so a shift violent enough to denature proteins means pathology or a laboratory condition, not ordinary metabolism. The same protonation sensitivity you can explore through careful protonation edits is what extreme pH overwhelms — a controlled nudge teaches; a flood destroys.",
+      "claim_ids": [],
       "tags": ["ending:bad", "edit:unknown"],
       "on_enter": [
         {"op": "hide_all"}
@@ -157,7 +157,7 @@
     "edit.prompt": {
       "text_dramatic": "TBD — you stand before the enzyme. [STRUCTURAL STUB: at runtime, the EditRouter (rpg/edit_router.py) routes known edits to a defined branch node and unknown edits to the bad-ending pool; this stub's choices are structural BFS paths, not player-facing options.]",
       "text_teaching": "",
-      "claim_ids": ["PLACEHOLDER_PHASE7_EDIT"],
+      "claim_ids": [],
       "tags": ["edit:prompt"],
       "on_enter": [
         {"op": "hide_all"}
