@@ -17,7 +17,7 @@
     "approval_status": "approved",
     "approved_by": "human",
     "approved_date": "2026-08-15",
-    "notes": "Hub verified live 2026-08-15; exact Citric Acid Cycle chapter URL confirmed 2026-08-15 during Plan 05-05 (Fundamentals of Biochemistry Vol. II, Ch 16). The load-bearing prochirality + aconitase-discrimination mechanism is in section 16.02 'Reactions of the Citric Acid Cycle' at https://bio.libretexts.org/Bookshelves/Biochemistry/Fundamentals_of_Biochemistry_(Jakubowski_and_Flatt)/02%3A_Unit_II-_Bioenergetics_and_Metabolism/16%3A_The_Citric_Acid_Cycle/16.02%3A__Reactions_of_the_Citric_Acid_Cycle (citrate synthase forms (S)-citryl-CoA; aconitase 180-degree flip of cis-aconitate = discrimination between citrate's two carboxymethyl groups). License is CC BY-SA 4.0 per the Vol. II cover page metadata (the subpage itself shows 'not declared' - a metadata gap; the volume license governs). Approved by human 2026-08-15 (first batch); this source REPLACES the rejected LEHNINGER-CH-CITRIC_ACID_CYCLE for the 2 high-stakes TCA RNG claims."
+    "notes": "Hub verified live 2026-08-15; chapter URL confirmed 2026-08-15 during Plan 05-05. APPROVED SECTION SCOPE: 16.02 Reactions of the Citric Acid Cycle (approved 2026-08-15; re-verified live 2026-08-30), 16.01 Production of Acetyl-CoA pointer (approved Phase 7 batch A 2026-09-01; subpage fetched live 2026-09-01), and 16.04 Variants of the Citric Acid Cycle scope extension (approved Phase 7 batch B D9 2026-09-01; subpage fetched live 2026-08-30 AND re-confirmed live at landing 2026-09-01: citrate-lyase-cleaves-citrate-to-acetyl-CoA-for-FA-synthesis verbatim, GABA-shunt transamination, anaplerotic framing, no-net-synthesis-from-acetyl-CoA point). SECTION 16.03 (Regulation) WAS NOT FETCHED - OUT of approved scope; no 16.03-grounded claim may be filed (TCA-IDH3-01 softened to 'a key regulatory step' accordingly). Grounding uses ONLY the Jakubowski/Flatt body text; the subpages' Learning-Goals and Summary boxes are marked '(written by Claude, Sonnet 4.6, Anthropic)' and are NEVER used as claim grounding (documented batch-A precedent). License is CC BY-SA 4.0 per the Vol. II cover page metadata (subpage footers show 'not declared' - a metadata gap; the volume license governs). This source REPLACES the rejected LEHNINGER-CH-CITRIC_ACID_CYCLE for the 2 high-stakes TCA RNG claims."
   },
   "LEHNINGER-CH-CITRIC_ACID_CYCLE": {
     "reference": "Lehninger Principles of Biochemistry (Nelson & Cox), Citric Acid Cycle chapter",
@@ -25,26 +25,780 @@
     "approval_status": "rejected",
     "approved_by": "human",
     "approved_date": "2026-08-15",
-    "review_notes": "Rejected per user request 2026-08-15 — avoid print-textbook license issues. Replaced by the LibreTexts Citric Acid Cycle chapter (LIBRETEXTS-METAB-TCA = Jakubowski & Flatt, Fundamentals of Biochemistry Vol. II, Ch 16) which covers the citrate-prochirality + aconitase-discrimination mechanism grounding the 2 high-stakes TCA RNG claims. Provenance retained (NOT deleted) — a rejected source fails the gate identically to a pending one (no Pitfall 6 regression)."
+    "review_notes": "Rejected per user request 2026-08-15 - avoid print-textbook license issues. Replaced by the LibreTexts Citric Acid Cycle chapter (LIBRETEXTS-METAB-TCA = Jakubowski & Flatt, Fundamentals of Biochemistry Vol. II, Ch 16) which covers the citrate-prochirality + aconitase-discrimination mechanism grounding the 2 high-stakes TCA RNG claims. Provenance retained (NOT deleted) - a rejected source fails the gate identically to a pending one (no Pitfall 6 regression)."
   },
   "PDB-4PFK": {
-    "reference": "RCSB PDB 4PFK (phosphofructokinase, G. stearothermophilus, 2.40 Å)",
+    "reference": "RCSB PDB 4PFK (phosphofructokinase, G. stearothermophilus, 2.40 A)",
     "url": "https://www.rcsb.org/structure/4PFK",
     "pdb_doi": "10.2210/pdb4PFK/pdb",
     "source_type": "structural_database_entry",
     "approval_status": "approved",
     "approved_by": "human",
     "approved_date": "2026-08-15",
-    "notes": "VERIFIED at rcsb.org 2026-08-15 — structure exists, resolution + citation read from the RCSB page. Evans/Farrants/Hudson 1981, Philos Trans R Soc London ser B 293:53-62, DOI 10.1098/rstb.1981.0059, PubMed 6115424. Approved by human 2026-08-15 (first batch)."
+    "notes": "VERIFIED at rcsb.org 2026-08-15 - structure exists, resolution + citation read from the RCSB page. Evans/Farrants/Hudson 1981, Philos Trans R Soc London ser B 293:53-62, DOI 10.1098/rstb.1981.0059, PubMed 6115424. Approved by human 2026-08-15 (first batch)."
   },
   "PDB-1CSC": {
-    "reference": "RCSB PDB 1CSC (citrate synthase, Gallus gallus, 1.70 Å)",
+    "reference": "RCSB PDB 1CSC (citrate synthase, Gallus gallus, 1.70 A)",
     "url": "https://www.rcsb.org/structure/1CSC",
     "pdb_doi": "10.2210/pdb1CSC/pdb",
     "source_type": "structural_database_entry",
     "approval_status": "approved",
     "approved_by": "human",
     "approved_date": "2026-08-15",
-    "notes": "VERIFIED at rcsb.org 2026-08-15. Karpusas/Holland/Remington 1991, Biochemistry 30:6024-6031, DOI 10.1021/bi00238a028, PubMed 2043640. Approved by human 2026-08-15 (first batch)."
+    "notes": "VERIFIED at rcsb.org 2026-08-15. Karpusas/Holland/Remington 1991, Biochemistry 30:6024-6031, DOI 10.1021/bi00238a028, PubMed 2043640. Re-verified live 2026-08-30 (batch B): AU = 1 polymer chain; biological assembly 1 = HOMODIMER - the D7 decision keeps the AU-monomer load + a teaching note; assembly loading is FLAGGED, never implemented (no engine surgery). Approved by human 2026-08-15 (first batch)."
+  },
+  "LIBRETEXTS-CATAB-GLYCOLYSIS": {
+    "reference": "LibreTexts Catabolism - 'Glycolysis' (Darik Benson): all 10 steps + priming/payoff phases + PK regulation + pyruvate fate",
+    "url": "https://chem.libretexts.org/Bookshelves/Biological_Chemistry/Supplemental_Modules_(Biological_Chemistry)/Metabolism/Catabolism/Glycolysis",
+    "license": "CC BY-NC-SA 4.0 (footer verbatim)",
+    "source_type": "educational_open_textbook",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S1. Fetched live 2026-08-30 AND re-fetched live 2026-09-01 (approval-time log) - all 10 steps + phases + regulation text confirmed verbatim. Grounds GLY-INTRO-01, GLY-HXK-01, GLY-TRIOSE-01, GLY-PKM-01, AN-G-01."
+  },
+  "LIBRETEXTS-CATAB-FERMENTATION": {
+    "reference": "LibreTexts Catabolism - 'Fermentation' (Benson + Blaber): lactic in muscle, alcoholic in yeast, NAD+ recycling, yield",
+    "url": "https://chem.libretexts.org/Bookshelves/Biological_Chemistry/Supplemental_Modules_(Biological_Chemistry)/Metabolism/Catabolism/Fermentation",
+    "license": "CC BY-NC-SA 4.0 (footer verbatim)",
+    "source_type": "educational_open_textbook",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S2. Fetched live 2026-08-30 AND re-fetched live 2026-09-01 - lactic/alcoholic/NAD+-recycling/yield text confirmed verbatim. Grounds AN-G-02, AN-G-03, AN-G-04, AN-G-05, AN-ANAER-DEF-01, and (with the biooxidation + ETC pages) AN-ETC-02. Load-bearing evidence for the batch-A Decision 5 (ethanolic = yeast-counterfactual teaching moment)."
+  },
+  "LIBRETEXTS-CATAB-BIOOX": {
+    "reference": "LibreTexts Catabolism - 'Biological Oxidation' (O2 as final electron acceptor; NADH/FADH2 reduce O2 releasing Gibbs energy used to make ATP)",
+    "url": "https://chem.libretexts.org/Bookshelves/Biological_Chemistry/Supplemental_Modules_(Biological_Chemistry)/Metabolism/Catabolism/Biological_Oxidation",
+    "license": "CC BY-NC-SA 4.0 (footer verbatim)",
+    "source_type": "educational_open_textbook",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-08-15",
+    "notes": "Phase 7 batch A source S3 = batch C source 'S-BIOX' (same page; the 07-04 ledger's alias recorded here). Verified live 2026-08-15 (Phase 5 anaerobic-framing verification) and re-fetched live 2026-08-30 (batch C research) and 2026-09-01 (batch A approval-time log): O2-as-final-acceptor + NADH/FADH2-reduce-O2 text confirmed, plus the verbatim BAD-HOST-01 anchor 'The flow of electrons is a vital process that provides the necessary energy for the survival of all organisms'. Grounds AN-ETC-02 (with the ETC page) and BAD-HOST-01. Registry-landing note (plan 07-05): the 07-02 ledger described S3/S4 as 'already present'; they were NOT in sources.json at landing time (only 5 Phase-5 sources existed) - landed here from the recorded verdicts."
+  },
+  "LIBRETEXTS-CATAB-ETC": {
+    "reference": "LibreTexts Catabolism - 'Electron Transport Chain' (complex-level chemistry, carriers, PMF, chemiosmosis; NO yields, NO inhibitors)",
+    "url": "https://chem.libretexts.org/Bookshelves/Biological_Chemistry/Supplemental_Modules_(Biological_Chemistry)/Metabolism/Catabolism/Electron_Transport_Chain",
+    "license": "CC BY-NC-SA 4.0 (footer verbatim)",
+    "source_type": "educational_open_textbook",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-08-15",
+    "notes": "Phase 7 batch A source S4 = batch C source 'LIBRETEXTS-METAB-ETC' (same chem.libretexts Catabolism page; the 07-04 ledger's alias recorded here; canonical id = this record). Verified live 2026-08-15 (Phase 5) and re-fetched live 2026-08-30 (batch C research) and 2026-09-01 (batch A approval-time log): 'finally given to oxygen... production of water' + proton-gradient-drives-ATP text confirmed verbatim. Grounds AN-ETC-02 (with the biooxidation page) and the ETC chemistry claims ATP-SOUL-03, ETC-CI-01, ETC-CII-01, ETC-Q-01, ETC-CIII-01, ETC-CYTC-01, ETC-CIV-01, ETC-PMF-01, ETC-CHEM-01 (plus co-sourcing ATP-SOUL-07 with J&F 19.2). Registry-landing note (plan 07-05): landed here from the recorded batch verdicts (the 07-02 'already present' note was inaccurate - see LIBRETEXTS-CATAB-BIOOX)."
+  },
+  "UNIPROT-P08237": {
+    "reference": "UniProtKB P08237 (PFKM_HUMAN) reviewed entry - variant table VAR_006066 G209D ('in GSD7; loss of activity shown by complementation assays in yeast')",
+    "url": "https://rest.uniprot.org/uniprotkb/P08237",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S6. REST fetched live 2026-08-30. Grounds DIS-PFKM-01-cand (with CLINVAR-VCV003375341 + PubMed 7825568)."
+  },
+  "UNIPROT-P30613": {
+    "reference": "UniProtKB P30613 (PKLR) reviewed entry - variant table VAR_011480 R479H ('in CNSHA2; Amish; no conformational change')",
+    "url": "https://rest.uniprot.org/uniprotkb/P30613",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S7. REST fetched live 2026-08-30. R479H re-confirmed (R479W appears nowhere in the curated table). Grounds DIS-PKLR-01-cand (with CLINVAR-VCV000001510 + PubMed 11960989/8161798)."
+  },
+  "UNIPROT-P08559": {
+    "reference": "UniProtKB P08559 (PDHA1) reviewed entry - variant table VAR_004952 V167M ('disrupts magnesium binding and results in deficient activity')",
+    "url": "https://rest.uniprot.org/uniprotkb/P08559",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S8. REST fetched live 2026-08-30. Grounds DIS-PDHA1-01-cand (with CLINVAR-VCV000985548 + PubMed 29970614/8504306)."
+  },
+  "CLINVAR-VCV003375341": {
+    "reference": "ClinVar variation record VCV003375341 - PFKM G209D, classification 'Likely pathogenic' (multiple submitters, no conflicts; last evaluated 2024-09-20)",
+    "url": "https://www.ncbi.nlm.nih.gov/clinvar/VCV003375341/",
+    "license": "Public domain (US government)",
+    "source_type": "clinical_variant_database",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S9. E-utilities fetched live 2026-08-30. Classification is 'Likely pathogenic' (NOT Pathogenic) - the DIS-PFKM-01-cand wording is PINNED to this tier and must never be upgraded."
+  },
+  "CLINVAR-VCV000001510": {
+    "reference": "ClinVar variation record VCV000001510 - PKLR R479H, classification 'Pathogenic' (multiple submitters, no conflicts; last evaluated 2025-12-19)",
+    "url": "https://www.ncbi.nlm.nih.gov/clinvar/VCV000001510/",
+    "license": "Public domain (US government)",
+    "source_type": "clinical_variant_database",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S10. E-utilities fetched live 2026-08-30. Grounds DIS-PKLR-01-cand."
+  },
+  "CLINVAR-VCV000985548": {
+    "reference": "ClinVar variation record VCV000985548 - PDHA1 V167M, classification 'Pathogenic/Likely pathogenic' (last evaluated 2023-12-21)",
+    "url": "https://www.ncbi.nlm.nih.gov/clinvar/VCV000985548/",
+    "license": "Public domain (US government)",
+    "source_type": "clinical_variant_database",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S11. E-utilities fetched live 2026-08-30. Grounds DIS-PDHA1-01-cand."
+  },
+  "PUBMED-7825568": {
+    "reference": "PubMed 7825568 - Raben et al. 1995 (PFKM G209D yeast-complementation characterization)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/7825568/",
+    "license": "Publisher metadata (public); cite-only bibliographic record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S12 (cite-only set). Cross-ref-verified 2026-08-30 via RCSB/UniProt/ClinVar; abstracts NOT fetched (human did not request; cite-only role)."
+  },
+  "PUBMED-8161798": {
+    "reference": "PubMed 8161798 - Kanno et al. 1994 (PKLR deficiency, Amish annotation context)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/8161798/",
+    "license": "Publisher metadata (public); cite-only bibliographic record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S12 (cite-only set). Cross-ref-verified 2026-08-30; abstracts NOT fetched."
+  },
+  "PUBMED-11960989": {
+    "reference": "PubMed 11960989 - Valentini et al. 2002 (PKLR R479H characterization; the 2VGG mutant-structure paper)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/11960989/",
+    "license": "Publisher metadata (public); cite-only bibliographic record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S12 (cite-only set). Cross-ref-verified 2026-08-30; abstracts NOT fetched."
+  },
+  "PUBMED-29970614": {
+    "reference": "PubMed 29970614 - Whitley et al. 2018, J Biol Chem, DOI 10.1074/jbc.RA118.003996 (PDHA1 V138M; the 6CFO/6CER structure paper)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/29970614/",
+    "license": "Publisher metadata (public); cite-only bibliographic record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S12 (cite-only set). Cross-ref-verified 2026-08-30; abstracts NOT fetched."
+  },
+  "PUBMED-8504306": {
+    "reference": "PubMed 8504306 - Chun et al. 1993 (PDH deficiency context)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/8504306/",
+    "license": "Publisher metadata (public); cite-only bibliographic record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S12 (cite-only set). Cross-ref-verified 2026-08-30; abstracts NOT fetched."
+  },
+  "PUBMED-36753880": {
+    "reference": "PubMed 36753880 - Nain-Perez et al. 2023 (the 7FS3 pyruvate-kinase structure paper)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/36753880/",
+    "license": "Publisher metadata (public); cite-only bibliographic record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S12 (cite-only set). Cross-ref-verified 2026-08-30; abstracts NOT fetched."
+  },
+  "PUBMED-29120638": {
+    "reference": "PubMed 29120638 - Rai et al. 2017, J Med Chem, DOI 10.1021/acs.jmedchem.7b00941 (the 5W8J LDHA + inhibitor compound 29 paper)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/29120638/",
+    "license": "Publisher metadata (public); cite-only bibliographic record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S12 (cite-only set). Cross-ref-verified 2026-08-30; abstracts NOT fetched."
+  },
+  "PDB-7FS3": {
+    "reference": "RCSB PDB 7FS3 (human PKLR L-type pyruvate kinase + allosteric modulator 15 + oxalate + Mg2+ + K+, 1.66 A)",
+    "url": "https://www.rcsb.org/structure/7FS3",
+    "pdb_doi": "10.2210/pdb7FS3/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S13 (group verdict). RCSB data API fetched live 2026-08-30. CAST-PKLR-PDB-01's selected cast (Decision 3 default). Teaching note owed: 7FS3 is L-type (liver) while the disease is RBC - one honest line (batch-A Decision 3)."
+  },
+  "PDB-2VGB": {
+    "reference": "RCSB PDB 2VGB (human erythrocyte R-type pyruvate kinase, 2.73 A; Valentini 2002)",
+    "url": "https://www.rcsb.org/structure/2VGB",
+    "pdb_doi": "10.2210/pdb2VGB/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S13 (group verdict). RCSB data API fetched live 2026-08-30. Approved as a source; the #6 2VGB claim VARIANT WORDING was NOT selected (Decision 3 chose 7FS3) - 2VGB remains an approved source only, no claim consumes it."
+  },
+  "PDB-2VGG": {
+    "reference": "RCSB PDB 2VGG ('Human erythrocyte pyruvate kinase: R479H mutant', 2.74 A; Valentini 2002; keywords include 'DISEASE MUTATION')",
+    "url": "https://www.rcsb.org/structure/2VGG",
+    "pdb_doi": "10.2210/pdb2VGG/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S13 (group verdict). RCSB data API fetched live 2026-08-30. The old ID 1LIY is REMOVED from RCSB - 2VGG is the current R479H-mutant ID. Consumed by CAST-PKLR-MUTANT-PDB-01 (Decision 3 adopts the 2VGG mutant-PDB approach)."
+  },
+  "PDB-6CFO": {
+    "reference": "RCSB PDB 6CFO (human PDHA1 E1 heterotetramer + covalent TDP-acetyl-phosphinate analog + Mg2+, 2.70 A; Whitley 2018, DOI 10.1074/jbc.RA118.003996)",
+    "url": "https://www.rcsb.org/structure/6CFO",
+    "pdb_doi": "10.2210/pdb6CFO/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S13 (group verdict). RCSB data API fetched live 2026-08-30. Bonus corroboration: the approved LIBRETEXTS-METAB-TCA section 16.01 body embeds 6CFO (fetched live 2026-09-01). Consumed by CAST-PDH-WT-PDB-01-cand; the restoration arc applies the edit on 6CFO (Decision 4 = option a)."
+  },
+  "PDB-6CER": {
+    "reference": "RCSB PDB 6CER (human PDH E1 V138M mutant, 2.69 A; Whitley 2018; ligands TPP + Mg2+)",
+    "url": "https://www.rcsb.org/structure/6CER",
+    "pdb_doi": "10.2210/pdb6CER/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S13 (group verdict). RCSB data API fetched live 2026-08-30. Approved but DORMANT: Decision 4 chose applyEdit-on-6CFO (option a), so no plan consumes 6CER this phase; approval recorded so a later phase could adopt option (b) without re-approval."
+  },
+  "PDB-5W8J": {
+    "reference": "RCSB PDB 5W8J (human LDHA wild-type + inhibitor compound 29, 1.55 A; Rai 2017, DOI 10.1021/acs.jmedchem.7b00941)",
+    "url": "https://www.rcsb.org/structure/5W8J",
+    "pdb_doi": "10.2210/pdb5W8J/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S13 (group verdict). RCSB data API fetched live 2026-08-30. Consumed by CAST-LDH-PDB-01. Decision 6 (default): keep 5W8J; teaching text names the bound research inhibitor ('a research inhibitor sits in the very pocket lactate would occupy')."
+  },
+  "PUBCHEM-CID-5793": {
+    "reference": "PubChem compound CID 5793 (D-glucose, C6H12O6, MW 180.16, 3D conformer)",
+    "url": "https://pubchem.ncbi.nlm.nih.gov/compound/5793",
+    "license": "Public domain (US government)",
+    "source_type": "compound_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S14. PUG REST fetched live 2026-08-30. Grounds CAST-GLC-PUBCHEM-01 (glucose 3D model; unblocks gly.start show_as glucose)."
+  },
+  "PUBCHEM-CID-1060": {
+    "reference": "PubChem compound CID 1060 (pyruvic acid - OPTIONAL source)",
+    "url": "https://pubchem.ncbi.nlm.nih.gov/compound/1060",
+    "license": "Public domain (US government)",
+    "source_type": "compound_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch A source S15 (optional; approved as part of approve-all covering optional claim CAST-PYR-PUBCHEM-01, which is itself dormant this phase). PUG REST fetched live 2026-08-30. If ever consumed, the neutral-acid-vs-physiological-anion nuance MUST be stated in text."
+  },
+  "LIBRETEXTS-CATAB-PYRUVATE-DH": {
+    "reference": "LibreTexts Catabolism - 'Pyruvate Dehydrogenase Complex' page",
+    "url": "https://chem.libretexts.org/Bookshelves/Biological_Chemistry/Supplemental_Modules_(Biological_Chemistry)/Metabolism/Catabolism/Pyruvate_Dehydrogenase_Complex",
+    "license": "CC BY-NC-SA 4.0 (footer)",
+    "source_type": "educational_open_textbook",
+    "approval_status": "rejected",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "review_notes": "REJECTED as claim source (batch A R1, pre-verified; human did not override). Provenance: the page is a STUB (one Wikipedia figure, empty references) - fetched live 2026-08-30, unusable for PYR-PDH-01. Recorded so future researchers do not re-fetch it. PYR-PDH-01 routes to the approved book instead (LIBRETEXTS-METAB-TCA, new 16.01 pointer). Same pattern as the LEHNINGER rejection - rejected sources keep provenance, are never deleted."
+  },
+  "PDB-5GRF": {
+    "reference": "RCSB PDB 5GRF ('Crystal structure of the alpha gamma mutant (gamma-K151A) of human IDH3 in complex with Mg2+, citrate and ADP', 2.5 A)",
+    "url": "https://www.rcsb.org/structure/5GRF",
+    "pdb_doi": "10.2210/pdb5GRF/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "rejected",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "review_notes": "REJECTED as IDH3 cast (batch B D3, replaced by 5GRE). Provenance: RCSB live 2026-08-30 - the structure is the human IDH3 alpha-gamma heterodimer with a gamma-K151A CRYSTALLIZATION MUTATION in the regulatory gamma subunit (catalytic alpha is WT), 2.5 A. Using it would re-create the 2OZL mutant-cast problem that Phase 5.1 fixed via the 6CFO swap. Rejection recorded in the registry so the skeleton's 5GRF reference resolves to the 5GRE swap, not a silent patch."
+  },
+  "PDB-1C97": {
+    "reference": "RCSB PDB 1C97 (bovine S642A catalytic-site mutant aconitase with citrate, 1.8 A; Lloyd et al. 1999; the LibreTexts iCn3D teaching model)",
+    "url": "https://www.rcsb.org/structure/1C97",
+    "pdb_doi": "10.2210/pdb1C97/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "rejected",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "review_notes": "REJECTED as aconitase cast (batch B D6). Provenance: RCSB live 2026-08-30 - bovine S642A CATALYTIC-SITE MUTANT aconitase with citrate, 1.8 A. Catalytic-site mutant as cast = the same disqualifying class as 5GRF/2OZL; viable only with explicit mutant disclosure - NOT recommended, NOT approved."
+  },
+  "PDB-2B3Y": {
+    "reference": "RCSB PDB 2B3Y ('monoclinic crystal form of human cytosolic aconitase (IRP1)', 1.85 A)",
+    "url": "https://www.rcsb.org/structure/2B3Y",
+    "pdb_doi": "10.2210/pdb2B3Y/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "rejected",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "review_notes": "REJECTED as aconitase cast - WRONG ISOFORM (batch B D6). Provenance: RCSB live 2026-08-30 - human CYTOSOLIC aconitase = ACO1/IRP1, 1.85 A, not the mitochondrial ACO2 the TCA cast needs. Wrong-isoform rejection recorded so no future researcher re-proposes it (the brief's open question, answered)."
+  },
+  "WIKIPEDIA-TCA": {
+    "reference": "Wikipedia, 'Citric acid cycle' (revision 1370238747)",
+    "url": "https://en.wikipedia.org/wiki/Citric_acid_cycle",
+    "license": "CC BY-SA 4.0",
+    "source_type": "encyclopedia_open",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B source (D9). Fetched live 2026-08-30. Covers: the carbon-fate isotope result VERBATIM ('The carbons lost as CO2 originate from what was oxaloacetate, not directly from acetyl-CoA. The carbons donated by acetyl-CoA become part of the oxaloacetate carbon backbone after the first turn... Loss of the acetyl-CoA-donated carbons as CO2 requires several turns'); 'cataplerotic' + citrate-export/ATP-citrate-lyase/FA-synthesis (verbatim); transamination amino-acid exits (verbatim: OAA->aspartate/asparagine; alpha-ketoglutarate->glutamine/proline/arginine; PLP cofactor); amphibolic framing; per-turn stoichiometry; IDH 'rate-limiting' table note (NOT filed as claim wording - TCA-IDH3-01 softened per D9); SCS GDP/ADP isoforms. Grounds TCA-RNG-WEIGHT-02-cand, TCA-CARBON-FATE-01-cand, TCA-AMPHIBOLIC-01, TCA-CITRATE-EXPORT-01, TCA-TRANSAMINATION-01, TCA-CO2-EXIT-01, and co-sources TCA-ENTRY-01 + the D2 widening of TCA-RNG-CITRATE-PROCHIRALITY-01."
+  },
+  "WIKIPEDIA-ACONITASE": {
+    "reference": "Wikipedia, 'Aconitase' (revision 1343733503)",
+    "url": "https://en.wikipedia.org/wiki/Aconitase",
+    "license": "CC BY-SA 4.0",
+    "source_type": "encyclopedia_open",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B source (D9). Fetched live 2026-08-30. Mechanism section VERBATIM: 'The carbon atom from which the hydrogen is removed is the one that came from oxaloacetate in the previous step of the citric acid cycle, not the one that came from acetyl CoA, even though these two carbons are equivalent except that one is pro-R and the other pro-S (see Prochirality)' + the 180-degree 'citrate mode' to 'isocitrate mode' flip. Also: His101/Ser642 catalytic residues (pig/bovine numbering); Fe4S4 cluster with labile Fe; fluorocitrate inhibition (optional color only). Co-sources TCA-RNG-WEIGHT-02-cand, TCA-ACONITASE-01, and the D2 widening of TCA-RNG-CITRATE-PROCHIRALITY-01."
+  },
+  "PMID-36520152": {
+    "reference": "Whittle et al. 2023, Genetics in Medicine - 'Biallelic variants in OGDH ... neurodevelopmental disorder' (via ClinVar VCV002443831 links; journal citation-of-record)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/36520152/",
+    "license": "Journal citation-of-record (license not required for factual citation - ClinVar/OMIM ref pattern)",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B source (D9). Was CONDITIONAL ('only if akg_dh text mentions OGDH deficiency') - the condition FIRED by D5=promote, so it is fully approved. Covers OGDH P189L pathogenicity, the OGDHD phenotype, and the unstable-protein functional evidence (HEK293). Verified via the live ClinVar VCV002443831 page 2026-08-30. Grounds DIS-OGDH-01-cand."
+  },
+  "PDB-5GRE": {
+    "reference": "RCSB PDB 5GRE ('Crystal structure of the alpha gamma heterodimer of human IDH3 in complex with Mg2+, citrate and ADP' - WT, 2.65 A, 2017 group)",
+    "url": "https://www.rcsb.org/structure/5GRE",
+    "pdb_doi": "10.2210/pdb5GRE/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B source (per D3). RCSB fetched live 2026-08-30. The IDH3 cast structure replacing 5GRF (rejected - gamma-K151A crystallization mutant). Consumed by CAST-IDH3-PDB-01-cand. Plan 13 swaps the tca.isocitrate_dh load target."
+  },
+  "PDB-1ACO": {
+    "reference": "RCSB PDB 1ACO (bovine Bos taurus P20004 mitochondrial aconitase, trans-aconitate bound, 2.05 A; Lauble et al. 1994, PMID 8151704)",
+    "url": "https://www.rcsb.org/structure/1ACO",
+    "pdb_doi": "10.2210/pdb1ACO/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B source (per D6). RCSB fetched live 2026-08-30. The aconitase cast (human ACO2 has 0 PDB cross-refs - live re-confirmed 2026-08-30). Consumed by CAST-ACO2-PDB-01-cand. HOMOLOGY CAVEAT mandatory in teaching content. OWED before any edits.json aconitase resi signature: bovine-1ACO <-> human S112 mapping via REAL sequence alignment (Phase 5.1 OQ5, load-bearing) - do not author on assumed identity-of-numbering."
+  },
+  "PDB-4WLU": {
+    "reference": "RCSB PDB 4WLU (human MDH2 with L-malate + NAD+ bound, 2.14 A - LibreTexts' own teaching model)",
+    "url": "https://www.rcsb.org/structure/4WLU",
+    "pdb_doi": "10.2210/pdb4WLU/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B source (per D8). RCSB fetched live 2026-08-30. The MDH2 cast - pedagogically richer (substrate + cofactor visible at the active site). 2DFD (apo, 1.9 A) verified but NOT selected. Consumed by CAST-MDH2-PDB-01-cand."
+  },
+  "PDB-6WCV": {
+    "reference": "RCSB PDB 6WCV ('Tartryl-CoA bound to human GTP-specific succinyl-CoA synthetase', 1.52 A)",
+    "url": "https://www.rcsb.org/structure/6WCV",
+    "pdb_doi": "10.2210/pdb6WCV/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B source (D9). RCSB fetched live 2026-08-30. Human SUCLG1 record - excellent resolution. Ligand = tartryl-CoA ANALOG - disclose in teaching text if the ligand is shown. SUCLG1 cast record (routine tier); no cast claim filed (narrative-only node)."
+  },
+  "PDB-5UPP": {
+    "reference": "RCSB PDB 5UPP ('Crystal structure of human fumarate hydratase', 1.8 A)",
+    "url": "https://www.rcsb.org/structure/5UPP",
+    "pdb_doi": "10.2210/pdb5UPP/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B source (D9). RCSB fetched live 2026-08-30. FH cast record (routine tier); no cast claim filed (narrative-only node)."
+  },
+  "PDB-7ACN": {
+    "reference": "RCSB PDB 7ACN (PIG Sus scrofa P16276 aconitase, 2.0 A, isocitrate + nitroisocitrate (product) bound; Lauble/Kennedy/Beinert/Stout 1992, PMID 1547214)",
+    "url": "https://www.rcsb.org/structure/7ACN",
+    "pdb_doi": "10.2210/pdb7ACN/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "pending",
+    "notes": "Phase 7 batch B: verified live 2026-08-30 (research section 7) but NOT SELECTED - D6 runner-up (shows the PRODUCT at the active site). No cast claim filed; may be adopted by a later plan (which would then need approval). Landed as pending to preserve the verified-alternative provenance; the gate never reads sources.json."
+  },
+  "PDB-2DFD": {
+    "reference": "RCSB PDB 2DFD ('Crystal Structure of Human Malate Dehydrogenase Type 2', apo, 1.9 A)",
+    "url": "https://www.rcsb.org/structure/2DFD",
+    "pdb_doi": "10.2210/pdb2DFD/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "pending",
+    "notes": "Phase 7 batch B: verified live 2026-08-30 (research section 7) but NOT SELECTED - D8 runner-up (apo vs the chosen 4WLU substrate+cofactor form). No cast claim filed; may be adopted by a later plan (which would then need approval). Landed as pending to preserve the verified-alternative provenance."
+  },
+  "UNIPROT-Q99798": {
+    "reference": "UniProtKB Q99798 (ACON_HUMAN / ACO2) reviewed entry - variants S112R/G259D/K736N (ICRD, MIM 614559), L74V/G661R (OPA9, MIM 616289), T697N (somatic); 0 PDB cross-refs",
+    "url": "https://rest.uniprot.org/uniprotkb/Q99798",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B evidence citation (D9 group verdict: UniProt + ClinVar records approved as evidence citations). REST fetched live 2026-08-30. Grounds DIS-ACO2-01-cand. The 0-PDB-cross-refs fact is load-bearing for the D6 non-human cast decision."
+  },
+  "UNIPROT-P50213": {
+    "reference": "UniProtKB P50213 (IDH3A_HUMAN) reviewed entry - 8 RP90 missense variants incl. M204I + R316C (UniProt's 'uncertain significance' label is STALE per Phase 5.1)",
+    "url": "https://rest.uniprot.org/uniprotkb/P50213",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B evidence citation. REST fetched live 2026-08-30. Grounds DIS-IDH3A-01-cand (with CLINVAR-VCV000977473 / VCV000977472)."
+  },
+  "UNIPROT-P53597": {
+    "reference": "UniProtKB P53597 (SUCLG1_HUMAN) reviewed entry - variants M14L, G37A, G85A (MTDPS9, rs267607097), P170R (MTDPS9, rs267607099)",
+    "url": "https://rest.uniprot.org/uniprotkb/P53597",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B evidence citation. REST fetched live 2026-08-30. Grounds DIS-SUCLG1-01-cand. Naming note: claim id is DIS-SUCLG1-01 (NOT SUCLG6)."
+  },
+  "UNIPROT-P07954": {
+    "reference": "UniProtKB P07954 (FUMH_HUMAN / FH) reviewed entry - variants incl. R233H (HLRCC; 'catalytically inactive mutant; abolished ability to promote DNA repair'; dbSNP rs121913123), N107T (rs121913121), G282V, A308T, F312C, M328R",
+    "url": "https://rest.uniprot.org/uniprotkb/P07954",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B evidence citation. REST fetched live 2026-08-30. Grounds DIS-FH-01-cand. rsID CORRECTION vs Phase 5.1: R233H = rs121913123 (Phase 5.1 wrote rs121913121, which belongs to N107T per the live fetch)."
+  },
+  "UNIPROT-P40926": {
+    "reference": "UniProtKB P40926 (MDH2_HUMAN) reviewed entry - variants G37R (DEE51; 'severe defects in aerobic respiration... when assayed in a heterologous system'), P133L, P207L",
+    "url": "https://rest.uniprot.org/uniprotkb/P40926",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B evidence citation. REST fetched live 2026-08-30. Grounds DIS-MDH2-01-cand."
+  },
+  "UNIPROT-O75390": {
+    "reference": "UniProtKB O75390 (CISY_HUMAN / citrate synthase) reviewed entry - NEGATIVE re-verification: 0 natural variants, no disease block",
+    "url": "https://rest.uniprot.org/uniprotkb/O75390",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B evidence citation (D9 group verdict listed O75390 in the approved UniProt set). REST fetched live 2026-08-30. The CS negative result (all 7 ClinVar Pathogenic records are structural variants - inversions/CN-gains, not cmd.alter-implementable) re-confirms tca.citrate_synthase stays edit:structural with NO DIS- claim."
+  },
+  "UNIPROT-Q02218": {
+    "reference": "UniProtKB Q02218 (ODHX_HUMAN / OGDH) reviewed entry - disease block EMPTY; 1 variant V1018I (no disease note); UniProt/MANE numbering (NP_002532.2) authoritative for the narrative-only akg_dh node",
+    "url": "https://rest.uniprot.org/uniprotkb/Q02218",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B evidence citation. REST fetched live 2026-08-30. Grounds DIS-OGDH-01-cand (with CLINVAR-VCV002443831 + PMID-36520152). tca.akg_dh is narrative-only (no PDB load) - no PDB mapping needed."
+  },
+  "CLINVAR-VCV000977473": {
+    "reference": "ClinVar variation record VCV000977473 - IDH3A M204I, classification Pathogenic (batch-B live esearch/esummary spot-verification 2026-08-30; 9 pathogenic-missense records for IDH3A)",
+    "url": "https://www.ncbi.nlm.nih.gov/clinvar/VCV000977473/",
+    "license": "Public domain (US government)",
+    "source_type": "clinical_variant_database",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B evidence citation (research section 6.3: 'M204I (VCV 977473) = Pathogenic'). Grounds DIS-IDH3A-01-cand (D4 reaffirm)."
+  },
+  "CLINVAR-VCV000977472": {
+    "reference": "ClinVar variation record VCV000977472 - IDH3A R316C, classification Pathogenic (batch-B live esearch/esummary spot-verification 2026-08-30)",
+    "url": "https://www.ncbi.nlm.nih.gov/clinvar/VCV000977472/",
+    "license": "Public domain (US government)",
+    "source_type": "clinical_variant_database",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B evidence citation (research section 6.3: 'R316C (VCV 977472) = Pathogenic'). The ALTERNATE allele for the isocitrate_dh disease story (D4: M204I default, alt R316C)."
+  },
+  "CLINVAR-VCV002443831": {
+    "reference": "ClinVar variation record VCV002443831 - OGDH P189L (c.566C>T), classification Pathogenic; single submission, literature-only, 'no assertion criteria provided'; condition Oxoglutaricaciduria / oxoglutarate dehydrogenase deficiency (OGDHD); OMIM cross-ref 613022.0003 (gene OGDH MIM 613022; phenotype 203740)",
+    "url": "https://www.ncbi.nlm.nih.gov/clinvar/VCV002443831/",
+    "license": "Public domain (US government)",
+    "source_type": "clinical_variant_database",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch B evidence citation. Live VCV page fetched 2026-08-30. Grounds DIS-OGDH-01-cand (with UNIPROT-Q02218 + PMID-36520152). The single-submitter / no-assertion-criteria evidence tier is MANDATED into the claim's review_notes (D5)."
+  },
+  "LIBRETEXTS-METAB-ETC-II": {
+    "reference": "LibreTexts Catabolism - 'Electron Transport Chain II' page",
+    "url": "https://chem.libretexts.org/Bookshelves/Biological_Chemistry/Supplemental_Modules_(Biological_Chemistry)/Metabolism/Catabolism/Electron_Transport_Chain_II",
+    "license": "CC BY-NC-SA 4.0",
+    "source_type": "educational_open_textbook",
+    "approval_status": "rejected",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "review_notes": "REJECTED (batch C Decision 9). Provenance: the page states OUTDATED stoichiometry - 'three ATP' per NADH and 'an ATP for every two hydrogen ions' (the deprecated pre-1978 3/2 P/O values) - and does NOT cover the F0F1 rotary mechanism. Everything it offers beyond that is covered by LIBRETEXTS-CATAB-ETC + LIBRETEXTS-BIOCHEM-JF-CH19. CONSTRAINT: it must NEVER source a numeric-yield claim (batch C Decision 8 bans those anyway). Retained with provenance (LEHNINGER precedent) - do NOT delete."
+  },
+  "LIBRETEXTS-BIOCHEM-JF-CH19": {
+    "reference": "Jakubowski & Flatt, Fundamentals of Biochemistry Vol. II, Ch 19 Oxidative Phosphorylation (subpages 19.1 Electron-Transfer Reactions in Mitochondria / 19.2 ATP Synthesis / 19.3 Regulation of Oxidative Phosphorylation)",
+    "url": "https://bio.libretexts.org/Bookshelves/Biochemistry/Fundamentals_of_Biochemistry_(Jakubowski_and_Flatt)/02%3A_Unit_II-_Bioenergetics_and_Metabolism/19%3A_Oxidative_Phosphorylation",
+    "license": "CC BY-SA 4.0 (volume-level; chapter page shows 'not declared' - same documented metadata gap as approved Ch 16; volume license governs)",
+    "source_type": "educational_open_textbook",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). Chapter + subpage descriptions fetched live 2026-08-30 (research); LANDING-TIME SUBPAGE-CONTENT CONFIRM DISCHARGED 2026-09-01 (plan 07-05 webfetches): 19.1 subpage live - complexes I-IV structure/function, electron-transfer mechanisms, cofactors (FMN, Fe/S clusters, hemes), proton coupling (grounds C1-C8 depth, BAD-CRIT-01, BAD-COFACTOR-01); 19.2 subpage live - F0F1 ATP synthase structure + Boyer LOT binding-change mechanism + proton path through Fo (DISCHARGES the ATP-SOUL-07 wording condition; the page even models 1E79 and discusses DCCD); 19.3 subpage live - 'Coupling and uncoupling of electron and proton transport' + 'A closer look at uncoupler protein 1 (UCP1)' sections with verbatim proton-leak/ANT/UCP1 text (DISCHARGES the ETC-UCP-01 condition; verbatim: 'Protons can also leak away from the proton gradient if they bypass the ATP synthase complex and pass through the inner membrane with the help of specific carriers and protein uncouplers'; 'an inducible leak through specific proteins, adenine nucleotide translocase (ANT), and uncoupling proteins (UCPs), leading to the loss of energy as heat'; 'UCP1 is an inner membrane protein in the mitochondria that bypasses the movement of protons through the c-ring of F1'). Same book as the approved LIBRETEXTS-METAB-TCA. Grounding uses ONLY the Jakubowski/Flatt body text; the subpages' Learning-Goals and Summary boxes are marked '(written by Claude, Sonnet 4.6, Anthropic)' and are NEVER used as claim grounding. Backs C9 (19.2), C1-C8 depth (19.1), ETC-UCP-01 + bad.proton_leak source (19.3)."
+  },
+  "PDB-5LDW": {
+    "reference": "RCSB PDB 5LDW ('Structure of mammalian respiratory Complex I, class1' - bovine Bos taurus heart, ELECTRON MICROSCOPY / cryo-EM single particle, 4.27 A FSC 0.143; Zhu, Vinothkumar, Hirst 2016, Nature 536:354-358, DOI 10.1038/nature19095, PubMed 27509854)",
+    "url": "https://www.rcsb.org/structure/5LDW",
+    "pdb_doi": "10.2210/pdb5LDW/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 1 - ETC PDB set approved as-is). RCSB Data API fetched live 2026-08-30. NDUFS8 = chain I (05.1 coordinate-verified; resi 68 = ARG). Cast text must say 'resolution 4.27 Angstrom (cryo-EM)' - it is EM, not X-ray. Ligands: FMN/N3/FES/SF4/ZN."
+  },
+  "PDB-1ZOY": {
+    "reference": "RCSB PDB 1ZOY ('Crystal Structure of Mitochondrial Respiratory Complex II from porcine heart at 2.4 Angstroms' - Sus scrofa, X-ray; Sun et al. 2005, Cell 121:1043-1057, DOI 10.1016/j.cell.2005.05.025, PubMed 15989954)",
+    "url": "https://www.rcsb.org/structure/1ZOY",
+    "pdb_doi": "10.2210/pdb1ZOY/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 1). RCSB Data API fetched live 2026-08-30. SDHA = chain A (05.1 coordinate-verified; resi 512 = ARG). Ligands: FAD/FES/SF4/HEM. complex_ii promoted to PDB-bearing per Decision 6b (plan 09 adds the load)."
+  },
+  "PDB-1BGY": {
+    "reference": "RCSB PDB 1BGY ('CYTOCHROME BC1 COMPLEX FROM BOVINE' - Bos taurus, X-ray 3.0 A; Iwata et al. 1998, Science 281:64-71, DOI 10.1126/science.281.5373.64, PubMed 9651245)",
+    "url": "https://www.rcsb.org/structure/1BGY",
+    "pdb_doi": "10.2210/pdb1BGY/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 1). RCSB Data API fetched live 2026-08-30. CYC1 = chains D + P (05.1 coordinate-verified: resi 12 = TRP, resi 131 = LEU). Ligands: FES/HEC/HEM. complex_iii promoted to PDB-bearing per Decision 6b (plan 09 adds the load)."
+  },
+  "PDB-1OCC": {
+    "reference": "RCSB PDB 1OCC ('STRUCTURE OF BOVINE HEART CYTOCHROME C OXIDASE AT THE FULLY OXIDIZED STATE' - Bos taurus, X-ray 2.8 A; Tsukihara et al. 1996, Science 272:1136-1144, PubMed 8638158)",
+    "url": "https://www.rcsb.org/structure/1OCC",
+    "pdb_doi": "10.2210/pdb1OCC/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 1). RCSB Data API fetched live 2026-08-30. COX4I1 = chains D + Q (05.1 coordinate-verified: resi 130 = PRO). Ligands: CU/HEA/MG/ZN. ALREADY loads in the skeleton's on_enter. Note: the structure shows BOTH monomers - edit targets chain D only (05.1 OQ-5)."
+  },
+  "PDB-1E79": {
+    "reference": "RCSB PDB 1E79 ('Bovine F1-ATPase inhibited by DCCD (dicyclohexylcarbodiimide)' - Bos taurus, X-ray 2.4 A; Gibbons, Montgomery, Leslie, Walker 2000, Nat Struct Biol 7:1055-1061, DOI 10.1038/80981, PubMed 11062563)",
+    "url": "https://www.rcsb.org/structure/1E79",
+    "pdb_doi": "10.2210/pdb1E79/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 1 + Decision 2). FIRST source-record approval - 1E79 was never per-claim approved before (plan 07-05 adds the record). RCSB Data API fetched live 2026-08-30. NOT rat liver (task-brief assumption corrected). Ligands: ATP/ADP/MG/DCW (the covalent DCCD adduct). Decision 2 keeps 1E79; the DCCD caveat becomes a teaching beat ('shown with its DCCD inhibitor bound - the molecule researchers used to freeze it for photography'); 1BMF recorded as the documented alternative, NOT selected."
+  },
+  "PDB-1ZP0": {
+    "reference": "RCSB PDB 1ZP0 ('Crystal Structure of Mitochondrial Respiratory Complex II bound with 3-nitropropionate and 2-thenoyltrifluoroacetone' - Sus scrofa, X-ray 3.5 A; Sun et al. 2005, Cell 121:1043-1057, DOI 10.1016/j.cell.2005.05.025, PubMed 15989954 - the same primary citation as 1ZOY)",
+    "url": "https://www.rcsb.org/structure/1ZP0",
+    "pdb_doi": "10.2210/pdb1ZP0/pdb",
+    "source_type": "structural_database_entry",
+    "approval_status": "pending",
+    "notes": "Phase 7 batch C: existence anchor verified (via 1ZOY's related-entries, live 2026-08-30) and INDIVIDUALLY FETCHED AT LANDING 2026-09-01 (plan 07-05 discharged the owed fetch): entry live, X-ray 3.5 A, deposited 2005-05-16, ligands F3S/FES/HEM/SF4 plus the two inhibitors; related-entry note '1ZOY is the apo-structure with no inhibitors bound'. Landed as PENDING: the batch-C verdict was 'existence anchor verified; MEDIUM until individually fetched' and the claim's inhibitor-chemistry wording (named compounds malonate/3NP) still needs its own per-claim chemistry source at authoring time (batch-C BAD-INHIB-01 verdict). The gate never reads sources.json; a later registry write may approve this record together with BAD-INHIB-01."
+  },
+  "UNIPROT-O00217": {
+    "reference": "UniProtKB O00217 (NDUS8_HUMAN / NDUFS8, 210 aa) - VARIANT 102 R->H (in MC1DN2; dbSNP:rs121912638), VAR_019539, evidence PubMed:9837812; transit peptide 1..34",
+    "url": "https://rest.uniprot.org/uniprotkb/O00217",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). REST fetched live 2026-08-30. Grounds DIS-NDUFS8-01-cand."
+  },
+  "UNIPROT-P31040": {
+    "reference": "UniProtKB P31040 (SDHA_HUMAN, 664 aa) - VARIANT 554 R->W (in LS; dbSNP:rs9809219), VAR_002449, evidence PubMed:7550341; transit 1..42",
+    "url": "https://rest.uniprot.org/uniprotkb/P31040",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). REST fetched live 2026-08-30. Grounds DIS-SDHA-01-cand."
+  },
+  "UNIPROT-P08574": {
+    "reference": "UniProtKB P08574 (CY1_HUMAN / CYC1, 325 aa) - VARIANT 96 W->C (in MC3DN6; dbSNP:rs587777041), VAR_070847, AND VARIANT 215 L->F (in MC3DN6; dbSNP:rs587777042), VAR_070848 - both evidence PubMed:23910460; transit 1..84",
+    "url": "https://rest.uniprot.org/uniprotkb/P08574",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). REST fetched live 2026-08-30. Grounds DIS-CYC1-01-cand (Decision 3 selected L215F / VAR_070848; W96C / VAR_070847 documented as the discarded skeleton default)."
+  },
+  "UNIPROT-P13073": {
+    "reference": "UniProtKB P13073 (COX41_HUMAN / COX4I1, 169 aa) - VARIANT 152 P->T (in MC4DN16), VAR_084182, evidence PubMed:31290619; transit 1..22; also VARIANT 101..102 KT->NS (PubMed:28766551, a 2-residue indel)",
+    "url": "https://rest.uniprot.org/uniprotkb/P13073",
+    "license": "CC BY 4.0",
+    "source_type": "protein_database_entry",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). REST fetched live 2026-08-30. P13073 confirmed as COX4I1; the task brief's 'UniProt P10515' is a DIFFERENT protein - rejected as an artifact, never copied downstream. Grounds DIS-COX4I1-01-cand."
+  },
+  "CLINVAR-VCV000007512": {
+    "reference": "ClinVar variation record VCV000007512 - NDUFS8 R102H, classification 'Conflicting classifications of pathogenicity' (last evaluated 2024-05-23, criteria provided, conflicting); OMIM 602141.0002",
+    "url": "https://www.ncbi.nlm.nih.gov/clinvar/VCV000007512/",
+    "license": "Public domain (US government)",
+    "source_type": "clinical_variant_database",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30. The conflicting classification is the KNOWN WEAK SPOT for DIS-NDUFS8-01-cand - the claim is kept on UniProt + original-paper strength (Loeffen 1998)."
+  },
+  "CLINVAR-VCV000008742": {
+    "reference": "ClinVar variation record VCV000008742 - SDHA R554W, classification 'Likely pathogenic' (last evaluated 2025-12-15, criteria provided, multiple submitters, no conflicts); traits include MC2DN1, PPGL5, NDAXOA, CMD1GG, Leigh syndrome (256000); OMIM 600857.0001",
+    "url": "https://www.ncbi.nlm.nih.gov/clinvar/VCV000008742/",
+    "license": "Public domain (US government)",
+    "source_type": "clinical_variant_database",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30. Grounds DIS-SDHA-01-cand."
+  },
+  "CLINVAR-VCV000066019": {
+    "reference": "ClinVar variation record VCV000066019 - CYC1 W96C (NM_001916.5:c.288G>T p.Trp96Cys), classification Pathogenic (last evaluated 2013-08-08, review status 'no assertion criteria provided'); trait MC3DN6 (OMIM 615453); OMIM 123980.0001",
+    "url": "https://www.ncbi.nlm.nih.gov/clinvar/VCV000066019/",
+    "license": "Public domain (US government)",
+    "source_type": "clinical_variant_database",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30. The DISCARDED skeleton-default allele's record (Decision 3 chose L215F on evidence strength); retained so the W96C documentation resolves."
+  },
+  "CLINVAR-VCV000066020": {
+    "reference": "ClinVar variation record VCV000066020 - CYC1 L215F (NM_001916.5:c.643C>T p.Leu215Phe), classification Pathogenic (last evaluated 2025-11-20, review status 'criteria provided, single submitter'); OMIM 123980.0002",
+    "url": "https://www.ncbi.nlm.nih.gov/clinvar/VCV000066020/",
+    "license": "Public domain (US government)",
+    "source_type": "clinical_variant_database",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30. The SELECTED complex_iii disease allele's record (Decision 3). Grounds DIS-CYC1-01-cand."
+  },
+  "CLINVAR-VCV000834063": {
+    "reference": "ClinVar variation record VCV000834063 - COX4I1 P152T (NM_001861.6:c.454C>A p.Pro152Thr), classification Pathogenic (last evaluated 2020-10-23, no assertion criteria provided); trait MC4DN16 (OMIM 619060); OMIM 123864.0002",
+    "url": "https://www.ncbi.nlm.nih.gov/clinvar/VCV000834063/",
+    "license": "Public domain (US government)",
+    "source_type": "clinical_variant_database",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30. Grounds DIS-COX4I1-01-cand."
+  },
+  "PUBMED-9837812": {
+    "reference": "PubMed 9837812 - Loeffen et al. 1998, Am J Hum Genet 63(6):1598-1608, DOI 10.1086/302154 ('The first nuclear-encoded complex I mutation in a patient with Leigh syndrome')",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/9837812/",
+    "license": "Public (NCBI); citation-of-record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30. Bibliographic data verified correct (no correction needed). Grounds DIS-NDUFS8-01-cand's original-paper strength."
+  },
+  "PUBMED-7550341": {
+    "reference": "PubMed 7550341 - Bourgeron et al. 1995, Nat Genet 11(2):144-9, DOI 10.1038/ng1095-144 ('Mutation of a nuclear succinate dehydrogenase gene results in mitochondrial respiratory chain deficiency')",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/7550341/",
+    "license": "Public (NCBI); citation-of-record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30. Bibliographic data verified correct. 'First mutation in a nuclear-encoded respiratory-chain component' - grounds DIS-SDHA-01-cand."
+  },
+  "PUBMED-23910460": {
+    "reference": "PubMed 23910460 - Gaignard et al. 2013, Am J Hum Genet 93(2):384-389, DOI 10.1016/j.ajhg.2013.06.015 (CYC1 MC3DN6 variants W96C + L215F)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/23910460/",
+    "license": "Public (NCBI); citation-of-record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30. CITATION CORRECTION LANDED (research section 4.5 / batch-C Decision 9): the CORRECT citation is 93(2):384-389, DOI 10.1016/j.ajhg.2013.06.015 - the 05.1 research file's '93(4):704-709' was WRONG. The 05.1 file is a planning artifact: annotated, not rewritten; the corrected numbers land here in the registry."
+  },
+  "PUBMED-31290619": {
+    "reference": "PubMed 31290619 - Pillai et al. 2019, Am J Med Genet A 179(10):2138-2143, DOI 10.1002/ajmg.a.61288 ('Biallelic variants in COX4I1 associated with a novel phenotype resembling Leigh syndrome with developmental regression, intellectual disability, and seizures')",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/31290619/",
+    "license": "Public (NCBI); citation-of-record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30. CITATION CORRECTION LANDED (research section 4.5 / batch-C Decision 9): the CORRECT citation is 179(10):2138-2143 with the title ending '...developmental regression, intellectual disability, and seizures' - the 05.1 research file's '179(10):1950-1956' + different title were WRONG. Corrected numbers land here in the registry."
+  },
+  "PUBMED-27509854": {
+    "reference": "PubMed 27509854 - Zhu, Vinothkumar, Hirst 2016, Nature 536:354-358, DOI 10.1038/nature19095 (the 5LDW primary citation)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/27509854/",
+    "license": "Public (NCBI); citation-of-record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30."
+  },
+  "PUBMED-15989954": {
+    "reference": "PubMed 15989954 - Sun et al. 2005, Cell 121:1043-1057, DOI 10.1016/j.cell.2005.05.025 (the 1ZOY + 1ZP0 primary citation)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/15989954/",
+    "license": "Public (NCBI); citation-of-record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30."
+  },
+  "PUBMED-9651245": {
+    "reference": "PubMed 9651245 - Iwata et al. 1998, Science 281:64-71, DOI 10.1126/science.281.5373.64 (the 1BGY primary citation)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/9651245/",
+    "license": "Public (NCBI); citation-of-record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30."
+  },
+  "PUBMED-8638158": {
+    "reference": "PubMed 8638158 - Tsukihara et al. 1996, Science 272:1136-1144 (the 1OCC primary citation)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/8638158/",
+    "license": "Public (NCBI); citation-of-record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30."
+  },
+  "PUBMED-11062563": {
+    "reference": "PubMed 11062563 - Gibbons, Montgomery, Leslie, Walker 2000, Nat Struct Biol 7:1055-1061, DOI 10.1038/80981 (the 1E79 primary citation)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/11062563/",
+    "license": "Public (NCBI); citation-of-record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30."
+  },
+  "PUBMED-8065448": {
+    "reference": "PubMed 8065448 - Abrahams, Leslie, Lutter, Walker 1994, Nature 370:621-628, DOI 10.1038/370621a0 (the 1BMF primary citation - documented alternative, not selected)",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/8065448/",
+    "license": "Public (NCBI); citation-of-record",
+    "source_type": "primary_literature_citation",
+    "approval_status": "approved",
+    "approved_by": "human",
+    "approved_date": "2026-09-01",
+    "notes": "Phase 7 batch C source (Decision 9). E-utilities fetched live 2026-08-30. The paper is approved as a bibliographic record; the 1BMF STRUCTURE remains a documented alternative, NOT selected (Decision 2 kept 1E79) - no PDB-1BMF source record (batch C ledger: documented not-v1, no v1 source records required)."
   }
 }
