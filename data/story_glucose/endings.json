@@ -1,9 +1,9 @@
 {
   "nodes": {
     "end.good.fatty_acid": {
-      "text_dramatic": "TBD — you are stored for tomorrow; your carbon body lives on as a fatty acid.",
-      "text_teaching": "TBD — Phase 7 teaching text (citrate cataplerotic exit to fatty-acid synthesis).",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ENDINGS"],
+      "text_dramatic": "The wheel slows, and the cycle lets you off before the burning. Whole and unspent, you are carried out of the mitochondrion as citrate — no CO2, no flame. Your carbon body lives on: not spent, but stored for tomorrow.",
+      "text_teaching": "The citric acid cycle is amphibolic: it both oxidizes fuel and supplies building blocks, and its intermediates may be withdrawn (cataplerotic) for biosynthesis. You stepped off as citrate, an intermediate. Acetyl-CoA cannot cross the inner mitochondrial membrane, so the cell ships its two-carbon units out as citrate instead: citrate is carried into the cytosol, where ATP-citrate-lyase cleaves it into acetyl-CoA and oxaloacetate. The acetyl-CoA is destined for fatty-acid synthesis; the oxaloacetate returns to the mitochondrion as malate. This is the exit that keeps you: each turn releases two carbons as CO2, and across the turns a carbon that stays aboard is eventually burned — but a carbon that steps off as an intermediate is retained. What the cell builds from cytosolic acetyl-CoA, and how, is a story for another path.",
+      "claim_ids": ["TCA-CITRATE-EXPORT-01", "TCA-AMPHIBOLIC-01", "TCA-CO2-EXIT-01"],
       "tags": ["stage:tca", "ending:good"],
       "on_enter": [
         {"op": "hide_all"}
@@ -12,9 +12,9 @@
       "choices": []
     },
     "end.good.amino_acid": {
-      "text_dramatic": "TBD — you become a building block; your carbon body is now an amino acid.",
-      "text_teaching": "TBD — Phase 7 teaching text (TCA cataplerotic exit to amino-acid synthesis).",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ENDINGS"],
+      "text_dramatic": "The wheel lets you off at the workbench. An amino group settles onto your carbon skeleton, and you are no longer fuel — you are material. Your carbon body lives on as part of an amino acid, a building block for what the cell will build next. Not burned: built.",
+      "text_teaching": "The citric acid cycle is amphibolic, and this is its other trade: its intermediates are withdrawn (cataplerotic) for biosynthesis. Oxaloacetate hands its carbon skeleton to aspartate and asparagine; alpha-ketoglutarate becomes the backbone of the glutamate family — glutamate, glutamine, proline, and arginine. The handoff is transamination: an alpha-keto acid acquires its amino group from glutamate (which itself reverts to alpha-ketoglutarate, a cycle intermediate), with pyridoxal phosphate (PLP) as the cofactor. Your carbon skeleton is retained as a building block. What the cell assembles from these amino acids afterward is a story for another path.",
+      "claim_ids": ["TCA-TRANSAMINATION-01", "TCA-AMPHIBOLIC-01"],
       "tags": ["stage:tca", "ending:good"],
       "on_enter": [
         {"op": "hide_all"}
@@ -23,9 +23,9 @@
       "choices": []
     },
     "end.normal.co2": {
-      "text_dramatic": "TBD — you drift away as CO2; the everyday exit, no drama, no destiny.",
-      "text_teaching": "TBD — Phase 7 teaching text. [NARRATIVE-FRAMING FLAG: this is a narrative tier, not a separate biochemical path — the carbon still goes through PDH/TCA and exits as CO2, but the dramatic soul-jump arc doesn't complete. Human review: is this the right narrative branch point? (research OQ2)].",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ENDINGS"],
+      "text_dramatic": "You drift away as CO2 — the everyday exit. No drama, no destiny: the chemistry simply ran to completion, the wheel turned, and the carbon left with a breath. The cell exhales and carries on.",
+      "text_teaching": "This is a narrative tier, not a separate biochemical path — the same chemistry as the destined road, minus its ending. Every glucose carbon that enters respiration eventually leaves as CO2: the pyruvate dehydrogenase complex releases the first as pyruvate becomes acetyl-CoA, and each turn of the citric acid cycle releases two more. Your electrons, the story's soul, were a different traveler from your carbon body. In the electron transport chain, complexes I, III, and IV pump protons across the inner membrane to build the proton-motive force, and the protons' return through ATP synthase is what phosphorylates ADP + Pi into ATP. On this road, the harvest never came: protons leaked back through the inner membrane without driving ATP synthase — the basal proton leak, or an inducible leak through uncoupling proteins such as UCP1, found most abundantly in brown fat — so the proton-motive force dissipated as heat while electron transport and CO2 production carried on. The chemistry completed; the destiny arc did not. The carbon body is shed as CO2, as chemistry demands; no ATP was harvested from the gradient today.",
+      "claim_ids": ["TCA-CO2-EXIT-01", "PYR-PDH-01", "ETC-PMF-01", "ATP-SOUL-07", "ETC-UCP-01", "ATP-SOUL-08"],
       "tags": ["stage:etc", "ending:normal"],
       "on_enter": [
         {"op": "hide_all"}
