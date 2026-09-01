@@ -1,9 +1,9 @@
 {
   "nodes": {
     "intro.preface": {
-      "text_dramatic": "TBD — the hero, a single carbon atom, is blessed with a superpower: the destiny to travel the respiratory pathway and become ATP.",
-      "text_teaching": "TBD — Phase 7 preface text (the hero's blessing + the 20-AA cast introduction).",
-      "claim_ids": ["PLACEHOLDER_PHASE7"],
+      "text_dramatic": "You are a single carbon atom — small, unremarkable, and utterly blessed. Yours is the destiny to travel the respiratory pathway, the ancient road every fuel must walk, all the way to its far end: the moment when a soul of restless electrons is poured into the purest energy a cell can make — ATP. But the host that carries you is sick. The great enzymes that should bear you along lie damaged in the dark. Walk the road. Mend what is broken. Reach the light — or be lost along the way.",
+      "text_teaching": "This is the very beginning. The hero of this story is ONE carbon atom — the cyan atom labeled 'YOU' in the viewer. The tag C14 you may meet in this game is only a TRACKING LABEL pinned on the hero carbon so the story can follow it — not a second atom, not a disease, and not a fate; it changes nothing about the atom itself. Around the hero float the story's cast: placeholder stand-in figures for the twenty players who will act as the enzymes of the pathway (the real cast arrives in a later chapter). Your task: ride the respiratory pathway through a sick host and help restore the damaged enzymes you meet along the way.",
+      "claim_ids": [],
       "tags": ["stage:intro", "preface"],
       "on_enter": [
         {"op": "hide_all"},
@@ -23,9 +23,9 @@
       ]
     },
     "intro.select": {
-      "text_dramatic": "Choose your form — which carbon are you?",
-      "text_teaching": "TBD — Phase 7 content (character-select screen)",
-      "claim_ids": ["PLACEHOLDER_PHASE7"],
+      "text_dramatic": "Choose your form. Three fuels wait at the door of the cell — glucose, fat, and alcohol — but only one road is open to you now.",
+      "text_teaching": "Character select. Pick the molecule you will inhabit for this run. Glucose is available now — the sugar that opens this story. Fatty acid and Alcohol are planned for Phase 8 — their doors stay closed for now, and choosing them simply returns you here. Nothing on this screen makes a scientific claim; it is pure game UI. (Every form you play is remembered in your achievements.)",
+      "claim_ids": [],
       "tags": ["stage:intro"],
       "on_enter": [
         {"op": "hide_all"}
@@ -37,9 +37,9 @@
       ]
     },
     "intro.shell_glucose": {
-      "text_dramatic": "TBD — you select glucose; the atom gains its shell — the glucose structure becomes your form.",
-      "text_teaching": "TBD — Phase 7 shell text (the hero dons the glucose molecule; the 20 AA remain as the cast).",
-      "claim_ids": ["PLACEHOLDER_PHASE7"],
+      "text_dramatic": "The shell becomes the form. Glucose settles over you like a garment of light — and you are no longer a lone atom adrift: you are the sugar entire, whole and sweet, and the long road to pyruvate unrolls ahead.",
+      "text_teaching": "Your new form is D-glucose, C6H12O6 — PubChem CID 5793. The 3D model now on screen is the game's glucose model: a single 3D conformer (MW 180.16) whose ring is the pyranose form — the six-membered oxane ring named in the molecule's IUPAC name. In this game small molecules are shown as true 3D models, not flat textbook hexagons: every bond and hydroxyl you see has a direction in space. The amino-acid cast stands by as before; the journey begins at glycolysis.",
+      "claim_ids": ["CAST-GLC-PUBCHEM-01"],
       "tags": ["stage:intro", "preface", "char:glucose"],
       "on_enter": [
         {"op": "hide_all"},
@@ -53,8 +53,8 @@
       ]
     },
     "fa.stub": {
-      "text_dramatic": "This character is not yet available. Returning to character select.",
-      "text_teaching": "",
+      "text_dramatic": "The fatty-acid road is not yet built — this form returns in Phase 8. The choosing waits; the story calls you back.",
+      "text_teaching": "Phase 8 stub: the fatty-acid character is planned content, not yet available. Choosing it returns you to character select. This screen intentionally carries no science yet — nothing here is asserted or cited.",
       "claim_ids": ["PLACEHOLDER_PHASE8"],
       "tags": ["stage:intro"],
       "on_enter": [
@@ -65,8 +65,8 @@
       ]
     },
     "alc.stub": {
-      "text_dramatic": "This character is not yet available. Returning to character select.",
-      "text_teaching": "",
+      "text_dramatic": "The alcohol road is not yet built — this form returns in Phase 8. The choosing waits; the story calls you back.",
+      "text_teaching": "Phase 8 stub: the alcohol character is planned content, not yet available. Choosing it returns you to character select. This screen intentionally carries no science yet — nothing here is asserted or cited.",
       "claim_ids": ["PLACEHOLDER_PHASE8"],
       "tags": ["stage:intro"],
       "on_enter": [
