@@ -2,7 +2,7 @@
 Glucose Story Graph Skeleton (Phase 5.1)
 Legend: │▼─ = player path (spatial)  |  ┄┄► = edit:offer/structural/cycle (note)  |  [TRAP] = RNG cycle-trap
         [EDIT] = edit-allowed (14)  |  [PDB] = PDB load  |  [TRUE/GOOD/NORMAL/BAD] = ending tier
-Summary: 55 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
+Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
 ====================================================================================================
 
 
@@ -13,7 +13,7 @@ Summary: 55 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
 
        ┌──────────────────────────────┐
        │intro.preface [PDB]           │
-       │the hero, a single carbon...  │
+       │You are a single carbon a...  │
        └──────────────────────────────┘
                        │
                        │
@@ -22,7 +22,7 @@ Summary: 55 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue to chara... / Observe the hero ...
        ┌──────────────────────────────┐
        │intro.select                  │
-       │Choose your form — which ...  │
+       │Choose your form. Three f...  │
        └──────────────────────────────┘
          ┄┄► Phase 8 stub ──► fa.stub
          ┄┄► Phase 8 stub ──► alc.stub
@@ -31,7 +31,7 @@ Summary: 55 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Glucose — enter t...
        ┌──────────────────────────────┐
        │intro.shell_glucose [PDB]     │
-       │you select glucose; the a...  │
+       │The shell becomes the for...  │
        └──────────────────────────────┘
                        │
                        │
@@ -100,7 +100,7 @@ Summary: 55 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        │
                        ┬──────────────────────────────────────────┬
                        │                                          │
-                       ▼ cond: not flags.host_o2_low              ▼ cond: flags.host_o2_low
+                       ▼ cond: not flags.get('host...             ▼ cond: flags.get('host_o2_...
        ┌──────────────────────────────┐           ┌──────────────────────────────┐
        │pyr.pdh [EDIT] [PDB]          │           │anaer.entry                   │
        │PDH strips your first car...  │           │the air runs out; your ho...  │
@@ -211,16 +211,16 @@ Summary: 55 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Follow the soul t...                     ▼ Divert to fatty-a...                  ▼ Divert to amino-a...
        ┌──────────────────────────────┐           ┌──────────────────────────────┐        ┌──────────────────────────────┐
        │etc.entry                     │           │end.good.fatty_acid [GOOD]    │        │end.good.amino_acid [GOOD]    │
-       │your spark (the electrons...  │           │you are stored for tomorr...  │        │you become a building blo...  │
+       │Your carbon body is behin...  │           │The wheel slows, and the ...  │        │The wheel lets you off at...  │
        └──────────────────────────────┘           └──────────────────────────────┘        └──────────────────────────────┘
                        │
                        │
                        ┬──────────────────────────────────────────┬
                        │                                          │
-                       ▼ Follow the soul i...                     ▼ Let go — drift aw...
+                       ▼ Follow the soul i...                     ▼ Let go — let the ...
        ┌──────────────────────────────┐           ┌──────────────────────────────┐
        │etc.complex_i [EDIT]          │           │end.normal.co2 [NORMAL]       │
-       │Complex I receives your e...  │           │you drift away as CO2; th...  │
+       │Complex I — the NADH gate...  │           │You drift away as CO2 — t...  │
        └──────────────────────────────┘           └──────────────────────────────┘
          ┄┄► edit:offer ──► edit.prompt
                        │
@@ -228,8 +228,8 @@ Summary: 55 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        │
                        ▼ Continue down the...
        ┌──────────────────────────────┐
-       │etc.complex_ii [EDIT]         │
-       │Complex II (succinate deh...  │
+       │etc.complex_ii [EDIT] [PDB]   │
+       │Complex II catches you at...  │
        └──────────────────────────────┘
          ┄┄► edit:offer ──► edit.prompt
                        │
@@ -237,8 +237,8 @@ Summary: 55 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        │
                        ▼ Continue / Examine the Compl...
        ┌──────────────────────────────┐
-       │etc.complex_iii [EDIT]        │
-       │Complex III runs the Q-cy...  │
+       │etc.complex_iii [EDIT] [PDB]  │
+       │Complex III takes deliver...  │
        └──────────────────────────────┘
          ┄┄► edit:offer ──► edit.prompt
                        │
@@ -247,7 +247,7 @@ Summary: 55 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue / Examine the Compl...
        ┌──────────────────────────────┐
        │etc.complex_iv [EDIT] [PDB]   │
-       │Complex IV (cytochrome c ...  │
+       │The last door: Complex IV...  │
        └──────────────────────────────┘
          ┄┄► edit:offer ──► edit.prompt
                        │
@@ -256,7 +256,7 @@ Summary: 55 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue to ATP s... / Examine the Compl...
        ┌──────────────────────────────┐
        │etc.atp_synthase              │
-       │the proton flow drives AT...  │
+       │And here is the harvest. ...  │
        └──────────────────────────────┘
                        │
                        │
@@ -265,93 +265,107 @@ Summary: 55 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Become ATP — the ... / Examine ATP synth...
        ┌──────────────────────────────┐
        │end.true [TRUE]               │
-       │you are ATP. Your electro...  │
+       │YOU are the spark within ...  │
        └──────────────────────────────┘
 
 ----------------------------------------------------------------------------------------------------
-=== Unreached nodes (17) — structural/bad-ending pool ===
+=== Unreached nodes (19) — structural/bad-ending pool ===
 ----------------------------------------------------------------------------------------------------
 
   ┌──────────────────────────────┐
   │fa.stub [STUB]                │
-  │This character is not yet...  │
+  │The fatty-acid road is no...  │
   └──────────────────────────────┘
   ┄┄► Back ──► intro.select
 
   ┌──────────────────────────────┐
   │alc.stub [STUB]               │
-  │This character is not yet...  │
+  │The alcohol road is not y...  │
   └──────────────────────────────┘
   ┄┄► Back ──► intro.select
 
+  ┌─────────────────────────┐
+  │gly.pfk_restored [PDB]   │
+  │Phase 7 text (plan 08).  │
+  └─────────────────────────┘
+  ──► Continue ──► gly.fbp_to_pyruvate
+  ──► Examine the resto... ──► gly.fbp_to_pyruvate
+
+  ┌──────────────────────────────┐
+  │tca.aconitase_restored [PDB]  │
+  │Phase 7 text (plan 13).       │
+  └──────────────────────────────┘
+  ──► Continue ──► tca.shuffle
+  ──► Examine the resto... ──► tca.shuffle
+
   ┌──────────────────────────────┐
   │bad.lost_connection [BAD]     │
-  │lost connection to the host.  │
+  │The thread goes slack. Wh...  │
   └──────────────────────────────┘
 
   ┌──────────────────────────────┐
   │bad.released_from_host [BAD]  │
-  │released from the host.       │
+  │The host lets go. One edi...  │
   └──────────────────────────────┘
 
   ┌─────────────────────────────────┐
   │bad.cycle_trap_host_death [BAD]  │
-  │the cycle has spun too lo...     │
+  │The wheel turns, and turn...     │
   └─────────────────────────────────┘
 
   ┌──────────────────────────────────┐
   │bad.critical_residue_break [BAD]  │
-  │you broke a critical resi...      │
+  │The residue you broke was...      │
   └──────────────────────────────────┘
 
   ┌──────────────────────────────┐
   │bad.enzyme_collapse [BAD]     │
-  │your edit misfolded the e...  │
+  │Your edit unsettled the e...  │
   └──────────────────────────────┘
 
   ┌───────────────────────────────────┐
   │bad.wrong_substrate_trapped [BAD]  │
-  │a foreign substrate is ja...       │
+  │Something that is not the...       │
   └───────────────────────────────────┘
 
   ┌──────────────────────────────┐
   │bad.broken_active_site [BAD]  │
-  │the catalytic residues ar...  │
+  │The catalytic residues ar...  │
   └──────────────────────────────┘
 
   ┌──────────────────────────────┐
   │bad.lost_in_cytosol [BAD]     │
-  │with no enzyme to bind yo...  │
+  │With no enzyme to bind yo...  │
   └──────────────────────────────┘
 
   ┌──────────────────────────────┐
   │bad.proton_leak [BAD]         │
-  │the proton gradient bleed...  │
+  │The gradient bleeds away....  │
   └──────────────────────────────┘
 
   ┌───────────────────────────────┐
   │bad.misfolded_aggregate [BAD]  │
-  │the enzyme aggregates int...   │
+  │The misfolded enzyme does...   │
   └───────────────────────────────┘
 
   ┌─────────────────────────────────┐
   │bad.active_site_destroyed [BAD]  │
-  │this specific edit shredd...     │
+  │This edit did not disturb...     │
   └─────────────────────────────────┘
 
   ┌─────────────────────────────────────┐
   │bad.substrate_channel_blocked [BAD]  │
-  │the substrate channel is ...         │
+  │The way in is plugged. Th...         │
   └─────────────────────────────────────┘
 
   ┌──────────────────────────────┐
   │bad.cofactor_lost [BAD]       │
-  │the cofactor (NAD+/FAD) c...  │
+  │The cofactor no longer fi...  │
   └──────────────────────────────┘
 
   ┌──────────────────────────────┐
   │bad.denature_ph_change [BAD]  │
-  │extreme pH shatters the e...  │
+  │The shift in acidity is t...  │
   └──────────────────────────────┘
 
   ┌──────────────────────────────┐

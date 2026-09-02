@@ -38,6 +38,22 @@ choices; the 2 new preface nodes each have 2 choices = Continue + Observe).
 
 - Plan 05.2-01 (extensibility convention) added +1 bad-ending node (bad.denature_ph_change, pH-denaturation, edit:unknown): 54 -> 55 nodes, 20 -> 21 endings, Bad 14 -> 15 (1T+3G+2N+15B). The bad-ending-reachability test was generalized into a parametrized subTest convention proof (test_all_edit_prompt_bad_endings_reachable_convention) that auto-covers future Phase 7 additions WITHOUT test edits. The 14 edit-allowed + 0 single-Continue invariants are UNCHANGED by this addition.
 
+- Plan 07-12 (Phase 7 restoration topology, the DC-A outcome of 07-01) added +2
+  restoration-branch nodes: 55 -> 57 nodes, 21 endings UNCHANGED (restoration
+  nodes are NON-ending). gly.pfk_restored (glycolysis.json) and
+  tca.aconitase_restored (tca.json) are the FIXED branch_node targets the
+  EditRouter routes known (correct reverse-mutation) edits to once rpg/data/
+  edits.json binds them (Phase 7 plan 14). Their entry is ROUTER-ONLY (no
+  incoming choice.goto edge -- engine.apply_player_edit routes directly to the
+  branch node, bypassing choices; same runtime-vs-structural distinction as
+  the edit.prompt stub), so the BFS neither reaches nor needs them; each
+  carries 2 choices (Continue + mc:observe Observe) re-entering the main path
+  (gly.fbp_to_pyruvate / tca.shuffle). Their on_enter carries the 05.3 §2 (iii)
+  restoration-reveal op sequence: edit (the player's reverse mutation) -> load
+  WT cast -> align (method=super, align_sele="name CA") -> show_as. The 14
+  edit-allowed + 0 single-Continue invariants are UNCHANGED (restoration nodes
+  are NOT edit-allowed).
+
 Pure Python 3.6 stdlib only. NO pymol/PyQt5. Mirrors the proven pattern in
 tests/test_integration.py:336-362 (the toy-graph SC2 tests).
 """
@@ -56,7 +72,7 @@ GLUCOSE_STORY_DIR = os.path.join(HERE, "..", "data", "story_glucose")
 
 
 class TestGlucoseReachability(unittest.TestCase):
-    """SC2: the reachability checker on the real 55-node glucose skeleton.
+    """SC2: the reachability checker on the real 57-node glucose skeleton.
 
     The skeleton grew 34 -> 43 nodes in the Phase 5.1 tiered-completeness
     expansion (see 05.1-EXPANSION-SUMMARY.md): +1 gly.pyruvate_kinase,
@@ -88,30 +104,38 @@ class TestGlucoseReachability(unittest.TestCase):
     test_14_edit_allowed_nodes, and test_pdh_cast_pdb_fix_and_complex_i_claim_id.
 
     Plan 05.2-01 (extensibility convention) added +1 bad-ending node
-    (bad.denature_ph_change, pH-denaturation, edit:unknown): 54 -> 55 nodes,
+    (bad.denature_ph_change, pH-denaturation, 1a edit:unknown): 54 -> 55 nodes,
     20 -> 21 endings, Bad 14 -> 15 (1T+3G+2N+15B). The bad-ending-reachability
     test was generalized into a parametrized subTest convention proof that
     auto-covers future Phase 7 additions WITHOUT test edits. The 14
     edit-allowed + 0 single-Continue invariants are UNCHANGED by this
-    addition."""
+    addition.
+
+    Plan 07-12 (Phase 7 restoration topology) added the 2 DC-A restoration-
+    branch nodes: 55 -> 57 nodes, 21 endings UNCHANGED. See the module
+    docstring for the router-only-entry semantics."""
 
     def setUp(self):
         self._story_dir = GLUCOSE_STORY_DIR
 
-    def test_manifest_loads_all_55_nodes(self):
+    def test_manifest_loads_all_57_nodes(self):
         """The manifest lists 7 files; StoryGraph.load merges them with no
-        duplicate-id ValueError. 55 nodes = 52 story nodes + fa.stub +
-        alc.stub + edit.prompt. (Was 34 before the tiered-completeness
-        expansion added 9 net nodes, then 43 before the expansion Wave 2
-        added +9 bad-ending nodes [Plan 05.1-12] + 2 preface nodes
-        [Plan 05.1-13], then 54 before Plan 05.2-01 added +1 bad-ending
-        node [bad.denature_ph_change].) The manifest start is now
-        intro.preface (the preface Beat A is the entry point after Plan
-        05.1-13)."""
+        duplicate-id ValueError. 57 nodes = 52 story nodes + fa.stub +
+        alc.stub + edit.prompt + the 2 Phase 7 plan-12 restoration nodes
+        (gly.pfk_restored + tca.aconitase_restored, the 07-01 DC-A outcome).
+        (Was 34 before the tiered-completeness expansion added 9 net nodes,
+        then 43 before the expansion Wave 2 added +9 bad-ending nodes
+        [Plan 05.1-12] + 2 preface nodes [Plan 05.1-13], then 54 before
+        Plan 05.2-01 added +1 bad-ending node [bad.denature_ph_change],
+        then 55 before Plan 07-12 added the +2 restoration nodes.) The
+        manifest start is intro.preface (the preface Beat A is the entry
+        point after Plan 05.1-13)."""
         g = StoryGraph.load(self._story_dir)
         nodes = g.all_nodes()
-        self.assertEqual(len(nodes), 55,
-                         "glucose skeleton has 55 nodes after the bad-ending + preface + extensibility expansion (43 base + 10 bad endings + 2 preface)")
+        self.assertEqual(len(nodes), 57,
+                         "glucose skeleton has 57 nodes after the Phase 7 "
+                         "restoration-topology addition (55 + gly.pfk_restored "
+                         "+ tca.aconitase_restored)")
         self.assertEqual(g.start_node(), "intro.preface",
                          "manifest start is intro.preface (the preface Beat A is the entry point after Plan 05.1-13)")
 
@@ -125,7 +149,10 @@ class TestGlucoseReachability(unittest.TestCase):
         the preface is upstream of everything, so all 4 tiers stay reachable).
         The endings are unchanged in tier -- only the Bad count grew
         (1T+3G+2N+5B -> 1T+3G+2N+15B = 21 endings) via the Plan 05.1-12
-        bad-ending expansion + the Plan 05.2-01 extensibility addition."""
+        bad-ending expansion + the Plan 05.2-01 extensibility addition. The
+        Plan 07-12 restoration nodes are NON-ending additions (57 nodes, 21
+        endings unchanged) and are NOT BFS entries (router-only -- see
+        test_restoration_nodes_reachable_non_ending)."""
         g = StoryGraph.load(self._story_dir)
         rep = check_reachability(g.all_nodes(), g.start_node())
         self.assertTrue(rep.is_ok,
@@ -273,6 +300,142 @@ class TestGlucoseReachability(unittest.TestCase):
             "is edit:structural, not edit:disease); claim_ids=%s"
             % cs.claim_ids)
 
+    def test_restoration_nodes_reachable_non_ending(self):
+        """Plan 07-12 restoration-topology invariants (the 07-01 DC-A outcome):
+        gly.pfk_restored + tca.aconitase_restored exist with (a) NO ending
+        tier (NON-ending -- the 21-ending count is unchanged), (b) NO
+        edit:enzyme: tag (NOT edit-allowed; test_14_edit_allowed_nodes'
+        exact-set assertion guards this from the other side), (c) a forward
+        path back to the main path: every choice.goto target exists and an
+        ENDING is reachable from the restored node via choice.goto chains
+        (a restored branch is never a dead end), (d) the 05.3 §2 (iii)
+        restoration-reveal on_enter op sequence in order: edit (the player's
+        reverse mutation) -> load (the WT cast) -> align (method=super per
+        the 07-04 batch-C convention) -> show_as, (e) full-graph structural
+        reachability stays GREEN.
+
+        Router-only entry (why the BFS neither reaches nor needs them): the
+        restored nodes have NO incoming choice.goto edge --
+        engine.apply_player_edit routes a KNOWN edit DIRECTLY to the branch
+        node (edit_router.route -> _enter), bypassing choices. Same
+        structural-vs-runtime distinction as the edit.prompt stub; these
+        nodes are pinned HERE instead of via the BFS.
+
+        The aconitase sele documents the derived human<->bovine mapping
+        (tools/aconitase_mapping_probe.py, SMOKE_RESULT: PASS): human ACO2
+        S112 (UniProt Q99798, the DIS-ACO2-01-cand allele S112R) -> bovine
+        1ACO chain A resi 85 (SER) -- real Needleman-Wunsch alignment of the
+        human sequence vs the cmd.iterate-extracted 1ACO ATOM-record sequence
+        (96.4% identity), cross-checked by 1ACO's own DBREF record (PDB
+        2-754 = UniProt P20004 29-781; 112 - 27 = 85) and the catalytic
+        Ser642 anchor. Chain case is EMPIRICAL: PyMOL matches 'chain A'
+        (uppercase) only. The PFK sele (resi 209 -> GLY) is the recorded
+        game-design framing (07-02 batch A: text-only disease fallback, NO
+        bacterial residue mapping asserted -- 4PFK resi 209 is HIS; the
+        honest teaching text lands in plan 08)."""
+        restored = {
+            "gly.pfk_restored": {
+                "edit_target": "pfk",
+                "sele": "resi 209 and chain A",
+                "new_resn": "GLY",
+                "wt_object": "pfk_wt",
+                "wt_pdb": "pdb:4PFK",
+                "reentry": "gly.fbp_to_pyruvate",
+            },
+            "tca.aconitase_restored": {
+                "edit_target": "aconitase",
+                "sele": "resi 85 and chain A",
+                "new_resn": "SER",
+                "wt_object": "aconitase_wt",
+                "wt_pdb": "pdb:1ACO",
+                "reentry": "tca.shuffle",
+            },
+        }
+        g = StoryGraph.load(self._story_dir)
+        for nid, spec in restored.items():
+            with self.subTest(restored_node=nid):
+                node = g.get_node(nid)  # KeyError (a loud fail) if absent
+                # (a) NON-ending.
+                self.assertIsNone(
+                    node.is_ending,
+                    "%s must be a NON-ending node (the 21-ending count is "
+                    "unchanged by the restoration topology)" % nid)
+                # (b) NOT edit-allowed.
+                self.assertFalse(
+                    any(str(t).startswith("edit:enzyme:") for t in node.tags),
+                    "%s must NOT carry an edit:enzyme: tag (restoration "
+                    "nodes are not edit-allowed); tags=%s" % (nid, node.tags))
+                # (d) the 05.3 on_enter op sequence, in order.
+                ops = [m.op for m in node.on_enter]
+                self.assertEqual(
+                    ops, ["edit", "load", "align", "show_as"],
+                    "%s on_enter must be the 05.3 restoration-reveal "
+                    "sequence [edit, load, align, show_as]; got %s"
+                    % (nid, ops))
+                edit_m = node.on_enter[0]
+                self.assertEqual(edit_m.target, spec["edit_target"])
+                self.assertEqual(edit_m.args.get("edit_type"), "point_mutation")
+                self.assertEqual(edit_m.args.get("sele"), spec["sele"])
+                self.assertEqual(edit_m.args.get("new_resn"), spec["new_resn"])
+                load_m = node.on_enter[1]
+                self.assertEqual(load_m.target, spec["wt_pdb"])
+                self.assertEqual(load_m.args.get("object"), spec["wt_object"])
+                align_m = node.on_enter[2]
+                self.assertEqual(align_m.target, spec["wt_object"],
+                                 "align mobile = the WT object (it MOVES)")
+                self.assertEqual(
+                    align_m.args.get("reference"), spec["edit_target"],
+                    "align reference (FIXED) = the edited enzyme object")
+                self.assertEqual(
+                    align_m.args.get("method"), "super",
+                    "07-04 batch-C convention: op=align dispatches cmd.super")
+                # (c) forward re-entry: goto targets exist + an ending is
+                # reachable from the restored node.
+                reentries = [c.goto for c in node.choices]
+                self.assertIn(
+                    spec["reentry"], reentries,
+                    "%s must re-enter the main path at %s; choices got %s"
+                    % (nid, spec["reentry"], reentries))
+                for c in node.choices:
+                    self.assertIn(
+                        c.goto, g.all_nodes(),
+                        "%s choice goto %r must exist" % (nid, c.goto))
+                queue = [nid]
+                visited = {nid}
+                found_ending = False
+                while queue and not found_ending:
+                    cur = queue.pop()
+                    cur_node = g.get_node(cur)
+                    if cur_node.is_ending is not None:
+                        found_ending = True
+                        break
+                    for c in cur_node.choices:
+                        if c.goto in g.all_nodes() and c.goto not in visited:
+                            visited.add(c.goto)
+                            queue.append(c.goto)
+                self.assertTrue(
+                    found_ending,
+                    "an ending must be reachable from %s via choice.goto "
+                    "chains (a restored branch is never a dead end); "
+                    "visited %d nodes" % (nid, len(visited)))
+        # Router-only entry: no incoming choice.goto edge anywhere.
+        for nid in restored:
+            incoming = [src for src, other in g.all_nodes().items()
+                        for c in other.choices if c.goto == nid]
+            self.assertEqual(
+                incoming, [],
+                "restoration node %r must have NO incoming choice.goto edge "
+                "(entry is router-only via engine.apply_player_edit); "
+                "found %s" % (nid, incoming))
+        # (e) full-graph structural reachability stays GREEN.
+        rep = check_reachability(g.all_nodes(), g.start_node())
+        self.assertTrue(
+            rep.is_ok,
+            "reachability stays GREEN after the restoration-topology addition")
+        self.assertEqual(
+            rep.unreachable_endings, [],
+            "no unreachable endings after the restoration-topology addition")
+
     def test_edit_offer_nodes_carry_edit_enzyme_tag(self):
         """SC2f round-2 graph invariant (06-14 re-verify, debugger session
         .planning/debug/edit-prompt-empty-stash.md): EVERY node that offers an
@@ -401,10 +564,11 @@ class TestPyrBranchRuntimeEligibility(unittest.TestCase):
     glucose story uses the broken ``flags.<attr>`` dict-attribute form.
 
     This is a COND-SYNTAX fix to the FROZEN 5.1 skeleton, NOT a topology
-    change: the 55-node/21-ending structural reachability is unchanged (covered
-    by TestGlucoseReachability above); these tests prove the FROZEN topology is
-    actually PLAYABLE past pyr.branch (the 05.1-06 review didn't exercise
-    runtime cond evaluation).
+    change: the 21-ending structural reachability is unchanged (covered
+    by TestGlucoseReachability above; the node count is now 57 after the
+    sanctioned Phase 7 plan-12 restoration addition); these tests prove the
+    FROZEN topology is actually PLAYABLE past pyr.branch (the 05.1-06 review
+    didn't exercise runtime cond evaluation).
     """
 
     def setUp(self):
@@ -549,8 +713,9 @@ class TestStartNodeOnEnterShape(unittest.TestCase):
     cited PDB).
 
     These are CONTENT-shape tests (the on_enter MolAction list), NOT topology
-    tests -- the 55-node/21-ending structural reachability is unchanged
-    (covered by test_intro_topology_unchanged below re-running the counts).
+    tests -- the 21-ending structural reachability is unchanged (covered by
+    test_intro_topology_unchanged below re-running the counts; 57 nodes after
+    the sanctioned Phase 7 plan-12 restoration addition).
     """
 
     def setUp(self):
@@ -666,14 +831,18 @@ class TestStartNodeOnEnterShape(unittest.TestCase):
                         "instant-start); got %r" % (nid, m.target))
 
     def test_intro_topology_unchanged(self):
-        """Regression guard: the on_enter content edit (swapping TBD_* targets
-        + adding the hero-highlight sequence) did NOT change the topology.
-        Re-runs the frozen skeleton counts: 55 nodes, 21 endings (1T+3G+2N+
-        15B), all 4 tiers reachable from intro.preface."""
+        """Regression guard: the on_enter content edits (swapping TBD_*
+        targets + adding the hero-highlight sequence) did NOT change the
+        topology beyond the SANCTIONED Phase 7 plan-12 addition. Re-runs the
+        frozen counts: 57 nodes (55 + the 2 restoration branch nodes of
+        Plan 07-12, the only sanctioned topology change of Phase 7), 21
+        endings (1T+3G+2N+15B), all 4 tiers reachable from intro.preface."""
         g = self._graph()
         self.assertEqual(
-            len(g.all_nodes()), 55,
-            "topology unchanged: 55 nodes (the on_enter edit is content-only)")
+            len(g.all_nodes()), 57,
+            "topology unchanged since Plan 07-12: 57 nodes (55 + the 2 "
+            "restoration branch nodes -- the ONLY sanctioned topology change "
+            "of Phase 7)")
         rep = check_reachability(g.all_nodes(), g.start_node())
         self.assertTrue(
             rep.is_ok,
@@ -681,7 +850,8 @@ class TestStartNodeOnEnterShape(unittest.TestCase):
         all_endings = [n for n in g.all_nodes().values() if n.is_ending]
         self.assertEqual(
             len(all_endings), 21,
-            "topology unchanged: 21 endings (1T+3G+2N+15B)")
+            "topology unchanged: 21 endings (1T+3G+2N+15B; the restoration "
+            "nodes are NON-ending)")
 
 
 if __name__ == "__main__":
