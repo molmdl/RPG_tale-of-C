@@ -2,12 +2,111 @@
   "version": 1,
   "bad_ending_pool": ["bad.lost_connection", "bad.released_from_host"],
   "enzymes": {
-    "fixture_enzyme_1": {
+    "gly.pfk": {
       "edits": [
         {
-          "signature": {"op": "point_mutation", "target": "resi 1", "args": {"new_res": "GLY"}},
-          "branch_node": "fixture.branch_1",
-          "claim_id": "PLACEHOLDER_PHASE5"
+          "signature": {"op": "point_mutation", "target": "resi 209 and chain a", "args": {"new_res": "GLY"}},
+          "branch_node": "gly.pfk_restored",
+          "claim_id": "DIS-PFKM-01-cand"
+        }
+      ]
+    },
+    "gly.pyruvate_kinase": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 479", "args": {"new_res": "ARG"}},
+          "branch_node": "gly.pyruvate",
+          "claim_id": "DIS-PKLR-01-cand"
+        }
+      ]
+    },
+    "pyr.pdh": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 138 and chain a", "args": {"new_res": "VAL"}},
+          "branch_node": "tca.entry",
+          "claim_id": "DIS-PDHA1-01-cand"
+        }
+      ]
+    },
+    "tca.aconitase": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 85 and chain a", "args": {"new_res": "SER"}},
+          "branch_node": "tca.aconitase_restored",
+          "claim_id": "DIS-ACO2-01-cand"
+        }
+      ]
+    },
+    "tca.isocitrate_dh": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 204", "args": {"new_res": "MET"}},
+          "branch_node": "tca.akg_dh",
+          "claim_id": "DIS-IDH3A-01-cand"
+        }
+      ]
+    },
+    "tca.succinyl_coa_synthetase": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 85", "args": {"new_res": "GLY"}},
+          "branch_node": "tca.fumarase",
+          "claim_id": "DIS-SUCLG1-01-cand"
+        }
+      ]
+    },
+    "tca.fumarase": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 233", "args": {"new_res": "ARG"}},
+          "branch_node": "tca.malate_dh",
+          "claim_id": "DIS-FH-01-cand"
+        }
+      ]
+    },
+    "tca.malate_dh": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 37", "args": {"new_res": "GLY"}},
+          "branch_node": "tca.divert_to_good",
+          "claim_id": "DIS-MDH2-01-cand"
+        }
+      ]
+    },
+    "etc.complex_i": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 68 and chain i", "args": {"new_res": "ARG"}},
+          "branch_node": "etc.complex_ii",
+          "claim_id": "DIS-NDUFS8-01-cand"
+        }
+      ]
+    },
+    "etc.complex_ii": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 512 and chain a", "args": {"new_res": "ARG"}},
+          "branch_node": "etc.complex_iii",
+          "claim_id": "DIS-SDHA-01-cand"
+        }
+      ]
+    },
+    "etc.complex_iii": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 131 and chain d", "args": {"new_res": "LEU"}},
+          "branch_node": "etc.complex_iv",
+          "claim_id": "DIS-CYC1-01-cand"
+        }
+      ]
+    },
+    "etc.complex_iv": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 130 and chain d", "args": {"new_res": "PRO"}},
+          "branch_node": "etc.atp_synthase",
+          "claim_id": "DIS-COX4I1-01-cand"
         }
       ]
     }
