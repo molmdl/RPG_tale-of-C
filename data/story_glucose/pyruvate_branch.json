@@ -1,22 +1,22 @@
 {
   "nodes": {
     "pyr.branch": {
-      "text_dramatic": "TBD — the air is thin. What fate, little carbon?",
-      "text_teaching": "",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ANAEROBIC"],
+      "text_dramatic": "The tissue around you thins of breath. Every road you have walked — the trap, the split, the long relay of sparks — funnels into this: pyruvate, the three-carbon crossroads, and a question written in the air itself. For now the blood still carries oxygen; for now the deep furnace waits. Press on into the citric acid cycle while the air holds — or let the air run out, and learn what a body can do without breath.",
+      "text_teaching": "Pyruvate's fate depends on oxygen. Aerobically, pyruvate feeds the TCA cycle (via the pyruvate dehydrogenase complex); anaerobically, it is reduced to lactate or ethanol — fermentation. Where lactic fermentation occurs is a tissue fact: oxygen-depleted muscle (and some bacteria) run it; yeast runs the ethanolic road instead. Oxygen availability is not a game whim — it is a real, tissue-level physiological condition. Working muscle can outrun its own oxygen supply and go low on O2 even while the lungs work fine, and that is exactly when oxygen-depleted muscle ferments. In this story you set the host's condition at this branch, the way a sprint sets it in real physiology: the oxygen-rich road keeps the aerobic path (acetyl-CoA, then the TCA cycle); the air-runs-out road switches the host to fermentation. Either road is playable — compare them.",
+      "claim_ids": ["AN-G-01", "AN-G-05"],
       "tags": ["stage:pyruvate"],
       "on_enter": [
         {"op": "hide_all"}
       ],
       "choices": [
-        {"label": "Proceed aerobically (O2 available) -> acetyl-CoA -> TCA", "goto": "pyr.pdh", "cond": "not flags.get('host_o2_low')", "tags": ["branch:aerobic"]},
-        {"label": "The air runs out — ferment (anaerobic)", "goto": "anaer.entry", "cond": "flags.get('host_o2_low')", "effects": {"set": {"anaerobic": true}}, "tags": ["branch:anaerobic"]}
+        {"label": "Proceed aerobically — the tissue is oxygen-rich", "goto": "pyr.pdh", "tags": ["branch:aerobic"]},
+        {"label": "The air runs out — ferment (anaerobic)", "goto": "anaer.entry", "effects": {"set": {"anaerobic": true}}, "tags": ["branch:anaerobic"]}
       ]
     },
     "pyr.pdh": {
-      "text_dramatic": "TBD — PDH strips your first carbon as CO2.",
-      "text_teaching": "",
-      "claim_ids": ["PLACEHOLDER_PHASE7", "DIS-PDHA1-01-cand", "CAST-PDH-WT-PDB-01-cand"],
+      "text_dramatic": "A gate of five enzymes stands before you: the pyruvate dehydrogenase complex. It takes hold of pyruvate and strips away one carbon — a breath of CO2, the first of the aerobic journey. One carbon leaves here; if that departing shadow is you, your body's road ends at this gate. If it is not, you ride onward — smaller by one, rewired as acetyl-CoA, with a fresh spark banked into NADH for the road ahead.",
+      "text_teaching": "The pyruvate dehydrogenase complex catalyzes the oxidative decarboxylation of pyruvate to acetyl-CoA — releasing CO2 and generating NADH — the committed entry of carbon into the citric acid cycle. Of pyruvate's three carbons, the third is released as CO2; the remaining two ride on as acetyl-CoA. (Identity note: the enzyme's health is not the carbon's fate — the CO2 shed here is pyruvate's carboxyl carbon, and the story does not claim which glucose carbon the hero rides.) The cast structure on screen is PDB 6CFO, the human PDH E1 component resolved at 2.70 Å with a covalent TDP-acetyl-phosphinate analog and a magnesium ion still cradled in the active site — the cofactor cradle you see is thiamine pyrophosphate (TPP), a derivative of vitamin B1 and one of the five vitamin-derived cofactors. The gene encoding it, PDHA1, is X-linked and can carry the V138M allele — shown here in PDB numbering; the literature often writes it V167M, counting from the 29-residue mitochondrial transit peptide that the mature protein sheds. ClinVar classifies V138M as Pathogenic/Likely pathogenic: it disrupts magnesium binding and leaves the complex deficient — broken at the very Mg2+ cradle you can see on screen. No mutant crystal is loaded here: the game edits the healthy structure in place, and you may try to repair it.",
+      "claim_ids": ["PYR-PDH-01", "DIS-PDHA1-01-cand", "CAST-PDH-WT-PDB-01-cand"],
       "tags": ["stage:pyruvate", "edit:enzyme:pyr.pdh"],
       "on_enter": [
         {"op": "hide_all"},
@@ -28,9 +28,9 @@
       ]
     },
     "anaer.entry": {
-      "text_dramatic": "TBD — the air runs out; your host switches to fermentation.",
-      "text_teaching": "",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ANAEROBIC"],
+      "text_dramatic": "The air is gone. No oxygen slides down the capillaries now; the great wheel of breath has stopped turning, and still the muscles demand fuel. The host burns without breath. Three fates wait in the dark: to be kept, to be poured off as gas, or to burn out with the host.",
+      "text_teaching": "Fermentation is the process by which living organisms recycle NADH back to NAD+ — the exchange that lets glycolysis continue. NAD+ can be replenished by the electron transport chain or by fermentation; if the supply of NAD+ is not replenished, glycolysis is unable to proceed. The catch is yield: fermentation's energy yield is much less than if the organism were to continue on through the TCA cycle and ETC. With oxygen gone, pyruvate's carbon has three roads in this story: kept as lactate (the mammalian road), given up as CO2 with ethanol (the yeast road), or — if the energy deficit wins — crisis.",
+      "claim_ids": ["AN-G-04"],
       "tags": ["stage:anaerobic"],
       "on_enter": [
         {"op": "hide_all"}
@@ -42,9 +42,9 @@
       ]
     },
     "anaer.ldh": {
-      "text_dramatic": "TBD — lactate dehydrogenase catches you: pyruvate becomes lactate, and NADH is oxidized back to NAD+ so glycolysis can keep running.",
-      "text_teaching": "TBD — Phase 7 teaching text: LDH (lactate dehydrogenase) reduces pyruvate to lactate, regenerating NAD+ from NADH so anaerobic glycolysis can continue. This is the mammalian fermentation step (exam-worthy). PDB 5W8J is a CANDIDATE structure pending Phase 7 approval.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ANAEROBIC"],
+      "text_dramatic": "Lactate dehydrogenase closes around you. Pyruvate becomes lactate — and in the same motion the enzyme spends a NADH to mint fresh NAD+ for the glycolysis line. You are not burned away and you are not breathed out. You are carried, whole, in a smaller shell.",
+      "text_teaching": "In the absence of oxygen, pyruvate is reduced to lactate by lactate dehydrogenase, with NADH as the reducing agent; NAD+ is regenerated, and pyruvate's carbon is retained in lactate — no decarboxylation step occurs. This is the mammalian (muscle) fermentation, and it takes place in oxygen-depleted muscle (and some bacteria). The cast structure on screen is PDB 5W8J, human LDHA resolved at 1.55 Å — photographed with a research inhibitor (compound 29) bound in the very pocket lactate would occupy: a drug-discovery portrait in which the door you would pass through is blocked by a molecular wedge.",
+      "claim_ids": ["AN-G-02", "CAST-LDH-PDB-01"],
       "tags": ["stage:anaerobic"],
       "on_enter": [
         {"op": "hide_all"},
@@ -56,9 +56,9 @@
       ]
     },
     "anaer.lactic": {
-      "text_dramatic": "TBD — you are retained as lactate.",
-      "text_teaching": "TBD — Phase 7 teaching text.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ANAEROBIC"],
+      "text_dramatic": "Retained. Lactate carries you out of the enzyme's grip and into the tissue — your carbon intact, your body whole. Not burned, not breathed out: kept. Somewhere beyond this chapter, the host may come back for what it stored.",
+      "text_teaching": "The lactic road is the carbon-keeper: in the absence of oxygen, pyruvate is reduced to lactate and its carbon is retained — no decarboxylation step occurs, so nothing of you leaves as gas. NAD+ is regenerated in the same exchange, which is the favor fermentation exists to do: it keeps glycolysis supplied so the host's emergency ATP production can continue. This is the mammalian (muscle) fermentation — the exam-worthy one. A Good ending here is the project's tier semantics: the carbon body survives; what the host later does with lactate is a story beyond this chapter.",
+      "claim_ids": ["AN-G-02"],
       "tags": ["stage:anaerobic"],
       "on_enter": [
         {"op": "hide_all"}
@@ -67,9 +67,9 @@
       "choices": []
     },
     "anaer.ethanolic": {
-      "text_dramatic": "TBD — you drift off as CO2 and ethanol.",
-      "text_teaching": "TBD — Phase 7 teaching text. [HOST-TENSION FLAG: mammalian host does not do ethanolic fermentation — this is a yeast pathway; human review needed before Phase 7].",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ANAEROBIC"],
+      "text_dramatic": "You feel the vision take you — not this host, but another. In a yeast cell, this is the road you would take: a carbon torn from you and breathed out as bubbling CO2, the rest of your body left behind as ethanol. The brewer's bubble, the vintner's gift — and you, divided between gas and cup.",
+      "text_teaching": "Ethanolic fermentation is the yeast pathway: in yeast (not mammals), pyruvate is converted to acetaldehyde with release of CO2 by pyruvate decarboxylase; acetaldehyde is then reduced to ethanol by alcohol dehydrogenase, regenerating NAD+. Your host is a mammal, and your mammalian host does not run this road — it lacks pyruvate decarboxylase. This ending is shown as a counterfactual for teaching: the purpose of fermentation in yeast is the same as that in muscle — recycling NAD+ — but yeast pays for it in ethanol and a puff of CO2, and the departing carbon leaves as gas. That carbon fate — released as CO2 rather than retained — is what makes this road a 'normal' ending for a carbon hero: the everyday exit, not retention and not catastrophe.",
+      "claim_ids": ["AN-G-03", "AN-G-05"],
       "tags": ["stage:anaerobic"],
       "on_enter": [
         {"op": "hide_all"}
@@ -78,9 +78,9 @@
       "choices": []
     },
     "anaer.crisis": {
-      "text_dramatic": "TBD — fermentation cannot sustain the host; the host passes.",
-      "text_teaching": "",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ANAEROBIC"],
+      "text_dramatic": "The ferment is not enough. NAD+ turns over and over and glycolysis pants on, but the deep furnace stays cold. The host's energy thins, flickers, fails — the wheel stops. The host passes, and wherever you drift in the dark, the story ends here with them.",
+      "text_teaching": "Two shortfalls meet in this ending. First, supply: fermentation recycles NAD+ (from NADH) so glycolysis can continue, but if the supply of NAD+ is not replenished by the ETC or fermentation, glycolysis is unable to proceed — a host running on fermentation is one supply failure away from stopping. Second, yield: fermentation's energy yield is much less than continuing through the TCA cycle and ETC — and without oxygen the electron transport chain stalls (no terminal electron acceptor), oxidative phosphorylation cannot produce ATP, and the proton-motive force collapses. Fermentation regenerates NAD+ but yields far less ATP. A hard-working tissue with no oxygen cannot cover its ATP demand, and the host's crisis is the story's name for that deficit. A Bad ending here is the project's tier semantics — the host's failure, not a new chemical claim.",
+      "claim_ids": ["AN-G-04", "AN-ETC-02"],
       "tags": ["stage:anaerobic"],
       "on_enter": [
         {"op": "hide_all"}
