@@ -552,23 +552,31 @@ class TestGlucoseReachability(unittest.TestCase):
 
 
 class TestPyrBranchRuntimeEligibility(unittest.TestCase):
-    """Runtime-eligibility tests for the pyr.branch cond-syntax fix (06-05).
+    """Runtime-eligibility tests for the pyr.branch O2 branch (07-06).
 
-    The structural reachability tests in TestGlucoseReachability cover BFS
-    (cond ignored). These tests exercise the interpreter's ``_cond`` at
-    RUNTIME to confirm the fixed ``flags.get('host_o2_low')`` conds evaluate
-    correctly: the aerobic choice is eligible when ``host_o2_low`` is unset
-    (player can proceed to TCA -> True ending), the anaerobic choice is hidden
-    until a flag-setter exists (Phase 7), and the flag flip inverts
-    eligibility. Also includes a regression scan ensuring NO choice cond in the
-    glucose story uses the broken ``flags.<attr>`` dict-attribute form.
+    History: 06-05 fixed the cond SYNTAX (``flags.get('host_o2_low')`` dict-
+    method form) and these tests then proved the cond-GATED semantics (aerobic
+    eligible when ``host_o2_low`` unset / anaerobic hidden / flag flip
+    inverts). The 07-01 DC-B outcome -- implemented by Phase 7 plan 06, the
+    SAME plan that rewrote these tests (the OQ-K obligation) -- REMOVED both
+    cond keys: nothing in the graph ever sets ``host_o2_low``, so the
+    anaerobic subtree was structurally reachable (BFS ignores cond) but
+    runtime-HIDDEN forever. Both pyr.branch choices are now UNCONDITIONAL
+    (``cond is None`` -> always eligible per ``interpreter._cond``); the
+    honest O2 framing moved into the choice labels + teaching text (oxygen
+    availability is a real, tissue-level condition the player sets at the
+    branch, like sprint-vs-rest physiology -- host = mammal per Phase 5).
 
-    This is a COND-SYNTAX fix to the FROZEN 5.1 skeleton, NOT a topology
-    change: the 21-ending structural reachability is unchanged (covered
-    by TestGlucoseReachability above; the node count is now 57 after the
-    sanctioned Phase 7 plan-12 restoration addition); these tests prove the
-    FROZEN topology is actually PLAYABLE past pyr.branch (the 05.1-06 review
-    didn't exercise runtime cond evaluation).
+    These tests now pin the ALWAYS-ELIGIBLE semantics: both choices carry no
+    cond, both are eligible regardless of flag state (the flag is vestigial),
+    and the player can take either road. The dict-attribute regression scan
+    is kept: with the pyr.branch conds gone it passes trivially, and it
+    still guards any FUTURE cond added anywhere in the story against the
+    broken ``flags.<attr>`` form.
+
+    Structural reachability (BFS, cond ignored) is covered by
+    TestGlucoseReachability above; the node count is 57 after the sanctioned
+    Phase 7 plan-12 restoration addition. This class is RUNTIME semantics.
     """
 
     def setUp(self):
@@ -577,90 +585,109 @@ class TestPyrBranchRuntimeEligibility(unittest.TestCase):
     def _pyr_branch_choices(self):
         """Return (aerobic_choice, anaerobic_choice) from pyr.branch.
 
-        Aerobic = the choice whose cond starts with 'not ' (the
-        ``not flags.get('host_o2_low')`` choice -> pyr.pdh -> TCA -> True
-        ending). Anaerobic = the other cond-gated choice
-        (``flags.get('host_o2_low')`` -> anaer.entry -> fermentation endings).
+        Since the 07-06 cond-neutralization NEITHER choice carries a cond
+        (the old cond-shape identification -- ``cond.startswith('not ')`` --
+        no longer applies), so identification is by the FROZEN branch tags
+        (``branch:aerobic`` -> pyr.pdh -> TCA; ``branch:anaerobic`` ->
+        anaer.entry -> fermentation endings), preserved through the 07-06
+        edit.
         """
         g = StoryGraph.load(self._story_dir)
         node = g.get_node("pyr.branch")
         aerobic = None
         anaerobic = None
         for c in node.choices:
-            if c.cond and c.cond.startswith("not "):
+            if "branch:aerobic" in (c.tags or []):
                 aerobic = c
-            elif c.cond:
+            elif "branch:anaerobic" in (c.tags or []):
                 anaerobic = c
         self.assertIsNotNone(
             aerobic,
-            "pyr.branch has an aerobic choice (cond starts with 'not ')")
+            "pyr.branch has an aerobic choice (branch:aerobic tag)")
         self.assertIsNotNone(
             anaerobic,
-            "pyr.branch has an anaerobic choice (cond without 'not ')")
+            "pyr.branch has an anaerobic choice (branch:anaerobic tag)")
         return aerobic, anaerobic
 
-    def test_pyr_branch_aerobic_choice_eligible_when_host_o2_low_unset(self):
-        """Aerobic choice (``not flags.get('host_o2_low')``) is eligible when
-        ``host_o2_low`` is unset (fresh GameState, empty flags). ``flags.get``
-        returns None -> ``not None`` is True -> the player CAN proceed
-        aerobically to pyr.pdh -> TCA -> the True ending (SC#3 unblocked)."""
-        aerobic, _ = self._pyr_branch_choices()
+    def test_pyr_branch_choices_are_cond_neutral(self):
+        """The 07-01 DC-B cond-neutralization, pinned: NEITHER pyr.branch
+        choice carries a cond (``cond is None``). Nothing in the graph sets
+        ``host_o2_low``, so any cond gating these choices would hide one
+        subtree at runtime forever -- a regression re-adding a cond fails
+        here loudly."""
+        aerobic, anaerobic = self._pyr_branch_choices()
+        self.assertIsNone(
+            aerobic.cond,
+            "aerobic choice must be cond-neutral (07-01 DC-B); cond=%r"
+            % aerobic.cond)
+        self.assertIsNone(
+            anaerobic.cond,
+            "anaerobic choice must be cond-neutral (07-01 DC-B); cond=%r"
+            % anaerobic.cond)
+
+    def test_pyr_branch_both_choices_eligible_when_flags_unset(self):
+        """BOTH pyr.branch choices are eligible on a fresh GameState (empty
+        flags): ``_cond(None, state)`` is True for each, so the player can
+        proceed aerobically to pyr.pdh -> TCA -> the True ending OR take the
+        air-runs-out road to anaer.entry -> the fermentation endings. The
+        eligible set must contain both goto targets (replaces the old
+        aerobic-eligible/anaerobic-hidden split)."""
+        aerobic, anaerobic = self._pyr_branch_choices()
         interp = StoryInterpreter()
-        state = GameState()  # empty flags -> host_o2_low unset
+        state = GameState()  # empty flags -> host_o2_low unset (irrelevant)
         self.assertIs(
             interp._cond(aerobic.cond, state), True,
-            "aerobic choice eligible when host_o2_low unset (player can reach "
-            "TCA -> True ending); cond=%r" % aerobic.cond)
-
-    def test_pyr_branch_anaerobic_choice_hidden_when_host_o2_low_unset(self):
-        """Anaerobic choice (``flags.get('host_o2_low')``) is HIDDEN when
-        ``host_o2_low`` is unset. ``flags.get`` returns None -> ``bool(None)``
-        is False -> the anaerobic branch is not selectable until a Phase 7
-        flag-setter exists (no fabricated anaerobic reachability)."""
-        _, anaerobic = self._pyr_branch_choices()
-        interp = StoryInterpreter()
-        state = GameState()  # empty flags -> host_o2_low unset
+            "aerobic choice eligible on fresh state (cond-free); "
+            "goto=%r" % aerobic.goto)
         self.assertIs(
-            interp._cond(anaerobic.cond, state), False,
-            "anaerobic choice hidden when host_o2_low unset (None is falsy); "
-            "cond=%r" % anaerobic.cond)
+            interp._cond(anaerobic.cond, state), True,
+            "anaerobic choice eligible on fresh state (cond-free); "
+            "goto=%r" % anaerobic.goto)
+        self.assertEqual(
+            {aerobic.goto, anaerobic.goto}, {"pyr.pdh", "anaer.entry"},
+            "the two branch roads must target pyr.pdh (aerobic) and "
+            "anaer.entry (anaerobic); got %r"
+            % sorted([aerobic.goto, anaerobic.goto]))
 
-    def test_pyr_branch_aerobic_hidden_when_host_o2_low_set_true(self):
-        """Setting ``host_o2_low=True`` FLIPS eligibility: the aerobic choice
-        becomes hidden (``not True`` is False) and the anaerobic choice becomes
-        eligible (``True`` is truthy). Proves the cond is actually reading the
-        flag, not just always-True (a regression guard against a cond that
-        ignores the flag entirely)."""
+    def test_pyr_branch_both_choices_eligible_when_host_o2_low_set_true(self):
+        """Setting ``host_o2_low=True`` changes NOTHING: both choices stay
+        eligible (replaces the old flip-when-set semantics). The flag is
+        vestigial since the 07-06 cond removal -- no cond reads it -- so no
+        flag value can hide either road. Proves eligibility does not depend
+        on hidden state (a regression guard against a cond sneaking back)."""
         aerobic, anaerobic = self._pyr_branch_choices()
         interp = StoryInterpreter()
         state = GameState()
         state.set_flag("host_o2_low", True)
         self.assertIs(
-            interp._cond(aerobic.cond, state), False,
-            "aerobic choice hidden when host_o2_low=True (not True is False); "
-            "cond=%r" % aerobic.cond)
+            interp._cond(aerobic.cond, state), True,
+            "aerobic choice STILL eligible with host_o2_low=True "
+            "(flag is vestigial); cond=%r" % aerobic.cond)
         self.assertIs(
             interp._cond(anaerobic.cond, state), True,
-            "anaerobic choice eligible when host_o2_low=True; cond=%r"
-            % anaerobic.cond)
+            "anaerobic choice STILL eligible with host_o2_low=True "
+            "(flag is vestigial); cond=%r" % anaerobic.cond)
 
     def test_pyr_branch_both_choices_not_stuck(self):
-        """Regression guard: at least ONE pyr.branch choice is eligible when
-        ``host_o2_low`` is unset (the aerobic choice is True). The OLD broken
-        ``flags.host_o2_low`` cond made BOTH choices False (AttributeError ->
-        caught -> False) -> the player was STUCK at pyr.branch -> SC#3 blocked.
-        This test proves the fix: the player can advance past pyr.branch."""
+        """Regression guard, upgraded to the always-eligible semantics: BOTH
+        pyr.branch choices are eligible when flags are unset (exactly 2, up
+        from the old >=1). Lineage: the ORIGINAL broken ``flags.host_o2_low``
+        cond made BOTH choices False (AttributeError -> caught -> False) ->
+        the player was STUCK at pyr.branch -> SC#3 blocked; the 06-05
+        dict-method fix made exactly one eligible; the 07-06
+        cond-neutralization makes BOTH eligible -- the player can advance
+        past pyr.branch on either road."""
         aerobic, anaerobic = self._pyr_branch_choices()
         interp = StoryInterpreter()
-        state = GameState()  # host_o2_low unset
+        state = GameState()  # host_o2_low unset (irrelevant)
         eligible = [c for c in (aerobic, anaerobic)
                     if interp._cond(c.cond, state)]
-        self.assertGreaterEqual(
-            len(eligible), 1,
-            "at least one pyr.branch choice must be eligible when "
-            "host_o2_low is unset (the OLD broken cond made both False -> "
-            "stuck -> SC#3 blocked); conds=%r, %r"
-            % (aerobic.cond, anaerobic.cond))
+        self.assertEqual(
+            len(eligible), 2,
+            "BOTH pyr.branch choices must be eligible when flags are unset "
+            "(the 07-06 always-eligible semantics: OLD broken cond -> both "
+            "False -> stuck; cond-gated era -> one; now -> both); "
+            "conds=%r, %r" % (aerobic.cond, anaerobic.cond))
 
     def test_no_broken_dict_attribute_conds_remain(self):
         """Regression scan: NO choice cond in the glucose story uses the broken
@@ -670,7 +697,10 @@ class TestPyrBranchRuntimeEligibility(unittest.TestCase):
         tca.shuffle's working ``visits.get(...)`` sibling). Scans only ``flags.``
         attribute access (``visits.``/``counters.`` are separate dicts and are
         not flagged here). Catches any other node with the same bug so it
-        surfaces immediately rather than stranding the player at runtime."""
+        surfaces immediately rather than stranding the player at runtime.
+        07-06 note: with the pyr.branch conds REMOVED (07-01 DC-B) this scan
+        passes trivially today, but it stays as the guard for any FUTURE
+        cond added anywhere in the story."""
         g = StoryGraph.load(self._story_dir)
         # Match flags.<identifier> NOT immediately followed by '(' (i.e. a bare
         # dict-attribute access, NOT a dict-method call like flags.get(...)).
