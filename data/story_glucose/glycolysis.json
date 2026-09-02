@@ -41,6 +41,22 @@
         {"label": "Try to edit PFK's active site", "goto": "edit.prompt", "tags": ["edit:offer"]}
       ]
     },
+    "gly.pfk_restored": {
+      "text_dramatic": "TBD — Phase 7 text (plan 08).",
+      "text_teaching": "TBD — Phase 7 teaching text (plan 08).",
+      "claim_ids": [],
+      "tags": ["stage:glycolysis"],
+      "on_enter": [
+        {"op": "edit", "target": "pfk", "args": {"edit_type": "point_mutation", "sele": "resi 209 and chain A", "new_resn": "GLY"}},
+        {"op": "load", "target": "pdb:4PFK", "args": {"object": "pfk_wt"}},
+        {"op": "align", "target": "pfk_wt", "args": {"reference": "pfk", "method": "super", "align_sele": "name CA"}},
+        {"op": "show_as", "target": "pfk_wt", "args": {"rep": "cartoon"}}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "gly.fbp_to_pyruvate"},
+        {"label": "Examine the restored enzyme", "goto": "gly.fbp_to_pyruvate", "tags": ["mc:observe"]}
+      ]
+    },
     "gly.fbp_to_pyruvate": {
       "text_dramatic": "TBD — aldolase splits the C6 into two C3 trioses; the chain races through TPI, GAPDH, PGK, PGAM, and ENO to reach PEP. Net so far: 2 ATP, 2 NADH.",
       "text_teaching": "TBD — Phase 7 teaching text covering steps 4-9 (aldolase, TPI, GAPDH, PGK, PGAM, ENO) up to PEP.",

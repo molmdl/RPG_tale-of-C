@@ -41,6 +41,22 @@
         {"label": "Try to edit aconitase", "goto": "edit.prompt", "tags": ["edit:offer"]}
       ]
     },
+    "tca.aconitase_restored": {
+      "text_dramatic": "TBD — Phase 7 text (plan 13).",
+      "text_teaching": "TBD — Phase 7 teaching text (plan 13).",
+      "claim_ids": [],
+      "tags": ["stage:tca"],
+      "on_enter": [
+        {"op": "edit", "target": "aconitase", "args": {"edit_type": "point_mutation", "sele": "resi 85 and chain A", "new_resn": "SER"}},
+        {"op": "load", "target": "pdb:1ACO", "args": {"object": "aconitase_wt"}},
+        {"op": "align", "target": "aconitase_wt", "args": {"reference": "aconitase", "method": "super", "align_sele": "name CA"}},
+        {"op": "show_as", "target": "aconitase_wt", "args": {"rep": "cartoon"}}
+      ],
+      "choices": [
+        {"label": "Continue", "goto": "tca.shuffle"},
+        {"label": "Examine the restored enzyme", "goto": "tca.shuffle", "tags": ["mc:observe"]}
+      ]
+    },
     "tca.shuffle": {
       "text_dramatic": "TBD — the great wheel spins. First turn or second turn?",
       "text_teaching": "TBD — Phase 7 teaching text citing the approved RNG weight + prochirality claims.",
