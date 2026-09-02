@@ -1,21 +1,21 @@
 {
   "nodes": {
     "etc.entry": {
-      "text_dramatic": "TBD — your spark (the electrons) is caught by NADH and FADH2.",
-      "text_teaching": "",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ETC"],
+      "text_dramatic": "Your carbon body is behind you now — shed as CO2 at the cycle's turning. What rides on is the spark itself: your electrons, handed to NADH and FADH2 and delivered to the inner membrane's electron transport chain. Ahead, three great pumps stand between you and the terminal door where oxygen waits. Follow the soul down the chain — or let the pressure bleed away as warmth, and leave the harvest ungathered.",
+      "text_teaching": "Electrons removed from fuel molecules are transferred to the electron carriers NADH and FADH2, which deliver them to the electron transport chain — that hand-off has already happened as you arrive. Downstream, Complex I (NADH:ubiquinone oxidoreductase) receives electrons from NADH and passes them to ubiquinone, the chain's mobile ferry. The fork in front of you is real biochemistry, not a metaphor: if you follow the chain, the falling electrons pump protons and the journey continues toward ATP synthase. If you let go, you reenact proton leak (uncoupling): protons slip back across the inner membrane through paths that bypass ATP synthase, so the proton-motive force dissipates — its energy leaves as warmth — while electron transport and CO2 production continue. The harvest is skipped; the chemistry is not. One map note: the cyan highlight now follows your ELECTRONS, not your carbon — your carbon body was released as CO2 back at the cycle's turning, and only the electrons (the narrative 'soul') travel onward. That is the metamorphosis, not a change of chemistry.",
+      "claim_ids": ["ATP-SOUL-03", "ETC-CI-01", "ETC-UCP-01"],
       "tags": ["stage:etc"],
       "on_enter": [
         {"op": "hide_all"}
       ],
       "choices": [
         {"label": "Follow the soul into the electron transport chain", "goto": "etc.complex_i", "tags": ["etc:enter"]},
-        {"label": "Let go — drift away as CO2 (the unremarkable exit)", "goto": "end.normal.co2", "tags": ["ending:normal"]}
+        {"label": "Let go — let the pressure bleed away as warmth (the proton-leak exit)", "goto": "end.normal.co2", "tags": ["ending:normal"]}
       ]
     },
     "etc.complex_i": {
-      "text_dramatic": "TBD — Complex I receives your electrons; protons pump across the membrane.",
-      "text_teaching": "",
+      "text_dramatic": "Complex I — the NADH gate. Your electrons step aboard the largest machine in the membrane, pass hand to hand down its wire of iron-sulfur clusters, and are handed to ubiquinone, the ferry that will carry them to the next stage. Behind you, the first protons cross to the far side of the membrane. The current has entered the chain.",
+      "text_teaching": "Complex I (NADH:ubiquinone oxidoreductase) receives electrons from NADH and passes them to ubiquinone; as the electrons flow, Complex I also pumps protons from the matrix to the intermembrane space — one of only three pumping complexes (I, III, IV; Complex II does not pump). This enzyme can fail. A single letter change — arginine 102 to histidine (R102H) in its NDUFS8 subunit — is associated with MC1DN2 (Leigh syndrome); it was the first nuclear-encoded Complex I mutation ever found in a Leigh patient (Loeffen 1998). ClinVar records conflicting expert classifications for this variant, so the game keeps it on the strength of the original discovery paper and the UniProt annotation. Numbering bridge: the research structure of Complex I (PDB 5LDW — a cryo-EM map at 4.27 Angstrom, an electron-microscopy reconstruction rather than an X-ray photograph) is bovine; the human protein's first 34 residues are a targeting tail that is clipped off inside the mitochondrion, so human residue 102 is residue 68 on the structure's chain I. The structure you see in the game's cast is bovine, while the disease genetics described here is human — standard structural-biology practice, with the corresponding residue verified present and healthy in the actual coordinate files. Restoration note: no photograph of a disease-mutant Complex I exists, so the game teaches repair by editing the healthy structure in place — and be honest about the tool: changing a residue's identity (the letter) does not re-pack the side chain around it, so the edited model is a schematic, not a physics simulation.",
       "claim_ids": ["DIS-NDUFS8-01-cand"],
       "tags": ["stage:etc", "edit:enzyme:etc.complex_i"],
       "on_enter": [
@@ -27,12 +27,13 @@
       ]
     },
     "etc.complex_ii": {
-      "text_dramatic": "TBD — Complex II (succinate dehydrogenase) catches you: succinate becomes fumarate, and FADH2 carries your electrons onward. The bridge between TCA and ETC.",
-      "text_teaching": "TBD — Phase 7 teaching text: Complex II (succinate dehydrogenase, SdhABCD) oxidizes succinate to fumarate (the TCA step 6, repeated here as the FADH2 entry point to the ETC) and passes electrons to ubiquinone. NO PDB LOAD: narrative-only node (PDB 1ZOY is a candidate, pending Phase 7 approval).",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ETC", "DIS-SDHA-01-cand"],
+      "text_dramatic": "Complex II catches you at the cycle's own threshold: succinate becomes fumarate, and FAD — this enzyme's private wire — takes your electrons and passes them to ubiquinone, the ferry that serves both worlds. You are standing on the bridge between the citric-acid cycle and the electron transport chain.",
+      "text_teaching": "Complex II (succinate dehydrogenase) oxidizes succinate to fumarate — the cycle's sixth step, replayed here as the chain's side entrance — passing the electrons through FAD to FADH2 and on to ubiquinone. Ubiquinone (Q) is the mobile membrane carrier that collects electrons from Complexes I and II (and from other sources such as ETF and glycerol-3-phosphate dehydrogenase) and delivers them, as ubiquinol, to Complex III. Complex II is the exception among the chain's four complexes: it does NOT pump protons. It can also fail: an arginine-to-tryptophan change at human residue 554 (R554W) in its SDHA subunit is classified Likely pathogenic in ClinVar (multiple submitters, no conflicts) and is associated with Leigh syndrome; Bourgeron's 1995 report of this family was the first mutation found in a nuclear-encoded respiratory-chain component. Numbering bridge: the structure shown is porcine heart Complex II (PDB 1ZOY, X-ray at 2.4 Angstrom); the human protein's first 42 residues are the clipped targeting tail, so human residue 554 is residue 512 on its chain A — the same residue, verified present with the healthy arginine in the coordinate file. The cast is porcine, the disease genetics is human. Restoration note: no mutant photograph exists, so the game edits the healthy structure in place; the editing tool changes the residue's identity, not its side-chain packing.",
+      "claim_ids": ["ETC-CII-01", "ETC-Q-01", "DIS-SDHA-01-cand"],
       "tags": ["stage:etc", "edit:enzyme:etc.complex_ii"],
       "on_enter": [
-        {"op": "hide_all"}
+        {"op": "hide_all"},
+        {"op": "load", "target": "pdb:1ZOY", "args": {"object": "complex_ii"}}
       ],
       "choices": [
         {"label": "Continue", "goto": "etc.complex_iii"},
@@ -41,12 +42,13 @@
       ]
     },
     "etc.complex_iii": {
-      "text_dramatic": "TBD — Complex III runs the Q-cycle: ubiquinol hands electrons to cytochrome c, and more protons pump across the membrane.",
-      "text_teaching": "TBD — Phase 7 teaching text: Complex III (cytochrome bc1 complex) runs the Q-cycle: oxidizes ubiquinol (QH2), reduces cytochrome c, and pumps protons. NO PDB LOAD: narrative-only node (PDB 1BGY is a candidate, pending Phase 7 approval).",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ETC", "DIS-CYC1-01-cand"],
+      "text_dramatic": "Complex III takes delivery from the ferry: ubiquinol hands your electrons across the Q-cycle's churn — pickup, hand-off, repeat — and cytochrome c, the small shuttle that rides the membrane's face, carries them the last stretch. More protons cross. Two doors remain.",
+      "text_teaching": "Complex III (ubiquinol–cytochrome c oxidoreductase, the bc1 complex) oxidizes ubiquinol and passes the electrons to cytochrome c — the mobile carrier of the intermembrane space, which transfers electrons only from Complex III to Complex IV. As the electrons flow, Complex III pumps protons; it is the second of the three pumping complexes. It can fail: a leucine-to-phenylalanine change at human residue 215 (L215F) in its CYC1 subunit is classified Pathogenic in ClinVar (evaluated 2025, criteria provided, single submitter) and is associated with mitochondrial complex III deficiency, nuclear type 6 (MC3DN6) — a condition whose episodes of lactic acidosis fit the host-in-crisis stakes of this game. The discovery paper is Gaignard 2013; a second variant in the same subunit, W96C, was reported in the same paper and remains documented as the game's discarded first draft — L215F was chosen for its stronger 2025 clinical classification. Numbering bridge: the structure shown is bovine cytochrome bc1 (PDB 1BGY, X-ray at 3.0 Angstrom); the human protein's first 84 residues are the clipped targeting tail, so human residue 215 is residue 131 on the structure's chain D — verified present with the healthy leucine in the coordinate file. The cast is bovine, the disease genetics is human. Restoration note: no mutant photograph exists, so the game edits the healthy structure in place; the editing tool changes the residue's identity, not its side-chain packing.",
+      "claim_ids": ["ETC-CIII-01", "ETC-CYTC-01", "DIS-CYC1-01-cand"],
       "tags": ["stage:etc", "edit:enzyme:etc.complex_iii"],
       "on_enter": [
-        {"op": "hide_all"}
+        {"op": "hide_all"},
+        {"op": "load", "target": "pdb:1BGY", "args": {"object": "complex_iii"}}
       ],
       "choices": [
         {"label": "Continue", "goto": "etc.complex_iv"},
@@ -55,9 +57,9 @@
       ]
     },
     "etc.complex_iv": {
-      "text_dramatic": "TBD — Complex IV (cytochrome c oxidase) hands your electrons to O2 — oxygen, the terminal acceptor. Water is born; the aerobic-only path reaches its anchor.",
-      "text_teaching": "TBD — Phase 7 teaching text: Complex IV (cytochrome c oxidase) transfers electrons from cytochrome c to O2, reducing O2 to H2O. O2 is the terminal electron acceptor — grounds the aerobic-only True ending (no O2 -> no Complex IV -> no ETC -> no ATP synthase). PDB 1OCC is a CANDIDATE structure pending Phase 7 approval.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ETC", "DIS-COX4I1-01-cand"],
+      "text_dramatic": "The last door: Complex IV takes your electrons from cytochrome c and hands them to oxygen itself — the terminal acceptor, the hungriest listener at the end of the chain. Water is born. This is the aerobic anchor: no oxygen, no door, no harvest. But the door is open, and the current flows through.",
+      "text_teaching": "Complex IV (cytochrome c oxidase) transfers electrons from cytochrome c to O2, reducing oxygen to water in the matrix; oxygen stands at the end of the chain because it holds the highest (most positive) reduction potential — it is the terminal electron acceptor. This is why the True ending is aerobic-only: without O2 the door never opens, the chain backs up, and the harvest cannot proceed. Complex IV is the third and last of the pumping complexes (I, III, and IV pump; Complex II does not), completing the proton gradient that ATP synthase will harvest. It can fail: a proline-to-threonine change at human residue 152 (P152T) in its COX4I1 subunit is classified Pathogenic in ClinVar (evaluated 2020) and is associated with MC4DN16 — a phenotype resembling Leigh syndrome, described by Pillai 2019. Dual numbering, honestly stated: the narrative names the human residue Pro152, but the game's edit targets the bovine structure (PDB 1OCC, X-ray at 2.8 Angstrom), where the human protein's 22-residue targeting tail is absent — so human residue 152 is residue 130 on chain D (152 − 22 = 130), verified present with the healthy proline in the coordinate file. The structure shows two copies of the enzyme; the game's edit addresses chain D only. The cast is bovine, the disease genetics is human. Restoration note: no mutant photograph exists, so the game edits the healthy structure in place; the editing tool changes the residue's identity, not its side-chain packing.",
+      "claim_ids": ["ETC-CIV-01", "ETC-PMF-01", "DIS-COX4I1-01-cand"],
       "tags": ["stage:etc", "edit:enzyme:etc.complex_iv"],
       "on_enter": [
         {"op": "hide_all"},
@@ -70,9 +72,9 @@
       ]
     },
     "etc.atp_synthase": {
-      "text_dramatic": "TBD — the proton flow drives ATP synthase; your electrons become the spark of ATP.",
-      "text_teaching": "TBD — Phase 7 teaching text (metamorphosis framing: the soul-jump climax).",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ETC"],
+      "text_dramatic": "And here is the harvest. The protons you pumped come flooding home through ATP synthase, spinning its rotor — and with every turn, the enzyme presses ADP and phosphate together into ATP. Understand what this is: your electrons never become ATP. They are the falling water; ATP is the turning millstone's work. The spark's journey ends as power, not as matter.",
+      "text_teaching": "ATP synthase uses the proton gradient — chemiosmosis: protons flowing back through the F0 membrane domain drive a rotary mechanism, and the rotation drives the F1 catalytic domain to phosphorylate ADP + Pi into ATP. The whole chain adds up to one reaction: electrons plus H+ plus O2 yield water, with the energy of the fall captured as ATP by chemiosmotic phosphorylation. The game deliberately quotes no numbers for how much ATP one electron's fall yields — those ratios are approximate, condition-dependent, and textbooks disagree on their averages, so the story stays qualitative. Keep the three threads separate, as this ending demands: your carbon body was released as CO2 back at the cycle's turning; your electrons (the narrative 'soul') are what drove the pumps and what the cyan highlight now follows; the PROTONS are what physically spin the rotor — the electrons drive its synthesis, they are never its substance. A last honest note on the cast: the research structure of this enzyme (PDB 1E79, bovine F1-ATPase, 2.4 Angstrom) was photographed with a small molecule called DCCD bound to it — the chemical 'freeze' researchers used to hold the rotor still for its portrait; the inhibitor in the picture is a laboratory tool, not the enzyme's living state.",
+      "claim_ids": ["ATP-SOUL-07", "ETC-CHEM-01"],
       "tags": ["stage:etc"],
       "on_enter": [
         {"op": "hide_all"}
@@ -83,9 +85,9 @@
       ]
     },
     "end.true": {
-      "text_dramatic": "TBD — you are ATP. Your electrons power the cell; your carbon body was shed as CO2. The metamorphosis is complete.",
-      "text_teaching": "TBD — Phase 7 teaching text (metamorphosis: caterpillar -> butterfly; carbon -> CO2 = chrysalis; electrons -> ATP = the soul lives on).",
-      "claim_ids": ["PLACEHOLDER_PHASE7_ETC"],
+      "text_dramatic": "YOU are the spark within the ATP — your electrons now power the cell. Your carbon body was shed as CO2, breath by breath, at the cycle's turning. The metamorphosis is complete: the chrysalis lies empty, and what flies on is the current itself.",
+      "text_teaching": "Your carbon body is released as CO2; your electrons (the narrative 'soul') are carried by NADH/FADH2 to the ETC, which powers ATP synthase. The cyan highlight now follows your electrons, not your carbon — the metamorphosis. Every one of glucose's six carbons left the story the same way: as CO2, released at pyruvate dehydrogenase and twice per turn of the citric-acid cycle. None of them became ATP — the ATP is harvested current, not matter, and the carbon never entered the electron transport chain. The chain's overall chemistry held to the end: electrons plus H+ plus O2 gave water, and the energy of the fall was captured as ATP by chemiosmotic phosphorylation. And the harvest was never guaranteed: at the citrate shuffle, the cycle's own symmetry coin-flip (50/50) decided which turn would shed your carbon as CO2 — the prochiral gate that stood between the soul and ATP. You followed the soul through every pump, and the spark arrived.",
+      "claim_ids": ["ATP-SOUL-08", "ATP-SOUL-09", "ETC-CHEM-01"],
       "tags": ["stage:etc", "ending:true"],
       "on_enter": [
         {"op": "hide_all"}
