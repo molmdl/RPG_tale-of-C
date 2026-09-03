@@ -280,7 +280,7 @@ Plans:
 - [ ] 07.1-08-PLAN.md — JS validator port mirroring the lint 1:1 (20_validate.js) (Wave 3)
 - [ ] 07.1-09-PLAN.md — Node form: identity + texts + claims + tags (40_form.js) (Wave 4)
 - [ ] 07.1-10-PLAN.md — Path tracing tab (60_trace.js) (Wave 4)
-- [ ] 07.1-11-PLAN.md — CHECKPOINT 1: Firefox load + render + form + trace human-verify (Wave 4)
+- [ ] 07.1-11-PLAN.md — CHECKPOINT 1: Firefox load + render + form + trace human-verify (Wave 5)
 - [ ] 07.1-12-PLAN.md — Claims/references panel (C) (70_claims.js) (Wave 4)
 - [ ] 07.1-13-PLAN.md — Persistence: draft + save-edit + crash copy + stale-draft warning (E) (80_save.js) (Wave 4)
 - [ ] 07.1-14-PLAN.md — Edits table + cast + bad-ending pool panels (B4/B7/B10) (50_editscast.js) (Wave 4)
