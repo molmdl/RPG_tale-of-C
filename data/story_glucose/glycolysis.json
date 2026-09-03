@@ -1,9 +1,9 @@
 {
   "nodes": {
     "gly.start": {
-      "text_dramatic": "TBD — glucose arrives in the cytosol.",
-      "text_teaching": "",
-      "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS"],
+      "text_dramatic": "The glucose molecule slips into the cell's interior, and you ride inside it — one carbon among six, carried into the cytosol where the sugar is spent. A ten-enzyme production line waits here, primed for exactly this molecule. The journey begins: glucose at one end, pyruvate at the other, and ten steps between — every one of them will ask something of you.",
+      "text_teaching": "Glycolysis is the catabolic process in which glucose is converted into pyruvate via ten enzymatic steps. The ten steps run in two phases: a priming phase that requires an input of energy — 2 ATPs per glucose — and a payoff phase in which energy is released in the form of 4 ATPs, 2 per glyceraldehyde molecule. The full ledger for one glucose: a net of 2 ATP and 2 NADH. That is the engine this whole story rides.",
+      "claim_ids": ["GLY-INTRO-01"],
       "tags": ["stage:glycolysis"],
       "on_enter": [
         {"op": "hide_all"},
@@ -15,9 +15,9 @@
       ]
     },
     "gly.g6p": {
-      "text_dramatic": "TBD — hexokinase traps glucose as G6P.",
-      "text_teaching": "",
-      "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS"],
+      "text_dramatic": "The trap closes. Hexokinase takes hold of the glucose and bolts a phosphate onto its sixth carbon — a charged handle the sugar cannot shed. What drifted in as loose fuel is now glucose-6-phosphate: claimed, marked, and held by the cell that caught it. The road back out is gone; the only way leads deeper.",
+      "text_teaching": "Step 1: alpha-D-glucose is phosphorylated at the 6 carbon by ATP via the enzyme hexokinase (class: transferase), yielding alpha-D-glucose-6-phosphate — glucose + ATP -> glucose-6-phosphate + ADP. This is a regulatory step, negatively regulated by the presence of glucose-6-phosphate itself: when the cell's G6P pool is full, hexokinase eases off (product inhibition). The phosphate is the cell's grip — once the fuel carries a charge, it stays in the cell's economy.",
+      "claim_ids": ["GLY-HXK-01"],
       "tags": ["stage:glycolysis"],
       "on_enter": [
         {"op": "hide_all"}
@@ -28,8 +28,8 @@
       ]
     },
     "gly.pfk": {
-      "text_dramatic": "TBD — PFK-1, the committed step of glycolysis.",
-      "text_teaching": "TBD — Phase 7 teaching text citing GLY-PFK-01.",
+      "text_dramatic": "Phosphofructokinase — the gatekeeper. This is the step the cell welded shut behind you: fructose-6-phosphate takes a second phosphate and becomes fructose-1,6-bisphosphate, and past this gate there is no walking back up. The sugar is committed to the burn. But look closely at the enzyme on screen — for in some hosts the gatekeeper is born broken, and the whole road jams at the step that was meant to be irreversible.",
+      "text_teaching": "Step 3: phosphofructokinase-1 (PFK-1) phosphorylates fructose-6-phosphate at the 1-carbon position — fructose-6-phosphate + ATP -> fructose-1,6-bisphosphate + ADP. This is the committed step of glycolysis because of its large ΔG value: once this reaction runs, the molecule is locked onto the glycolysis road. The cast on screen is PDB 4PFK — phosphofructokinase from the bacterium Geobacillus stearothermophilus, resolved at 2.40 Å (Evans, Farrants, Hudson 1981) — a bacterial stand-in for the human enzyme, shown honestly as such. The disease story is carried in text: the featured human mutation, PFKM G209D, abolishes PFK-1 activity in yeast-complementation assays (Raben 1995) and is classified Likely pathogenic in ClinVar (VCV003375341) for Glycogen Storage Disease VII / Tarui disease (MIM:232800). Residue 209 is human PFKM numbering; the bacterial 4PFK has no sourced equivalent at that position (its own residue 209 is a histidine), so the game asserts no on-structure mutation here — the enzyme you see is the healthy cast, and the Tarui story is the frame this node carries. The restoration arc that follows is the game's staged replay of a corrected enzyme: a narrative reveal, taught honestly at the next branch node.",
       "claim_ids": ["GLY-PFK-01", "CAST-PFK-PDB-01", "DIS-PFKM-01-cand"],
       "tags": ["stage:glycolysis", "edit:enzyme:gly.pfk"],
       "on_enter": [
@@ -42,9 +42,9 @@
       ]
     },
     "gly.pfk_restored": {
-      "text_dramatic": "TBD — Phase 7 text (plan 08).",
-      "text_teaching": "TBD — Phase 7 teaching text (plan 08).",
-      "claim_ids": [],
+      "text_dramatic": "The gatekeeper runs again. The staged fault has been answered — the featured residue set back to glycine, and the healthy wild-type structure brought alongside yours, the two shapes settling into agreement. This is what repair looks like in this story: not a new enzyme, but the old one made whole. The gate swings open, and the split of the sugar lies just ahead.",
+      "text_teaching": "This is the PFK restoration reveal — the arc's staged replay of a corrected enzyme, and it is honest about what is real. The mechanics you just watched are real: the game applied a point mutation at residue 209 of the on-screen enzyme (setting it to glycine, GLY), loaded the healthy wild-type cast — PDB 4PFK, 2.40 Å — and superimposed it onto your edited copy (alignment on C-alpha atoms, cmd.super) so the two structures can be compared. The framing is the honest part: the cast is the bacterial enzyme (Geobacillus stearothermophilus), whose own residue 209 is a histidine — the game asserts no bacterial equivalent of the human disease position, so this edit is a symbolic replay, not a structural correction of a real mutation. The human story it stands in for: PFKM G209D abolishes PFK-1 activity in yeast-complementation assays (Raben 1995) and is classified Likely pathogenic in ClinVar (VCV003375341) for Glycogen Storage Disease VII / Tarui disease (MIM:232800) — and in a human enzyme, a fix that restores the glycine at the featured residue is precisely the corrective shape this arc imagines. The road continues: the six-carbon sugar now splits into two three-carbon tracks.",
+      "claim_ids": ["DIS-PFKM-01-cand"],
       "tags": ["stage:glycolysis"],
       "on_enter": [
         {"op": "edit", "target": "pfk", "args": {"edit_type": "point_mutation", "sele": "resi 209 and chain A", "new_resn": "GLY"}},
@@ -58,9 +58,9 @@
       ]
     },
     "gly.fbp_to_pyruvate": {
-      "text_dramatic": "TBD — aldolase splits the C6 into two C3 trioses; the chain races through TPI, GAPDH, PGK, PGAM, and ENO to reach PEP. Net so far: 2 ATP, 2 NADH.",
-      "text_teaching": "TBD — Phase 7 teaching text covering steps 4-9 (aldolase, TPI, GAPDH, PGK, PGAM, ENO) up to PEP.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS"],
+      "text_dramatic": "Aldolase falls like an axe: the six-carbon sugar splits into two three-carbon halves — dihydroxyacetone phosphate and glyceraldehyde-3-phosphate. You ride one twin; the isomerase bends the other onto your track until the two halves run level. Then the assembly line seizes you both — five enzymes in swift succession, each shaving the three carbons toward one coiled destination: phosphoenolpyruvate. The ledger so far: 2 ATP invested + 2 ATP recovered + 2 NADH banked. The second substrate-level ATP is still to come — pyruvate kinase holds it.",
+      "text_teaching": "Steps 4 through 9, in order. Step 4 — aldolase (class: lyase) cleaves fructose-1,6-bisphosphate into two three-carbon molecules: dihydroxyacetone phosphate and D-glyceraldehyde-3-phosphate. Step 5 — triose phosphate isomerase converts dihydroxyacetone phosphate into D-glyceraldehyde-3-phosphate, so both halves of the split sugar reach the same track. Step 6 — glyceraldehyde-3-phosphate dehydrogenase phosphorylates G3P at the 1 carbon to yield the high-energy molecule 1,3-bisphosphoglycerate; this is the step that banks NADH. Step 7 — phosphoglycerate kinase makes ATP at the expense of 1,3-bisphosphoglycerate, yielding ATP and 3-phosphoglycerate (the first substrate-level phosphorylation — one per triose, the 2 invested ATPs recovered). Step 8 — phosphoglycerate mutase converts 3-phosphoglycerate into 2-phosphoglycerate. Step 9 — enolase converts 2-phosphoglycerate into phosphoenolpyruvate (PEP). The account after step 9: 2 ATP invested + 2 ATP recovered + 2 NADH banked — net ATP zero so far. The payoff's second substrate-level ATP does not land here; it lands at pyruvate kinase, the next node.",
+      "claim_ids": ["GLY-TRIOSE-01"],
       "tags": ["stage:glycolysis"],
       "on_enter": [
         {"op": "hide_all"}
@@ -71,9 +71,9 @@
       ]
     },
     "gly.pyruvate_kinase": {
-      "text_dramatic": "TBD — pyruvate kinase strikes: PEP becomes pyruvate, and the second substrate-level ATP is born.",
-      "text_teaching": "TBD — Phase 7 teaching text: pyruvate kinase transfers PEP's phosphate to ADP, yielding pyruvate + ATP (the 2nd substrate-level phosphorylation of glycolysis; irreversible, regulatory step). PDB 7FS3 is a CANDIDATE structure pending human approval.",
-      "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS", "DIS-PKLR-01-cand"],
+      "text_dramatic": "Pyruvate kinase strikes the final blow. Phosphoenolpyruvate — the spring the assembly line wound tight — snaps its phosphate onto ADP, and the second substrate-level ATP is born. What falls away is pyruvate: the three-carbon molecule this whole journey was aimed at. The cell's ledger tips into profit — and for you, the crossroads is one step away.",
+      "text_teaching": "Step 10: pyruvate kinase catalyzes the transfer — PEP + ADP -> pyruvate + ATP, the second substrate-level phosphorylation of glycolysis. The step is regulated by the energy in the cell: high concentrations of ATP, acetyl-CoA, alanine, and cAMP all signal 'enough' and inhibit the enzyme. The cast on screen is PDB 7FS3 — human PKLR, the liver-type (L-type) pyruvate kinase, resolved at 1.66 Å in complex with its allosteric modulator, oxalate (a pyruvate analog resting in the active site), Mg2+ and K+ (Nain-Perez 2023). One honest line about tissue types: 7FS3 is the L-type isoform — the liver's version of the enzyme — while the disease below afflicts red blood cells, whose R-type enzyme is built from the same PKLR gene. The disease story: PKLR R479H is classified Pathogenic in ClinVar (VCV000001510) for chronic nonspherocytic hemolytic anemia type 2 / pyruvate kinase deficiency (MIM:266200); the variant is annotated in the Amish population, and UniProt notes it causes no conformational change (VAR_011480; Valentini 2002). Red blood cells depend entirely on glycolysis for their ATP, which is why a sluggish pyruvate kinase shows up as anemia. Researchers have even photographed the mutant itself: PDB 2VGG, the human erythrocyte pyruvate kinase R479H mutant (Valentini 2002) — the same residue the game's pyruvate-kinase edit targets.",
+      "claim_ids": ["GLY-PKM-01", "CAST-PKLR-PDB-01", "CAST-PKLR-MUTANT-PDB-01", "DIS-PKLR-01-cand"],
       "tags": ["stage:glycolysis", "edit:enzyme:gly.pyruvate_kinase"],
       "on_enter": [
         {"op": "hide_all"},
@@ -86,9 +86,9 @@
       ]
     },
     "gly.pyruvate": {
-      "text_dramatic": "TBD — you arrive at pyruvate, the branch point.",
-      "text_teaching": "",
-      "claim_ids": ["PLACEHOLDER_PHASE7_GLYCOLYSIS"],
+      "text_dramatic": "Pyruvate. The word the whole road was spelled toward. Ten enzymatic steps behind you; the three-carbon molecule they promised stands before you — and every road forward passes through this point. Ahead, the air itself decides: burn the carbon on through the great furnace while breath holds, or ferment it when the air runs thin. The fork is the very next threshold.",
+      "text_teaching": "Glycolysis ends at pyruvate — two of them, one from each three-carbon track of the split sugar. What happens next depends on oxygen: aerobically, pyruvate is fed into the citric acid cycle via the pyruvate dehydrogenase complex; anaerobically — when oxygen is absent — it is reduced to lactate or ethanol, using a process known as fermentation. One molecule, and the tissue's breathing decides its fate. The next node is the fork itself.",
+      "claim_ids": ["AN-G-01"],
       "tags": ["stage:glycolysis"],
       "on_enter": [
         {"op": "hide_all"}
