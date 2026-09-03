@@ -110,7 +110,9 @@ class TestGlucoseReachability(unittest.TestCase):
     edit:structural reframe. The 14 edit-allowed count + the 0 single-Continue
     invariant are UNCHANGED across the expansion Wave 2. The replan
     invariants are machine-checked by test_no_single_continue_choice,
-    test_14_edit_allowed_nodes, and test_pdh_cast_pdb_fix_and_complex_i_claim_id.
+    test_15_edit_allowed_nodes (renamed from test_14_edit_allowed_nodes by
+    Plan 07-13's D5 promotion), and
+    test_pdh_cast_pdb_fix_and_complex_i_claim_id.
 
     Plan 05.2-01 (extensibility convention) added +1 bad-ending node
     (bad.denature_ph_change, pH-denaturation, 1a edit:unknown): 54 -> 55 nodes,
@@ -325,7 +327,7 @@ class TestGlucoseReachability(unittest.TestCase):
         """Plan 07-12 restoration-topology invariants (the 07-01 DC-A outcome):
         gly.pfk_restored + tca.aconitase_restored exist with (a) NO ending
         tier (NON-ending -- the 21-ending count is unchanged), (b) NO
-        edit:enzyme: tag (NOT edit-allowed; test_14_edit_allowed_nodes'
+        edit:enzyme: tag (NOT edit-allowed; test_15_edit_allowed_nodes'
         exact-set assertion guards this from the other side), (c) a forward
         path back to the main path: every choice.goto target exists and an
         ENDING is reachable from the restored node via choice.goto chains
