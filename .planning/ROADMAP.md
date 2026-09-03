@@ -261,11 +261,34 @@ Plans:
 **Depends on**: Phase 7
 **Requirements**: (none owned — authoring-tool/aid phase; accelerates content authoring + review across Phases 7–9)
 **Success Criteria** (what must be TRUE):
-  1. [To be planned]
-**Plans**: 0 plans
+  1. `python3.6 tools/story_editor.py` emits the committed repo-root `story_editor.html` — a self-contained, offline, dependency-free page (vanilla JS, zero external requests, no frameworks/servers/installs; loads live data from the HTML's own sub-directories) — and the emitted HTML passes the automated structural battery (required JS entry points present, no token leaks, no ES-module scripts, generator integrity gate green on the live bundle)
+  2. In Firefox the editor loads the live bundle from sub-directories of the HTML's own location (opportunistic fetch probe → `webkitdirectory` folder pick with found/missing checklist; single-file draft reload) and renders the full 57-node graph, node forms, path-trace tab, and claims panel with a clean console and zero network requests (human-verify)
+  3. All B capabilities are operable in the browser: node/choice/path add-delete-update (B1/B3/B5); node-type transitions (starting / MC / mutation / ending) implemented as the underlying multi-field data recipes with count-shift acknowledgment naming the pinned tests (B2); allowed + known-wrong mutation table (B4); node text fields with id-as-title + story/science/claims mapping — no invented schema fields (B6); cast PDBs (B7); scene camera/color/representation paste-in via the frozen scene_capture MolAction contract with set_view Phase-10 flag (B8); ending-CG Phase-12 reminder on ending nodes + STATE.md Pending-Todos tracking (B9); bad-ending random pool editor (B10); unknown-key/unknown-op round-trip preservation (B11)
+  4. References/sources checking (C) is operable: claim → source resolution with approval-status chips, review tier, claim_text, and reverse index (claim → referencing nodes) — read-only (approvals stay human-gated)
+  5. Path tracing (D) is operable: a trace tab renders any path from a chosen start as an expandable nested list (full-story view) with a cycle guard and copy-as-text
+  6. The safety net (E) is operable: snapshot undo/redo (one entry per logical action); draft download (git-ignored tmp/ target) with fingerprint-based stale-draft detection; save-edit = per-dirty-file downloads with displayed repo-relative destinations, house-style serialization (no-op save is byte-identical — verified over all 12 data files), and a post-save gate reminder; the Python mirror lint (`tools/story_editor_lint.py`) is green on untouched data and red on seeded violations, mirroring the suite's pinned invariants 1:1
+**Plans**: 19 plans in 6 waves (fine-grained per user directive — "split to more plan so each plan is focused, I accept more than 20"; asset-pipeline architecture: the generator auto-inlines per-concern JS asset files so same-wave plans never share files; Firefox + universal `<a download>`/Blob persistence per binding user directives — no File System Access API, no server; early Firefox checkpoint after load+render, final checkpoint on the full edit→draft→save→gates round trip)
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 7.1 to break down)
+- [ ] 07.1-01-PLAN.md — Generator skeleton + asset pipeline + shell template + emitted-HTML test harness (Wave 1)
+- [ ] 07.1-02-PLAN.md — House-style JSON serializer (Python canonical, TDD; byte-identical no-op proof over all 12 data files) (Wave 1)
+- [ ] 07.1-03-PLAN.md — Python mirror lint CLI (pre-save validator spec; TDD; green on real data, red on seeded violations) (Wave 1)
+- [ ] 07.1-04-PLAN.md — JS core + state + undo/redo (00_core.js) (Wave 2)
+- [ ] 07.1-05-PLAN.md — JS house-style serializer port + self-test vectors (05_json.js) (Wave 2)
+- [ ] 07.1-06-PLAN.md — SVG graph view (30_graph.js) (Wave 3)
+- [ ] 07.1-07-PLAN.md — JS boot/load layer: probe → folder pick → checklist; draft reload (10_load.js) (Wave 3)
+- [ ] 07.1-08-PLAN.md — JS validator port mirroring the lint 1:1 (20_validate.js) (Wave 3)
+- [ ] 07.1-09-PLAN.md — Node form: identity + texts + claims + tags (40_form.js) (Wave 4)
+- [ ] 07.1-10-PLAN.md — Path tracing tab (60_trace.js) (Wave 4)
+- [ ] 07.1-11-PLAN.md — CHECKPOINT 1: Firefox load + render + form + trace human-verify (Wave 4)
+- [ ] 07.1-12-PLAN.md — Claims/references panel (C) (70_claims.js) (Wave 4)
+- [ ] 07.1-13-PLAN.md — Persistence: draft + save-edit + crash copy + stale-draft warning (E) (80_save.js) (Wave 4)
+- [ ] 07.1-14-PLAN.md — Edits table + cast + bad-ending pool panels (B4/B7/B10) (50_editscast.js) (Wave 4)
+- [ ] 07.1-15-PLAN.md — Choices editor (B3/B5) (42_choices.js) (Wave 4)
+- [ ] 07.1-16-PLAN.md — on_enter editor + scene_capture paste-in (B8) (43_onenter.js) (Wave 4)
+- [ ] 07.1-17-PLAN.md — Node lifecycle: add/delete/type-change recipes + count-shift acknowledgment (B1/B2) (45_lifecycle.js) (Wave 5)
+- [ ] 07.1-18-PLAN.md — Status bar + diagnostics + help (incl. Firefox save-settings guidance) (90_boot.js) (Wave 5)
+- [ ] 07.1-19-PLAN.md — Capstone: integration tests + STATE.md B9 Pending-Todos entry + FINAL Firefox round-trip checkpoint (Wave 6)
 
 **Details:**
 User-requested spec (2026-09-04; urgent insertion during Phase 7 execution):
@@ -453,7 +476,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 5
 | 5.4 Representation Design (INSERTED) | 4/4 ✓ | Complete | 2026-08-29 |
 | 6. Qt UI + MVP (Glucose + True+Bad) | 14/14 ✓ | Complete | 2026-08-30 |
 | 7. Content I: All Glucose Endings | 0/TBD | Not started | - |
-| 7.1 Story Node Editing HTML Interface (INSERTED) | 0/TBD | Not started | - |
+| 7.1 Story Node Editing HTML Interface (INSERTED) | 0/19 | Planned (6 waves) | - |
 | 8. Content II: Fatty Acid + Alcohol | 0/TBD | Not started | - |
 | 9. Anaerobic + Full Cast + Docs | 0/TBD | Not started | - |
 | 10. Polish, Playtest & Release | 0/TBD | Not started | - |
