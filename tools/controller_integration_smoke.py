@@ -79,6 +79,7 @@ from rpg.ui.controller import Controller
 # Gotcha #6: complete PyMOL startup before any cmd.* call.
 pymol.finish_launching()
 
+import shutil
 import tempfile
 
 FAILS = []
@@ -90,6 +91,21 @@ def check(name, ok, detail=""):
     print("SMOKE: {0} {1} {2}".format("PASS" if ok else "FAIL", name, detail))
     if not ok:
         FAILS.append(name)
+
+
+def _secure_temp_path(name):
+    # type: (str) -> str
+    """Race-free unpredictable temp path (CodeQL insecure-temporary-file fix).
+
+    tempfile.mktemp returns a PREDICTABLE, not-yet-created path -> a local
+    attacker can win the TOCTOU race with a symlink. mkdtemp() instead creates
+    an unpredictable 0700-permission directory atomically; a fixed name joined
+    inside it cannot be attacked by another user (the file itself is created
+    later by the consumer -- AchievementBoard's load-if-exists check requires a
+    not-yet-existing path). Same convention as demo_playthrough.py +
+    tests/test_controller.py (mkdtemp + os.path.join).
+    """
+    return os.path.join(tempfile.mkdtemp(), name)
 
 
 # =========================================================================
@@ -123,7 +139,7 @@ def _build_molops_stack():
     edits_path = str(rpg.paths.data_path("data", "edits.json"))
     edit_router = EditRouter(EditsTable.load(edits_path))
     # Temp achievements path (NOT the real user_data_path -- no pollution).
-    ach_path = tempfile.mktemp(suffix="_smoke_ach.json")
+    ach_path = _secure_temp_path("_smoke_ach.json")
     achievement_board = AchievementBoard(path=ach_path)
     return molops, edit_router, achievement_board, ach_path
 
@@ -191,7 +207,7 @@ def _make_controller(achievement_board=None):
         # a fresh one). Actually the plan uses ONE board for stages 4-6 (start
         # -> Bad ending) + a FRESH board for stage 7 (True ending). This helper
         # builds a fresh board when none is passed.
-        ach_path = tempfile.mktemp(suffix="_smoke_ach.json")
+        ach_path = _secure_temp_path("_smoke_ach.json")
         achievement_board = AchievementBoard(path=ach_path)
     view = MockView()
     controller = Controller(
@@ -509,7 +525,7 @@ try:
         STORY_DIR, molops_d, cmd, edit_router_d, view=MockView(),
         prompt_fn=_prompt_fn, count_fn=_count_fn,
         achievement_board=AchievementBoard(
-            path=tempfile.mktemp(suffix="_smoke_ach_d.json")),
+            path=_secure_temp_path("_smoke_ach_d.json")),
         view_provider=_view_provider, view_applier=_view_applier,
         edit_offer_fn=_edit_offer_fn)
     controller_d.start_game("glucose", seed=42)
@@ -835,7 +851,7 @@ try:
         STORY_DIR, molops_s, cmd, edit_router_s, view=mock_view_s,
         prompt_fn=_prompt_fn, count_fn=_count_fn,
         achievement_board=AchievementBoard(
-            path=tempfile.mktemp(suffix="_smoke_ach_s.json")),
+            path=_secure_temp_path("_smoke_ach_s.json")),
         view_provider=_view_provider, view_applier=_view_applier,
         edit_offer_fn=_edit_offer_fn)
     # Walk to gly.g6p (intro.preface -> intro.select -> intro.shell_glucose ->
@@ -851,7 +867,7 @@ try:
           "node=%r finished=%r" % (save_node, controller_s._engine.state.finished))
 
     # Save.
-    save_path = tempfile.mktemp(suffix="_smoke_save.json")
+    save_path = _secure_temp_path("_smoke_save.json")
     controller_s.save(save_path)
     check("save_file_exists", os.path.isfile(save_path),
           "path=%r exists=%r" % (save_path, os.path.isfile(save_path)))
@@ -868,7 +884,7 @@ try:
         STORY_DIR, molops_l, cmd, edit_router_l, view=mock_view_l,
         prompt_fn=_prompt_fn, count_fn=_count_fn,
         achievement_board=AchievementBoard(
-            path=tempfile.mktemp(suffix="_smoke_ach_l.json")),
+            path=_secure_temp_path("_smoke_ach_l.json")),
         view_provider=_view_provider, view_applier=_view_applier,
         edit_offer_fn=_edit_offer_fn)
     # Record the applied_views count BEFORE load.
@@ -901,11 +917,10 @@ try:
           len(mock_view_l.turns) >= 1,
           "turns=%d" % len(mock_view_l.turns))
 
-    # Clean up the save file.
-    try:
-        os.remove(save_path)
-    except OSError:
-        pass
+    # Clean up the save file + its secure mkdtemp dir.
+    _save_dir = os.path.dirname(save_path)
+    if _save_dir and os.path.isdir(_save_dir):
+        shutil.rmtree(_save_dir, ignore_errors=True)
 except Exception as e:
     import traceback
     traceback.print_exc()
@@ -964,8 +979,12 @@ except Exception as e:
 # =========================================================================
 try:
     for _p in [ach_path_main, ach_path_t]:
-        if _p and os.path.isfile(_p):
-            os.remove(_p)
+        # Each path lives in its own unpredictable 0700 mkdtemp dir
+        # (_secure_temp_path); remove the whole dir. The falsy guard is
+        # REQUIRED: the vars are None when a stage raised before assignment
+        # (os.path.dirname(None) raises TypeError, not caught below).
+        if _p and os.path.isdir(os.path.dirname(_p)):
+            shutil.rmtree(os.path.dirname(_p), ignore_errors=True)
 except OSError:
     pass
 try:

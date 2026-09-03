@@ -558,7 +558,13 @@ class TestController(unittest.TestCase):
         c._engine.goto("gly.g6p")
         turn = c.choose(0)  # -> gly.pfk
         self.assertEqual(turn.node.id, "gly.pfk", "walked to gly.pfk")
-        save_path = tempfile.mktemp(suffix="_ctrl_stash_save.json")
+        # Secure temp path (CodeQL insecure-temporary-file): mkdtemp() creates
+        # an unpredictable 0700-permission dir atomically; the joined name is
+        # race-free inside it (the insecure tempfile.mktemp returns a
+        # PREDICTABLE, not-yet-created path -> TOCTOU/symlink race).
+        tmpdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, tmpdir)
+        save_path = os.path.join(tmpdir, "ctrl_stash_save.json")
         try:
             c.save(save_path)
             c.request_edit(c._current_enzyme_id())  # -> edit.prompt, stashes
