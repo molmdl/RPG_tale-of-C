@@ -47,6 +47,15 @@
         }
       ]
     },
+    "tca.akg_dh": {
+      "edits": [
+        {
+          "signature": {"op": "point_mutation", "target": "resi 189", "args": {"new_res": "PRO"}},
+          "branch_node": "tca.succinyl_coa_synthetase",
+          "claim_id": "DIS-OGDH-01-cand"
+        }
+      ]
+    },
     "tca.succinyl_coa_synthetase": {
       "edits": [
         {
