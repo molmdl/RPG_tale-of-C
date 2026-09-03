@@ -23,3 +23,7 @@ rpg/data/assets/downloaded/
 # tools/build_plugin_zip.sh). NOT committed -- regenerable on demand.
 # The zip bundles rpg/ + data/story_glucose at build time; source is in rpg/.
 dist/
+
+# Interactive story-graph review viewer (built by tools/story_graph_viewer.py).
+# NOT committed -- regenerable on demand: python3.6 tools/story_graph_viewer.py
+dist/story_graph_viewer.html
