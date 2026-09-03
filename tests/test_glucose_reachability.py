@@ -54,6 +54,15 @@ choices; the 2 new preface nodes each have 2 choices = Continue + Observe).
   edit-allowed + 0 single-Continue invariants are UNCHANGED (restoration nodes
   are NOT edit-allowed).
 
+- Plan 07-13 (Phase 7 TCA content) applied the 07-03 Decision D5 promotion:
+  tca.akg_dh gains an edit:enzyme:tca.akg_dh tag + an edit:offer choice, so
+  the edit-allowed invariant grew 14 -> 15 (the OGDH promotion's "same plan"
+  test-update obligation per the 07-03 ledger: DIS-OGDH-01-cand P189L, the
+  evidence-weaker single-submitter tier, promoted over research's
+  narrative-only preference). Node/ending counts are UNCHANGED (a tag + a
+  choice, not new nodes). The 0 single-Continue invariant is UNCHANGED (the
+  new offer rides alongside the existing 2 choices).
+
 Pure Python 3.6 stdlib only. NO pymol/PyQt5. Mirrors the proven pattern in
 tests/test_integration.py:336-362 (the toy-graph SC2 tests).
 """
@@ -113,7 +122,11 @@ class TestGlucoseReachability(unittest.TestCase):
 
     Plan 07-12 (Phase 7 restoration topology) added the 2 DC-A restoration-
     branch nodes: 55 -> 57 nodes, 21 endings UNCHANGED. See the module
-    docstring for the router-only-entry semantics."""
+    docstring for the router-only-entry semantics.
+
+    Plan 07-13 applied the 07-03 D5 promotion: tca.akg_dh is edit-allowed,
+    growing the set 14 -> 15 (the OGDH "same plan" test-update obligation).
+    Node/ending counts unchanged."""
 
     def setUp(self):
         self._story_dir = GLUCOSE_STORY_DIR
@@ -246,13 +259,18 @@ class TestGlucoseReachability(unittest.TestCase):
             "Continue-to-MC invariant -- Driver 2 of the Phase 5.1 replan); "
             "found %d: %s" % (len(single_continue), single_continue))
 
-    def test_14_edit_allowed_nodes(self):
-        """Replan invariant (Driver 1 -- promotion): exactly 14 edit-allowed
-        nodes (each carrying an edit:enzyme:<id> tag). The disease-mutant
-        replan promoted 8 enzyme nodes to edit-allowed (gly.pyruvate_kinase,
-        4 TCA enzymes -- isocitrate_dh/succinyl_coa_synthetase/fumarase/
-        malate_dh, 3 ETC complexes -- complex_ii/iii/iv), growing the set
-        from 5+shuffle to 14. Each edit-allowed node must carry an edit:offer
+    def test_15_edit_allowed_nodes(self):
+        """Count invariant (Driver 1 -- promotion): exactly 15 edit-allowed
+        nodes (each carrying an edit:enzyme:<id> tag). History: the
+        disease-mutant replan promoted 8 enzyme nodes to edit-allowed
+        (gly.pyruvate_kinase, 4 TCA enzymes -- isocitrate_dh/
+        succinyl_coa_synthetase/fumarase/malate_dh, 3 ETC complexes --
+        complex_ii/iii/iv), growing the set from 5+shuffle to 14; Plan 07-13
+        then applied the 07-03 Decision D5 promotion (tca.akg_dh gains the
+        edit:enzyme:tca.akg_dh tag + an edit:offer choice), growing 14 -> 15
+        (the OGDH promotion's "same plan" test-update obligation -- DIS-OGDH-
+        01-cand P189L, approved with the single-submitter/no-assertion-criteria
+        evidence-tier caveat). Each edit-allowed node must carry an edit:offer
         choice routing to edit.prompt. tca.citrate_synthase carries the
         edit:structural reframe tag (NO disease point mutant) and has NO
         DIS-* claim_id."""
@@ -263,20 +281,23 @@ class TestGlucoseReachability(unittest.TestCase):
                 if str(tag).startswith("edit:enzyme:"):
                     edit_allowed[nid] = node
                     break
-        self.assertEqual(len(edit_allowed), 14,
-                         "exactly 14 edit-allowed nodes after the disease-"
-                         "mutant replan; found %d: %s"
+        self.assertEqual(len(edit_allowed), 15,
+                         "exactly 15 edit-allowed nodes after the 07-03 D5 "
+                         "OGDH promotion (14 replan + tca.akg_dh by 07-13); "
+                         "found %d: %s"
                          % (len(edit_allowed), sorted(edit_allowed.keys())))
         expected_ids = {
             "gly.pfk", "pyr.pdh", "tca.citrate_synthase", "tca.aconitase",
             "tca.shuffle", "etc.complex_i", "gly.pyruvate_kinase",
-            "tca.isocitrate_dh", "tca.succinyl_coa_synthetase",
+            "tca.isocitrate_dh", "tca.akg_dh",
+            "tca.succinyl_coa_synthetase",
             "tca.fumarase", "tca.malate_dh", "etc.complex_ii",
             "etc.complex_iii", "etc.complex_iv",
         }
         self.assertEqual(
             set(edit_allowed.keys()), expected_ids,
-            "the 14 edit-allowed node ids must match the replan set exactly")
+            "the 15 edit-allowed node ids must match the replan set + the "
+            "D5-promoted tca.akg_dh exactly")
         # Each edit-allowed node has an edit:offer choice to edit.prompt.
         for nid, node in edit_allowed.items():
             has_offer = any(
@@ -465,9 +486,10 @@ class TestGlucoseReachability(unittest.TestCase):
             if not has_tag:
                 offenders.append(nid)
         self.assertGreaterEqual(
-            offer_nodes, 14,
-            "the skeleton should have >=14 edit-offering nodes (the 14 "
-            "edit-allowed set); found %d" % offer_nodes)
+            offer_nodes, 15,
+            "the skeleton should have >=15 edit-offering nodes (the 15 "
+            "edit-allowed set after the 07-03 D5 tca.akg_dh promotion); "
+            "found %d" % offer_nodes)
         self.assertEqual(
             offenders, [],
             "every edit-offering node must carry an edit:enzyme:<id> tag "
@@ -518,9 +540,9 @@ class TestGlucoseReachability(unittest.TestCase):
         reachable from the edit.prompt structural stub is a valid bad ending
         with a correct edit:* tag, and the full-graph reachability stays GREEN.
         Parametrized via subTest over the stub's structural choices so future
-        additions (Phase 7 content) auto-verify WITHOUT test edits. The 14
-        edit-allowed + 0 single-Continue invariants are covered by the UNCHANGED
-        test_14_edit_allowed_nodes + test_no_single_continue_choice (which still
+        additions (Phase 7 content) auto-verify WITHOUT test edits. The 15
+        edit-allowed + 0 single-Continue invariants are covered by
+        test_15_edit_allowed_nodes + test_no_single_continue_choice (which still
         pass after the addition -- see those tests)."""
         g = StoryGraph.load(self._story_dir)
         edit_prompt = g.get_node("edit.prompt")
