@@ -536,7 +536,12 @@ def _build_solid_edges(nodes_raw, nodes_out, pos):
         rec = pairs[key]
         src, dst = key
         sc, sr = pos[src]
-        tc, tr = pos[dst]
+        if dst in pos:
+            tc, tr = pos[dst]
+        else:
+            # Dangling goto: keep the edge so integrity gate 5a reports it
+            # cleanly (VIEWER_FAIL, exit 1, no HTML) instead of crashing here.
+            tc, tr = sc, sr
         if src == EDIT_PROMPT_ID:
             # edit.prompt hub -> bad-ending pool: route the 13 structural
             # choices through the right gutter (fan) so they stay visible
