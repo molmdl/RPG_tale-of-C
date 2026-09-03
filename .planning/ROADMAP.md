@@ -2,9 +2,9 @@
 
 ## Overview
 
-A 16-phase build order (12 integer milestones + 4 INSERTED decimal design phases at 5.1/5.2/5.3/5.4) that front-loads the project's hardest invariants (testability boundary + no-fabricated-science gate + path resolution), proves the whole architecture end-to-end in WSL on a toy story BEFORE any PyMOL/Qt code, then layers the PyMOL `cmd` molecular layer (headless-testable) and finally the Qt UI (human-verify). The critical path is **engineering on placeholder content racing in parallel** with a **human source-approval + science-framing decision track** (Phase 5) that gates all content authoring. **Four design phases (5.1 Story Graph Design, 5.2 Bad-Ending Extensibility, 5.3 WT-Aligned Structure Load, 5.4 Cast & Hero Representation Design) sit between the Phase 5 decisions and the Phase 6 MVP**: they make the *story graph topology + gameplay-integration contracts*, the *bad-ending extensibility convention*, the *restoration-reveal scene template*, and the *3D visual language* explicit, reviewable artifacts before any Qt UI or cited content is built on top — so Phase 6 implements an already-reviewed design rather than inventing one inside the already-overloaded first-Qt phase. Content is a marathon spanning Phases 7–9 (glucose first, then fatty acid + alcohol, then anaerobic + full ~20+ cast), each phase dominated by per-claim approval throughput rather than engineering difficulty — these phases stay at 3 (not split further) and instead use granular per-pathway-segment plans (see "Content Phase Plan Granularity" below) because the per-claim approval bottleneck is orthogonal to phase structure. Phase 10 is playtest-driven polish (content/engineering finalization); Phase 11 is documentation finalization + verification — the last release gate, ensuring all user-facing docs match the shipped game. Depth = comprehensive.
+A 17-phase build order (12 integer milestones + 5 INSERTED decimal phases at 5.1/5.2/5.3/5.4/7.1) that front-loads the project's hardest invariants (testability boundary + no-fabricated-science gate + path resolution), proves the whole architecture end-to-end in WSL on a toy story BEFORE any PyMOL/Qt code, then layers the PyMOL `cmd` molecular layer (headless-testable) and finally the Qt UI (human-verify). The critical path is **engineering on placeholder content racing in parallel** with a **human source-approval + science-framing decision track** (Phase 5) that gates all content authoring. **Four design phases (5.1 Story Graph Design, 5.2 Bad-Ending Extensibility, 5.3 WT-Aligned Structure Load, 5.4 Cast & Hero Representation Design) sit between the Phase 5 decisions and the Phase 6 MVP**: they make the *story graph topology + gameplay-integration contracts*, the *bad-ending extensibility convention*, the *restoration-reveal scene template*, and the *3D visual language* explicit, reviewable artifacts before any Qt UI or cited content is built on top — so Phase 6 implements an already-reviewed design rather than inventing one inside the already-overloaded first-Qt phase. Content is a marathon spanning Phases 7–9 (glucose first, then fatty acid + alcohol, then anaerobic + full ~20+ cast), each phase dominated by per-claim approval throughput rather than engineering difficulty — these phases stay at 3 (not split further) and instead use granular per-pathway-segment plans (see "Content Phase Plan Granularity" below) because the per-claim approval bottleneck is orthogonal to phase structure. Phase 10 is playtest-driven polish (content/engineering finalization); Phase 11 is documentation finalization + verification — the last release gate, ensuring all user-facing docs match the shipped game. Depth = comprehensive.
 
-**Depth:** comprehensive (8–12 phases) — this roadmap has 16 (12 integer + 4 INSERTED decimal design phases; above the comprehensive ceiling — the Phase 11 split is a user-requested separation of documentation verification from polish, Phase 12 is a user-requested ending-cutscene-rendering phase appended at the end, and Phases 5.2/5.3 are user-requested urgent insertions for bad-ending extensibility + WT-aligned structure load convention discovered during the Phase 5.1 human review checkpoint).
+**Depth:** comprehensive (8–12 phases) — this roadmap has 17 (12 integer + 5 INSERTED decimal phases; above the comprehensive ceiling — the Phase 11 split is a user-requested separation of documentation verification from polish, Phase 12 is a user-requested ending-cutscene-rendering phase appended at the end, Phases 5.2/5.3 are user-requested urgent insertions for bad-ending extensibility + WT-aligned structure load convention discovered during the Phase 5.1 human review checkpoint, and Phase 7.1 is a user-requested urgent insertion for a story-node-editing HTML interface discovered during Phase 7 execution).
 **Parallelization:** enabled — Phase 5 (decisions + source approval) runs in parallel with Phases 2–4 (engineering on placeholder content); the 4 Key Decisions within Phase 5 are independent of each other. Phase 5.1 (Story Graph Design) can start as soon as Phase 2 + the Phase 5 ATP/True-Ending decision are done (potentially before Phase 4 finishes); Phase 5.2 + 5.3 (urgent follow-ups from the 5.1 checkpoint) follow 5.1; Phase 5.4 (Representation Design) follows 5.1 + Phase 3. Phases 5.1–5.4 gate Phase 6. Use the spec.md worktree/branch protocol for parallel plan execution.
 
 ## Phases
@@ -256,6 +256,48 @@ Plans:
 - [ ] 07-18-PLAN.md — Final verification + human content-review checkpoint (Wave 7)
 - [ ] 07-19-PLAN.md — Scene-capture tool: pose a scene in PyMOL GUI → emits paste-ready on_enter JSON (set_view flagged for Phase 10) (Wave 8)
 
+### Phase 7.1: Story Framework Node Editing HTML Interface (INSERTED)
+**Goal**: A self-contained, offline, dependency-free HTML interface for visualizing and interactively updating the nodes of the game — node/choice/path structure, node types (starting / multiple-choices / mutation / ending), choice contents, allowed + known-wrong mutations, connections and directions, node text fields (title / story / science / reference / links), cast PDBs, scene camera/color/representation (paste-in — no PyMOL call), ending CG (end-of-milestone reminder), and the bad-ending random pool — plus convenient reference/source checking of scientific contents, path tracing shown as a nested-list full-story view, and undo/redo + draft save (tmp file) + save edit.
+**Depends on**: Phase 7
+**Requirements**: (none owned — authoring-tool/aid phase; accelerates content authoring + review across Phases 7–9)
+**Success Criteria** (what must be TRUE):
+  1. [To be planned]
+**Plans**: 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 7.1 to break down)
+
+**Details:**
+User-requested spec (2026-09-04; urgent insertion during Phase 7 execution):
+
+Create an HTML interface that allows the user to visualize and update the nodes of the game.
+
+- **A — Form factor:** self-contained, offline, and free of dependencies (plain HTML/JS; no frameworks, no servers, no installs).
+- **B — Interactive edit of:**
+  1. add/delete/update nodes, options, path
+  2. add/delete/update whether it's a starting node, multiple-choices node, mutation node, ending node
+  3. add/delete/update the contents of multiple choices
+  4. add/delete/update the mutation allowed / known to be wrong
+  5. adjust node connection and directions
+  6. add/delete/update the node's a. title, b. story, c. science, d. reference and/or links
+  7. add/delete/update the PDB used as the cast
+  8. add/delete/update the camera/color/representation etc. of the scene (ask the user to copy something — keep it simple, no need to call PyMOL)
+  9. (remind around the end of milestone) add/delete/update CG of endings
+  10. add/delete/update the nodes in the random pool of bad endings
+  11. (future) if we introduce a new type of node, the interface should also be updated
+- **C — References:** convenient check of the reference and source of scientific contents.
+- **D — Path tracing:** a tab/button/panel to trace a path and show the traced flow as a nested list, to view as a full story.
+- **E — Safety net:** undo/redo, save draft (a tmp file), save edit.
+
+Planning pointers (recorded at insertion; resolve during planning):
+- Edit targets are the existing data JSON: `data/story_glucose/*.json` (manifest + 7 story files, 57-node graph), `data/edits.json` (13 buckets incl. `bad_ending_pool` → B4/B10), `data/cast.json` (12 entries → B7), `data/citations.json` + `data/sources.json` (registry → C).
+- Prior art in-repo: `tools/story_graph_viewer.py` (quick-003) already emits a self-contained offline HTML viewer (vanilla JS + SVG, zero libraries, data inlined) with network + reading panels — the 7.1 editor extends this concept from read-only review to interactive editing (B–E).
+- B8's "copy something" paste format has a natural match: 07-19 `tools/scene_capture.py` already emits paste-ready on_enter MolAction JSON (FROZEN molops vocabulary, set_view Phase-10-flagged) — reuse rather than inventing a new format.
+- B9 (CG of endings) = Phase 12 territory — the "remind around the end of milestone" obligation must be tracked (e.g. STATE.md Pending Todos).
+- Topology edits (B1/B2/B5/B10) must keep the frozen invariants + test battery green (57 nodes / 21 endings / 4 tiers / 15 edit-allowed reachability + 5.4 template-type conformance) — the editor edits data the engine + gates consume.
+- E's draft = tmp file (git-ignored) so unproven edits never touch real data; "save edit" writes the real JSON.
+- Authoring tool for the human editor — not runtime game code; ships outside the plugin zip unless planning decides otherwise.
+
 ### Phase 8: Content Expansion II — Fatty Acid + Alcohol Characters
 **Goal**: The fatty acid and alcohol characters are authored with all four ending tiers each, completing the three-character roster — every character can reach every ending, fulfilling the v1 success measure ("all endings reachable for all characters").
 **Depends on**: Phase 7 (content model proven on glucose)
@@ -386,6 +428,7 @@ User-requested design preferences (capture during planning):
 | 5.4 Representation Design (INSERTED) | No | Visual design prototyped headlessly on placeholder structures; real cast PDBs land in Phase 6/9 |
 | 6 MVP | **Yes** | ATP/True-Ending reframing MUST be resolved before this phase's content; critical-path cast PDB IDs + resolutions + citations; TCA RNG weight values |
 | 7 Glucose content | **Yes** | Glucose pathway branch enumeration + ending-fate citations |
+| 7.1 Story Node Editing HTML Interface (INSERTED) | No | Self-contained offline dependency-free HTML/JS tool (user-mandated: no frameworks/servers/installs); edits existing JSON whose schemas are documented in-repo; prior art = tools/story_graph_viewer.py |
 | 8 Fatty acid + alcohol | **Yes** | Fatty acid / alcohol pathway branches + ending fates |
 | 9 Anaerobic + cast | **Yes** | Full ~20+ cast enumeration + citations; anaerobic-path content once framing decided |
 | 10 Polish | No | Playtest-driven iteration on existing content |
@@ -395,7 +438,7 @@ User-requested design preferences (capture during planning):
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 5.3 → 5.4 → 6 → 7 → 8 → 9 → 10 → 11 → 12. Phase 5 runs in PARALLEL with Phases 2–4 and must be complete (at least the ATP/True-Ending + anaerobic decisions) before Phase 5.1 begins. Phases 5.1–5.4 (INSERTED design phases) gate Phase 6. Phase 11 (documentation finalization + verification) is the last release gate, after Phase 10's content polish is complete. Phase 12 (Ending Cutscene Rendering) depends on Phase 10 (settled content); it may run between Phase 10 and Phase 11 if the docs should reference the cutscene renders, or as the final phase after Phase 11.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 5.3 → 5.4 → 6 → 7 → 7.1 → 8 → 9 → 10 → 11 → 12. Phase 5 runs in PARALLEL with Phases 2–4 and must be complete (at least the ATP/True-Ending + anaerobic decisions) before Phase 5.1 begins. Phases 5.1–5.4 (INSERTED design phases) gate Phase 6. Phase 7.1 (INSERTED 2026-09-04) is an urgent post-Phase-7 insertion — the story-node-editing HTML interface (authoring tool); it depends on Phase 7 and precedes Phase 8. Phase 11 (documentation finalization + verification) is the last release gate, after Phase 10's content polish is complete. Phase 12 (Ending Cutscene Rendering) depends on Phase 10 (settled content); it may run between Phase 10 and Phase 11 if the docs should reference the cutscene renders, or as the final phase after Phase 11.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -410,6 +453,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 5
 | 5.4 Representation Design (INSERTED) | 4/4 ✓ | Complete | 2026-08-29 |
 | 6. Qt UI + MVP (Glucose + True+Bad) | 14/14 ✓ | Complete | 2026-08-30 |
 | 7. Content I: All Glucose Endings | 0/TBD | Not started | - |
+| 7.1 Story Node Editing HTML Interface (INSERTED) | 0/TBD | Not started | - |
 | 8. Content II: Fatty Acid + Alcohol | 0/TBD | Not started | - |
 | 9. Anaerobic + Full Cast + Docs | 0/TBD | Not started | - |
 | 10. Polish, Playtest & Release | 0/TBD | Not started | - |
@@ -418,6 +462,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 5.2 → 5
 
 ---
 
-*Roadmap created: 2026-08-12 · Revised: 2026-08-12 (inserted Phases 5.1 + 5.4 — story graph design + representation design — per user feedback on story/editing/representation concerns) · Revised: 2026-08-12 (content phases 7/8/9 kept at 3 — not split further; per-pathway-segment plan granularity documented in "Content Phase Plan Granularity" section, per user feedback on content-authoring citation load) · Revised: 2026-08-12 (split documentation finalization + verification OUT of Phase 10 into Phase 11 — Phase 10 keeps polish/playtest/accessibility/test-matrix/citation-gate; Phase 11 owns docs update + final docs verification as the last release gate, per user feedback) · Revised: 2026-08-22 (inserted Phases 5.2 + 5.3 — bad-ending extensibility + WT-aligned structure load convention — per user feedback during the Phase 5.1 human review checkpoint; old Phase 5.2 renumbered to Phase 5.4)*
-*Depth: comprehensive (16 phases: 12 integer + 4 INSERTED decimal design phases — above the 8–12 comprehensive ceiling; the Phase 11 split is a user-requested separation of documentation verification from polish, Phase 12 is a user-requested ending-cutscene-rendering phase, and Phases 5.2/5.3 are user-requested urgent insertions for bad-ending extensibility + WT-aligned structure load convention discovered during the Phase 5.1 human review checkpoint) · Coverage: 32/32 v1 requirements mapped ✓ (5.1 + 5.2 + 5.3 + 5.4 + 11 + 12 own 0 requirements — design/finalization/render phases enabling/verifying downstream delivery, per the Phase 10 0-requirement precedent)*
+*Roadmap created: 2026-08-12 · Revised: 2026-08-12 (inserted Phases 5.1 + 5.4 — story graph design + representation design — per user feedback on story/editing/representation concerns) · Revised: 2026-08-12 (content phases 7/8/9 kept at 3 — not split further; per-pathway-segment plan granularity documented in "Content Phase Plan Granularity" section, per user feedback on content-authoring citation load) · Revised: 2026-08-12 (split documentation finalization + verification OUT of Phase 10 into Phase 11 — Phase 10 keeps polish/playtest/accessibility/test-matrix/citation-gate; Phase 11 owns docs update + final docs verification as the last release gate, per user feedback) · Revised: 2026-08-22 (inserted Phases 5.2 + 5.3 — bad-ending extensibility + WT-aligned structure load convention — per user feedback during the Phase 5.1 human review checkpoint; old Phase 5.2 renumbered to Phase 5.4) · Revised: 2026-09-04 (inserted Phase 7.1 — story-framework node-editing HTML interface — urgent user request during Phase 7 execution; runs after Phase 7, before Phase 8)*
+*Depth: comprehensive (17 phases: 12 integer + 5 INSERTED decimal phases — above the 8–12 comprehensive ceiling; the Phase 11 split is a user-requested separation of documentation verification from polish, Phase 12 is a user-requested ending-cutscene-rendering phase, Phases 5.2/5.3 are user-requested urgent insertions for bad-ending extensibility + WT-aligned structure load convention discovered during the Phase 5.1 human review checkpoint, and Phase 7.1 is a user-requested urgent insertion for a story-node-editing HTML interface discovered during Phase 7 execution) · Coverage: 32/32 v1 requirements mapped ✓ (5.1 + 5.2 + 5.3 + 5.4 + 7.1 + 11 + 12 own 0 requirements — design/finalization/render/tooling phases enabling/verifying downstream delivery, per the Phase 10 0-requirement precedent)*
 *Note: REQUIREMENTS.md previously stated "34 total" v1 requirements; the actual enumerated v1 set is 32 (PATH-01 and STAT-01 are v2). Traceability below uses the actual count of 32.*
