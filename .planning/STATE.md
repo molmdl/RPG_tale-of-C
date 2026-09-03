@@ -322,6 +322,7 @@ Phase 6 (Qt UI MVP) IN PROGRESS — Plan 06-06 COMPLETE ✓ (3/3 tasks): built t
 
 ### Pending Todos
 
+- [ ] **Smoke drift — controller_integration_smoke 3 pre-existing FAILs (found 2026-09-04 during CodeQL alert fix, out of scope there):** stage-9 expectations no longer match the real story cast — `pyr_branch_anaerobic_cond_not_met`, `bulk_download_missing_empty_placeholder`, `bulk_download_expected_chars_empty`; cause is data drift (real PDB IDs 6WCV/5UPP/5LDW now in the cast; cond data changed). Proven pre-existing + unrelated to the temp-file fix via differential run (byte-identical SMOKE output with/without fix; see .planning/debug/resolved/codeql-insecure-temp-files.md Eliminated section). Needs its own session to re-align smoke expectations with the current cast.
 - [ ] **Phase 10 — scene-tuning support (user request 2026-08-30):** add `set_view` op to the MolAction dispatch (one peer-primitive op: `cmd.set_view(18 floats)`, molops.py — follows the 5.3/5.4 precedent; Phase 7 was scoped no-engine-surgery) + in-game "capture scene" write-back UX so 07-19's captured JSON can be saved into `data/story_glucose/*.json` directly from the GUI. Camera entries emitted by 07-19 are flagged until this lands.
 
 ### Blockers/Concerns
