@@ -18,9 +18,14 @@
 """Unit tests for rpg.ui.bulk_download (Qt-free runner, MockCmd inject).
 
 Pure WSL python3.6 -- NO pymol/Qt import. Tests:
-  1. missing_large_pdbs skips PLACEHOLDER (Phase 6 -> []).
+  1. missing_large_pdbs on the REAL bundled cast (Phase 7 plan 07-15: 12 real
+     download enzymes) -- hermetic via a temp downloaded dir; pins the 12-id
+     bulk list + the real-pdb_id hygiene (no PLACEHOLDER ids remain).
   2. missing_large_pdbs detects a missing real pdb_id.
   3. missing_large_pdbs skips an existing lowercase file (Pitfall 3 cache).
+  3b. missing_large_pdbs skips a PLACEHOLDER pdb_id (guard regression -- the
+      Phase 6 contract, kept as a temp-cast unit test now that the real cast
+      carries no placeholder entries).
   4. run_bulk_download success path (count_atoms>0 -> completed=N).
   5. run_bulk_download failure recorded + loop continues (count_atoms=0 ->
      RuntimeError; one failure does not abort the loop).
@@ -82,18 +87,62 @@ class MockCmd(object):
         return self._counts.get(sel, self._default_count)
 
 
-class TestMissingLargePdbsPlaceholder(unittest.TestCase):
-    """Test 1: Phase 6 placeholder cast -> missing_large_pdbs returns []."""
+class TestRealCastBulkList(unittest.TestCase):
+    """Test 1: the REAL bundled cast.json download list is real, pre-fetchable data.
 
-    def test_missing_large_pdbs_skips_placeholder(self):
-        # The REAL bundled cast.json (Phase 6) has only PLACEHOLDER_large_enzyme
-        # with pdb_id "PLACEHOLDER_PDB". The PLACEHOLDER guard skips it, so
-        # the prompt does NOT fire for placeholder content. No monkeypatching
-        # needed -- the guard fires regardless of the downloaded dir's state.
-        missing = missing_large_pdbs(None)
-        self.assertEqual(missing, [])
-        # And expected_download_characters is empty (no real download enzymes).
-        self.assertEqual(expected_download_characters(), set())
+    Phase 7 plan 07-15 replaced the Phase-6 placeholder cast (fixture_enzyme_1
+    + PLACEHOLDER_large_enzyme) with the 12 real mutable-enzyme entries (the
+    rpg/data/edits.json buckets). This test pins the bulk-download list
+    HERMETICALLY: the real cast manifest is read via an explicit cast_path
+    while rpg.paths.data_path is monkeypatched to a temp root, so the
+    downloaded-dir probe hits an empty temp dir -- the gitignored dev cache
+    (rpg/data/assets/downloaded/) can never influence the result (cache state
+    is environment-dependent; a fresh clone has NONE).
+    """
+
+    def setUp(self):
+        self._tmp = tempfile.mkdtemp(prefix="rpg_bulkdl_realcast_")
+        self._orig_data_path = rpg.paths.data_path
+        # Capture the REAL cast path BEFORE patching (original data_path).
+        self._real_cast_path = str(rpg.paths.data_path("data", "cast.json"))
+        rpg.paths.data_path = self._fake_data_path
+
+    def tearDown(self):
+        rpg.paths.data_path = self._orig_data_path
+        shutil.rmtree(self._tmp, ignore_errors=True)
+
+    def _fake_data_path(self, *parts):
+        # Downloaded-dir probes resolve into a temp root (hermetic); the real
+        # cast.json is read via the explicit cast_path captured in setUp.
+        return os.path.join(self._tmp, *parts)
+
+    def test_real_cast_lists_12_real_download_enzymes(self):
+        # Empty temp downloaded dir -> EVERY download enzyme is "missing":
+        # the full pre-play bulk list is exactly the 12 real cast entries.
+        missing = missing_large_pdbs(None, cast_path=self._real_cast_path)
+        self.assertEqual(len(missing), 12)
+        by_pdb = {}
+        for pdb_id, object_name, enzyme_id, character in missing:
+            by_pdb[pdb_id] = (object_name, enzyme_id, character)
+            # Real 4-char RCSB ids only -- the PLACEHOLDER guard must never be
+            # needed again (plan 07-15 removed the placeholder cast entries).
+            self.assertEqual(len(pdb_id), 4)
+            self.assertTrue(pdb_id.isalnum())
+            self.assertFalse(pdb_id.startswith("PLACEHOLDER"))
+            # object_name = enzyme_id (the runner's naming convention) and the
+            # glucose character is carried for the per-character lock mapping.
+            self.assertEqual(object_name, enzyme_id)
+            self.assertEqual(character, "glucose")
+        # The exact bulk list (plan 07-15 recorded outcomes; update BOTH files
+        # in the same plan if a cast id is ever swapped).
+        self.assertEqual(
+            set(by_pdb),
+            {"4PFK", "7FS3", "6CFO", "1ACO", "5GRE", "6WCV",
+             "5UPP", "4WLU", "5LDW", "1ZOY", "1BGY", "1OCC"})
+        # All 12 download enzymes belong to the glucose character (lock UI).
+        self.assertEqual(
+            expected_download_characters(cast_path=self._real_cast_path),
+            {"glucose"})
 
 
 class TestMissingLargePdbsTempCast(unittest.TestCase):
@@ -157,6 +206,28 @@ class TestMissingLargePdbsTempCast(unittest.TestCase):
             fh.write("dummy")
         missing = missing_large_pdbs(None, cast_path=self._cast_path)
         self.assertEqual(missing, [])
+
+    def test_missing_large_pdbs_skips_placeholder_pdb_id(self):
+        # Test 3b (guard regression, Phase 6 contract): a download enzyme whose
+        # pdb_id starts with PLACEHOLDER is SKIPPED -- the prompt must never
+        # fire for placeholder content. The real bundled cast no longer
+        # carries placeholder entries (plan 07-15), so this contract is
+        # exercised with a dedicated temp cast.
+        cast_path2 = os.path.join(self._tmp, "cast_placeholder.json")
+        cast2 = {
+            "version": 1,
+            "enzymes": [
+                {"id": "ph_enzyme", "label": "Placeholder (regression probe)",
+                 "source": "download", "pdb_id": "PLACEHOLDER_PDB",
+                 "character": "glucose", "claim_id": "PLACEHOLDER_PHASE7"},
+            ],
+        }
+        with open(cast_path2, "w", encoding="utf-8") as fh:
+            json.dump(cast2, fh)
+        self.assertEqual(missing_large_pdbs(None, cast_path=cast_path2), [])
+        # The placeholder-only character is NOT in the lock universe either.
+        self.assertEqual(expected_download_characters(cast_path=cast_path2),
+                         set())
 
 
 class TestRunBulkDownload(unittest.TestCase):
