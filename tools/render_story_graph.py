@@ -1007,14 +1007,20 @@ def render_ascii(nodes, node_order, edges, out_path, title, node_count):
             loose_lines.append('')
 
     # Build header (legend + summary)
+    # Legend edit-allowed count is DERIVED (same node_style predicate as
+    # _ascii_summary) so the legend can never contradict the Summary line
+    # when the graph grows (was hardcoded "(14)" — stale after the 07-03
+    # D5 promotion of tca.akg_dh, 14 -> 15).
+    legend_edit_n = sum(
+        1 for nid in node_order if node_style(nid, nodes[nid])[1])
     header = [
         '=' * min(total_w, 100),
         title,
         'Legend: \u2502\u25bc\u2500 = player path (spatial)  |  '
         '\u2504\u2504\u25ba = edit:offer/structural/cycle (note)  |  '
         '[TRAP] = RNG cycle-trap',
-        '        [EDIT] = edit-allowed (14)  |  [PDB] = PDB load  |  '
-        '[TRUE/GOOD/NORMAL/BAD] = ending tier',
+        '        [EDIT] = edit-allowed (%d)  |  [PDB] = PDB load  |  '
+        '[TRUE/GOOD/NORMAL/BAD] = ending tier' % legend_edit_n,
         _ascii_summary(nodes, node_order),
         '=' * min(total_w, 100),
         '',

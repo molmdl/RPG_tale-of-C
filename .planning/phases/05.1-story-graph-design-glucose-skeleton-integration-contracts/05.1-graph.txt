@@ -1,8 +1,8 @@
 ====================================================================================================
 Glucose Story Graph Skeleton (Phase 5.1)
 Legend: │▼─ = player path (spatial)  |  ┄┄► = edit:offer/structural/cycle (note)  |  [TRAP] = RNG cycle-trap
-        [EDIT] = edit-allowed (14)  |  [PDB] = PDB load  |  [TRUE/GOOD/NORMAL/BAD] = ending tier
-Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
+        [EDIT] = edit-allowed (15)  |  [PDB] = PDB load  |  [TRUE/GOOD/NORMAL/BAD] = ending tier
+Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 15 edit-allowed | 1 RNG
 ====================================================================================================
 
 
@@ -40,7 +40,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Begin the journey... / Observe your new ...
        ┌──────────────────────────────┐
        │gly.start                     │
-       │glucose arrives in the cy...  │
+       │The glucose molecule slip...  │
        └──────────────────────────────┘
                        │
                        │
@@ -49,7 +49,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue / Examine the gluco...
        ┌──────────────────────────────┐
        │gly.g6p                       │
-       │hexokinase traps glucose ...  │
+       │The trap closes. Hexokina...  │
        └──────────────────────────────┘
                        │
                        │
@@ -58,7 +58,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue / Examine the G6P s...
        ┌──────────────────────────────┐
        │gly.pfk [EDIT] [PDB]          │
-       │PFK-1, the committed step...  │
+       │Phosphofructokinase — the...  │
        └──────────────────────────────┘
          ┄┄► edit:offer ──► edit.prompt
                        │
@@ -67,7 +67,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue glycolysis
        ┌──────────────────────────────┐
        │gly.fbp_to_pyruvate           │
-       │aldolase splits the C6 in...  │
+       │Aldolase falls like an ax...  │
        └──────────────────────────────┘
                        │
                        │
@@ -76,7 +76,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue / Examine the trios...
      ┌──────────────────────────────────┐
      │gly.pyruvate_kinase [EDIT] [PDB]  │
-     │pyruvate kinase strikes: ...      │
+     │Pyruvate kinase strikes t...      │
      └──────────────────────────────────┘
        ┄┄► edit:offer ──► edit.prompt
                        │
@@ -85,7 +85,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue / Examine the pyruv...
        ┌──────────────────────────────┐
        │gly.pyruvate                  │
-       │you arrive at pyruvate, t...  │
+       │Pyruvate. The word the wh...  │
        └──────────────────────────────┘
                        │
                        │
@@ -94,16 +94,16 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue / Examine the pyruv...
        ┌──────────────────────────────┐
        │pyr.branch                    │
-       │the air is thin. What fat...  │
+       │The tissue around you thi...  │
        └──────────────────────────────┘
                        │
                        │
                        ┬──────────────────────────────────────────┬
                        │                                          │
-                       ▼ cond: not flags.get('host...             ▼ cond: flags.get('host_o2_...
+                       ▼ Proceed aerobical...                     ▼ The air runs out ...
        ┌──────────────────────────────┐           ┌──────────────────────────────┐
        │pyr.pdh [EDIT] [PDB]          │           │anaer.entry                   │
-       │PDH strips your first car...  │           │the air runs out; your ho...  │
+       │A gate of five enzymes st...  │           │The air is gone. No oxyge...  │
        └──────────────────────────────┘           └──────────────────────────────┘
          ┄┄► edit:offer ──► edit.prompt                           │
                        │                                          │
@@ -112,7 +112,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue into the...                     ▼ Lactic fermentati...                  ▼ Ethanolic ferment...                  ▼ The energy runs o...
        ┌──────────────────────────────┐           ┌──────────────────────────────┐        ┌──────────────────────────────┐        ┌──────────────────────────────┐
        │tca.entry                     │           │anaer.ldh [PDB]               │        │anaer.ethanolic [NORMAL]      │        │anaer.crisis [BAD]            │
-       │acetyl-CoA condenses with...  │           │lactate dehydrogenase cat...  │        │you drift off as CO2 and ...  │        │fermentation cannot susta...  │
+       │The ferry noses into the ...  │           │Lactate dehydrogenase clo...  │        │You feel the vision take ...  │        │The ferment is not enough...  │
        └──────────────────────────────┘           └──────────────────────────────┘        └──────────────────────────────┘        └──────────────────────────────┘
                        │                                          │
                        │                                          │
@@ -121,7 +121,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                       ▼ Continue / Examine the TCA c...           ▼ Continue to the l... / Examine the LDH a...
     ┌───────────────────────────────────┐         ┌──────────────────────────────┐
     │tca.citrate_synthase [EDIT] [PDB]  │         │anaer.lactic [GOOD]           │
-    │citrate synthase forms (S...       │         │you are retained as lactate.  │
+    │The wheel's first gate. C...       │         │Retained. Lactate carries...  │
     └───────────────────────────────────┘         └──────────────────────────────┘
       ┄┄► edit:offer ──► edit.prompt
                       │
@@ -130,7 +130,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue to aconi...
        ┌──────────────────────────────┐
        │tca.aconitase [EDIT] [PDB]    │
-       │aconitase flips cis-aconi...  │
+       │Aconitase takes citrate i...  │
        └──────────────────────────────┘
          ┄┄► edit:offer ──► edit.prompt
                        │
@@ -139,7 +139,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue to the s...
        ┌──────────────────────────────┐
        │tca.shuffle [RNG] [EDIT]      │
-       │the great wheel spins. Fi...  │
+       │The great wheel does not ...  │
        └──────────────────────────────┘
          ┄┄► edit:offer ──► edit.prompt
          ┄┄► TRAP ──► bad.cycle_trap_host_death  [TRAP]
@@ -148,7 +148,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ w=0.5                                    ▼ w=0.5
        ┌──────────────────────────────┐           ┌──────────────────────────────┐
        │tca.co2_turn1                 │           │tca.co2_turn2                 │
-       │one of your carbons leave...  │           │your other carbon leaves ...  │
+       │Exit position. The wheel ...  │           │Retained. The wheel keeps...  │
        └──────────────────────────────┘           └──────────────────────────────┘
          ──► The cycle turns a... ──► tca.shuffle   ──► The cycle turns a... ──► tca.shuffle
                        │                                          │
@@ -157,7 +157,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue onward —...
       ┌────────────────────────────────┐
       │tca.isocitrate_dh [EDIT] [PDB]  │
-      │isocitrate dehydrogenase ...    │
+      │Isocitrate dehydrogenase ...    │
       └────────────────────────────────┘
         ┄┄► edit:offer ──► edit.prompt
                        │
@@ -165,17 +165,17 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        │
                        ▼ Continue / Examine the isoci...
        ┌──────────────────────────────┐
-       │tca.akg_dh                    │
-       │alpha-ketoglutarate dehyd...  │
+       │tca.akg_dh [EDIT]             │
+       │Alpha-ketoglutarate dehyd...  │
        └──────────────────────────────┘
-                       │
+         ┄┄► edit:offer ──► edit.prompt
                        │
                        │
                        │
                        ▼ Continue / Examine the alpha...
     ┌────────────────────────────────────┐
     │tca.succinyl_coa_synthetase [EDIT]  │
-    │succinyl-CoA synthetase h...        │
+    │Succinyl-CoA is a wound s...        │
     └────────────────────────────────────┘
       ┄┄► edit:offer ──► edit.prompt
                        │
@@ -184,7 +184,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue / Examine the succi...
        ┌──────────────────────────────┐
        │tca.fumarase [EDIT]           │
-       │fumarase hydrates fumarat...  │
+       │Water crosses the double ...  │
        └──────────────────────────────┘
          ┄┄► edit:offer ──► edit.prompt
                        │
@@ -192,8 +192,8 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        │
                        ▼ Continue / Examine the fumar...
        ┌──────────────────────────────┐
-       │tca.malate_dh [EDIT]          │
-       │malate dehydrogenase oxid...  │
+       │tca.malate_dh [EDIT] [PDB]    │
+       │Malate dehydrogenase clos...  │
        └──────────────────────────────┘
          ──► The cycle turns a... ──► tca.shuffle
          ┄┄► edit:offer ──► edit.prompt
@@ -202,7 +202,7 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
                        ▼ Continue onward —...
        ┌──────────────────────────────┐
        │tca.divert_to_good            │
-       │stay in the cycle and fol...  │
+       │The wheel turns, and turn...  │
        └──────────────────────────────┘
                        │
                        │
@@ -284,16 +284,16 @@ Summary: 57 nodes | 21 endings (1T/3G/2N/15B) | 14 edit-allowed | 1 RNG
   └──────────────────────────────┘
   ┄┄► Back ──► intro.select
 
-  ┌─────────────────────────┐
-  │gly.pfk_restored [PDB]   │
-  │Phase 7 text (plan 08).  │
-  └─────────────────────────┘
+  ┌──────────────────────────────┐
+  │gly.pfk_restored [PDB]        │
+  │The gatekeeper runs again...  │
+  └──────────────────────────────┘
   ──► Continue ──► gly.fbp_to_pyruvate
   ──► Examine the resto... ──► gly.fbp_to_pyruvate
 
   ┌──────────────────────────────┐
   │tca.aconitase_restored [PDB]  │
-  │Phase 7 text (plan 13).       │
+  │Aconitase, made whole. Th...  │
   └──────────────────────────────┘
   ──► Continue ──► tca.shuffle
   ──► Examine the resto... ──► tca.shuffle
