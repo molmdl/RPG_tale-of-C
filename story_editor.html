@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RPG: Tale of C — Story Node Editor</title>
-<!-- inlined assets (sorted): 00_core.js (29315 bytes) | 05_json.js (22337 bytes) | 10_load.js (49491 bytes) | 20_validate.js (58503 bytes) | 30_graph.js (43583 bytes) | 60_trace.js (25956 bytes) -->
+<!-- inlined assets (sorted): 00_core.js (29315 bytes) | 05_json.js (22337 bytes) | 10_load.js (49491 bytes) | 20_validate.js (58503 bytes) | 30_graph.js (43583 bytes) | 40_form.js (45617 bytes) | 60_trace.js (25956 bytes) | 70_claims.js (42276 bytes) | 80_save.js (46723 bytes) -->
 <style>
 /* ==========================================================================
    Structural layout ONLY (flex/grid skeleton, tab bar, monospace JSON
@@ -67,7 +67,7 @@ textarea.json-area { width: 100%; min-height: 120px; resize: vertical; }
 
 <header id="editor-header">
   <h1>RPG: Tale of C — Story Node Editor</h1>
-  <span id="generated-at">generated 2026-09-04T19:32:21Z &middot; offline &amp; dependency-free</span>
+  <span id="generated-at">generated 2026-09-04T20:10:10Z &middot; offline &amp; dependency-free</span>
 </header>
 
 <section id="boot-panel">
@@ -5279,6 +5279,968 @@ rpg/data/cast.json</pre>
 
 </script>
 <script>
+/* asset: 40_form.js (45617 bytes) */
+/* ==========================================================================
+ * 40_form.js — the node form: identity, texts, claims, tags, ending (07.1-09).
+ *
+ * OWNS: the #node-form-identity sub-section of the shell's #node-form aside
+ * (the shell's FIXED mount point; the choices/on_enter/lifecycle sub-sections
+ * belong to 42_choices.js / 43_onenter.js / 45_lifecycle.js — never touched
+ * here). Loads after 00_core.js (EDITOR contract), 05_json.js, 10_load.js,
+ * 20_validate.js (validator whose verdicts this form surfaces inline) and
+ * 30_graph.js (whose click-select feeds EDITOR.select -> this form).
+ *
+ * ============================================================================
+ * B6 FIELD MAPPING (research-pinned schema fact — 07.1-RESEARCH-UI "Standard
+ * Stack" + 07.1-RESEARCH-DATA §1.3; the engine + the 5.4 conformance battery
+ * consume this exact 6-key node schema):
+ *
+ *     title            = THE NODE ID (displayed large; NOT an editable field)
+ *     story            = text_dramatic
+ *     science          = text_teaching
+ *     reference/links  = claim_ids, resolved LIVE through
+ *                        bundle.citations[claim_id] -> source_id ->
+ *                        bundle.sources (url) — full panel = 07.1-12
+ *
+ * THERE IS NO "title" FIELD IN THE SCHEMA AND NONE IS INVENTED HERE. The
+ * data carries exactly: text_dramatic, text_teaching, claim_ids, tags,
+ * on_enter, choices (+ is_ending on the 21 endings — present ONLY on
+ * endings, ABSENT — never null — elsewhere). A literal editable title field
+ * would be a SCHEMA CHANGE requiring engine + gate sign-off — OUT OF SCOPE
+ * for this editor; flagged to the human in the plan SUMMARY (07.1-09).
+ * ============================================================================
+ *
+ * WHAT THE FORM RENDERS (selection-driven editing — RESEARCH-UI structural
+ * choice 4: one form panel covers the identity/content half of B2 + B6):
+ *   1. Identity header — node id AS the title (B6a) + derived-kind badge(s)
+ *      (EDITOR.deriveKind port; kinds are DERIVED, never stored) + tier chip
+ *      (from is_ending ONLY — the 3 anaerobic endings carry is_ending but no
+ *      ending:* tag, 07.1-RESEARCH-DATA §1.5) + file placement.
+ *   2. Text editors (B6b/c) — two textareas bound data-field="text_dramatic"
+ *      / "text_teaching" through EDITOR.textFieldBindings: commit on change
+ *      = ONE undo step per field commit (never per keystroke); live preview
+ *      on input updates only the character counters. The validator asset
+ *      (20_validate.js) re-runs after every commit; text_layer_empty /
+ *      tbd_text errors for this node surface inline under the fields.
+ *   3. Claim chips + claim_ids editor (B6d + C groundwork) — one chip per
+ *      claim_id with a LIVE approval badge from bundle.citations (approved =
+ *      green, pending = amber, rejected = red, unresolved = MISSING red;
+ *      strict `approval_status === "approved"` semantics, rpg/citations.py:
+ *      100-109) + review_tier tag. Clicking a chip calls the
+ *      EDITOR.ui.claimFocus(claimId) hook — consumed by the claims panel
+ *      (70_claims.js, 07.1-12); a safe no-op until it lands. An add-input +
+ *      a remove ✕ per chip mutate claim_ids through the 00_core mutators
+ *      (nodeSet with an edited COPY — order preserved). PLACEHOLDER_PHASE8
+ *      is the sanctioned residual, allowed ONLY on fa.stub / alc.stub; a
+ *      violation surfaces as the validator's placeholder_misuse error inline.
+ *   4. Tags editor (B2 partial) — chip list + add-input + quick-add
+ *      suggestions for the KNOWN vocabulary (counts documented from
+ *      07.1-RESEARCH-DATA §1.5, verified against the live data 2026-09-05);
+ *      add/remove run through the mutators; the validator's tag-rule errors
+ *      (offer_without_tag etc.) surface inline.
+ *   5. is_ending select (B2) — none/true/good/normal/bad. "none" REMOVES the
+ *      key (absent, never null — model.py:250-252); a tier value sets it.
+ *      An inline note reminds that the ending convention wants the matching
+ *      ending:<tier> + stage:* tags, empty choices and reachability — the
+ *      validator surfaces the real errors (unreachable_ending,
+ *      pool_node_not_ending, ...). Router-only / restored / stub nodes show
+ *      an informational note when their special shape is touched.
+ *   6. B9 reminder — when the node is an ending, a pinned info banner:
+ *      the Phase-12 cutscene-render reminder (a reminder, NOT a field).
+ *   7. Unknown-key safety (B11) — any key outside the known schema renders
+ *      in a read-only "extra keys" list with a warning icon: NEVER editable
+ *      here, NEVER deleted — unknown keys must round-trip untouched through
+ *      every edit (the engine tolerates them; the 00_core mutators touch
+ *      only named fields).
+ *
+ * MUTATION DISCIPLINE: this form NEVER writes the bundle directly — every
+ * change flows through EDITOR.nodeSet / EDITOR.apply (one undo step each,
+ * per-file dirty marking, afterChange fan-out). Listeners are DELEGATED on
+ * the stable #node-form aside (one listener per concern — event delegation,
+ * RESEARCH-UI structural choice 2): the container survives re-renders, only
+ * the identity sub-section's innerHTML is rebuilt.
+ *
+ * VALIDATOR INTEGRATION: reads EDITOR._lastValidation (cached by the
+ * 20_validate.js hook after every mutation) and shows this node's errors
+ * inline, bucketed to the section that owns the rule (text / claims / tags
+ * / ending / other). Read-only consumption — the validator is never invoked
+ * with mutated state from here.
+ *
+ * STYLE: one classic script, one IIFE, ES5 only (var, no arrow functions,
+ * no let/const, no modules) — the emitted-page discipline pinned by
+ * tests/test_story_editor_state.py.
+ * ========================================================================== */
+
+(function () {
+  "use strict";
+
+  // -------------------------------------------------------------------------
+  // Constants.
+  // -------------------------------------------------------------------------
+
+  // B9 reminder (roadmap B9): endings want a cutscene render that is Phase-12
+  // territory — the editor tracks it as a REMINDER, never a field.
+  var B9_REMINDER_TEXT =
+    "Ending CG (cutscene render) is Phase-12 territory \u2014 the editor " +
+    "tracks this as a reminder, not a field (roadmap B9).";
+
+  // The known node schema (07.1-RESEARCH-DATA §1.3): every node carries
+  // exactly these 6 keys; the 21 endings add is_ending. Anything else is an
+  // unknown key -> the read-only B11 guard section. (The node "id" the core
+  // stamps is a NON-enumerable property — invisible to for-in, so it never
+  // shows up here either.)
+  // Keys written strict-JSON (quoted) so the structural test battery can
+  // parse the literal (same convention as 30_graph.js's FILE_COL).
+  var KNOWN_NODE_KEYS = {
+    "text_dramatic": true,
+    "text_teaching": true,
+    "claim_ids": true,
+    "tags": true,
+    "on_enter": true,
+    "choices": true,
+    "is_ending": true
+  };
+
+  var ENDING_TIERS = ["true", "good", "normal", "bad"];
+
+  // The sanctioned Phase-8 residual claim (allowed ONLY on fa.stub/alc.stub;
+  // 07.1-08 validator placeholder_misuse rule + test_glucose_content.py).
+  var PLACEHOLDER_CLAIM = "PLACEHOLDER_PHASE8";
+  var SANCTIONED_STUB_IDS = { "fa.stub": true, "alc.stub": true };
+
+  // Known tag vocabulary (07.1-RESEARCH-DATA §1.5; counts verified against
+  // the committed data 2026-09-05). Literal quick-add candidates + the
+  // documented counts legend. edit:enzyme:<id> is parameterized — its
+  // concrete candidates come from bundle.edits.enzymes at render time
+  // (13 buckets; 14 distinct tag values — tca.citrate_synthase carries the
+  // tag without an edits.json bucket).
+  var TAG_VOCAB = [
+    { tag: "stage:intro", count: "5 nodes" },
+    { tag: "stage:glycolysis", count: "7 nodes" },
+    { tag: "stage:pyruvate", count: "2 nodes" },
+    { tag: "stage:anaerobic", count: "5 nodes" },
+    { tag: "stage:tca", count: "15 nodes" },
+    { tag: "stage:etc", count: "8 nodes" },
+    { tag: "edit:enzyme:<id>", count: "15 nodes, 14 distinct values (the edits.json buckets + tca.citrate_synthase)" },
+    { tag: "edit:structural", count: "1 node (tca.citrate_synthase)" },
+    { tag: "edit:prompt", count: "1 node (edit.prompt)" },
+    { tag: "edit:known", count: "3 nodes" },
+    { tag: "edit:known_critical", count: "1 node" },
+    { tag: "edit:unknown", count: "9 nodes" },
+    { tag: "ending:true", count: "1 node" },
+    { tag: "ending:good", count: "2 nodes" },
+    { tag: "ending:normal", count: "1 node" },
+    { tag: "ending:bad", count: "14 nodes" },
+    { tag: "rng:weighted", count: "1 node (tca.shuffle — the only weighted node)" },
+    { tag: "preface", count: "2 nodes" },
+    { tag: "char:glucose", count: "1 node" },
+    { tag: "cycle_trap", count: "1 node (bad.cycle_trap_host_death)" }
+  ];
+
+  // Validator error kinds -> the form section that owns the rule (used to
+  // bucket the inline flags). Kinds not listed fall into "other".
+  var ISSUE_SECTION = {
+    text_layer_empty: "text",
+    tbd_text: "text",
+    claim_missing: "claims",
+    claim_unapproved: "claims",
+    placeholder_misuse: "claims",
+    offer_without_tag: "tags",
+    unreachable_ending: "ending",
+    pool_node_not_ending: "ending",
+    dangling_pool_node: "ending",
+    empty_bad_ending_pool: "ending"
+  };
+
+  // -------------------------------------------------------------------------
+  // Module state.
+  // -------------------------------------------------------------------------
+
+  var refs = { form: null, identity: null };
+  // The last special-shape touch (set when is_ending changes on a
+  // router-only / restored / stub node; cleared when another node is
+  // selected) — drives the "special shape touched" informational note.
+  var lastTouch = null;
+
+  // -------------------------------------------------------------------------
+  // Small helpers.
+  // -------------------------------------------------------------------------
+
+  function esc(s) {
+    return EDITOR.esc(s);
+  }
+
+  function warn(msg) {
+    try {
+      if (typeof console !== "undefined" && console && console.warn) {
+        console.warn(msg);
+      }
+    } catch (e) { /* never warn about failing to warn */ }
+  }
+
+  function selectedNode() {
+    var nid = EDITOR.state.sel;
+    if (!nid || !EDITOR.state.bundle) return null;
+    return EDITOR.nodeById(nid);
+  }
+
+  function selectedFile() {
+    var nid = EDITOR.state.sel;
+    return nid ? EDITOR.fileOfNode(nid) : null;
+  }
+
+  // Incoming-choice count (router-only detection): a node with zero
+  // incoming choice.goto edges is entered ONLY via the edit router (the
+  // restored-node pattern, 07-12) or is simply orphaned (validator flags).
+  function incomingCount(nid) {
+    var all = EDITOR.allNodes();
+    var count = 0;
+    for (var i = 0; i < all.length; i++) {
+      var node = all[i].node;
+      var choices = (node && Object.prototype.toString.call(node.choices) ===
+                     "[object Array]") ? node.choices : null;
+      if (!choices) continue;
+      for (var j = 0; j < choices.length; j++) {
+        var c = choices[j];
+        if (c && typeof c === "object" && c.goto === nid) count++;
+      }
+    }
+    return count;
+  }
+
+  // The node's special structural shape, as display facts ("" if none).
+  function specialFacts(node) {
+    var kind = EDITOR.deriveKind(node);
+    var facts = [];
+    if (kind === "phase8-stub") {
+      facts.push("Phase-8 stub (returns in Phase 8; sanctioned " +
+                 "PLACEHOLDER_PHASE8 residual)");
+    }
+    if (kind === "edit-prompt") {
+      facts.push("the edit.prompt hub (the intercepted structural stub the " +
+                 "edit router routes through)");
+    }
+    if (kind === "restored") {
+      facts.push("a restoration node (known-edit reveal; on_enter sequence " +
+                 "pinned: edit, load, align, show_as)");
+    }
+    if (node && node.id && incomingCount(node.id) === 0) {
+      facts.push("router-only entry (no incoming choice.goto edge — the " +
+                 "engine routes known edits directly to it)");
+    }
+    return facts.join("; ");
+  }
+
+  // -------------------------------------------------------------------------
+  // The EDITOR.ui extension point. claimFocus is the C-groundwork hook: the
+  // claims panel (70_claims.js, 07.1-12) REPLACES/EXTENDS it to switch to
+  // the claims tab and open the claim. Until that asset lands this default
+  // is a SAFE NO-OP (a console info, never an error).
+  // -------------------------------------------------------------------------
+
+  if (!EDITOR.ui) EDITOR.ui = {};
+  if (typeof EDITOR.ui.claimFocus !== "function") {
+    EDITOR.ui.claimFocus = function (claimId) {
+      try {
+        if (typeof console !== "undefined" && console && console.info) {
+          console.info("EDITOR.ui.claimFocus(\"" + String(claimId) +
+                       "\"): claims panel not loaded yet (70_claims.js, " +
+                       "07.1-12) — no-op.");
+        }
+      } catch (e) { /* safe no-op */ }
+    };
+  }
+
+  // -------------------------------------------------------------------------
+  // Mutations — ALL through the 00_core mutators (B11 contract: touch only
+  // the named field; unknown keys round-trip untouched). claim_ids/tags are
+  // edited on a COPY so order is preserved and one apply = one undo step.
+  // -------------------------------------------------------------------------
+
+  function mutateList(fname, nid, field, mutate) {
+    var node = EDITOR.nodeGet(fname, nid);
+    if (!node) return;
+    var list = Object.prototype.toString.call(node[field]) ===
+      "[object Array]" ? node[field].slice(0) : [];
+    var result = mutate(list);
+    if (result === false) return; // mutation declined (duplicate/no-op)
+    EDITOR.nodeSet(fname, nid, field, list);
+  }
+
+  function addClaim(fname, nid, rawId) {
+    var claimId = String(rawId == null ? "" : rawId).replace(/^\s+|\s+$/g, "");
+    if (!claimId) return;
+    var node = EDITOR.nodeGet(fname, nid);
+    var current = (node && Object.prototype.toString.call(node.claim_ids) ===
+                   "[object Array]") ? node.claim_ids : [];
+    for (var i = 0; i < current.length; i++) {
+      if (current[i] === claimId) {
+        showNote("Claim \"" + esc(claimId) +
+                 "\" is already referenced by this node.");
+        return;
+      }
+    }
+    mutateList(fname, nid, "claim_ids", function (list) {
+      list.push(claimId); // order preserved: appended at the end
+      return list;
+    });
+  }
+
+  function removeClaim(fname, nid, index) {
+    mutateList(fname, nid, "claim_ids", function (list) {
+      if (index >= 0 && index < list.length) list.splice(index, 1);
+      return list;
+    });
+  }
+
+  function addTag(fname, nid, rawTag) {
+    var tag = String(rawTag == null ? "" : rawTag).replace(/^\s+|\s+$/g, "");
+    if (!tag) return;
+    var node = EDITOR.nodeGet(fname, nid);
+    var current = (node && Object.prototype.toString.call(node.tags) ===
+                   "[object Array]") ? node.tags : [];
+    for (var i = 0; i < current.length; i++) {
+      if (current[i] === tag) {
+        showNote("Tag \"" + esc(tag) + "\" is already on this node.");
+        return;
+      }
+    }
+    mutateList(fname, nid, "tags", function (list) {
+      list.push(tag); // order preserved: appended at the end
+      return list;
+    });
+  }
+
+  function removeTag(fname, nid, index) {
+    mutateList(fname, nid, "tags", function (list) {
+      if (index >= 0 && index < list.length) list.splice(index, 1);
+      return list;
+    });
+  }
+
+  // is_ending set/unset. "none" REMOVES the key entirely — the schema keeps
+  // is_ending ABSENT (never null) on non-endings (model.py:250-252; the key
+  // removal below is the ONLY allowed shape-change here and touches only
+  // that one key per the B11 mutator contract). A tier value sets the key.
+  function applyEnding(fname, nid, value) {
+    var node = EDITOR.nodeGet(fname, nid);
+    if (!node) return;
+    var tier = String(value == null ? "" : value);
+    // Remember a special-shape touch for the informational note (rendered
+    // after the mutation's re-render).
+    var facts = specialFacts(node);
+    lastTouch = facts ? { id: nid, facts: facts } : null;
+
+    if (tier === "") {
+      if (Object.prototype.hasOwnProperty.call(node, "is_ending")) {
+        EDITOR.apply({
+          files: [fname],
+          redo: function (b) {
+            var n = (b && b.files && b.files[fname] && b.files[fname].nodes)
+              ? b.files[fname].nodes[nid] : null;
+            if (n) {
+              // is_ending removal: the key becomes ABSENT (never null) —
+              // B11-safe: this touches ONLY the is_ending key.
+              delete n.is_ending;
+            }
+          }
+        });
+      }
+    } else {
+      EDITOR.nodeSet(fname, nid, "is_ending", tier);
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Validator consumption (read-only): this node's errors, bucketed by the
+  // section that owns the rule. EDITOR._lastValidation is refreshed by the
+  // 20_validate.js hook after every mutation; defensively re-run it if the
+  // cache is cold (e.g. the validator asset landed but no mutation happened
+  // since load).
+  // -------------------------------------------------------------------------
+
+  function nodeIssues(nid) {
+    var v = EDITOR._lastValidation;
+    if (!v && typeof EDITOR.validateCurrent === "function") {
+      try { v = EDITOR.validateCurrent(); } catch (e) { v = null; }
+    }
+    var out = [];
+    if (v && Object.prototype.toString.call(v.errors) === "[object Array]") {
+      for (var i = 0; i < v.errors.length; i++) {
+        var err = v.errors[i];
+        if (err && err.node === nid) out.push(err);
+      }
+    }
+    return out;
+  }
+
+  function renderIssues(errors, section) {
+    var html = "";
+    for (var i = 0; i < errors.length; i++) {
+      var err = errors[i];
+      if (ISSUE_SECTION[err.kind] !== section) continue;
+      html += "<div class=\"form-issue\">\u26a0 <b>" + esc(err.kind) +
+        "</b> \u2014 " + esc(err.detail || "") + "</div>";
+    }
+    return html;
+  }
+
+  function otherIssues(errors) {
+    var html = "";
+    for (var i = 0; i < errors.length; i++) {
+      var err = errors[i];
+      if (ISSUE_SECTION[err.kind]) continue; // bucketed to its own section
+      html += "<div class=\"form-issue\">\u26a0 <b>" + esc(err.kind) +
+        "</b> \u2014 " + esc(err.detail || "") + "</div>";
+    }
+    return html;
+  }
+
+  // -------------------------------------------------------------------------
+  // Claim chip badge — LIVE resolution against bundle.citations. Strict
+  // `approval_status === "approved"` semantics (rpg/citations.py:100-109);
+  // an unresolved id renders MISSING (red) — PLACEHOLDER_PHASE8 is exactly
+  // this state on the sanctioned stubs.
+  // -------------------------------------------------------------------------
+
+  function claimBadge(claimId) {
+    var b = EDITOR.state.bundle;
+    var cits = (b && b.citations) ? b.citations : {};
+    var rec = Object.prototype.hasOwnProperty.call(cits, claimId)
+      ? cits[claimId] : null;
+    if (!rec || typeof rec !== "object") {
+      return { cls: "claim-badge-missing", label: "MISSING", tier: "" };
+    }
+    var status = rec.approval_status;
+    var tier = rec.review_tier ? String(rec.review_tier) : "";
+    if (status === "approved") {
+      return { cls: "claim-badge-approved", label: "approved", tier: tier };
+    }
+    if (status === "pending") {
+      return { cls: "claim-badge-pending", label: "pending", tier: tier };
+    }
+    if (status === "rejected") {
+      return { cls: "claim-badge-rejected", label: "rejected", tier: tier };
+    }
+    return { cls: "claim-badge-missing", label: "MISSING", tier: tier };
+  }
+
+  function placeholderNote(node) {
+    var claims = (node && Object.prototype.toString.call(node.claim_ids) ===
+                  "[object Array]") ? node.claim_ids : [];
+    for (var i = 0; i < claims.length; i++) {
+      if (claims[i] === PLACEHOLDER_CLAIM) {
+        var sanctioned = node.id && SANCTIONED_STUB_IDS[node.id];
+        if (sanctioned) {
+          return "<div class=\"form-note form-note-ok\">" +
+            "PLACEHOLDER_PHASE8 is the sanctioned residual \u2014 allowed " +
+            "ONLY on fa.stub / alc.stub (validator rule " +
+            "<b>placeholder_misuse</b>).</div>";
+        }
+        return "<div class=\"form-note form-note-warn\">" +
+          "PLACEHOLDER_PHASE8 here is a \u26a0 violation: the sanctioned " +
+          "residual is allowed ONLY on fa.stub / alc.stub (validator rule " +
+          "<b>placeholder_misuse</b>).</div>";
+      }
+    }
+    return "";
+  }
+
+  // -------------------------------------------------------------------------
+  // Section renderers (return HTML strings; everything data-derived goes
+  // through esc()).
+  // -------------------------------------------------------------------------
+
+  function kindChipHtml(node) {
+    var kind = EDITOR.deriveKind(node);
+    return "<span class=\"form-kind-chip form-kind-" +
+      esc(kind.replace(/[^a-z0-9-]/g, "-")) + "\">" + esc(kind) + "</span>";
+  }
+
+  function tierChipHtml(node) {
+    var tier = EDITOR.endingTier(node);
+    if (!tier) return "";
+    return "<span class=\"form-tier-chip\">tier: " + esc(tier) + "</span>";
+  }
+
+  function renderIdentityHeader(node, fname) {
+    var html = "";
+    var tier = EDITOR.endingTier(node);
+    if (tier) {
+      // B9 reminder — PINNED at the top of the form whenever the node is an
+      // ending (is_ending set). A reminder, never a field.
+      html += "<div class=\"form-b9-banner\">\u2139 " +
+        esc(B9_REMINDER_TEXT) + "</div>";
+    }
+    // B6a: the node id IS the title (id-as-title). Rendered LARGE,
+    // read-only — never an editable field (there is NO title field in the
+    // schema; see the header comment's B6 mapping + schema-change rule).
+    html += "<div class=\"form-id-line\">" +
+      "<span class=\"form-id-name\">" + esc(node.id) + "</span>" +
+      kindChipHtml(node) + tierChipHtml(node) + "</div>";
+    html += "<div class=\"form-id-file\">in " + esc(fname) +
+      " &middot; B6 mapping: title = id &middot; story = text_dramatic " +
+      "&middot; science = text_teaching &middot; reference/links = " +
+      "claim_ids (live-resolved)</div>";
+    var facts = specialFacts(node);
+    if (facts) {
+      html += "<div class=\"form-note form-note-info\">\u2139 Special " +
+        "shape: " + esc(facts) + ". Structural conventions are pinned by " +
+        "the gates \u2014 the validator re-checks every change.</div>";
+    }
+    return html;
+  }
+
+  function renderTexts(node, errors) {
+    var dramatic = (typeof node.text_dramatic === "string")
+      ? node.text_dramatic : "";
+    var teaching = (typeof node.text_teaching === "string")
+      ? node.text_teaching : "";
+    var nid = esc(node.id);
+    var fname = esc(selectedFile() || "");
+    var html = "";
+    html += "<h4>Story (dramatic layer) <span class=\"form-char-count\" " +
+      "data-charcount=\"text_dramatic\">" + dramatic.length + " chars</span></h4>";
+    html += "<textarea class=\"json-area form-textarea\" rows=\"4\" " +
+      "data-field=\"text_dramatic\" data-node=\"" + nid +
+      "\" data-file=\"" + fname + "\">" + esc(dramatic) + "</textarea>";
+    html += "<h4>Science (teaching layer) <span class=\"form-char-count\" " +
+      "data-charcount=\"text_teaching\">" + teaching.length + " chars</span></h4>";
+    html += "<textarea class=\"json-area form-textarea\" rows=\"4\" " +
+      "data-field=\"text_teaching\" data-node=\"" + nid +
+      "\" data-file=\"" + fname + "\">" + esc(teaching) + "</textarea>";
+    html += renderIssues(errors, "text");
+    return html;
+  }
+
+  function renderClaims(node, errors) {
+    var nid = esc(node.id);
+    var fname = esc(selectedFile() || "");
+    var claims = (node && Object.prototype.toString.call(node.claim_ids) ===
+                  "[object Array]") ? node.claim_ids : [];
+    var html = "";
+    html += "<h4>References &amp; claims (claim_ids)</h4>";
+    if (!claims.length) {
+      html += "<div class=\"form-none\">no claim_ids \u2014 this node " +
+        "makes no citation claims</div>";
+    }
+    html += "<div class=\"form-chip-list\">";
+    for (var i = 0; i < claims.length; i++) {
+      var claimId = String(claims[i]);
+      var badge = claimBadge(claimId);
+      // The chip and its remove button are SIBLINGS (never nested) so a
+      // click on the ✕ never also triggers the chip's claimFocus hook.
+      html += "<span class=\"form-chip-row\">" +
+        "<span class=\"form-claim-chip " + badge.cls + "\" " +
+        "data-claim-chip=\"" + esc(claimId) + "\">" + esc(claimId) +
+        " <span class=\"form-claim-status\">" + esc(badge.label) +
+        "</span>" +
+        (badge.tier ? " <span class=\"form-tier-tag\">" +
+          esc(badge.tier) + "</span>" : "") +
+        "</span>" +
+        "<button type=\"button\" class=\"form-chip-x\" " +
+        "data-claim-remove=\"" + i + "\" data-node=\"" + nid +
+        "\" data-file=\"" + fname + "\" aria-label=\"remove claim " +
+        esc(claimId) + ">\u2715</button></span>";
+    }
+    html += "</div>";
+    html += "<div class=\"form-add-row\">" +
+      "<input type=\"text\" class=\"form-add-input\" " +
+      "data-role=\"add-claim-input\" data-node=\"" + nid +
+      "\" data-file=\"" + fname + "\" placeholder=\"add claim_id&hellip;\">" +
+      "<button type=\"button\" class=\"form-add-btn\" " +
+      "data-role=\"add-claim-btn\" data-node=\"" + nid +
+      "\" data-file=\"" + fname + "\">+ Add</button></div>";
+    html += placeholderNote(node);
+    html += renderIssues(errors, "claims");
+    return html;
+  }
+
+  // Quick-add candidates: the literal vocabulary + the concrete
+  // edit:enzyme:<bucket> ids from the loaded edits.json (if present).
+  function quickAddCandidates(node) {
+    var current = (node && Object.prototype.toString.call(node.tags) ===
+                   "[object Array]") ? node.tags : [];
+    var have = {};
+    for (var i = 0; i < current.length; i++) have[current[i]] = true;
+    var out = [];
+    function offer(tag) {
+      if (have[tag] || tag === "edit:enzyme:<id>") return;
+      for (var j = 0; j < out.length; j++) {
+        if (out[j] === tag) return;
+      }
+      out.push(tag);
+    }
+    for (var v = 0; v < TAG_VOCAB.length; v++) {
+      if (TAG_VOCAB[v].tag === "edit:enzyme:<id>") {
+        // Parameterized: offer the concrete edits.json bucket ids.
+        var b = EDITOR.state.bundle;
+        var enzymes = (b && b.edits && b.edits.enzymes) ? b.edits.enzymes : {};
+        for (var key in enzymes) {
+          if (Object.prototype.hasOwnProperty.call(enzymes, key)) {
+            offer("edit:enzyme:" + key);
+          }
+        }
+        continue;
+      }
+      offer(TAG_VOCAB[v].tag);
+    }
+    return out;
+  }
+
+  function renderTags(node, errors) {
+    var nid = esc(node.id);
+    var fname = esc(selectedFile() || "");
+    var tags = (node && Object.prototype.toString.call(node.tags) ===
+                "[object Array]") ? node.tags : [];
+    var html = "";
+    html += "<h4>Tags</h4>";
+    if (!tags.length) {
+      html += "<div class=\"form-none\">no tags on this node</div>";
+    }
+    html += "<div class=\"form-chip-list\">";
+    for (var i = 0; i < tags.length; i++) {
+      html += "<span class=\"form-chip-row\">" +
+        "<span class=\"form-tag-chip\">" + esc(String(tags[i])) +
+        "</span>" +
+        "<button type=\"button\" class=\"form-chip-x\" " +
+        "data-tag-remove=\"" + i + "\" data-node=\"" + nid +
+        "\" data-file=\"" + fname + "\" aria-label=\"remove tag " +
+        esc(String(tags[i])) + ">\u2715</button></span>";
+    }
+    html += "</div>";
+    html += "<div class=\"form-add-row\">" +
+      "<input type=\"text\" class=\"form-add-input\" " +
+      "data-role=\"add-tag-input\" data-node=\"" + nid +
+      "\" data-file=\"" + fname + "\" placeholder=\"add tag&hellip;\">" +
+      "<button type=\"button\" class=\"form-add-btn\" " +
+      "data-role=\"add-tag-btn\" data-node=\"" + nid +
+      "\" data-file=\"" + fname + "\">+ Add</button></div>";
+    var candidates = quickAddCandidates(node);
+    if (candidates.length) {
+      html += "<div class=\"form-quickadd-label\">quick-add (known " +
+        "vocabulary):</div><div class=\"form-quickadd\">";
+      for (var c = 0; c < candidates.length; c++) {
+        html += "<button type=\"button\" class=\"form-quickadd-chip\" " +
+          "data-tag-quick=\"" + esc(candidates[c]) + "\" data-node=\"" +
+          nid + "\" data-file=\"" + fname + "\">+" +
+          esc(candidates[c]) + "</button>";
+      }
+      html += "</div>";
+    }
+    html += "<details class=\"form-vocab\"><summary>Known tag vocabulary " +
+      "(07.1-RESEARCH-DATA \u00a71.5, counts documented)</summary><ul>";
+    for (var t = 0; t < TAG_VOCAB.length; t++) {
+      html += "<li><b>" + esc(TAG_VOCAB[t].tag) + "</b> \u2014 " +
+        esc(TAG_VOCAB[t].count) + "</li>";
+    }
+    html += "</ul></details>";
+    html += renderIssues(errors, "tags");
+    return html;
+  }
+
+  function renderEnding(node, errors) {
+    var nid = esc(node.id);
+    var fname = esc(selectedFile() || "");
+    var tier = EDITOR.endingTier(node);
+    var html = "";
+    html += "<h4>Ending type (is_ending)</h4>";
+    html += "<select class=\"form-select\" data-role=\"ending-select\" " +
+      "data-node=\"" + nid + "\" data-file=\"" + fname + "\">";
+    html += "<option value=\"\"" + (tier ? "" : " selected") +
+      ">(none \u2014 not an ending)</option>";
+    for (var i = 0; i < ENDING_TIERS.length; i++) {
+      var t = ENDING_TIERS[i];
+      html += "<option value=\"" + t + "\"" +
+        (tier === t ? " selected" : "") + ">" + t + "</option>";
+    }
+    html += "</select>";
+    // The ending-convention reminder: what a data change to an ending
+    // actually requires (07.1-RESEARCH-DATA §1.7 type-transition recipes);
+    // the validator surfaces the REAL errors — this is guidance, not a gate.
+    html += "<div class=\"form-note form-note-info\">Ending convention: " +
+      "an ending wants the matching <b>ending:" + esc(tier || "&lt;tier&gt;") +
+      "</b> + <b>stage:*</b> tags, <b>empty choices</b>, and reachability " +
+      "via some choice.goto \u2014 the validator surfaces the real errors " +
+      "(unreachable_ending, pool_node_not_ending, &hellip;).</div>";
+    // Special-shape touched note (router-only / restored / stub).
+    if (lastTouch && lastTouch.id === node.id) {
+      html += "<div class=\"form-note form-note-warn\">\u26a0 Special " +
+        "shape touched: " + esc(lastTouch.facts) + ". This node's shape " +
+        "is pinned by structural conventions \u2014 run the Python gates " +
+        "after saving.</div>";
+    }
+    html += renderIssues(errors, "ending");
+    return html;
+  }
+
+  // B11 unknown-key guard: read-only rendering of any key outside the
+  // known schema. NEVER editable, NEVER removed here — unknown keys must
+  // survive every edit untouched (round-trip contract).
+  function extraKeys(node) {
+    var out = [];
+    for (var k in node) {
+      if (Object.prototype.hasOwnProperty.call(node, k) &&
+          !KNOWN_NODE_KEYS[k]) {
+        out.push(k);
+      }
+    }
+    return out;
+  }
+
+  function renderExtraKeys(node) {
+    var keys = extraKeys(node);
+    var html = "";
+    html += "<h4>Extra keys (B11 guard)</h4>";
+    if (!keys.length) {
+      html += "<div class=\"form-none form-extrakeys-none\">none \u2014 " +
+        "node is schema-exact (6 keys + optional is_ending)</div>";
+      return html;
+    }
+    html += "<div class=\"form-extrakeys\">";
+    for (var i = 0; i < keys.length; i++) {
+      var value = "";
+      try { value = JSON.stringify(node[keys[i]]); } catch (e) {
+        value = String(node[keys[i]]);
+      }
+      if (value && value.length > 120) value = value.slice(0, 117) + "...";
+      html += "<div class=\"form-extrakey\">\u26a0 unknown key <b>" +
+        esc(String(keys[i])) + "</b>: <code>" + esc(value) + "</code> " +
+        "\u2014 preserved on round-trip; read-only here, never removed " +
+        "(B11 extensibility).</div>";
+    }
+    html += "</div>";
+    return html;
+  }
+
+  // Transient inline note (set by declined no-op mutations like duplicate
+  // adds; lives in the DOM until the next re-render — no mutation, so no
+  // re-render happens and the note stays visible).
+  function showNote(text) {
+    if (!refs.identity) return;
+    var el = document.getElementById("form-transient-note");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "form-transient-note";
+      el.className = "form-note form-note-info";
+      refs.identity.insertBefore(el, refs.identity.firstChild);
+    }
+    el.textContent = text;
+  }
+
+  // -------------------------------------------------------------------------
+  // The form renderer — registered via EDITOR.setFormRenderer (the core's
+  // dedicated node-form slot). Runs on every EDITOR.select (selection-driven
+  // editing) and after every afterChange (mutation fan-out).
+  // -------------------------------------------------------------------------
+
+  function renderForm() {
+    var form = refs.form;
+    var identity = refs.identity;
+    if (!form || !identity) return;
+    var node = selectedNode();
+    var fname = selectedFile();
+    if (!EDITOR.state.bundle || !node || !fname) {
+      form.hidden = true; // nothing selected — the panel stays out of the way
+      return;
+    }
+    if (lastTouch && lastTouch.id !== node.id) lastTouch = null;
+    form.hidden = false;
+    var errors = nodeIssues(node.id);
+    var html = renderIdentityHeader(node, fname) +
+      "<div class=\"form-section\">" +
+      renderTexts(node, errors) + "</div>" +
+      "<div class=\"form-section\">" + renderClaims(node, errors) + "</div>" +
+      "<div class=\"form-section\">" + renderTags(node, errors) + "</div>" +
+      "<div class=\"form-section\">" + renderEnding(node, errors) + "</div>" +
+      "<div class=\"form-section\">" + renderExtraKeys(node) + "</div>" +
+      "<div class=\"form-section\">" + otherIssues(errors) + "</div>";
+    identity.innerHTML = html;
+  }
+
+  // -------------------------------------------------------------------------
+  // Event wiring — ONE delegated listener per concern on the STABLE
+  // #node-form aside (survives innerHTML replacement of the identity
+  // sub-section). The textareas' change/input events are handled EXCLUSIVELY
+  // by EDITOR.textFieldBindings (commit on change = one undo step; input =
+  // live preview only, never a bundle write).
+  // -------------------------------------------------------------------------
+
+  function currentIds(el) {
+    var nid = el.getAttribute("data-node") || EDITOR.state.sel;
+    return { nid: nid, fname: EDITOR.fileOfNode(nid) };
+  }
+
+  function wireForm() {
+    var form = refs.form;
+    if (!form) return;
+
+    // Commit-on-change for the schema text fields (core binding).
+    EDITOR.textFieldBindings(form);
+
+    // Chip + button clicks (delegated once).
+    EDITOR.delegate(form, "click", "data-claim-chip", function (el) {
+      EDITOR.ui.claimFocus(el.getAttribute("data-claim-chip"));
+    });
+    EDITOR.delegate(form, "click", "data-claim-remove", function (el) {
+      var ids = currentIds(el);
+      if (ids.fname) {
+        removeClaim(ids.fname, ids.nid, parseInt(el.getAttribute("data-claim-remove"), 10));
+      }
+    });
+    EDITOR.delegate(form, "click", "data-tag-remove", function (el) {
+      var ids = currentIds(el);
+      if (ids.fname) {
+        removeTag(ids.fname, ids.nid, parseInt(el.getAttribute("data-tag-remove"), 10));
+      }
+    });
+    EDITOR.delegate(form, "click", "data-tag-quick", function (el) {
+      var ids = currentIds(el);
+      if (ids.fname) addTag(ids.fname, ids.nid, el.getAttribute("data-tag-quick"));
+    });
+    EDITOR.delegate(form, "click", "data-role", function (el) {
+      var role = el.getAttribute("data-role");
+      var ids = currentIds(el);
+      if (!ids.fname) return;
+      if (role === "add-claim-btn") {
+        var input = form.querySelector("input[data-role=\"add-claim-input\"]");
+        if (input) {
+          addClaim(ids.fname, ids.nid, input.value);
+          input.value = "";
+        }
+      } else if (role === "add-tag-btn") {
+        var tagInput = form.querySelector("input[data-role=\"add-tag-input\"]");
+        if (tagInput) {
+          addTag(ids.fname, ids.nid, tagInput.value);
+          tagInput.value = "";
+        }
+      }
+    });
+
+    // Enter in an add-input commits the add (keydown delegation).
+    form.addEventListener("keydown", function (ev) {
+      var el = ev.target;
+      if (!el || !el.getAttribute) return;
+      var role = el.getAttribute("data-role");
+      if (role !== "add-claim-input" && role !== "add-tag-input") return;
+      if (ev.keyCode !== 13 && ev.key !== "Enter") return;
+      ev.preventDefault();
+      var ids = currentIds(el);
+      if (!ids.fname) return;
+      if (role === "add-claim-input") {
+        addClaim(ids.fname, ids.nid, el.value);
+        el.value = "";
+      } else {
+        addTag(ids.fname, ids.nid, el.value);
+        el.value = "";
+      }
+    });
+
+    // The is_ending select (change delegation; NOT a data-field element, so
+    // the core's text-binding change listener ignores it).
+    form.addEventListener("change", function (ev) {
+      var el = ev.target;
+      if (!el || !el.getAttribute) return;
+      if (el.getAttribute("data-role") !== "ending-select") return;
+      var ids = currentIds(el);
+      if (ids.fname) applyEnding(ids.fname, ids.nid, el.value);
+    });
+
+    // Live character counts (input events — never a bundle write; the undo
+    // pre-image stays the true pre-edit value per the 00_core contract).
+    EDITOR.livePreview(function (info) {
+      if (info.field !== "text_dramatic" && info.field !== "text_teaching") {
+        return;
+      }
+      var span = refs.identity
+        ? refs.identity.querySelector("span[data-charcount=\"" +
+            info.field + "\"]")
+        : null;
+      if (span) span.textContent = String(info.value.length) + " chars";
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // Asset CSS (injected at runtime per the pipeline's per-feature CSS rule).
+  // -------------------------------------------------------------------------
+
+  EDITOR.injectCss(
+    "/* injected by 40_form.js (07.1-09): node form styles */\n" +
+    "#node-form-identity .form-b9-banner { margin: 4px 0 8px; padding: 7px 9px; border: 1px solid #b8860b; border-left: 4px solid #b8860b; border-radius: 4px; background: #fdf6e3; color: #6b5308; font-size: 12.5px; }\n" +
+    "#node-form-identity .form-id-line { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }\n" +
+    "#node-form-identity .form-id-name { font-family: Consolas, monospace; font-size: 19px; font-weight: bold; color: #1a1a1a; word-break: break-all; }\n" +
+    "#node-form-identity .form-kind-chip { font-size: 10.5px; padding: 1px 7px; border-radius: 8px; border: 1px solid #999999; background: #eef1f5; color: #444444; }\n" +
+    "#node-form-identity .form-tier-chip { font-size: 10.5px; padding: 1px 7px; border-radius: 8px; border: 1px solid #b8860b; background: #fdf3d7; color: #6b5308; }\n" +
+    "#node-form-identity .form-id-file { font-size: 11.5px; color: #777777; margin: 2px 0 8px; }\n" +
+    "#node-form-identity .form-section { padding: 2px 0 4px; }\n" +
+    "#node-form-identity h4 { margin: 8px 0 4px; font-size: 12.5px; color: #333333; }\n" +
+    "#node-form-identity .form-char-count { font-weight: normal; font-size: 11px; color: #888888; margin-left: 6px; }\n" +
+    "#node-form-identity .form-textarea { min-height: 84px; font-size: 12px; }\n" +
+    "#node-form-identity .form-chip-list { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0; }\n" +
+    "#node-form-identity .form-chip-row { display: inline-flex; align-items: center; gap: 3px; }\n" +
+    "#node-form-identity .form-claim-chip { display: inline-block; padding: 2px 7px; border-radius: 9px; border: 1px solid #aab3c0; background: #f2f4f8; font-family: Consolas, monospace; font-size: 11.5px; cursor: pointer; }\n" +
+    "#node-form-identity .form-claim-chip:hover { text-decoration: underline; }\n" +
+    "#node-form-identity .form-claim-status { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; padding: 0 5px; border-radius: 7px; border: 1px solid transparent; }\n" +
+    "#node-form-identity .claim-badge-approved .form-claim-status { background: #dff2df; border-color: #2e8b57; color: #1d5c38; }\n" +
+    "#node-form-identity .claim-badge-pending .form-claim-status { background: #fdf3d7; border-color: #b8860b; color: #6b5308; }\n" +
+    "#node-form-identity .claim-badge-rejected .form-claim-status { background: #fbe0dc; border-color: #b22222; color: #7a1616; }\n" +
+    "#node-form-identity .claim-badge-missing .form-claim-status { background: #fbe0dc; border-color: #b22222; color: #7a1616; }\n" +
+    "#node-form-identity .form-tier-tag { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; color: #555555; border: 1px dotted #999999; border-radius: 7px; padding: 0 5px; }\n" +
+    "#node-form-identity .form-tag-chip { display: inline-block; padding: 2px 7px; border-radius: 9px; border: 1px solid #8ea3c0; background: #e9eef7; font-family: Consolas, monospace; font-size: 11.5px; color: #2b3a55; }\n" +
+    "#node-form-identity .form-chip-x { border: 1px solid #c26a5a; background: #fdf0ed; color: #8c2f1f; border-radius: 50%; width: 17px; height: 17px; line-height: 1; font-size: 10px; cursor: pointer; padding: 0; }\n" +
+    "#node-form-identity .form-chip-x:hover { background: #f6d9d2; }\n" +
+    "#node-form-identity .form-add-row { display: flex; gap: 5px; margin: 6px 0 2px; }\n" +
+    "#node-form-identity .form-add-input { flex: 1 1 auto; min-width: 0; font-family: Consolas, monospace; font-size: 11.5px; padding: 3px 6px; border: 1px solid #aab3c0; border-radius: 4px; }\n" +
+    "#node-form-identity .form-add-btn { flex: none; font-size: 11.5px; padding: 3px 9px; border: 1px solid #6d7f9b; background: #e9eef7; border-radius: 4px; cursor: pointer; }\n" +
+    "#node-form-identity .form-add-btn:hover { background: #dbe4f2; }\n" +
+    "#node-form-identity .form-quickadd-label { font-size: 11px; color: #777777; margin-top: 7px; }\n" +
+    "#node-form-identity .form-quickadd { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0; }\n" +
+    "#node-form-identity .form-quickadd-chip { font-family: Consolas, monospace; font-size: 10px; padding: 1px 6px; border: 1px dashed #8ea3c0; background: #f7f9fc; color: #2b3a55; border-radius: 8px; cursor: pointer; }\n" +
+    "#node-form-identity .form-quickadd-chip:hover { background: #e9eef7; }\n" +
+    "#node-form-identity .form-vocab { font-size: 11px; color: #555555; margin: 6px 0; }\n" +
+    "#node-form-identity .form-vocab summary { cursor: pointer; color: #666666; }\n" +
+    "#node-form-identity .form-vocab ul { margin: 5px 0; padding-left: 17px; }\n" +
+    "#node-form-identity .form-vocab li { margin: 2px 0; }\n" +
+    "#node-form-identity .form-select { font-family: Consolas, monospace; font-size: 12px; padding: 3px 5px; border: 1px solid #aab3c0; border-radius: 4px; background: #ffffff; }\n" +
+    "#node-form-identity .form-note { margin: 6px 0; padding: 6px 8px; border-radius: 4px; font-size: 11.5px; }\n" +
+    "#node-form-identity .form-note-info { border: 1px solid #9db4cc; border-left: 4px solid #4682b4; background: #eef4fb; color: #2b4a68; }\n" +
+    "#node-form-identity .form-note-ok { border: 1px solid #7aa87a; border-left: 4px solid #2e8b57; background: #eef7ee; color: #1d5c38; }\n" +
+    "#node-form-identity .form-note-warn { border: 1px solid #d9a544; border-left: 4px solid #b8860b; background: #fdf6e3; color: #6b4508; }\n" +
+    "#node-form-identity .form-issue { margin: 4px 0; padding: 4px 8px; border-left: 4px solid #b22222; background: #fdeeea; color: #7a1616; font-size: 11.5px; border-radius: 0 4px 4px 0; }\n" +
+    "#node-form-identity .form-none { font-size: 11.5px; color: #888888; font-style: italic; margin: 3px 0; }\n" +
+    "#node-form-identity .form-extrakeys { margin: 4px 0; }\n" +
+    "#node-form-identity .form-extrakey { margin: 4px 0; padding: 4px 8px; border: 1px dashed #d9a544; background: #fdf9ee; color: #6b4508; font-size: 11px; border-radius: 4px; }\n" +
+    "#node-form-identity .form-extrakey code { font-size: 10.5px; word-break: break-all; }\n"
+  );
+
+  // -------------------------------------------------------------------------
+  // Init: locate the mounts, wire the events, first render. Runs once from
+  // the shell bootstrap (EDITOR.runInits).
+  // -------------------------------------------------------------------------
+
+  function initForm() {
+    refs.form = document.getElementById("node-form");
+    refs.identity = document.getElementById("node-form-identity");
+    if (!refs.form || !refs.identity) {
+      warn("EDITOR form (40_form.js): #node-form / #node-form-identity " +
+           "mounts missing — form disabled.");
+      return;
+    }
+    wireForm();
+    renderForm();
+  }
+
+  // Registration per the 07.1-04 convention: the renderer goes into the
+  // dedicated form slot (re-renders on EDITOR.select + after every
+  // afterChange via the core's rerender dispatcher); the DOM work runs from
+  // the shell bootstrap.
+  EDITOR.setFormRenderer(renderForm);
+  EDITOR.init(initForm);
+
+})();
+
+</script>
+<script>
 /* asset: 60_trace.js (25956 bytes) */
 /* ==========================================================================
  * 60_trace.js — the Trace tab: path tracing as a nested list (07.1-10).
@@ -5953,6 +6915,2118 @@ rpg/data/cast.json</pre>
     ".k-story { background: #708090; }\n" +
     "textarea.trace-copy-ta { min-height: 240px; margin-top: 8px; }\n"
   );
+
+})();
+
+</script>
+<script>
+/* asset: 70_claims.js (42276 bytes) */
+/* ==========================================================================
+ * 70_claims.js — the claims/references browser, Requirement C (07.1-12).
+ *
+ * OWNS: the #tab-claims panel (the shell's fixed mount — the whole panel
+ * is this asset's territory). Loads after 00_core.js (EDITOR contract),
+ * 05_json.js, 10_load.js (bundle), 20_validate.js, 30_graph.js. Registers
+ * via EDITOR.view('claims', renderClaims) + EDITOR.init(initClaims) per
+ * the 07.1-04 registration convention (the single-quoted view name is the
+ * plan's pinned verify string).
+ *
+ * READ-ONLY CONTRACT (load-bearing): this panel is read-and-jump, never
+ * edit. Approvals are HUMAN-GATED by policy — spec.md non-negotiable
+ * ("No fabricated science ... explicitly approved by the human") — so this
+ * asset performs NO bundle mutation of any kind (the state layer's
+ * mutation API is never invoked here) and citations.json / sources.json
+ * are never written. src: 07.1-RESEARCH-UI "Reference/source checking (C)":
+ * "The editor must NOT write citations.json/sources.json ... C is
+ * read-and-jump, not edit."
+ *
+ * DATA (07.1-RESEARCH-DATA §1.10 registry schemas + §1.11 panel spec):
+ *   bundle.citations — FLAT dict claim_id → record: claim (short),
+ *     claim_text (full approved wording), source_type, source (human
+ *     string), source_id (STR OR LIST-OF-STR — 40/77 claims are
+ *     multi-source), review_tier (routine | high-stakes),
+ *     inherits_source_approval, approval_status (approved | pending |
+ *     rejected), optional approved_by / approved_date / review_notes /
+ *     pdb_id / resolution_angstrom.
+ *   bundle.sources — FLAT dict source_id → record: reference, url?,
+ *     pdb_doi?, license?, source_type, approval_status, approved_by?,
+ *     approved_date?, notes?.
+ *   The citation gate NEVER reads sources.json — provenance context only.
+ *   Either registry may be null when the load layer (10_load.js) degraded;
+ *   every access path below handles that (warning panel -> boot checklist).
+ *
+ * STRICT APPROVAL SEMANTICS (display mirrors the gate): a claim counts as
+ * approved iff approval_status === "approved" EXACTLY — a "rejected"
+ * claim fails identically to a "pending" one. There is deliberately NO
+ * "not pending" shortcut anywhere below.
+ * src: rpg/citations.py:100-109 (is_approved — the gate's core predicate,
+ * including the Pitfall-6 note about the erroneous "!= pending" form).
+ *
+ * SANCTIONED RESIDUAL: PLACEHOLDER_PHASE8 on exactly fa.stub / alc.stub is
+ * the citation gate's sanctioned residual — a NOTICE, never an error —
+ * rendered here as an annotated info case, not an alarm. The same id
+ * anywhere else (or any other PLACEHOLDER* id) is placeholder_misuse —
+ * an alarm. src: tools/story_editor_lint.py rule_claims;
+ * tests/test_glucose_content.py:213-236.
+ *
+ * REVERSE INDEX: claim_id → [node ids], built by walking every node's
+ * claim_ids list (≤ 3 ids each, 57 nodes — trivial; §1.10 cross-links:
+ * 70/77 claims referenced, 8 free pool). Shown in the claim detail and as
+ * per-node warning chips for unapproved / unresolved references (display
+ * mirror of the lint's claim rules; clicking a chip opens the claim).
+ *
+ * HOOK CONSUMED: EDITOR.ui.claimFocus(claimId) — the node form (40_form.js,
+ * 07.1-09) calls it when a claim chip is clicked. Defined here (defensively
+ * creating the EDITOR.ui namespace if an earlier asset has not): switches
+ * to the claims tab + opens the claim.
+ *
+ * STYLE: one classic script, one IIFE, ES5 only (var, no arrow functions,
+ * no modules) — the emitted-page discipline pinned page-wide by
+ * tests/test_story_editor_state.py.
+ * ========================================================================== */
+
+(function () {
+  "use strict";
+
+  // -------------------------------------------------------------------------
+  // Constants — the sanctioned-residual pair (mirror of the lint).
+  // -------------------------------------------------------------------------
+
+  var PHASE8_CLAIM = "PLACEHOLDER_PHASE8";
+  var PHASE8_STUB_NODES = { "fa.stub": true, "alc.stub": true };
+
+  // -------------------------------------------------------------------------
+  // Module state: DOM refs + view state. The toolbar/table/detail DOM is
+  // built ONCE in initClaims; re-renders only refresh the dynamic parts so
+  // the filter inputs never lose focus or value while typing.
+  // -------------------------------------------------------------------------
+
+  var refs = {
+    panel: null, built: false,
+    toolbar: null, search: null, statusSel: null, tierSel: null,
+    refSel: null, resetBtn: null, count: null,
+    tableWrap: null, tbody: null,
+    detail: null, warnings: null, empty: null
+  };
+
+  var selectedClaim = null;                       // claim_id or null
+  var filter = { status: "all", tier: "all", ref: "all", text: "" };
+  var lastIndex = { byClaim: {} };                // rebuilt on every data render
+
+  // -------------------------------------------------------------------------
+  // Small DOM helpers (ES5; every dynamic string passes through
+  // textContent — never innerHTML with data).
+  // -------------------------------------------------------------------------
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined && text !== null) n.textContent = String(text);
+    return n;
+  }
+
+  function clearEl(n) {
+    if (!n) return;
+    while (n.firstChild) n.removeChild(n.firstChild);
+  }
+
+  function hasOwn(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+  }
+
+  // -------------------------------------------------------------------------
+  // Data access — pure reads of EDITOR.state.bundle (see the READ-ONLY
+  // CONTRACT in the header; nothing below writes to the bundle).
+  // -------------------------------------------------------------------------
+
+  function theBundle() {
+    return EDITOR.state.bundle;
+  }
+
+  function citationsMap() {
+    var b = theBundle();
+    return (b && b.citations && typeof b.citations === "object")
+      ? b.citations : null;
+  }
+
+  function sourcesMap() {
+    var b = theBundle();
+    return (b && b.sources && typeof b.sources === "object")
+      ? b.sources : null;
+  }
+
+  function claimRecord(cid) {
+    var cits = citationsMap();
+    if (!cits || typeof cid !== "string" || !hasOwn(cits, cid)) return null;
+    var rec = cits[cid];
+    return (rec && typeof rec === "object") ? rec : null;
+  }
+
+  // STRICT gate predicate (display mirror of the citation gate): approved
+  // iff approval_status === "approved" EXACTLY — rejected fails identically
+  // to pending. src: rpg/citations.py:100-109 (is_approved).
+  function isApproved(rec) {
+    return !!(rec && rec.approval_status === "approved");
+  }
+
+  function statusOf(rec) {
+    if (!rec || !rec.approval_status) return "missing";
+    return String(rec.approval_status);
+  }
+
+  // source_id is a STRING or a LIST-OF-STRINGS (40/77 claims are
+  // multi-source — §1.10). Normalized to an array here, once, so every
+  // consumer below can iterate the same way; junk tolerated as [].
+  function sourceIds(rec) {
+    if (!rec) return [];
+    var sid = rec.source_id;
+    if (Object.prototype.toString.call(sid) === "[object Array]") {
+      return sid.slice(); // LIST branch
+    }
+    if (typeof sid === "string" && sid) {
+      return [sid];       // STRING branch
+    }
+    return [];
+  }
+
+  // Only http(s) URLs become anchors: a tampered sources.json must never be
+  // able to inject a javascript: href into the panel. Navigation is
+  // display-only — a file:// page may open an https target in a new tab;
+  // that is a browser navigation, never a resource load into this page
+  // (07.1-RESEARCH-UI, Requirement C "offline-safe" wording).
+  function safeHttpUrl(u) {
+    if (typeof u !== "string") return null;
+    return /^https?:\/\//i.test(u) ? u : null;
+  }
+
+  // -------------------------------------------------------------------------
+  // Claim-issue classification — a DISPLAY mirror of the lint's claim rules
+  // (tools/story_editor_lint.py rule_claims): claim_missing /
+  // claim_unapproved / placeholder_misuse, plus the sanctioned residual.
+  // Purely informational here (the authoritative verdict is the Python
+  // lint; 20_validate.js re-runs it in-browser — this panel only annotates).
+  // -------------------------------------------------------------------------
+
+  // Returns null for a clean reference, else
+  //   { kind: "claim_missing" | "claim_unapproved" | "placeholder_misuse" |
+  //           "sanctioned_residual",
+  //     note: human string, sanctioned: bool }
+  function claimIssue(cid, nodeId) {
+    if (typeof cid !== "string") {
+      return {
+        kind: "claim_missing",
+        note: "non-string claim_id (claim_ids must be strings)",
+        sanctioned: false
+      };
+    }
+    if (cid === PHASE8_CLAIM) {
+      if (nodeId && PHASE8_STUB_NODES[nodeId]) {
+        // The sanctioned residual: PLACEHOLDER_PHASE8 on exactly the
+        // Phase-8 stub pair — a notice, never an error (annotated info
+        // case below, deliberately NOT styled as an alarm).
+        return {
+          kind: "sanctioned_residual",
+          note: "sanctioned residual \u2014 Phase-8 stub pair " +
+                "(fa.stub / alc.stub); the citation gate reports this as " +
+                "a notice, never an error",
+          sanctioned: true
+        };
+      }
+      return {
+        kind: "placeholder_misuse",
+        note: PHASE8_CLAIM + " is sanctioned ONLY on fa.stub/alc.stub \u2014 " +
+              "a new node may never use it",
+        sanctioned: false
+      };
+    }
+    if (cid.indexOf("PLACEHOLDER") === 0) {
+      return {
+        kind: "placeholder_misuse",
+        note: "no PLACEHOLDER* residue is allowed anywhere except " +
+              PHASE8_CLAIM + " on the sanctioned stubs",
+        sanctioned: false
+      };
+    }
+    var rec = claimRecord(cid);
+    if (!rec) {
+      return {
+        kind: "claim_missing",
+        note: "references claim_id not in the registry",
+        sanctioned: false
+      };
+    }
+    if (!isApproved(rec)) {
+      // Strict comparison above; pending and rejected both land here.
+      return {
+        kind: "claim_unapproved",
+        note: "approval_status is " + JSON.stringify(rec.approval_status || null) +
+              ", not 'approved'",
+        sanctioned: false
+      };
+    }
+    return null;
+  }
+
+  // -------------------------------------------------------------------------
+  // Reverse index: claim_id → [node ids]. Walks every node's claim_ids
+  // (≤ 3 ids each, 57 nodes — trivial per §1.10). Rebuilt on every data
+  // render: claim_ids is editable in the node form (07.1-09), so a stale
+  // index would lie after every edit.
+  // -------------------------------------------------------------------------
+
+  function buildReverseIndex() {
+    var byClaim = {};
+    var nodes = (typeof EDITOR.allNodes === "function") ? EDITOR.allNodes() : [];
+    for (var i = 0; i < nodes.length; i++) {
+      var wrap = nodes[i];
+      var node = wrap.node;
+      var ids = (node && Object.prototype.toString.call(node.claim_ids) ===
+                 "[object Array]") ? node.claim_ids : [];
+      for (var j = 0; j < ids.length; j++) {
+        var cid = ids[j];
+        if (typeof cid !== "string") continue; // surfaced by renderWarnings
+        if (!hasOwn(byClaim, cid)) byClaim[cid] = [];
+        byClaim[cid].push(wrap.id);
+      }
+    }
+    lastIndex.byClaim = byClaim;
+    return lastIndex;
+  }
+
+  function referencingNodes(cid) {
+    return hasOwn(lastIndex.byClaim, cid) ? lastIndex.byClaim[cid] : [];
+  }
+
+  // -------------------------------------------------------------------------
+  // Chip builders.
+  // -------------------------------------------------------------------------
+
+  function statusChip(rec) {
+    var st = statusOf(rec);
+    var label = (st === "missing") ? "MISSING" : st;
+    return el("span", "claims-chip claims-status-" + st, label);
+  }
+
+  function tierBadge(rec) {
+    var tier = (rec && rec.review_tier) ? String(rec.review_tier) : "\u2014";
+    var cls = (tier === "high-stakes")
+      ? "claims-tier claims-tier-high"
+      : "claims-tier claims-tier-routine";
+    return el("span", cls, tier);
+  }
+
+  // A referencing-node chip (jump-to-node). warn=true gives the amber
+  // warning style (unapproved / unresolved reference).
+  function nodeChip(nid, warn) {
+    var c = el("button",
+      "claims-node-chip" + (warn ? " claims-node-chip-warn" : ""), String(nid));
+    c.type = "button";
+    c.setAttribute("data-jump-node", String(nid));
+    c.title = "Jump to node " + nid + " in the graph";
+    return c;
+  }
+
+  // -------------------------------------------------------------------------
+  // Filtering.
+  // -------------------------------------------------------------------------
+
+  function claimMatchesFilters(cid, rec, refCount) {
+    if (filter.status !== "all" && statusOf(rec) !== filter.status) {
+      return false;
+    }
+    if (filter.tier !== "all") {
+      var tier = (rec && rec.review_tier) ? String(rec.review_tier) : "";
+      if (tier !== filter.tier) return false;
+    }
+    if (filter.ref === "referenced" && refCount === 0) return false;
+    if (filter.ref === "unreferenced" && refCount > 0) return false;
+    if (filter.text) {
+      var hay = (
+        cid + "\n" +
+        ((rec && rec.claim) ? rec.claim : "") + "\n" +
+        ((rec && rec.claim_text) ? rec.claim_text : "")
+      ).toLowerCase();
+      if (hay.indexOf(filter.text) === -1) return false;
+    }
+    return true;
+  }
+
+  // -------------------------------------------------------------------------
+  // Render: count line.
+  // -------------------------------------------------------------------------
+
+  function renderCount(cits) {
+    var ids = Object.keys(cits);
+    var approved = 0, pending = 0, rejected = 0;
+    for (var i = 0; i < ids.length; i++) {
+      var st = statusOf(cits[ids[i]]);
+      if (st === "approved") approved++;
+      else if (st === "pending") pending++;
+      else if (st === "rejected") rejected++;
+    }
+    var referenced = 0;
+    for (var cid in lastIndex.byClaim) {
+      if (hasOwn(lastIndex.byClaim, cid) && hasOwn(cits, cid)) referenced++;
+    }
+    refs.count.textContent = ids.length + " claims | " + approved +
+      " approved | " + pending + " pending | " + rejected + " rejected | " +
+      referenced + " referenced by nodes | " + (ids.length - referenced) +
+      " unreferenced (free pool)";
+  }
+
+  // -------------------------------------------------------------------------
+  // Render: claim table (filters applied).
+  // -------------------------------------------------------------------------
+
+  function renderTable(cits) {
+    clearEl(refs.tbody);
+    var ids = Object.keys(cits);
+    var shown = 0;
+    for (var i = 0; i < ids.length; i++) {
+      var cid = ids[i];
+      var rec = cits[cid];
+      var refList = referencingNodes(cid);
+      if (!claimMatchesFilters(cid, rec, refList.length)) continue;
+      shown++;
+
+      var tr = el("tr", "claims-row" +
+        (cid === selectedClaim ? " claims-row-selected" : ""));
+      tr.setAttribute("data-claim-id", cid);
+
+      var tdId = el("td", "claims-cell-id", cid);
+      var tdStatus = el("td");
+      tdStatus.appendChild(statusChip(rec));
+      var tdTier = el("td");
+      tdTier.appendChild(tierBadge(rec));
+      var tdClaim = el("td", "claims-cell-claim",
+        (rec && rec.claim) ? rec.claim : "");
+      var tdSources = el("td", "claims-cell-num",
+        String(sourceIds(rec).length));
+      var tdRefs = el("td", "claims-cell-num", String(refList.length));
+
+      tr.appendChild(tdId);
+      tr.appendChild(tdStatus);
+      tr.appendChild(tdTier);
+      tr.appendChild(tdClaim);
+      tr.appendChild(tdSources);
+      tr.appendChild(tdRefs);
+      refs.tbody.appendChild(tr);
+    }
+    if (!shown) {
+      var tr2 = el("tr", "claims-row-empty");
+      var td2 = el("td", null,
+        "No claims match the current filters.");
+      td2.setAttribute("colspan", "6");
+      tr2.appendChild(td2);
+      refs.tbody.appendChild(tr2);
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Render: claim detail (full record + sources + reverse index).
+  // -------------------------------------------------------------------------
+
+  function metaRow(label, valueText) {
+    var row = el("div", "claims-source-row");
+    row.appendChild(el("span", "claims-source-key", label));
+    row.appendChild(document.createTextNode(String(valueText)));
+    return row;
+  }
+
+  function renderSourceCard(sid, srec) {
+    var card = el("div", "claims-source");
+    card.appendChild(el("div", "claims-cell-id", String(sid)));
+    if (!srec) {
+      card.appendChild(el("div", "claims-source-missing",
+        "source_id not present in sources.json (dangling source reference)"));
+      return card;
+    }
+    if (srec.reference) card.appendChild(metaRow("reference", srec.reference));
+    if (srec.source_type) {
+      card.appendChild(metaRow("source_type", srec.source_type));
+    }
+    var url = safeHttpUrl(srec.url);
+    if (url) {
+      var row = el("div", "claims-source-row");
+      row.appendChild(el("span", "claims-source-key", "url"));
+      var a = document.createElement("a");
+      a.href = url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = srec.url;
+      a.title = "Opens in a new tab (display-only navigation \u2014 " +
+                "nothing is loaded into this page)";
+      row.appendChild(a);
+      card.appendChild(row);
+    } else if (srec.url) {
+      card.appendChild(metaRow("url", srec.url + " (not linked \u2014 " +
+        "only http/https URLs become links)"));
+    }
+    if (srec.pdb_doi) card.appendChild(metaRow("pdb_doi", srec.pdb_doi));
+    if (srec.license) card.appendChild(metaRow("license", srec.license));
+    var stRow = el("div", "claims-source-row");
+    stRow.appendChild(el("span", "claims-source-key", "approval_status"));
+    stRow.appendChild(statusChip(srec));
+    if (srec.approved_by) {
+      stRow.appendChild(document.createTextNode(
+        " by " + srec.approved_by +
+        (srec.approved_date ? " on " + srec.approved_date : "")));
+    }
+    card.appendChild(stRow);
+    if (srec.notes) card.appendChild(metaRow("notes", srec.notes));
+    return card;
+  }
+
+  function renderDetail() {
+    clearEl(refs.detail);
+    if (!selectedClaim) {
+      refs.detail.appendChild(el("p", "claims-detail-placeholder",
+        "Click a claim row to inspect its full text, sources and the " +
+        "nodes that reference it."));
+      return;
+    }
+    var rec = claimRecord(selectedClaim);
+    if (!rec) {
+      // A referenced-but-missing claim id (the lint's claim_missing) --
+      // degrade to an annotated card instead of crashing.
+      var miss = el("div", "claims-source");
+      miss.appendChild(el("div", "claims-cell-id", selectedClaim));
+      miss.appendChild(el("div", "claims-source-missing",
+        "This claim_id is not in the registry (citations.json) \u2014 the " +
+        "citation gate reports it as claim_missing on every node that " +
+        "references it. See the warnings section below."));
+      refs.detail.appendChild(miss);
+      renderReverseIndexSection(null);
+      return;
+    }
+
+    // Header: id + status chip + tier badge.
+    var head = el("div", "claims-detail-head");
+    head.appendChild(el("span", "claims-cell-id claims-detail-id",
+      selectedClaim));
+    head.appendChild(statusChip(rec));
+    head.appendChild(tierBadge(rec));
+    if (rec.approved_by) {
+      head.appendChild(el("span", "claims-detail-approved",
+        "approved by " + rec.approved_by +
+        (rec.approved_date ? " on " + rec.approved_date : "")));
+    }
+    refs.detail.appendChild(head);
+
+    // Full approved wording (the claim_text is the APPROVED TEXT -- the
+    // wording every story reference must stay inside).
+    refs.detail.appendChild(el("h4", "claims-section-title",
+      "claim_text (approved wording)"));
+    var quote = el("div", "claims-claim-text",
+      rec.claim_text || "(no claim_text recorded)");
+    refs.detail.appendChild(quote);
+
+    // Meta block.
+    var meta = el("div", "claims-meta");
+    if (rec.claim) meta.appendChild(metaRow("claim (short)", rec.claim));
+    if (rec.source_type) {
+      meta.appendChild(metaRow("source_type", rec.source_type));
+    }
+    if (rec.source) meta.appendChild(metaRow("source", rec.source));
+    if (rec.review_tier) {
+      meta.appendChild(metaRow("review_tier", rec.review_tier));
+    }
+    if (rec.inherits_source_approval !== undefined) {
+      meta.appendChild(metaRow("inherits_source_approval",
+        String(rec.inherits_source_approval)));
+    }
+    if (rec.pdb_id) meta.appendChild(metaRow("pdb_id", rec.pdb_id));
+    if (rec.resolution_angstrom !== undefined &&
+        rec.resolution_angstrom !== null) {
+      meta.appendChild(metaRow("resolution_angstrom",
+        String(rec.resolution_angstrom)));
+    }
+    if (meta.childNodes.length) refs.detail.appendChild(meta);
+
+    // review_notes (approval provenance), when present.
+    if (rec.review_notes) {
+      refs.detail.appendChild(el("h4", "claims-section-title",
+        "review_notes"));
+      refs.detail.appendChild(
+        el("div", "claims-review-notes", rec.review_notes));
+    }
+
+    // Sources -- source_id may be a single string or a list (40/77
+    // multi-source); sourceIds() normalized both to an array.
+    var sids = sourceIds(rec);
+    refs.detail.appendChild(el("h4", "claims-section-title",
+      "Sources (" + sids.length + ")"));
+    var sm = sourcesMap();
+    if (!sm) {
+      refs.detail.appendChild(el("div", "claims-source-missing",
+        "sources.json did not load \u2014 source records are unavailable " +
+        "in this session. Check the boot panel's found/missing checklist " +
+        "and re-pick the repository root."));
+    } else if (!sids.length) {
+      refs.detail.appendChild(el("div", "claims-detail-approved",
+        "No source_id recorded on this claim."));
+    } else {
+      for (var i = 0; i < sids.length; i++) {
+        var sid = sids[i];
+        var srec = (sm && hasOwn(sm, sid) && sm[sid] &&
+                    typeof sm[sid] === "object") ? sm[sid] : null;
+        refs.detail.appendChild(renderSourceCard(sid, srec));
+      }
+    }
+
+    renderReverseIndexSection(rec);
+  }
+
+  // The reverse-index block of the detail: every referencing node as a
+  // jump chip; the chips go amber when the claim itself is not approved.
+  function renderReverseIndexSection(rec) {
+    var refList = referencingNodes(selectedClaim);
+    refs.detail.appendChild(el("h4", "claims-section-title",
+      "Referenced by nodes (" + refList.length + ")"));
+    if (!refList.length) {
+      refs.detail.appendChild(el("div", "claims-detail-approved",
+        "Not referenced by any node \u2014 free pool (available for " +
+        "Phase 7-9 authoring)."));
+      return;
+    }
+    var issue = claimIssue(selectedClaim, null);
+    var warnChips = !!(issue && !issue.sanctioned);
+    var box = el("div", "claims-node-chips");
+    for (var i = 0; i < refList.length; i++) {
+      box.appendChild(nodeChip(refList[i], warnChips));
+    }
+    refs.detail.appendChild(box);
+    if (warnChips) {
+      refs.detail.appendChild(el("div", "claims-warn-note",
+        "Amber chips: these nodes reference a claim whose approval_status " +
+        "is not 'approved' (strict \u2014 the citation gate flags every " +
+        "one of them)."));
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Render: per-node warning chips -- the display mirror of the lint's
+  // claim rules. One row per (node, claim) reference that is missing /
+  // unapproved / placeholder misuse; the sanctioned residual renders as an
+  // annotated info case, not an alarm. Clicking a chip opens the claim.
+  // -------------------------------------------------------------------------
+
+  function renderWarnings() {
+    clearEl(refs.warnings);
+    refs.warnings.appendChild(el("h3", "claims-section-title",
+      "Per-node claim warnings (display mirror of the lint's claim rules)"));
+
+    var nodes = (typeof EDITOR.allNodes === "function")
+      ? EDITOR.allNodes() : [];
+    var rows = [];
+    var sanctionedSeen = [];
+    for (var i = 0; i < nodes.length; i++) {
+      var wrap = nodes[i];
+      var ids = (wrap.node && Object.prototype.toString.call(wrap.node.claim_ids) ===
+                 "[object Array]") ? wrap.node.claim_ids : [];
+      for (var j = 0; j < ids.length; j++) {
+        var issue = claimIssue(ids[j], wrap.id);
+        if (!issue) continue;
+        if (issue.sanctioned) {
+          if (sanctionedSeen.indexOf(wrap.id) === -1) {
+            sanctionedSeen.push(wrap.id);
+          }
+          continue; // rendered as the annotated info line below
+        }
+        rows.push({ nid: wrap.id, cid: ids[j], issue: issue });
+      }
+    }
+
+    // The sanctioned residual as an annotated special case (never an alarm).
+    if (sanctionedSeen.length) {
+      var info = el("div", "claims-sanctioned-info");
+      info.appendChild(el("span", "claims-chip claims-status-pending",
+        "sanctioned residual"));
+      info.appendChild(document.createTextNode(
+        " PLACEHOLDER_PHASE8 on " + sanctionedSeen.join(" + ") +
+        " \u2014 expected Phase-8 stub state (the citation gate's pinned " +
+        "2-MISSING + 0-UNAPPROVED form; a notice, never an error)."));
+      refs.warnings.appendChild(info);
+    }
+
+    if (!rows.length) {
+      refs.warnings.appendChild(el("div", "claims-allclean",
+        sanctionedSeen.length
+          ? "No claim issues beyond the sanctioned residual above."
+          : "No claim issues: every node reference resolves to an " +
+            "approved claim."));
+      return;
+    }
+
+    for (var r = 0; r < rows.length; r++) {
+      var row = rows[r];
+      var chip = el("button",
+        "claims-node-chip claims-node-chip-warn claims-warn-chip",
+        "\u26a0 " + row.nid + " \u2192 " + row.cid);
+      chip.type = "button";
+      chip.setAttribute("data-open-claim", String(row.cid));
+      chip.title = row.issue.kind + " \u2014 " + row.issue.note +
+        " (click to open the claim)";
+      var line = el("div", "claims-warn-row");
+      line.appendChild(chip);
+      line.appendChild(el("span", "claims-warn-kind",
+        row.issue.kind + " \u2014 " + row.issue.note));
+      refs.warnings.appendChild(line);
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Degradation / empty state: no bundle, or the registry did not load --
+  // a warning panel pointing at the boot checklist (10_load.js fills it),
+  // never a silent blank panel.
+  // -------------------------------------------------------------------------
+
+  function showEmpty(msg, hint) {
+    if (msg === null) {
+      if (refs.empty) refs.empty.style.display = "none";
+      refs.toolbar.style.display = "flex";
+      refs.tableWrap.style.display = "";
+      refs.detail.style.display = "";
+      refs.warnings.style.display = "";
+      return;
+    }
+    // Rebuilt fresh on every show (content differs per degrade reason);
+    // the "Show boot panel" button is recreated with it.
+    if (!refs.empty) {
+      refs.empty = el("div", "claims-empty");
+      refs.panel.appendChild(refs.empty);
+    }
+    clearEl(refs.empty);
+    refs.empty.appendChild(el("p", null, msg));
+    refs.empty.appendChild(el("p", null, hint));
+    var btn = el("button", null, "Show boot panel");
+    btn.type = "button";
+    btn.addEventListener("click", function () {
+      var boot = document.getElementById("boot-panel");
+      if (boot && boot.scrollIntoView) boot.scrollIntoView();
+    });
+    refs.empty.appendChild(btn);
+    refs.empty.style.display = "flex";
+    refs.toolbar.style.display = "none";
+    refs.tableWrap.style.display = "none";
+    refs.detail.style.display = "none";
+    refs.warnings.style.display = "none";
+  }
+
+  // -------------------------------------------------------------------------
+  // Interactions.
+  // -------------------------------------------------------------------------
+
+  function openClaim(cid) {
+    selectedClaim = (cid == null) ? null : String(cid);
+    renderClaims();
+    // Bring the row/detail into view (only meaningful when the tab is
+    // active; harmless otherwise).
+    try {
+      var row = refs.tbody.querySelector(
+        'tr[data-claim-id="' + selectedClaim + '"]');
+      if (row && row.scrollIntoView) row.scrollIntoView();
+    } catch (e) { /* querySelector on a odd id is impossible -- ids are
+                     plain strings; keep the guard anyway */ }
+  }
+
+  // Jump-to-node (Requirement C): select the node + switch to the graph
+  // tab, where 30_graph.js renders the selection highlight.
+  function jumpToNode(nid) {
+    EDITOR.select(nid);
+    EDITOR.showTab("graph");
+  }
+
+  // -------------------------------------------------------------------------
+  // The registered view. Guarded so pre-init calls are no-ops; the
+  // re-render refreshes ONLY the dynamic parts (filters keep focus/value).
+  // -------------------------------------------------------------------------
+
+  function renderClaims() {
+    if (!refs.panel || !refs.built) return; // initClaims has not run yet
+    var b = theBundle();
+    if (!b || !b.files) {
+      showEmpty(
+        "No data loaded \u2014 the claims browser reads the loaded bundle.",
+        "Load data first: use the boot panel at the top of the page " +
+        "(silent probe or folder pick).");
+      return;
+    }
+    var cits = citationsMap();
+    if (!cits) {
+      showEmpty(
+        "citations.json did not load \u2014 the claims browser has no " +
+        "registry to show.",
+        "Check the boot panel's found/missing checklist at the top of " +
+        "the page and re-pick the repository root.");
+      return;
+    }
+    showEmpty(null);
+    buildReverseIndex();
+    renderCount(cits);
+    renderTable(cits);
+    renderDetail();
+    renderWarnings();
+  }
+
+  // -------------------------------------------------------------------------
+  // Init: build the static DOM ONCE, wire events, first render.
+  // -------------------------------------------------------------------------
+
+  function initClaims() {
+    var panel = document.getElementById("tab-claims");
+    if (!panel) return; // no claims mount in this shell (never in this repo)
+    refs.panel = panel;
+
+    var wrap = el("div", "claims-wrap");
+
+    // Toolbar: text search + status / tier / referenced filters + reset.
+    var toolbar = el("div", "claims-toolbar");
+    refs.search = el("input");
+    refs.search.type = "text";
+    refs.search.placeholder =
+      "Search claim id / short claim / claim_text\u2026";
+    refs.search.setAttribute("data-claims-search", "1");
+    toolbar.appendChild(refs.search);
+
+    toolbar.appendChild(el("span", "claims-tool-label", "status"));
+    refs.statusSel = el("select");
+    var stOpts = ["all", "approved", "pending", "rejected"];
+    for (var i = 0; i < stOpts.length; i++) {
+      var o1 = el("option", null, stOpts[i]);
+      o1.value = stOpts[i];
+      refs.statusSel.appendChild(o1);
+    }
+    toolbar.appendChild(refs.statusSel);
+
+    toolbar.appendChild(el("span", "claims-tool-label", "tier"));
+    refs.tierSel = el("select");
+    var tierOpts = ["all", "routine", "high-stakes"];
+    for (var t = 0; t < tierOpts.length; t++) {
+      var o2 = el("option", null, tierOpts[t]);
+      o2.value = tierOpts[t];
+      refs.tierSel.appendChild(o2);
+    }
+    toolbar.appendChild(refs.tierSel);
+
+    toolbar.appendChild(el("span", "claims-tool-label", "references"));
+    refs.refSel = el("select");
+    var refOpts = [
+      { v: "all", label: "all" },
+      { v: "referenced", label: "referenced only" },
+      { v: "unreferenced", label: "unreferenced (free pool)" }
+    ];
+    for (var r = 0; r < refOpts.length; r++) {
+      var o3 = el("option", null, refOpts[r].label);
+      o3.value = refOpts[r].v;
+      refs.refSel.appendChild(o3);
+    }
+    toolbar.appendChild(refs.refSel);
+
+    refs.resetBtn = el("button", null, "Reset filters");
+    refs.resetBtn.type = "button";
+    toolbar.appendChild(refs.resetBtn);
+
+    refs.count = el("span", "claims-count", "");
+    toolbar.appendChild(refs.count);
+    refs.toolbar = toolbar;
+    wrap.appendChild(toolbar);
+
+    // Claim table.
+    refs.tableWrap = el("div", "claims-table-wrap");
+    var table = el("table");
+    table.id = "claims-table";
+    var thead = el("thead");
+    var hrow = el("tr");
+    var heads = ["claim_id", "status", "review_tier", "claim", "sources",
+                 "nodes"];
+    for (var h = 0; h < heads.length; h++) {
+      hrow.appendChild(el("th", null, heads[h]));
+    }
+    thead.appendChild(hrow);
+    table.appendChild(thead);
+    refs.tbody = el("tbody");
+    table.appendChild(refs.tbody);
+    refs.tableWrap.appendChild(table);
+    wrap.appendChild(refs.tableWrap);
+
+    // Detail + warnings.
+    refs.detail = el("div", "claims-detail");
+    wrap.appendChild(refs.detail);
+    refs.warnings = el("div", "claims-warnings");
+    wrap.appendChild(refs.warnings);
+
+    panel.appendChild(wrap);
+
+    // Filter events: direct listeners (four controls, rebuilt never).
+    refs.search.addEventListener("input", function () {
+      filter.text = refs.search.value.replace(/^\s+|\s+$/g, "").toLowerCase();
+      var cits = citationsMap();
+      if (cits) renderTable(cits);
+    });
+    refs.statusSel.addEventListener("change", function () {
+      filter.status = refs.statusSel.value;
+      var cits = citationsMap();
+      if (cits) renderTable(cits);
+    });
+    refs.tierSel.addEventListener("change", function () {
+      filter.tier = refs.tierSel.value;
+      var cits = citationsMap();
+      if (cits) renderTable(cits);
+    });
+    refs.refSel.addEventListener("change", function () {
+      filter.ref = refs.refSel.value;
+      var cits = citationsMap();
+      if (cits) renderTable(cits);
+    });
+    refs.resetBtn.addEventListener("click", function () {
+      filter.status = "all";
+      filter.tier = "all";
+      filter.ref = "all";
+      filter.text = "";
+      refs.statusSel.value = "all";
+      refs.tierSel.value = "all";
+      refs.refSel.value = "all";
+      refs.search.value = "";
+      var cits = citationsMap();
+      if (cits) renderTable(cits);
+    });
+
+    // Row click -> open the claim (ONE delegated listener per container,
+    // RESEARCH-UI structural choice 2).
+    EDITOR.delegate(refs.tableWrap, "click", "data-claim-id",
+      function (target) {
+        openClaim(target.getAttribute("data-claim-id"));
+      });
+    // Node chip -> jump to the node in the graph (delegated on the panel:
+    // chips live in both the detail and the warnings sections).
+    EDITOR.delegate(panel, "click", "data-jump-node", function (target) {
+      jumpToNode(target.getAttribute("data-jump-node"));
+    });
+    // Warning chip -> open the claim it flags.
+    EDITOR.delegate(panel, "click", "data-open-claim", function (target) {
+      openClaim(target.getAttribute("data-open-claim"));
+    });
+
+    refs.built = true;
+    renderClaims();
+  }
+
+  // -------------------------------------------------------------------------
+  // EDITOR.ui.claimFocus -- the hook the node form (40_form.js, 07.1-09)
+  // calls when a claim chip is clicked. Defined HERE (the claims panel owns
+  // claim focus); the EDITOR.ui namespace is created defensively if no
+  // earlier asset made one. Switches to the claims tab + opens the claim.
+  // -------------------------------------------------------------------------
+
+  EDITOR.ui = EDITOR.ui || {};
+  EDITOR.ui.claimFocus = function (claimId) {
+    openClaim(claimId);
+    EDITOR.showTab("claims");
+  };
+
+  // -------------------------------------------------------------------------
+  // Registration (07.1-04 convention). The single-quoted view name is the
+  // plan's pinned verify string (emitted HTML must contain
+  // "EDITOR.view('claims'").
+  // -------------------------------------------------------------------------
+
+  EDITOR.view('claims', renderClaims);
+  EDITOR.init(initClaims);
+
+  // -------------------------------------------------------------------------
+  // Asset CSS (per-feature CSS injected at runtime per the pipeline rule).
+  // -------------------------------------------------------------------------
+
+  EDITOR.injectCss(
+    "/* injected by 70_claims.js (07.1-12): claims browser styles */\n" +
+    "#tab-claims { padding: 10px 14px 24px; }\n" +
+    ".claims-wrap { display: flex; flex-direction: column; gap: 10px; }\n" +
+    ".claims-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 6px 8px; background: #f5f6f8; border: 1px solid #dde3ec; border-radius: 6px; font-size: 12.5px; }\n" +
+    ".claims-toolbar input[type=\"text\"] { flex: 1 1 220px; min-width: 160px; padding: 4px 6px; border: 1px solid #b9c2d0; border-radius: 4px; font-size: 12.5px; }\n" +
+    ".claims-toolbar select { padding: 3px 4px; border: 1px solid #b9c2d0; border-radius: 4px; background: #ffffff; font-size: 12.5px; }\n" +
+    ".claims-toolbar button { padding: 3px 10px; border: 1px solid #9aa3b2; border-radius: 4px; background: #e8ecf3; cursor: pointer; font-size: 12px; }\n" +
+    ".claims-tool-label { color: #555555; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; }\n" +
+    ".claims-count { flex: 1 1 100%; color: #666666; font-family: Consolas, monospace; font-size: 11.5px; }\n" +
+    ".claims-table-wrap { overflow-x: auto; }\n" +
+    "#claims-table { width: 100%; border-collapse: collapse; font-size: 12.5px; background: #ffffff; }\n" +
+    "#claims-table th, #claims-table td { border: 1px solid #dde3ec; padding: 4px 8px; text-align: left; vertical-align: top; }\n" +
+    "#claims-table thead th { background: #eef1f6; position: sticky; top: 0; z-index: 1; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #555555; }\n" +
+    ".claims-row { cursor: pointer; }\n" +
+    ".claims-row:hover { background: #f2f6fc; }\n" +
+    ".claims-row-selected, .claims-row-selected:hover { background: #e3edfb; outline: 2px solid #1f6feb; outline-offset: -2px; }\n" +
+    ".claims-row-empty td { color: #777777; font-style: italic; }\n" +
+    ".claims-cell-id { font-family: Consolas, monospace; font-size: 12px; white-space: nowrap; }\n" +
+    ".claims-cell-claim { color: #333333; }\n" +
+    ".claims-cell-num { text-align: right; font-family: Consolas, monospace; }\n" +
+    ".claims-chip { display: inline-block; padding: 1px 8px; border-radius: 9px; font-size: 11px; font-weight: bold; border: 1px solid; }\n" +
+    ".claims-status-approved { color: #1d6b3c; background: #e2f4e8; border-color: #7fc49a; }\n" +
+    ".claims-status-pending { color: #8a5a00; background: #fdf0d5; border-color: #e0b35a; }\n" +
+    ".claims-status-rejected { color: #8f1d1d; background: #fbe2e2; border-color: #d98a8a; }\n" +
+    ".claims-status-missing, .claims-status-unknown { color: #666666; background: #eeeeee; border-color: #bbbbbb; }\n" +
+    ".claims-tier { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 11px; border: 1px solid #b9c2d0; background: #eef1f6; color: #33415c; }\n" +
+    ".claims-tier-high { background: #f3e8fd; border-color: #b48ad6; color: #5d2e86; }\n" +
+    ".claims-detail { border: 1px solid #dde3ec; border-radius: 6px; padding: 10px 12px 14px; background: #ffffff; }\n" +
+    ".claims-detail-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }\n" +
+    ".claims-detail-id { font-size: 13px; font-weight: bold; }\n" +
+    ".claims-detail-approved { font-size: 12px; color: #557744; }\n" +
+    ".claims-section-title { margin: 10px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #888888; }\n" +
+    ".claims-claim-text { background: #f6f9f4; border-left: 4px solid #2e8b57; margin: 6px 0; padding: 6px 10px; white-space: pre-wrap; font-size: 13px; }\n" +
+    ".claims-meta { font-size: 12px; color: #444444; margin: 4px 0; }\n" +
+    ".claims-review-notes { white-space: pre-wrap; background: #f4f6f9; border: 1px solid #dde3ec; border-radius: 4px; padding: 6px 8px; font-size: 12px; color: #444444; }\n" +
+    ".claims-source { border: 1px solid #dde3ec; border-radius: 4px; padding: 6px 8px; margin: 6px 0; background: #fbfcfe; }\n" +
+    ".claims-source-row { font-size: 12px; margin: 2px 0; color: #333333; }\n" +
+    ".claims-source-key { color: #777777; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 6px; }\n" +
+    ".claims-source a { color: #1f6feb; word-break: break-all; }\n" +
+    ".claims-source-missing { color: #8f1d1d; font-size: 12px; margin: 4px 0; }\n" +
+    ".claims-node-chips { display: flex; flex-wrap: wrap; gap: 2px; }\n" +
+    ".claims-node-chip { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 9px; border: 1px solid #9aa3b2; border-radius: 10px; background: #eef1f6; font-family: Consolas, monospace; font-size: 11.5px; cursor: pointer; color: #222222; }\n" +
+    ".claims-node-chip:hover { background: #e3edfb; }\n" +
+    ".claims-node-chip-warn { border-color: #d98a2b; background: #fdf0d5; color: #8a5a00; }\n" +
+    ".claims-warn-note, .claims-warn-kind { font-size: 11.5px; color: #8a5a00; margin: 2px 0 0 6px; }\n" +
+    ".claims-warn-row { display: flex; align-items: baseline; margin: 3px 0; }\n" +
+    ".claims-sanctioned-info { display: flex; align-items: baseline; gap: 6px; background: #f4f6f9; border: 1px solid #dde3ec; border-radius: 4px; padding: 6px 8px; margin: 4px 0; font-size: 12px; color: #555555; }\n" +
+    ".claims-allclean { font-size: 12px; color: #557744; }\n" +
+    ".claims-detail-placeholder { color: #777777; font-style: italic; margin: 4px 0; }\n" +
+    ".claims-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 40px 10px; color: #555555; font-size: 14px; text-align: center; }\n" +
+    ".claims-empty p { margin: 2px 0; }\n" +
+    ".claims-empty button { margin-top: 10px; padding: 5px 14px; border: 1px solid #9aa3b2; border-radius: 4px; background: #e8ecf3; cursor: pointer; }\n"
+  );
+
+})();
+
+</script>
+<script>
+/* asset: 80_save.js (46723 bytes) */
+/* ==========================================================================
+ * 80_save.js — the persistence layer: draft + final save + crash copy
+ * (plan 07.1-13; Requirement E, save half).
+ *
+ * OWNS: the #tab-save mount (the shell's fixed slot: "80_save.js: draft +
+ * per-file save-edit"). Loads after 00_core.js (EDITOR contract), 05_json.js
+ * (EDITOR.housy serializer), 10_load.js (boot/load layer), 20_validate.js
+ * (save gate) and 30_graph.js; registers via EDITOR.view("save", render) +
+ * EDITOR.init(...) per the 07.1-04 registration convention, and EXTENDS the
+ * EDITOR.save namespace that 00_core.js opened (recomputeDirty lives there
+ * and is consumed here at the mark-saved path; core's undo/redo call it).
+ *
+ * BINDING USER DIRECTIVES (verbatim): "i need firefox, should be able to
+ * detect sub-dir in the same dir of the html" + "so saving temp/final json
+ * could be more simple and universal. no api, no server."
+ *
+ * THE FILE SYSTEM ACCESS API IS BANNED in this asset (the binding directive
+ * rejects it; grep-guarded by tests/test_story_editor_save.py test_no_fsa_api).
+ * The ONE save primitive is downloadText(): the universal <a download> +
+ * Blob URL pattern (RESEARCH-UI "Persistence — universal no-API model" +
+ * Code Example 3). No servers, no POST, no network calls anywhere in this
+ * asset — the editor NEVER writes to the repository itself; the human
+ * places every downloaded file (display-only destinations below).
+ *
+ * FILENAME HONESTY (Pitfall 3b): the download attribute's filename is a
+ * SUGGESTION (MDN <a>) — browsers adjust it and user settings change the
+ * behavior entirely. Every affordance in this panel therefore displays the
+ * exact expected filename and destination, and the panel shows the
+ * recommended one-time Firefox setting ("Always ask you where to save
+ * files") that makes each save land where intended.
+ *
+ * SOURCES:
+ *   - .planning/.../07.1-RESEARCH-UI.md  "Persistence — universal no-API
+ *     model", Code Examples 3-4, Pitfalls 3 / 3b / 3c
+ *   - .planning/.../07.1-RESEARCH-SAFETY.md  "Save-edit semantics for
+ *     multi-file edits" (per-file saves, git as the atomicity layer), the
+ *     draft-fingerprint invalidation section, Pitfall S3 (stale draft
+ *     clobbers a real save)
+ *   - 10_load.js loadDraft (:1073-1124) — the draft-restore bookkeeping this
+ *     asset mirrors for the crash-copy restore, and the onDraftLoaded hook
+ *     point (:1257) this asset registers into.
+ *
+ * HOUSE STYLE: every emitted file body (draft doc included) is serialized
+ * with EDITOR.housy.stringify (07.1-05's 1:1 port of the canonical
+ * house-style serializer, 07.1-02) — NEVER the naive two-argument
+ * JSON.stringify pretty-print, whose full-file reflow would bury the
+ * intended change in the git diff (RESEARCH-SAFETY Pitfall S1). The body
+ * gets one trailing newline appended (tools/story_editor_json.py returns
+ * WITHOUT it; the Python file write appends it — same contract here so a
+ * downloaded file is a drop-in replacement for a repo data file).
+ *
+ * KNOWN ROUND-TRIP LIMITATION (documented, flagged for the human): JS
+ * JSON.parse has no parse_float hook (07.1-05's documented RawFloat
+ * limitation), so X.0-style float tokens lose their ".0" at LOAD time and
+ * the re-emitted body shows the shortest form — currently exactly one
+ * token in the writable set (intro.json's hero rgb [0.0, 0.75, 0.75]
+ * re-emits as [0, 0.75, 0.75]; same numeric value, one noisy diff line).
+ * An unedited download of every OTHER story file + edits.json + cast.json
+ * is byte-identical to the repo file (runtime-verified headlessly). The
+ * full fix (lossless float-token parse) belongs to the load layer —
+ * flagged, not attempted here (cross-asset architectural change). The
+ * read-only citations.json "2.40" resolution tokens are the same
+ * documented class and are never serialized by this save flow.
+ *
+ * LOCALSTORAGE IS OPTIONAL AND NON-LOAD-BEARING: a guarded, debounced
+ * crash-recovery copy only (MDN storageAvailable try/catch; any storage
+ * failure is silently swallowed). Nothing in the load/save flow DEPENDS on
+ * it — the real draft is the downloaded file (user simplicity directive).
+ *
+ * STYLE: one classic script, one IIFE, ES5 only (var, no arrow functions,
+ * no modules) — the emitted-page discipline pinned by
+ * tests/test_story_editor_state.py and re-pinned for this block by
+ * tests/test_story_editor_save.py.
+ * ========================================================================== */
+
+(function () {
+  "use strict";
+
+  // -------------------------------------------------------------------------
+  // Constants.
+  // -------------------------------------------------------------------------
+
+  // The draft file (ROADMAP E "tmp file (git-ignored)"): ONE self-contained
+  // JSON downloaded into the repo's tmp/ folder.
+  var DRAFT_FILENAME = "story_editor_draft.json";
+
+  // localStorage key for the OPTIONAL guarded crash copy (non-load-bearing;
+  // Pitfall 1: storage on file:// is not portable — failures are swallowed).
+  var CRASH_KEY = "rpg_story_editor_crash_draft";
+
+  // Debounce for the crash copy: 800 ms after the last mutation
+  // (RESEARCH-UI "Draft autosave cadence": after the last mutation, never
+  // per keystroke, never on an idle timer).
+  var CRASH_DEBOUNCE_MS = 800;
+
+  // Opt-in "Download all" fires rows SEQUENTIALLY with ~400 ms gaps
+  // (Pitfall 3: browsers may prompt once for multiple downloads; per-file
+  // buttons are the default precisely so this never matters).
+  var BATCH_GAP_MS = 400; // ~400 ms gaps between sequential downloads
+
+  // Display-only destination map (RESEARCH-UI Code Example 4): fname to
+  // repo-relative destination. Story files (and the manifest) live under
+  // data/story_glucose/; the four non-story targets are listed explicitly.
+  // DISPLAY-ONLY: the editor never writes to the repository — the human
+  // places each downloaded file over its destination (no API, no server).
+  var DEST_MAP = {
+    "citations.json": "data/citations.json",
+    "sources.json": "data/sources.json",
+    "edits.json": "rpg/data/edits.json",
+    "cast.json": "rpg/data/cast.json"
+  };
+  var STORY_DIR_PREFIX = "data/story_glucose/"; // default for story files
+
+  function destFor(fname) {
+    if (Object.prototype.hasOwnProperty.call(DEST_MAP, fname)) {
+      return DEST_MAP[fname];
+    }
+    return STORY_DIR_PREFIX + fname;
+  }
+
+  // -------------------------------------------------------------------------
+  // Small helpers.
+  // -------------------------------------------------------------------------
+
+  function describe(e) {
+    return (e && e.message) ? String(e.message) : String(e);
+  }
+
+  function hasOwn(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+  }
+
+  function copyOwn(obj) {
+    var out = {};
+    if (!obj || typeof obj !== "object") return out;
+    for (var k in obj) {
+      if (hasOwn(obj, k)) out[k] = obj[k];
+    }
+    return out;
+  }
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined && text !== null) e.textContent = String(text);
+    return e;
+  }
+
+  function codeEl(text) {
+    return el("code", "save-cmd", text);
+  }
+
+  function clearChildren(node) {
+    while (node.firstChild) node.removeChild(node.firstChild);
+  }
+
+  // MDN storageAvailable pattern (Web Storage API docs): browsers expose the
+  // property but THROW on use (private mode, opaque origins, disabled
+  // storage) — never feature-detect with a bare truthiness check.
+  function storageAvailable(type) {
+    var storage;
+    try {
+      storage = window[type];
+      var x = "__storage_test__";
+      storage.setItem(x, x);
+      storage.removeItem(x);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // THE save primitive (RESEARCH-UI Code Example 3): Blob URL to a temp
+  // <a download> to click to revoke. Zero APIs, works offline and on
+  // file:// in every browser (MDN <a>: download applies to blob: URLs).
+  // NOTE (Pitfall 3b): a.download is a SUGGESTION — the panel always
+  // displays the exact expected name + destination next to every button.
+  // -------------------------------------------------------------------------
+
+  function downloadText(filename, text) {
+    try {
+      if (typeof URL === "undefined" || typeof URL.createObjectURL !==
+          "function" || typeof Blob === "undefined") {
+        setStatus("error", "This browser cannot create downloads (Blob or " +
+                  "URL.createObjectURL missing).");
+        return false;
+      }
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([text], {
+        type: "application/json"
+      }));
+      a.download = filename; // SUGGESTION only — see the browser note below
+      document.body.appendChild(a);
+      a.click();
+      a.parentNode.removeChild(a);
+      setTimeout(function () {
+        try {
+          URL.revokeObjectURL(a.href);
+        } catch (e2) { /* revoke is best-effort */ }
+      }, 1000);
+      return true;
+    } catch (e) {
+      setStatus("error", "Download failed: " + describe(e));
+      return false;
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Content lookup + serialization. Dirty fnames are story files in practice
+  // (the mutators only touch bundle.files), but a restored draft may mark
+  // one of the four registries dirty — those live at the bundle's top level,
+  // not inside bundle.files.
+  // -------------------------------------------------------------------------
+
+  function fileContentOf(fname) {
+    var b = EDITOR.state.bundle;
+    if (!b) return null;
+    if (fname === "citations.json") return (b.citations === undefined) ? null : b.citations;
+    if (fname === "sources.json") return (b.sources === undefined) ? null : b.sources;
+    if (fname === "edits.json") return (b.edits === undefined) ? null : b.edits;
+    if (fname === "cast.json") return (b.cast === undefined) ? null : b.cast;
+    if (b.files && hasOwn(b.files, fname)) return b.files[fname];
+    return null;
+  }
+
+  // The downloaded body: house-style serialization + ONE trailing newline
+  // (the repo files end with a newline; tools/story_editor_json.py's
+  // stringify returns WITHOUT it and the file write appends it).
+  function serializeBody(content) {
+    return EDITOR.housy.stringify(content) + "\n";
+  }
+
+  // -------------------------------------------------------------------------
+  // draftDoc — the self-contained draft (RESEARCH-UI Code Example 3):
+  // bundle + dirty set + undo metadata + per-file fingerprints.
+  //
+  // SHAPE NOTE (deviation from the plan's "dirty: [fnames]" list form,
+  // auto-fixed): the LANDED loader (10_load.js loadDraft :1092-1098)
+  // restores draft.dirty as an OBJECT MAP ("for k in draft.dirty:
+  // state.dirty[k] = true") — a for-in over an ARRAY would restore index
+  // strings ("0", "1", ...) as dirty file names and corrupt the dirty
+  // state. The dirty MAP carries exactly the same information (its keys
+  // ARE the fname list) and round-trips through the landed consumer.
+  // -------------------------------------------------------------------------
+
+  function draftDoc() {
+    var dirtyMap = {};
+    var fnames = Object.keys(EDITOR.state.dirty);
+    for (var i = 0; i < fnames.length; i++) {
+      dirtyMap[fnames[i]] = true;
+    }
+    return {
+      version: 1,
+      saved_at: new Date().toISOString(),
+      bundle: EDITOR.state.bundle,
+      dirty: dirtyMap,
+      undo_meta: {
+        undo_depth: EDITOR.undoDepth(),
+        redo_depth: EDITOR.redoDepth()
+      },
+      fingerprints: copyOwn(EDITOR.state.fingerprints)
+    };
+  }
+  EDITOR.save.draftDoc = draftDoc; // exposed for the 07.1-18 diagnostics tab
+
+  // -------------------------------------------------------------------------
+  // Save draft — the explicit "Save draft" action. Drafts are ALWAYS
+  // allowed, even while the validator blocks final saves: the draft is the
+  // escape hatch that carries unsaved work out of a broken session.
+  // -------------------------------------------------------------------------
+
+  function saveDraft() {
+    var b = EDITOR.state.bundle;
+    if (!b) return;
+    var text = EDITOR.housy.stringify(draftDoc()) + "\n";
+    if (downloadText(DRAFT_FILENAME, text)) {
+      setStatus("ok", DRAFT_FILENAME + " downloaded — save it into the " +
+                "repo's tmp/ folder (git-ignored). Reload it any time via " +
+                "'Load draft…' in the load panel above.");
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Stale-draft detection (Pitfall S3: a stale draft must never silently
+  // clobber a real save). staleCheck(fingerprints) compares the given
+  // per-file fingerprints against the last completed FOLDER PICK's raw
+  // texts (EDITOR.load.state.folderRawByFname — refreshed by every re-pick)
+  // via the core FNV-1a drift detector. Keys without a folder counterpart
+  // are simply not comparable. Returns the stale fname list.
+  // (The fetch boot path keeps no raw copies, so nothing is comparable
+  // there; the folder pick is the primary universal load path.)
+  // -------------------------------------------------------------------------
+
+  EDITOR.save.staleCheck = function (fingerprints) {
+    var ls = (EDITOR.load && EDITOR.load.state) ? EDITOR.load.state : null;
+    var raws = ls ? ls.folderRawByFname : null;
+    var stale = [];
+    if (!fingerprints || typeof fingerprints !== "object" || !raws) {
+      return stale;
+    }
+    for (var fname in fingerprints) {
+      if (!hasOwn(fingerprints, fname)) continue;
+      var raw = raws[fname];
+      if (typeof raw !== "string") continue; // not comparable (never picked)
+      if (EDITOR.fnv1a(raw) !== fingerprints[fname]) {
+        stale.push(fname);
+      }
+    }
+    return stale;
+  };
+
+  // -------------------------------------------------------------------------
+  // mark-saved (RESEARCH-SAFETY save sequence): the dirty bit is cleared
+  // ONLY on the human's explicit confirm (the two-step arm + confirm row
+  // control below) — git remains the atomicity layer. Marking saved resets
+  // the per-file baseline to the CURRENT in-memory content and refreshes
+  // the fingerprint + folder-text baselines to the downloaded body (the
+  // same explicit confirm asserts the file was placed over the repo copy
+  // verbatim; the next folder re-pick re-derives the true fingerprints).
+  // Also persists the crash copy immediately so it never trails a
+  // confirmed save (RESEARCH-SAFETY: a draft older than the last save of
+  // the same files must never resurrect old content).
+  // -------------------------------------------------------------------------
+
+  function markSaved(fname) {
+    var b = EDITOR.state.bundle;
+    if (!b) return false;
+    var content = fileContentOf(fname);
+    if (content === null || content === undefined) return false;
+    var body = serializeBody(content);
+    if (b.files && hasOwn(b.files, fname)) {
+      // Story files: reset the dirty baseline (recomputeDirty then keeps
+      // the file clean until the next edit; undo re-dirties honestly).
+      EDITOR._originals[fname] = JSON.stringify(b.files[fname]);
+    }
+    // NOTE: the four registries are not bundle.files members, so
+    // recomputeDirty (which compares bundle.files only) re-marks them dirty
+    // on the next undo/redo re-derivation. No current mutator can dirty
+    // them — a registry dirty flag can only arrive from a restored draft,
+    // and the delete below clears it for the session.
+    EDITOR.state.fingerprints[fname] = EDITOR.fnv1a(body);
+    var ls = (EDITOR.load && EDITOR.load.state) ? EDITOR.load.state : null;
+    if (ls && ls.folderRawByFname) {
+      ls.folderRawByFname[fname] = body; // same explicit confirm
+    }
+    delete EDITOR.state.dirty[fname];
+    EDITOR.save.recomputeDirty();
+    persistCrashCopy();
+    return true;
+  }
+  EDITOR.save.markSaved = markSaved;
+
+  // -------------------------------------------------------------------------
+  // OPTIONAL guarded localStorage crash copy (non-load-bearing; user
+  // simplicity directive). Debounced 800 ms after the last mutation via the
+  // hooks.persist registration; restored only via the explicit banner
+  // ("draft from earlier session found — restore? / dismiss"). ANY storage
+  // failure is silently swallowed and nothing else changes behavior.
+  // -------------------------------------------------------------------------
+
+  function persistCrashCopy() {
+    try {
+      if (!storageAvailable("localStorage")) return;
+      if (!EDITOR.state.bundle) return;
+      localStorage.setItem(CRASH_KEY, EDITOR.housy.stringify(draftDoc()));
+    } catch (e) {
+      // silently swallowed — the crash copy is optional, never load-bearing
+    }
+  }
+
+  function scheduleCrashCopy() {
+    if (crashTimer) {
+      clearTimeout(crashTimer);
+    }
+    crashTimer = setTimeout(function () {
+      crashTimer = null;
+      persistCrashCopy();
+    }, CRASH_DEBOUNCE_MS);
+  }
+
+  function findCrashCopy() {
+    try {
+      if (!storageAvailable("localStorage")) return null;
+      var raw = localStorage.getItem(CRASH_KEY);
+      if (!raw || typeof raw !== "string") return null;
+      var doc = JSON.parse(raw);
+      if (!doc || typeof doc !== "object" ||
+          Object.prototype.toString.call(doc) === "[object Array]" ||
+          !doc.bundle || typeof doc.bundle !== "object") {
+        return null;
+      }
+      return doc;
+    } catch (e) {
+      return null; // any storage failure is silently swallowed
+    }
+  }
+
+  function clearCrashCopy() {
+    try {
+      if (storageAvailable("localStorage")) {
+        localStorage.removeItem(CRASH_KEY);
+      }
+    } catch (e) { /* silently swallowed */ }
+  }
+
+  // Restore = the same bookkeeping as 10_load.js loadDraft (setBundle with
+  // the draft bundle, then fingerprints + dirty restored verbatim) plus
+  // handing the session to the load layer's draft state so a later folder
+  // re-pick runs its staleness flow against THIS restored copy.
+  function restoreCrashCopy() {
+    var doc = crashState.found;
+    crashState.found = null;
+    crashState.hidden = true;
+    if (!doc) return;
+    EDITOR.setBundle(doc.bundle, null);
+    if (doc.fingerprints && typeof doc.fingerprints === "object") {
+      EDITOR.state.fingerprints = copyOwn(doc.fingerprints);
+    }
+    if (doc.dirty && typeof doc.dirty === "object") {
+      for (var k in doc.dirty) {
+        if (hasOwn(doc.dirty, k)) EDITOR.state.dirty[k] = true;
+      }
+    }
+    var ls = (EDITOR.load && EDITOR.load.state) ? EDITOR.load.state : null;
+    if (ls) {
+      ls.draft = doc;
+      ls.draftActive = true; // the restored copy IS a draft session
+      ls.loaded = true;
+      ls.lastSource = "draft";
+    }
+    clearCrashCopy(); // the session owns the content now; re-persisted on
+                      // the next mutation by the debounced hook
+    staleState.hasInfo = true;
+    staleState.files = doc.fingerprints ? EDITOR.save.staleCheck(doc.fingerprints) : [];
+    staleState.ack = false;
+    setStatus("ok", "Crash-copy draft restored (saved " +
+              (doc.saved_at || "unknown time") + "). Save it properly via " +
+              "the actions below.");
+    EDITOR.rerender();
+  }
+
+  // -------------------------------------------------------------------------
+  // Discard draft (the Pitfall S3 "Discard" option): return the session to
+  // the picked-folder baseline. Only offered when it cannot destroy work:
+  // a folder baseline exists, every needed raw text is present, and NO
+  // in-session edits have happened since the draft loaded (undo + redo
+  // stacks empty — setBundle resets them at draft load, so any depth means
+  // the human edited after loading). Otherwise explicit guidance is shown
+  // instead (reload the page and pick the repository folder).
+  // -------------------------------------------------------------------------
+
+  function rebuildBundleFromRaws(raws) {
+    if (!raws || typeof raws !== "object") return null;
+    var manifestText = raws["manifest.json"];
+    if (typeof manifestText !== "string") return null;
+    var manifest = JSON.parse(manifestText);
+    var flist = (manifest && Object.prototype.toString.call(manifest.files) ===
+                 "[object Array]") ? manifest.files : null;
+    if (!flist || !flist.length) return null;
+    var files = {};
+    var i;
+    for (i = 0; i < flist.length; i++) {
+      var fname = flist[i];
+      var t = raws[fname];
+      if (typeof t !== "string") return null; // incomplete baseline — refuse
+      files[fname] = JSON.parse(t);
+    }
+    return {
+      files: files,
+      manifest: manifest,
+      citations: parseMemberRaws(raws, "citations.json"),
+      sources: parseMemberRaws(raws, "sources.json"),
+      edits: parseMemberRaws(raws, "edits.json"),
+      cast: parseMemberRaws(raws, "cast.json"),
+      order: flist.slice()
+    };
+  }
+
+  function parseMemberRaws(raws, fname) {
+    var t = raws[fname];
+    if (typeof t !== "string") return null; // degraded member (load-layer rule)
+    try {
+      return JSON.parse(t);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function discardDraft() {
+    var ls = (EDITOR.load && EDITOR.load.state) ? EDITOR.load.state : null;
+    if (!ls || !ls.folderRawByFname) {
+      discardGuidance = "The loaded draft replaced the session and no " +
+        "folder baseline is in memory (data arrived via the direct-read " +
+        "probe). Reload the page and pick the repository folder to " +
+        "return to the folder data.";
+      staleState.ack = true;
+      renderSave();
+      return;
+    }
+    if (EDITOR.undoDepth() !== 0 || EDITOR.redoDepth() !== 0) {
+      discardGuidance = "You have made edits since this draft loaded — " +
+        "discarding here would destroy them. Reload the page and pick " +
+        "the repository folder instead (the browser discards the " +
+        "in-memory session).";
+      staleState.ack = true;
+      renderSave();
+      return;
+    }
+    var rebuilt = null;
+    try {
+      rebuilt = rebuildBundleFromRaws(ls.folderRawByFname);
+    } catch (e) {
+      rebuilt = null;
+    }
+    if (!rebuilt) {
+      discardGuidance = "The folder baseline could not be rebuilt from the " +
+        "picked raw texts. Reload the page and pick the repository " +
+        "folder instead.";
+      staleState.ack = true;
+      renderSave();
+      return;
+    }
+    ls.draft = null;
+    ls.draftActive = false;
+    ls.lastSource = "pick";
+    EDITOR.setBundle(rebuilt, ls.folderRawByFname); // fingerprints recomputed
+    staleState.hasInfo = false;
+    staleState.files = [];
+    staleState.ack = false;
+    discardGuidance = null;
+    setStatus("ok", "Draft discarded — the session now shows the picked " +
+              "folder data (fingerprints recomputed from the folder).");
+    EDITOR.rerender();
+  }
+
+  // -------------------------------------------------------------------------
+  // onDraftLoaded — the 07.1-07 hook point (fires after a draft load AND
+  // after a folder re-pick while a draft is active). Runs the stale check
+  // for the draft's stored fingerprints and shows the LOUD warning with
+  // Load-anyway / Discard options on any mismatch (Pitfall S3). The first
+  // detection per session also switches to the Save tab so the warning is
+  // actually seen (the load layer's own boot banner stays in its panel).
+  // -------------------------------------------------------------------------
+
+  function onDraftLoaded(info) {
+    crashState.hidden = true; // a draft supersedes the crash-copy banner
+    var draft = (info && info.draft) ? info.draft : null;
+    staleState.hasInfo = !!draft;
+    staleState.ack = false;
+    discardGuidance = null;
+    staleState.files = (draft && draft.fingerprints)
+      ? EDITOR.save.staleCheck(draft.fingerprints)
+      : [];
+    staleState.rechecked = !!(info && info.recheckedAgainstFolder);
+    if (staleState.files.length && !staleState.everAuto) {
+      staleState.everAuto = true; // auto-switch once per session
+      try {
+        EDITOR.showTab("save");
+      } catch (e) { /* tab switching is best-effort */ }
+    }
+    renderSave();
+  }
+
+  // -------------------------------------------------------------------------
+  // Module state (transient UI bookkeeping; never persisted except through
+  // the crash copy's draftDoc).
+  // -------------------------------------------------------------------------
+
+  var crashTimer = null;
+  var crashState = {
+    found: null,      // the parsed crash-copy draftDoc (checked once at init)
+    hidden: false,    // superseded by a draft / restored
+    dismissed: false  // dismissed for this session (the copy is KEPT — it
+                      // may be the only copy of unsaved work)
+  };
+  var staleState = {
+    hasInfo: false,   // a draft session is known to this panel
+    files: [],        // stale fnames from the last check
+    ack: false,       // "Load anyway" acknowledged
+    rechecked: false, // last check ran after a folder re-pick
+    everAuto: false   // the one-time auto tab switch fired
+  };
+  var discardGuidance = null;
+  var armed = {};     // fname -> true (mark-saved arm step)
+  var statusMsg = null; // { kind: "ok" | "warn" | "error", text: "..." }
+
+  function setStatus(kind, text) {
+    statusMsg = { kind: kind, text: text };
+  }
+
+  // -------------------------------------------------------------------------
+  // Rendering. The panel is ONE persistent #save-panel container inside
+  // #tab-save; every render rebuilds its children (full rerender strategy,
+  // trivial at this scale). All clicks funnel through ONE delegated
+  // listener on the container (data-action attributes).
+  // -------------------------------------------------------------------------
+
+  var panel = null;
+
+  function ensurePanel() {
+    if (panel) return panel;
+    var host = document.getElementById("tab-save");
+    if (!host) return null;
+    panel = el("div");
+    panel.id = "save-panel";
+    host.appendChild(panel);
+    EDITOR.delegate(panel, "click", "data-action", onSaveAction);
+    return panel;
+  }
+
+  function bannerBox(kind, text) {
+    var box = el("div", "save-banner save-banner-" + kind);
+    box.appendChild(el("span", null, text));
+    return box;
+  }
+
+  function renderCrashMount(parent) {
+    var ls = (EDITOR.load && EDITOR.load.state) ? EDITOR.load.state : null;
+    var draftActive = ls ? ls.draftActive : false;
+    if (!crashState.found || crashState.hidden || crashState.dismissed ||
+        draftActive) {
+      return;
+    }
+    var box = el("div", "save-banner save-banner-warn");
+    box.appendChild(el("strong", null,
+      "Draft from an earlier session found — restore? "));
+    box.appendChild(el("span", "save-muted",
+      "(optional browser-storage crash copy — never load-bearing; the real " +
+      "draft is the downloaded file. It was saved " +
+      (crashState.found.saved_at || "at an unknown time") + ".)"));
+    var row = el("div", "save-btn-row");
+    row.appendChild(btn("Restore it", "crash-restore", null, "save-btn"));
+    row.appendChild(btn("Dismiss", "crash-dismiss", null, "save-btn save-btn-secondary"));
+    box.appendChild(row);
+    parent.appendChild(box);
+  }
+
+  function renderStaleMount(parent, draft) {
+    if (!staleState.hasInfo) return;
+
+    if (staleState.files.length && !staleState.ack) {
+      var box = el("div", "save-banner save-banner-error");
+      box.appendChild(el("strong", null,
+        "Data changed since this draft was saved — loading may clobber newer changes."));
+      box.appendChild(el("div", "save-muted",
+        "Stale files (fingerprints mismatch against the last picked " +
+        "folder): " + staleState.files.join(", ") + "."));
+      box.appendChild(el("div", "save-muted",
+        staleState.rechecked
+          ? "Re-checked against the freshly picked folder."
+          : "Checked when the draft was loaded. Re-pick the repository " +
+            "folder in the load panel above, then re-check here."));
+      var row = el("div", "save-btn-row");
+      row.appendChild(btn("Load anyway (draft wins)", "stale-ack", null,
+        "save-btn"));
+      row.appendChild(btn("Discard draft (return to the picked folder)",
+        "stale-discard", null, "save-btn"));
+      row.appendChild(btn("Re-check against folder", "stale-recheck", null,
+        "save-btn save-btn-secondary"));
+      box.appendChild(row);
+      if (discardGuidance) {
+        box.appendChild(el("div", "save-guidance", discardGuidance));
+      }
+      parent.appendChild(box);
+      return;
+    }
+
+    if (staleState.files.length && staleState.ack) {
+      var ackBox = el("div", "save-banner save-banner-warn");
+      ackBox.appendChild(el("span", null,
+        "Stale-draft warning acknowledged ('draft wins'): " +
+        staleState.files.join(", ") + " changed in the repository after " +
+        "this draft was saved. Discarding is still possible while no " +
+        "edits have been made in this session."));
+      var ackRow = el("div", "save-btn-row");
+      ackRow.appendChild(btn("Re-check against folder", "stale-recheck", null,
+        "save-btn save-btn-secondary"));
+      ackBox.appendChild(ackRow);
+      if (discardGuidance) {
+        ackBox.appendChild(el("div", "save-guidance", discardGuidance));
+      }
+      parent.appendChild(ackBox);
+      return;
+    }
+
+    var okBox = el("div", "save-banner save-banner-ok");
+    okBox.appendChild(el("span", null,
+      "Fingerprints match — the underlying files are unchanged since this " +
+      "draft was saved" + (staleState.rechecked ?
+        " (re-checked against the freshly picked folder)." : ".")));
+    var okRow = el("div", "save-btn-row");
+    okRow.appendChild(btn("Re-check against folder", "stale-recheck", null,
+      "save-btn save-btn-secondary"));
+    okBox.appendChild(okRow);
+    parent.appendChild(okBox);
+  }
+
+  function saveRowDef(fname) {
+    var content = fileContentOf(fname);
+    if (content === null || content === undefined) return null;
+    return {
+      fname: fname,
+      dest: destFor(fname),
+      text: serializeBody(content)
+    };
+  }
+
+  function renderSaveRow(parent, def) {
+    var row = el("div", "save-row");
+    row.setAttribute("data-fname", def.fname);
+
+    var main = el("div", "save-row-main");
+    main.appendChild(btn("Download " + def.fname, "download", def.fname,
+      "save-btn"));
+    main.appendChild(el("span", "save-arrow", " \u2192 save over "));
+    main.appendChild(codeEl(def.dest));
+    row.appendChild(main);
+
+    var actions = el("div", "save-row-actions");
+    if (armed[def.fname]) {
+      actions.appendChild(el("span", "save-confirm-text",
+        "confirm: file placed over " + def.dest + "?"));
+      actions.appendChild(btn("\u2713 yes — mark saved", "mark-confirm",
+        def.fname, "save-btn save-btn-confirm"));
+      actions.appendChild(btn("\u2717 cancel", "mark-cancel", def.fname,
+        "save-btn save-btn-secondary"));
+    } else {
+      actions.appendChild(btn("mark saved", "mark", def.fname,
+        "save-btn save-btn-secondary"));
+      actions.appendChild(el("span", "save-muted",
+        "clears the dirty bit ONLY on your explicit confirm (git remains " +
+        "the atomicity layer)"));
+    }
+    row.appendChild(actions);
+    parent.appendChild(row);
+  }
+
+  function renderSave() {
+    var p = ensurePanel();
+    if (!p) return;
+    clearChildren(p);
+
+    var b = EDITOR.state.bundle;
+    var ls = (EDITOR.load && EDITOR.load.state) ? EDITOR.load.state : null;
+    var draftActive = !!(ls && ls.draftActive);
+    var draft = (ls && ls.draft) ? ls.draft : null;
+
+    var head = el("div", "save-section");
+    head.appendChild(el("h2", null, "Save"));
+    head.appendChild(el("p", "save-muted",
+      "Universal no-API persistence: every save is a download " +
+      "(<a download> + Blob). This editor NEVER writes to the repository " +
+      "itself — no API, no server; you place each downloaded file."));
+    p.appendChild(head);
+
+    // Browser note (Pitfall 3b): the download filename is a SUGGESTION —
+    // every affordance displays the exact expected name + destination, and
+    // the recommended Firefox setting makes each save land where intended.
+    var note = el("div", "save-section save-browser-note");
+    note.appendChild(el("p", null,
+      "The downloaded filename is a SUGGESTION (MDN): browsers may adjust " +
+      "it, and user settings change the behavior entirely — every button " +
+      "in this panel displays the exact expected filename and " +
+      "destination."));
+    note.appendChild(el("p", null,
+      "Recommended one-time Firefox setting: Settings, General, Files, " +
+      "\u201cAlways ask you where to save files\u201d. Then every download " +
+      "opens a save dialog where you pick the exact name and location — " +
+      "the draft lands in tmp/, final files overwrite their displayed " +
+      "data/ destinations in place."));
+    note.appendChild(el("p", "save-muted",
+      "Known serializer note: X.0-style float tokens are re-emitted in " +
+      "their shortest form by the browser's JSON parser (currently only " +
+      "intro.json's hero rgb line [0.0, 0.75, 0.75], downloaded as " +
+      "[0, 0.75, 0.75] — the same numeric value, but that line will show " +
+      "in the git diff alongside your edit). Review the git diff as " +
+      "instructed below; the Python gates re-verify everything."));
+    p.appendChild(note);
+
+    renderCrashMount(p);
+
+    if (!b) {
+      p.appendChild(el("p", "save-empty",
+        "No data loaded — load the story data first (the load panel " +
+        "above), or restore the crash-copy draft if one is offered."));
+      renderStatus(p);
+      return;
+    }
+
+    // --- Draft section (ALWAYS available — also while saves are blocked) ---
+    var draftSec = el("div", "save-section");
+    draftSec.appendChild(el("h2", null, "Save draft"));
+    draftSec.appendChild(el("p", null,
+      "One self-contained draft JSON (edited bundle + dirty set + undo " +
+      "metadata + per-file fingerprints). Save it into the repo's tmp/ " +
+      "folder (git-ignored); reload it any time via 'Load draft…' in the " +
+      "load panel above."));
+    var draftBtns = el("div", "save-btn-row");
+    draftBtns.appendChild(btn("Save draft (downloads " + DRAFT_FILENAME + ")",
+      "save-draft", null, "save-btn"));
+    if (draftActive) {
+      draftBtns.appendChild(btn("Re-check against folder", "stale-recheck",
+        null, "save-btn save-btn-secondary"));
+    }
+    draftSec.appendChild(draftBtns);
+    renderStaleMount(draftSec, draft);
+    p.appendChild(draftSec);
+
+    // --- Save edit (final): only dirty files, gated by the validator ---
+    var editSec = el("div", "save-section");
+    editSec.appendChild(el("h2", null, "Save edit (final) — only dirty files"));
+
+    var blocked = (typeof EDITOR.saveBlocked === "function")
+      ? EDITOR.saveBlocked() : false;
+
+    if (blocked) {
+      var errBox = el("div", "save-banner save-banner-error");
+      errBox.appendChild(el("strong", null,
+        "Save blocked — the validator reports errors. Fix them before " +
+        "saving (the draft above remains available)."));
+      var result = (typeof EDITOR.validateCurrent === "function")
+        ? EDITOR.validateCurrent() : null;
+      if (result && result.errors && result.errors.length) {
+        var list = el("ul", "save-error-list");
+        for (var i = 0; i < result.errors.length; i++) {
+          var e2 = result.errors[i];
+          list.appendChild(el("li", null,
+            e2.kind + (e2.node ? " — " + e2.node : "") + ": " + e2.detail));
+        }
+        errBox.appendChild(list);
+      }
+      editSec.appendChild(errBox);
+      p.appendChild(editSec);
+      renderStatus(p);
+      return;
+    }
+
+    var dirtyList = Object.keys(EDITOR.state.dirty).sort();
+    if (!dirtyList.length) {
+      editSec.appendChild(el("p", "save-muted",
+        "Nothing to save — no files are dirty."));
+      p.appendChild(editSec);
+      renderStatus(p);
+      return;
+    }
+
+    var defs = [];
+    var missing = [];
+    for (var d = 0; d < dirtyList.length; d++) {
+      var def = saveRowDef(dirtyList[d]);
+      if (def) {
+        defs.push(def);
+      } else {
+        missing.push(dirtyList[d]);
+      }
+    }
+    if (missing.length) {
+      editSec.appendChild(bannerBox("warn",
+        "No in-memory content found for: " + missing.join(", ") +
+        " — cannot serialize what is not loaded."));
+    }
+
+    var rows = el("div", null);
+    rows.id = "save-rows";
+    for (var r = 0; r < defs.length; r++) {
+      renderSaveRow(rows, defs[r]);
+    }
+    editSec.appendChild(rows);
+
+    var allRow = el("div", "save-btn-row");
+    allRow.appendChild(btn("Download all (" + defs.length + ")",
+      "download-all", null, "save-btn save-btn-secondary"));
+    allRow.appendChild(el("span", "save-muted",
+      "opt-in: fires the rows sequentially with ~400 ms gaps — per-file " +
+      "buttons are the default (browsers may prompt for multiple " +
+      "downloads)."));
+    editSec.appendChild(allRow);
+
+    editSec.appendChild(renderReminder());
+    p.appendChild(editSec);
+    renderStatus(p);
+  }
+
+  // The post-save reminder (RESEARCH-UI Pitfall 3 / RESEARCH-SAFETY save
+  // sequence): the editor cannot see the filesystem — the Python gates are
+  // the only authoritative post-save check.
+  function renderReminder() {
+    var box = el("div", "save-reminder");
+    box.appendChild(el("strong", null,
+      "After placing the downloaded files over their repo destinations, " +
+      "run the Python gates:"));
+    var ul = el("ul", "save-cmd-list");
+    var cmds = [
+      "python3.6 tools/story_editor_lint.py",
+      "python3.6 -m unittest discover -s tests",
+      "python3.6 tools/check_citations.py --story data/story_glucose --registry data/citations.json",
+      "git diff"
+    ];
+    for (var i = 0; i < cmds.length; i++) {
+      var li = el("li");
+      li.appendChild(codeEl(cmds[i]));
+      ul.appendChild(li);
+    }
+    box.appendChild(ul);
+    box.appendChild(el("div", "save-muted",
+      "Review the diff before committing — the gates are the only " +
+      "authoritative post-save check (the editor cannot see the " +
+      "filesystem)."));
+    return box;
+  }
+
+  function renderStatus(parent) {
+    if (!statusMsg) return;
+    parent.appendChild(bannerBox(statusMsg.kind, statusMsg.text));
+  }
+
+  function btn(label, action, fname, cls) {
+    var b = el("button", cls || "save-btn", label);
+    b.type = "button";
+    b.setAttribute("data-action", action);
+    if (fname) b.setAttribute("data-fname", fname);
+    return b;
+  }
+
+  // -------------------------------------------------------------------------
+  // ONE delegated click handler for every action in the panel.
+  // -------------------------------------------------------------------------
+
+  function onSaveAction(el2) {
+    var action = el2.getAttribute("data-action");
+    var fname = el2.getAttribute("data-fname");
+
+    if (action === "save-draft") {
+      saveDraft();
+      renderSave();
+      return;
+    }
+    if (action === "download") {
+      var def = fname ? saveRowDef(fname) : null;
+      if (def && downloadText(def.fname, def.text)) {
+        setStatus("ok", "Downloaded " + def.fname + " — place it over " +
+                  def.dest + " in the repository, then use 'mark saved' " +
+                  "on its row.");
+      }
+      renderSave();
+      return;
+    }
+    if (action === "download-all") {
+      downloadAll();
+      return;
+    }
+    if (action === "mark") {
+      if (fname) armed[fname] = true;
+      renderSave();
+      return;
+    }
+    if (action === "mark-cancel") {
+      if (fname) delete armed[fname];
+      renderSave();
+      return;
+    }
+    if (action === "mark-confirm") {
+      var dest = destFor(fname);
+      if (fname && markSaved(fname)) {
+        delete armed[fname];
+        setStatus("ok", "Marked " + fname + " saved over " + dest +
+                  " — dirty bit cleared on your explicit confirm (git " +
+                  "remains the atomicity layer). Run the gates below.");
+      } else {
+        setStatus("error", "Could not mark " + fname +
+                  " saved (no in-memory content).");
+      }
+      EDITOR.rerender();
+      return;
+    }
+    if (action === "stale-ack") {
+      staleState.ack = true;
+      renderSave();
+      return;
+    }
+    if (action === "stale-discard") {
+      discardDraft();
+      return;
+    }
+    if (action === "stale-recheck") {
+      recheckAgainstFolder();
+      return;
+    }
+    if (action === "crash-restore") {
+      restoreCrashCopy();
+      return;
+    }
+    if (action === "crash-dismiss") {
+      crashState.dismissed = true; // the copy is KEPT (may be the only copy)
+      renderSave();
+      return;
+    }
+  }
+
+  function recheckAgainstFolder() {
+    var ls = (EDITOR.load && EDITOR.load.state) ? EDITOR.load.state : null;
+    var draft = (ls && ls.draft) ? ls.draft : null;
+    if (!draft || !draft.fingerprints) {
+      setStatus("warn", "No draft session to re-check.");
+      renderSave();
+      return;
+    }
+    staleState.hasInfo = true;
+    staleState.ack = false;
+    staleState.rechecked = true;
+    staleState.files = EDITOR.save.staleCheck(draft.fingerprints);
+    if (staleState.files.length) {
+      setStatus("warn", "Re-check: data changed since this draft was " +
+                "saved (" + staleState.files.join(", ") + ").");
+    } else {
+      setStatus("ok", "Re-check: fingerprints match the picked folder.");
+    }
+    renderSave();
+  }
+
+  // Opt-in sequential batch (Pitfall 3): rows fire one at a time with
+  // ~400 ms gaps; per-file buttons remain the default.
+  function downloadAll() {
+    var dirtyList = Object.keys(EDITOR.state.dirty).sort();
+    var defs = [];
+    for (var i = 0; i < dirtyList.length; i++) {
+      var def = saveRowDef(dirtyList[i]);
+      if (def) defs.push(def);
+    }
+    if (!defs.length) {
+      renderSave();
+      return;
+    }
+    var idx = 0;
+    function next() {
+      if (idx >= defs.length) {
+        setStatus("ok", "Batch finished: " + defs.length +
+                  " download(s) fired sequentially with ~400 ms gaps — " +
+                  "place each file over its displayed destination, then " +
+                  "'mark saved' per row.");
+        renderSave();
+        return;
+      }
+      var def = defs[idx];
+      idx++;
+      downloadText(def.fname, def.text);
+      setStatus("ok", "Batch: downloaded " + def.fname + " (" + idx + "/" +
+                defs.length + ") — place it over " + def.dest + ".");
+      renderSave();
+      setTimeout(next, BATCH_GAP_MS); // ~400 ms gaps (Pitfall 3)
+    }
+    next();
+  }
+
+  // -------------------------------------------------------------------------
+  // Registration (07.1-04 convention) + init.
+  // -------------------------------------------------------------------------
+
+  EDITOR.view("save", renderSave);
+
+  // The optional crash-copy persist hook: after EVERY mutation (apply ->
+  // afterChange) the debounced 800 ms crash copy is re-scheduled. Registered
+  // defensively — hooks dispatch is core's job and never load-bearing here.
+  if (EDITOR.hooks && EDITOR.hooks.persist) {
+    EDITOR.hooks.persist.push(scheduleCrashCopy);
+  }
+
+  // The 07.1-07 draft-loaded hook point: full stale-draft UX (Pitfall S3).
+  if (EDITOR.load && typeof EDITOR.load.onDraftLoaded === "function") {
+    EDITOR.load.onDraftLoaded(onDraftLoaded);
+  }
+
+  EDITOR.init(function () {
+    injectSaveCss();
+    crashState.found = findCrashCopy(); // once per session, at boot
+    renderSave();
+  });
+
+  // -------------------------------------------------------------------------
+  // Asset CSS (per-feature styling lives with its feature, never in the
+  // shell — the shell carries structural layout ONLY).
+  // -------------------------------------------------------------------------
+
+  function injectSaveCss() {
+    EDITOR.injectCss(
+      "/* injected by 80_save.js (07.1-13): save panel styles */\n" +
+      "#save-panel { padding: 10px 14px 24px; max-width: 860px; }\n" +
+      "#save-panel h2 { margin: 14px 0 6px; font-size: 15px; }\n" +
+      "#save-panel .save-section { margin-bottom: 10px; }\n" +
+      "#save-panel p { margin: 4px 0; }\n" +
+      "#save-panel .save-muted { color: #666666; font-size: 12.5px; }\n" +
+      "#save-panel .save-empty { color: #555555; }\n" +
+      "#save-panel .save-btn-row { display: flex; align-items: center; " +
+      "gap: 8px; flex-wrap: wrap; margin: 6px 0; }\n" +
+      "#save-panel .save-btn { padding: 4px 10px; font-size: 13px; " +
+      "cursor: pointer; }\n" +
+      "#save-panel .save-btn-secondary { background: #eef1f6; }\n" +
+      "#save-panel .save-btn-confirm { background: #e7f4e7; }\n" +
+      "#save-panel .save-row { border: 1px solid #dde3ec; border-radius: " +
+      "4px; padding: 6px 10px; margin: 6px 0; background: #fbfcfe; }\n" +
+      "#save-panel .save-row-main { display: flex; align-items: center; " +
+      "gap: 6px; flex-wrap: wrap; }\n" +
+      "#save-panel .save-row-actions { display: flex; align-items: " +
+      "center; gap: 8px; flex-wrap: wrap; margin-top: 4px; }\n" +
+      "#save-panel .save-arrow { color: #555555; }\n" +
+      "#save-panel .save-confirm-text { font-size: 12.5px; color: #1e5c1e; }\n" +
+      "#save-panel .save-cmd { font-family: Consolas, monospace; " +
+      "font-size: 12px; background: #f4f6f9; border: 1px solid #dde3ec; " +
+      "border-radius: 3px; padding: 1px 5px; }\n" +
+      "#save-panel .save-banner { margin: 6px 0; padding: 8px 10px; " +
+      "border-radius: 4px; font-size: 13px; }\n" +
+      "#save-panel .save-banner-ok { background: #e7f4e7; border: 1px " +
+      "solid #3d8b3d; color: #1e5c1e; }\n" +
+      "#save-panel .save-banner-warn { background: #fdf3df; border: 1px " +
+      "solid #b8860b; color: #7a5a00; }\n" +
+      "#save-panel .save-banner-error { background: #fdeae6; border: 1px " +
+      "solid #b5442d; color: #8a2f1d; }\n" +
+      "#save-panel .save-guidance { margin-top: 6px; font-size: 12.5px; " +
+      "color: #7a5a00; }\n" +
+      "#save-panel .save-error-list { margin: 6px 0 0; padding-left: 18px; " +
+      "font-family: Consolas, monospace; font-size: 12px; }\n" +
+      "#save-panel .save-reminder { margin-top: 10px; padding: 8px 10px; " +
+      "border: 1px dashed #b8860b; border-radius: 4px; background: #fffdf5; " +
+      "font-size: 13px; }\n" +
+      "#save-panel .save-cmd-list { margin: 6px 0; padding-left: 18px; }\n" +
+      "#save-panel .save-cmd-list li { margin: 3px 0; }\n"
+    );
+  }
 
 })();
 
