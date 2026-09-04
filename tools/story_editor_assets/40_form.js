@@ -107,14 +107,16 @@
   // unknown key -> the read-only B11 guard section. (The node "id" the core
   // stamps is a NON-enumerable property — invisible to for-in, so it never
   // shows up here either.)
+  // Keys written strict-JSON (quoted) so the structural test battery can
+  // parse the literal (same convention as 30_graph.js's FILE_COL).
   var KNOWN_NODE_KEYS = {
-    text_dramatic: true,
-    text_teaching: true,
-    claim_ids: true,
-    tags: true,
-    on_enter: true,
-    choices: true,
-    is_ending: true
+    "text_dramatic": true,
+    "text_teaching": true,
+    "claim_ids": true,
+    "tags": true,
+    "on_enter": true,
+    "choices": true,
+    "is_ending": true
   };
 
   var ENDING_TIERS = ["true", "good", "normal", "bad"];
