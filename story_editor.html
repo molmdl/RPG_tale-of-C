@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RPG: Tale of C — Story Node Editor</title>
-<!-- inlined assets (sorted): 00_core.js (29315 bytes) | 05_json.js (22337 bytes) | 10_load.js (49491 bytes) | 20_validate.js (58503 bytes) | 30_graph.js (43583 bytes) | 40_form.js (45617 bytes) | 42_choices.js (54020 bytes) | 43_onenter.js (57278 bytes) | 50_editscast.js (85647 bytes) | 60_trace.js (25956 bytes) | 70_claims.js (42276 bytes) | 80_save.js (46723 bytes) -->
+<!-- inlined assets (sorted): 00_core.js (29315 bytes) | 05_json.js (22337 bytes) | 10_load.js (49491 bytes) | 20_validate.js (58503 bytes) | 30_graph.js (43583 bytes) | 40_form.js (45617 bytes) | 42_choices.js (54020 bytes) | 43_onenter.js (57278 bytes) | 50_editscast.js (91751 bytes) | 60_trace.js (25956 bytes) | 70_claims.js (42276 bytes) | 80_save.js (46723 bytes) -->
 <style>
 /* ==========================================================================
    Structural layout ONLY (flex/grid skeleton, tab bar, monospace JSON
@@ -67,7 +67,7 @@ textarea.json-area { width: 100%; min-height: 120px; resize: vertical; }
 
 <header id="editor-header">
   <h1>RPG: Tale of C — Story Node Editor</h1>
-  <span id="generated-at">generated 2026-09-04T20:42:36Z &middot; offline &amp; dependency-free</span>
+  <span id="generated-at">generated 2026-09-04T21:06:45Z &middot; offline &amp; dependency-free</span>
 </header>
 
 <section id="boot-panel">
@@ -8732,7 +8732,7 @@ rpg/data/cast.json</pre>
 
 </script>
 <script>
-/* asset: 50_editscast.js (85647 bytes) */
+/* asset: 50_editscast.js (91751 bytes) */
 /* ==========================================================================
  * 50_editscast.js — the Data tab: the edits.json table editor (B4), the
  * cast.json editor (B7), and the bad-ending random pool editor (B10)
@@ -8904,6 +8904,10 @@ rpg/data/cast.json</pre>
 
   // The new-bucket id draft.
   var bucketNewId = "";
+
+  // The last selected ending in the global-pool add select (survives
+  // rerenders so the dropdown does not reset while the picker is open).
+  var poolSel = "";
 
   // Two-step arm/confirm state for destructive buttons (the armed action
   // key; any other action disarms).
@@ -9242,16 +9246,6 @@ rpg/data/cast.json</pre>
     return (carriers && carriers[enzymeId]) ? carriers[enzymeId] : [];
   }
 
-  // Every ending node (for the pool dropdowns — members must be endings).
-  function endingWraps() {
-    var out = [];
-    var all = EDITOR.allNodes();
-    for (var i = 0; i < all.length; i++) {
-      if (isEnding(all[i].node)) out.push(all[i]);
-    }
-    return out;
-  }
-
   // Duplicate detection WITHIN a bucket: exact normalized-dict equality
   // (the runtime route() semantics), skipping the entry being edited.
   function duplicateOf(enzymeId, sig, exceptIndex) {
@@ -9288,14 +9282,31 @@ rpg/data/cast.json</pre>
     });
   }
 
-  function editsEntryUpdate(enzymeId, index, entry) {
+  // Update touches ONLY the named fields on the existing entry (the same
+  // unknown-key preservation contract as the core's mutators): any extra
+  // key on the entry, on the signature dict, or inside args round-trips
+  // untouched — never a whitelist rebuild.
+  function editsEntryUpdate(enzymeId, index, form) {
     EDITOR.apply({
       files: ["edits.json"],
       redo: function (b) {
         var e = (b && b.edits && b.edits.enzymes)
           ? b.edits.enzymes[enzymeId] : null;
         var list = e ? asArray(e.edits) : [];
-        if (index >= 0 && index < list.length) list[index] = entry;
+        var entry = (index >= 0 && index < list.length) ? list[index] : null;
+        if (!entry || typeof entry !== "object") return;
+        if (!entry.signature || typeof entry.signature !== "object") {
+          entry.signature = {};
+        }
+        entry.signature.op = form.op;
+        entry.signature.target = form.target;
+        if (!entry.signature.args ||
+            typeof entry.signature.args !== "object") {
+          entry.signature.args = {};
+        }
+        entry.signature.args.new_res = form.newRes;
+        entry.branch_node = form.branch;
+        entry.claim_id = form.claim;
       }
     });
   }
@@ -9572,13 +9583,6 @@ rpg/data/cast.json</pre>
   // Render helpers.
   // -------------------------------------------------------------------------
 
-  function el(tag, cls, text) {
-    var n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text !== undefined && text !== null) n.textContent = String(text);
-    return n;
-  }
-
   function chip(cls, text) {
     return "<span class=\"ec-chip " + cls + "\">" + esc(text) + "</span>";
   }
@@ -9654,9 +9658,8 @@ rpg/data/cast.json</pre>
         (st.op === ops[i] ? " selected" : "") + ">" + esc(ops[i]) +
         "</option>";
     }
-    if (st.op && KNOWN_OPS.indexOf(st.op) < 0) {
-      opOptions += ""; // the foreign op is already appended + warned below
-    }
+    // A foreign op stays selectable but is warned on (the chip below the
+    // select renders whenever KNOWN_OPS misses the current value).
 
     var html = "";
     html += "<div class=\"ec-entryform\" data-ec-form=\"1\">";
@@ -9730,7 +9733,7 @@ rpg/data/cast.json</pre>
     return html;
   }
 
-  function entryRowHtml(enzymeId, entry, index, dupWith, carriers) {
+  function entryRowHtml(enzymeId, entry, index, dupWith) {
     var sig = (entry && typeof entry === "object") ? entry.signature : null;
     var op = sig ? sig.op : undefined;
     var target = sig ? sig.target : "";
@@ -9837,7 +9840,7 @@ rpg/data/cast.json</pre>
     for (var i = 0; i < entries.length; i++) {
       var dupWith = duplicateOf(enzymeId,
         entries[i] ? entries[i].signature : null, i);
-      html += entryRowHtml(enzymeId, entries[i], i, dupWith, carriers);
+      html += entryRowHtml(enzymeId, entries[i], i, dupWith);
     }
     if (formState && formState.open && formState.enzyme === enzymeId) {
       html += entryFormHtml(enzymeId);
@@ -10109,9 +10112,6 @@ rpg/data/cast.json</pre>
       var id = trimText(st.id);
       var carriers = tagCarriers();
       var tagMissing = id ? tagCarrierIds(carriers, id).length === 0 : false;
-      var badge = st.claim ? claimBadge(st.claim) : null;
-      var claimBad = !badge || badge.label !== "approved";
-      var bucketMissing = id ? !editsBucketExistsFor(id) : true;
       html += "<div class=\"ec-entryform\">";
       html += "<div class=\"ec-formtitle\">Add cast entry " +
         "<button type=\"button\" class=\"ec-btn\" " +
@@ -10302,10 +10302,6 @@ rpg/data/cast.json</pre>
     return html;
   }
 
-  // The last selected ending in the global-pool add select (survives
-  // rerenders so the dropdown does not reset while the picker is open).
-  var poolSel = "";
-
   // -------------------------------------------------------------------------
   // Validator strip — the manifest-owned rules surface inline.
   // -------------------------------------------------------------------------
@@ -10370,6 +10366,20 @@ rpg/data/cast.json</pre>
   function liveEl(name) {
     if (!refs.panel) return null;
     return refs.panel.querySelector("[data-ec-live=\"" + name + "\"]");
+  }
+
+  // Find a form select by its data-form-field value via ATTRIBUTE
+  // comparison (enzyme ids are data — data never goes into a CSS selector
+  // string, which would be an injection-shaped construction).
+  function selectByFormField(value) {
+    if (!refs.panel) return null;
+    var selects = refs.panel.querySelectorAll("select[data-form-field]");
+    for (var i = 0; i < selects.length; i++) {
+      if (selects[i].getAttribute("data-form-field") === value) {
+        return selects[i];
+      }
+    }
+    return null;
   }
 
   function refreshEntryLive() {
@@ -10527,7 +10537,10 @@ rpg/data/cast.json</pre>
       claim_id: claim
     };
     if (st.index >= 0) {
-      editsEntryUpdate(enzymeId, st.index, entry);
+      editsEntryUpdate(enzymeId, st.index, {
+        op: op, target: target, newRes: newRes,
+        branch: branch, claim: claim
+      });
     } else {
       editsEntryAdd(enzymeId, entry);
     }
@@ -10694,12 +10707,10 @@ rpg/data/cast.json</pre>
         renderData();
         return;
       }
-      if (action === "entry-open-add") {
-        var parts = action.length ? action.split(":") : [];
-        // data-ec-action carries the enzyme after the prefix — read the
-        // attribute, not the split (ids contain dots, not colons).
-        var enzymeId = elx.getAttribute("data-ec-action")
-          .replace("entry-open-add:", "");
+      if (action.indexOf("entry-open-add:") === 0) {
+        // The attribute carries the enzyme id after the prefix (ids
+        // contain dots, never colons — the suffix split is unambiguous).
+        var enzymeId = action.slice("entry-open-add:".length);
         openEntryForm(enzymeId, -1);
         return;
       }
@@ -10768,8 +10779,7 @@ rpg/data/cast.json</pre>
         return;
       }
       if (action === "pool-global-add") {
-        var sel = refs.panel.querySelector(
-          "[data-form-field=\"pool-global-add-select\"]");
+        var sel = selectByFormField("pool-global-add-select");
         var nid = sel ? sel.value : "";
         if (!nid) {
           showStatus("Select an ending node to add to the global pool.");
@@ -10780,9 +10790,10 @@ rpg/data/cast.json</pre>
       }
       if (action.indexOf("pool-per-add:") === 0) {
         var pid = action.slice("pool-per-add:".length);
-        var psel = refs.panel.querySelector(
-          "[data-form-field=\"pool-per-add-select:" +
-          pid.replace(/"/g, "\\\"") + "\"]");
+        // Attribute-value comparison (never a quoted CSS selector —
+        // enzyme ids are data, and data never goes into selectors).
+        var psel = selectByFormField(
+          "pool-per-add-select:" + pid);
         var pnid = psel ? psel.value : "";
         if (!pnid) {
           showStatus("Select an ending node to add to the override pool.");
@@ -10804,8 +10815,7 @@ rpg/data/cast.json</pre>
         return;
       }
       if (action === "pool-create") {
-        var csel = refs.panel.querySelector(
-          "[data-form-field=\"pool-create-select\"]");
+        var csel = selectByFormField("pool-create-select");
         var cid = csel ? csel.value : "";
         if (!cid) {
           showStatus("Select the bucket to create the override for.");
@@ -10817,48 +10827,56 @@ rpg/data/cast.json</pre>
     });
 
     // form field changes (selects + checkbox) — LOCAL state only; the
-    // bundle is written exclusively by the explicit action buttons.
-    refs.panel.addEventListener("change", function (ev) {
-      var t = ev.target;
-      if (!t || !t.getAttribute) return;
+    // bundle is written exclusively by the explicit action buttons. One
+    // shared handler for BOTH input and change (selects/checkboxes fire
+    // change everywhere and input in every current browser — handling
+    // both keeps text/select/checkbox updates symmetric).
+    function handleFormFieldEvent(t, evType) {
       var f = formFieldFromEl(t);
       if (f && formState && formState.open) {
-        if (f === "op") { formState.op = t.value; refreshEntryLive(); }
-        else if (f === "branch") {
-          formState.branch = t.value;
-          formState.m5 = false; // re-confirm on every target change
-          renderData();
+        if (f === "op") {
+          formState.op = t.value;
+          refreshEntryLive();
+        } else if (f === "branch") {
+          if (evType === "change") {
+            formState.branch = t.value;
+            formState.m5 = false; // re-confirm on every target change
+            renderData();
+          }
+        } else if (f === "m5") {
+          formState.m5 = !!t.checked;
+        } else if (evType === "input") {
+          // text fields: LOCAL draft state + live previews only (never a
+          // bundle write — the undo pre-image stays the true pre-edit
+          // value, the same granularity contract as the core's
+          // textFieldBindings).
+          if (f === "target") {
+            formState.target = t.value;
+            refreshEntryLive();
+          } else if (f === "new_res") {
+            formState.newRes = t.value;
+            refreshEntryLive();
+          } else if (f === "claim_id") {
+            formState.claim = t.value;
+            refreshEntryLive();
+          }
         }
-        else if (f === "m5") { formState.m5 = !!t.checked; }
         return;
       }
-      var cf = t.getAttribute("data-cast-field");
-      if (cf !== null && t.getAttribute("data-cast-idx") !== null) {
-        castFieldSet(parseInt(t.getAttribute("data-cast-idx"), 10),
-          cf, t.value);
-        return;
+      if (evType === "change") {
+        var cf = t.getAttribute("data-cast-field");
+        if (cf !== null && cf !== undefined &&
+            t.getAttribute("data-cast-idx") !== null) {
+          // Inline cast field commit: change = ONE undo step per field
+          // (the apply triggers afterChange -> hooks -> rerender, which
+          // refreshes the claim chips + relationship pin).
+          castFieldSet(parseInt(t.getAttribute("data-cast-idx"), 10),
+            cf, t.value);
+          return;
+        }
       }
       if (f === "pool-global-add-select") {
-        poolSel = t.value;
-      }
-    });
-
-    // form field input — live previews ONLY (never a bundle write, so the
-    // undo pre-image stays the true pre-edit value).
-    refs.panel.addEventListener("input", function (ev) {
-      var t = ev.target;
-      if (!t || !t.getAttribute) return;
-      var f = formFieldFromEl(t);
-      if (f && formState && formState.open) {
-        if (f === "target") { formState.target = t.value; refreshEntryLive(); }
-        else if (f === "new_res") {
-          formState.newRes = t.value;
-          refreshEntryLive();
-        }
-        else if (f === "claim_id") {
-          formState.claim = t.value;
-          refreshEntryLive();
-        }
+        poolSel = t.value; // survives rerenders while the picker is open
         return;
       }
       if (f === "bucket-new-id") {
@@ -10874,6 +10892,15 @@ rpg/data/cast.json</pre>
         }
         refreshCastAddLive();
       }
+    }
+
+    refs.panel.addEventListener("change", function (ev) {
+      var t = ev.target;
+      if (t && t.getAttribute) handleFormFieldEvent(t, "change");
+    });
+    refs.panel.addEventListener("input", function (ev) {
+      var t = ev.target;
+      if (t && t.getAttribute) handleFormFieldEvent(t, "input");
     });
 
     renderData();
@@ -10881,6 +10908,87 @@ rpg/data/cast.json</pre>
 
   EDITOR.view("data", renderData);
   EDITOR.init(initEditsCast);
+
+  // -------------------------------------------------------------------------
+  // Per-asset CSS (the shell carries structural layout ONLY — each asset
+  // injects its own styles at runtime; 00_core's injectCss primitive).
+  // -------------------------------------------------------------------------
+  EDITOR.injectCss(
+    "/* co-owned by 50_editscast.js (07.1-14): the Data tab */\n" +
+    ".ec-section { border: 1px solid #d5dbe5; border-radius: 6px; " +
+    "margin: 10px 14px; padding: 10px 12px; background: #ffffff; }\n" +
+    ".ec-section h2 { font-size: 15px; margin: 0 0 6px; " +
+    "border-bottom: 1px solid #e0e4ec; padding-bottom: 4px; }\n" +
+    ".ec-note { font-size: 12.5px; color: #555555; margin: 4px 0; }\n" +
+    ".ec-note-ok { color: #2d6a2d; }\n" +
+    ".ec-warnbox { border: 1px solid #d9a441; background: #fdf6e3; " +
+    "border-radius: 4px; padding: 6px 8px; font-size: 12.5px; " +
+    "margin: 6px 0; }\n" +
+    ".ec-status { border: 1px solid #6a8fc9; background: #eef4fc; " +
+    "border-radius: 4px; padding: 6px 8px; font-size: 12.5px; " +
+    "margin: 0 14px; }\n" +
+    ".ec-bucket { border: 1px solid #e0e4ec; border-radius: 4px; " +
+    "margin: 8px 0; padding: 6px 8px; }\n" +
+    ".ec-buckethead { margin: 2px 0 6px; }\n" +
+    ".ec-enzyme { font-family: Consolas, monospace; font-size: 13px; }\n" +
+    ".ec-entry { border: 1px solid #eceff4; border-radius: 4px; " +
+    "margin: 6px 0; padding: 5px 8px; background: #fbfcfe; }\n" +
+    ".ec-entry-dup { border-color: #c0392b; background: #fdf0ee; }\n" +
+    ".ec-entry-knownwrong { border-color: #d9a441; }\n" +
+    ".ec-entryhead { margin: 1px 0 4px; }\n" +
+    ".ec-entrybody { font-size: 12.5px; color: #444444; }\n" +
+    ".ec-entrybtns { float: right; }\n" +
+    ".ec-btn { padding: 2px 8px; font-size: 12px; cursor: pointer; }\n" +
+    ".ec-btn-primary { background: #2e3440; color: #ffffff; " +
+    "border: 1px solid #2e3440; }\n" +
+    ".ec-btn-danger { border: 1px solid #b5442d; color: #b5442d; " +
+    "background: #ffffff; }\n" +
+    ".ec-chip { display: inline-block; border-radius: 9px; " +
+    "padding: 0 7px; font-size: 11px; margin: 1px 2px 1px 0; " +
+    "white-space: nowrap; }\n" +
+    ".ec-chip-ok { background: #e3f2e3; color: #2d6a2d; " +
+    "border: 1px solid #9fc99f; }\n" +
+    ".ec-chip-warn { background: #fdf3dd; color: #8a6d1a; " +
+    "border: 1px solid #d9a441; }\n" +
+    ".ec-chip-bad { background: #fdeceb; color: #a12611; " +
+    "border: 1px solid #d98880; }\n" +
+    ".ec-chip-info { background: #eef1f6; color: #4a5568; " +
+    "border: 1px solid #b9c2d0; }\n" +
+    ".ec-row { margin: 5px 0; display: flex; align-items: center; " +
+    "gap: 8px; flex-wrap: wrap; }\n" +
+    ".ec-row label { min-width: 170px; font-size: 12px; color: #666666; }\n" +
+    ".ec-row input[type=\"text\"], .ec-row select { font-size: 12.5px; " +
+    "padding: 2px 4px; }\n" +
+    ".ec-live { font-family: Consolas, monospace; font-size: 11.5px; " +
+    "color: #555555; }\n" +
+    ".ec-entryform { border: 1px dashed #9aa3b2; border-radius: 4px; " +
+    "margin: 8px 0; padding: 8px 10px; background: #f7f9fc; }\n" +
+    ".ec-formtitle { margin-bottom: 6px; }\n" +
+    ".ec-m5row { border: 1px solid #d9a441; background: #fdf6e3; " +
+    "border-radius: 4px; padding: 6px 8px; margin: 6px 0; " +
+    "font-size: 12.5px; }\n" +
+    ".ec-m5row label { min-width: 0; }\n" +
+    ".ec-m5panel { border: 1px solid #d9a441; background: #fdf6e3; " +
+    "border-radius: 4px; padding: 6px 8px; margin: 6px 0; " +
+    "font-size: 12.5px; }\n" +
+    ".ec-relpin { border: 2px solid #3a3f4b; border-radius: 4px; " +
+    "padding: 6px 8px; margin: 8px 0; background: #f5f6f8; }\n" +
+    ".ec-relformula { font-size: 13px; }\n" +
+    ".ec-relchips { margin-top: 5px; }\n" +
+    ".ec-check { font-size: 12.5px; margin: 2px 0; color: #a12611; }\n" +
+    ".ec-check-ok { color: #2d6a2d; }\n" +
+    ".ec-issue { font-size: 12.5px; color: #a12611; margin: 2px 0; }\n" +
+    ".ec-noticeinfo { font-size: 12.5px; color: #4a5568; margin: 2px 0; }\n" +
+    ".ec-poolrow { margin: 3px 0; font-size: 12.5px; }\n" +
+    ".ec-override { border: 1px solid #e0e4ec; border-radius: 4px; " +
+    "margin: 6px 0; padding: 5px 8px; }\n" +
+    ".ec-castgrid { display: grid; grid-template-columns: 1fr 1fr; " +
+    "gap: 4px 14px; margin: 4px 0; }\n" +
+    ".ec-castgrid label { font-size: 11px; color: #888888; " +
+    "display: flex; flex-direction: column; gap: 2px; }\n" +
+    ".ec-dirty { color: #b5442d; font-weight: bold; font-size: 12px; }\n" +
+    "code { font-family: Consolas, monospace; font-size: 12px; }\n"
+  );
 
 })();
 
