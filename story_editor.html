@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RPG: Tale of C — Story Node Editor</title>
-<!-- inlined assets (sorted): 00_core.js (29315 bytes) | 05_json.js (22337 bytes) | 10_load.js (49491 bytes) | 20_validate.js (58503 bytes) | 30_graph.js (43583 bytes) | 40_form.js (45617 bytes) | 42_choices.js (54020 bytes) | 43_onenter.js (57278 bytes) | 50_editscast.js (91751 bytes) | 60_trace.js (25956 bytes) | 70_claims.js (42276 bytes) | 80_save.js (46723 bytes) | 90_boot.js (36423 bytes) -->
+<!-- inlined assets (sorted): 00_core.js (29315 bytes) | 05_json.js (22337 bytes) | 10_load.js (49491 bytes) | 20_validate.js (58503 bytes) | 30_graph.js (43583 bytes) | 40_form.js (45617 bytes) | 42_choices.js (54020 bytes) | 43_onenter.js (57278 bytes) | 50_editscast.js (91751 bytes) | 60_trace.js (25956 bytes) | 70_claims.js (42276 bytes) | 80_save.js (46723 bytes) | 90_boot.js (36419 bytes) -->
 <style>
 /* ==========================================================================
    Structural layout ONLY (flex/grid skeleton, tab bar, monospace JSON
@@ -67,7 +67,7 @@ textarea.json-area { width: 100%; min-height: 120px; resize: vertical; }
 
 <header id="editor-header">
   <h1>RPG: Tale of C — Story Node Editor</h1>
-  <span id="generated-at">generated 2026-09-04T21:40:53Z &middot; offline &amp; dependency-free</span>
+  <span id="generated-at">generated 2026-09-04T21:45:06Z &middot; offline &amp; dependency-free</span>
 </header>
 
 <section id="boot-panel">
@@ -13785,7 +13785,7 @@ rpg/data/cast.json</pre>
 
 </script>
 <script>
-/* asset: 90_boot.js (36423 bytes) */
+/* asset: 90_boot.js (36419 bytes) */
 /* ==========================================================================
  * 90_boot.js — the editor's chrome: status bar + Diagnostics + Help
  * (plan 07.1-18, Wave 5).
@@ -13812,8 +13812,8 @@ rpg/data/cast.json</pre>
  *      (b) the validator report (EDITOR.validateCurrent / the cached
  *      EDITOR._lastValidation: errors + notices with rule ids and src
  *      citations, plus the pinned-count shift report); (c) build info: the
- *      generator's __ASSET_MANIFEST__ comment parsed at boot (asset list +
- *      byte sizes), the editor version, and the per-file FNV-1a data
+ *      generator's inline asset-manifest head comment parsed at boot (asset
+ *      list + byte sizes), the editor version, and the per-file FNV-1a data
  *      fingerprints for support/debug.
  *   3. HELP TAB — the human's operating manual (static content): what the
  *      tool is; the folder layout + why file:// fetch is blocked
@@ -13994,9 +13994,9 @@ rpg/data/cast.json</pre>
   //    info. The one-click health report (no DevTools needed).
   // =========================================================================
 
-  // The generator bakes the inline manifest into the head comment that
-  // replaces __ASSET_MANIFEST__ ("inlined assets (sorted): name (N bytes) |
-  // ..."). Parse it once at boot; fall back to scanning the page HTML.
+  // The generator bakes the inline manifest into a head comment of the
+  // emitted page ("inlined assets (sorted): name (N bytes) | ...").
+  // Parse it once at boot; fall back to scanning the page HTML.
   var MANIFEST_MARKER = "inlined assets";
 
   function parseAssetManifest() {
@@ -14254,8 +14254,8 @@ rpg/data/cast.json</pre>
 
     if (!entries.length) {
       sec.appendChild(el("p", "diag-warn",
-        "Asset manifest not found in this page (the generator's " +
-        "__ASSET_MANIFEST__ comment is missing — was this HTML emitted " +
+        "Asset manifest not found in this page (the generator's inline " +
+        "asset-manifest comment is missing — was this HTML emitted " +
         "by tools/story_editor.py?)"));
     } else {
       sec.appendChild(el("p", null, entries.length + " asset(s) inlined, " +

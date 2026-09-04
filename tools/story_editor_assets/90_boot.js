@@ -24,8 +24,8 @@
  *      (b) the validator report (EDITOR.validateCurrent / the cached
  *      EDITOR._lastValidation: errors + notices with rule ids and src
  *      citations, plus the pinned-count shift report); (c) build info: the
- *      generator's __ASSET_MANIFEST__ comment parsed at boot (asset list +
- *      byte sizes), the editor version, and the per-file FNV-1a data
+ *      generator's inline asset-manifest head comment parsed at boot (asset
+ *      list + byte sizes), the editor version, and the per-file FNV-1a data
  *      fingerprints for support/debug.
  *   3. HELP TAB — the human's operating manual (static content): what the
  *      tool is; the folder layout + why file:// fetch is blocked
@@ -206,9 +206,9 @@
   //    info. The one-click health report (no DevTools needed).
   // =========================================================================
 
-  // The generator bakes the inline manifest into the head comment that
-  // replaces __ASSET_MANIFEST__ ("inlined assets (sorted): name (N bytes) |
-  // ..."). Parse it once at boot; fall back to scanning the page HTML.
+  // The generator bakes the inline manifest into a head comment of the
+  // emitted page ("inlined assets (sorted): name (N bytes) | ...").
+  // Parse it once at boot; fall back to scanning the page HTML.
   var MANIFEST_MARKER = "inlined assets";
 
   function parseAssetManifest() {
@@ -466,8 +466,8 @@
 
     if (!entries.length) {
       sec.appendChild(el("p", "diag-warn",
-        "Asset manifest not found in this page (the generator's " +
-        "__ASSET_MANIFEST__ comment is missing — was this HTML emitted " +
+        "Asset manifest not found in this page (the generator's inline " +
+        "asset-manifest comment is missing — was this HTML emitted " +
         "by tools/story_editor.py?)"));
     } else {
       sec.appendChild(el("p", null, entries.length + " asset(s) inlined, " +
