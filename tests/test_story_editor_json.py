@@ -199,16 +199,17 @@ V6_EXPECTED = (
 )
 
 V7_OBJ = OrderedDict([("resolution_angstrom", RAWFLOAT("2.40"))])
-V7_EXPECTED = '{\n  "resolution_angstrom": 2.40\n}'
+V7_EXPECTED = '{"resolution_angstrom": 2.40}'
 
 V8_OBJ = OrderedDict([("text", "the road \u2014 em-dash \u2014 stays literal")])
-V8_EXPECTED = '{\n  "text": "the road \u2014 em-dash \u2014 stays literal"\n}'
+V8_EXPECTED = '{"text": "the road \u2014 em-dash \u2014 stays literal"}'
 
 V9_OBJ = OrderedDict([("s", 'say "hi" \\ done')])
-V9_EXPECTED = '{\n  "s": "say \\"hi\\" \\\\ done"\n}'
+V9_EXPECTED = '{"s": "say \\"hi\\" \\\\ done"}'
 
-V10_OBJ = OrderedDict([("k", "a" * 165)])
-V10_EXPECTED = '{"k": "' + "a" * 165 + '"}'
+# compact({"k": "a"*166}) = 7 + 166 + 2 = 175 == W -> inline (<= inclusive).
+V10_OBJ = OrderedDict([("k", "a" * 166)])
+V10_EXPECTED = '{"k": "' + "a" * 166 + '"}'
 
 V11_OBJ = OrderedDict([("k", ["a" * 11] * 8)])
 V11_EXPECTED = (
@@ -322,12 +323,12 @@ class TestEncodingBasics(unittest.TestCase):
         )
 
     def test_multiline_rendering_uses_two_space_indent(self):
-        # A dict that must break (child too long) renders children at +2 and
+        # A dict that must break (compact 176 > W) renders children at +2 and
         # closes the brace at the parent indent.
-        out = story_editor_json.dumps(OrderedDict([("k", "a" * 166)]))
+        out = story_editor_json.dumps(OrderedDict([("k", "a" * 167)]))
         self.assertEqual(
             out,
-            "{\n" '  "k": "' + "a" * 166 + '"\n' "}",
+            "{\n" '  "k": "' + "a" * 167 + '"\n' "}",
         )
 
     def test_loads_preserves_order_and_wraps_floats(self):
@@ -489,12 +490,13 @@ class TestDictFitsRule(unittest.TestCase):
     """Task 1 rule 6: the dict inline (fits) rule incl. propagation."""
 
     def test_dict_inline_at_exactly_175(self):
-        # compact({"k": "a"*165}) = 175 == W -> inline (<= is inclusive).
+        # compact({"k": "a"*166}) = 7 + 166 + 2 = 175 == W -> inline
+        # (<= is inclusive).
         self.assertEqual(story_editor_json.dumps(V10_OBJ), V10_EXPECTED)
 
     def test_dict_breaks_at_176(self):
-        out = story_editor_json.dumps(OrderedDict([("k", "a" * 166)]))
-        self.assertEqual(out, "{\n" '  "k": "' + "a" * 166 + '"\n' "}")
+        out = story_editor_json.dumps(OrderedDict([("k", "a" * 167)]))
+        self.assertEqual(out, "{\n" '  "k": "' + "a" * 167 + '"\n' "}")
 
     def test_container_array_child_forbids_dict_inline(self):
         # {"wrap": [{"op": "x"}]} fits width-wise (compact 21 <= 175) but the
