@@ -592,16 +592,15 @@ class TestExitCodeContract(_BundleCopyTestCase):
         """A registry JSON with a duplicate claim_id key -> schema-config
         exit 2 (the object_pairs_hook rejection, rpg/citations.py precedent:
         without it json.load silently last-wins and clobbers an approval)."""
-        reg = self._copy_support(REGISTRY_PATH, "registry.json")
-        path = os.path.join(self.tmp, "registry.json")
+        path = self._copy_support(REGISTRY_PATH, "registry.json")
+        with open(path, "r") as fh:
+            body = fh.read().rstrip()
+        self.assertTrue(body.endswith("}"), "registry JSON must be an object")
         entry = ('"LINT-DUP-KEY": {"claim": "dup probe", '
                  '"approval_status": "approved"}')
-        with open(path, "a") as fh:  # splice a duplicate key before the close
-            fh.seek(0)
-            body = fh.read().rstrip().rstrip("}")
-            fh.seek(0)
-            fh.truncate()
-            fh.write(body.rstrip().rstrip(",") + ",\n" + entry + ",\n" + entry + "\n}\n")
+        inner = body[:-1].rstrip().rstrip(",")
+        with open(path, "w") as fh:  # splice the SAME key twice
+            fh.write(inner + ",\n" + entry + ",\n" + entry + "\n}\n")
         code, out = _run_lint(self.story_dir, registry=path)
         self.assertEqual(
             code, 2, "duplicate registry key is a schema error\nstdout=%r" % out)
