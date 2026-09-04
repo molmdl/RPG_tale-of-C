@@ -402,8 +402,8 @@
   }
 
   // Public BFS parity surface (the plan names bfsReachable(bundle)):
-  // follows choice.goto edges ONLY, cond/weight ignored, on_enter_divert
-  // never followed, start = manifest.start.
+  // follows choice.goto edges ONLY, cond/weight ignored,
+  // on_enter_divert never followed, start = manifest.start.
   EDITOR.bfsReachable = function (bundle) {
     var nodes = flattenNodes(bundle);
     var start = (bundle && bundle.manifest && bundle.manifest.start !== undefined)
@@ -627,19 +627,23 @@
             "references claim_id '" + cid + "' -- not in the registry",
             "tools/check_citations.py:44-95"));
         } else {
-          var record = citations[cid];
-          var status = (record && typeof record === "object")
-            ? record.approval_status : undefined;
-          // THE STRICT COMPARISON (load-bearing, cited): approval_status
-          // === "approved". A rejected claim fails identically to a
-          // pending one (rpg/citations.py:100-109, Pitfall 6) — a
-          // not-equal-pending shortcut would erroneously pass rejected
-          // claims and is FORBIDDEN here.
-          if (status !== "approved") {
+          var record = hasOwn(citations, cid) ? citations[cid] : null;
+          // THE STRICT COMPARISON (load-bearing, cited): the gate's core
+          // predicate is approval_status === "approved" exactly
+          // (rpg/citations.py:100-109 is_approved) -- the check below is
+          // its literal code form, NEVER a not-equal-pending shortcut (a
+          // rejected claim fails identically to a pending one, Pitfall 6).
+          var isApproved = record !== null &&
+            typeof record === "object" &&
+            record.approval_status === "approved";
+          if (!isApproved) {
+            var rawStatus = (record && typeof record === "object" &&
+                             record.approval_status !== undefined)
+              ? record.approval_status : null;
             errors.push(issue(
               "claim_unapproved", nid,
               "references claim_id '" + cid + "' -- approval_status is " +
-              JSON.stringify(status === undefined ? null : status) +
+              JSON.stringify(rawStatus) +
               ", not 'approved' (rejected fails identically to pending)" +
               sourceContext(cid, citations, sources),
               "tools/check_citations.py:44-95"));
