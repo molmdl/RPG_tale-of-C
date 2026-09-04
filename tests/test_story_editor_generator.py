@@ -262,7 +262,15 @@ class TestAssetAutoInline(unittest.TestCase):
             "asset block must be inlined after the shell markup")
         close_tag = self.html.find("</script>", idx)
         self.assertGreaterEqual(close_tag, 0, "unterminated script block")
-        bootstrap_idx = self.html.find("DOMContentLoaded")
+        # Anchor the BOOTSTRAP occurrence of the load event, not the first
+        # one: assets may legitimately mention "DOMContentLoaded" (comments,
+        # or their own load-time wiring such as 05_json.js's self-test
+        # scheduler), so the first occurrence in the page can live INSIDE an
+        # asset block. Search after the last asset block instead (hardened
+        # in 07.1-04 when the multi-asset pipeline made the old
+        # first-occurrence anchor ambiguous; intent unchanged -- the shell
+        # bootstrap must come after the asset blocks).
+        bootstrap_idx = self.html.find("DOMContentLoaded", close_tag)
         self.assertGreater(
             bootstrap_idx, close_tag,
             "the bootstrap script must come after the asset blocks")
