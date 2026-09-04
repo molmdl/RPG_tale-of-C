@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RPG: Tale of C — Story Node Editor</title>
+<!-- inlined assets: (none yet) -->
+<style>
+/* ==========================================================================
+   Structural layout ONLY (flex/grid skeleton, tab bar, monospace JSON
+   areas). Per-feature CSS is injected at runtime by each JS asset -- the
+   shell carries no feature styling and no behavior.
+   ========================================================================== */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body { display: flex; flex-direction: column; font-family: "Segoe UI", Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.4; color: #222222; background: #ffffff; }
+button { font-family: inherit; }
+
+/* Header */
+#editor-header { flex: none; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding: 8px 14px; border-bottom: 2px solid #3a3f4b; background: #f5f6f8; }
+#editor-header h1 { font-size: 19px; margin: 0; }
+#generated-at { font-size: 12px; color: #666666; }
+
+/* Boot panel: the load UI mounts (probe status, folder-pick input,
+   found/missing checklist, draft-reload input). The load layer (10_load.js)
+   hides this panel once data is in. */
+#boot-panel { flex: none; margin: 10px 14px 0; padding: 10px 14px 12px; border: 2px solid #3a3f4b; border-radius: 6px; background: #fffdf5; }
+#boot-panel h2 { margin: 0 0 6px; font-size: 16px; }
+#boot-probe-status { margin: 4px 0; font-size: 13px; color: #555555; }
+#boot-pick-mount, #boot-draft-mount { margin: 8px 0; }
+#boot-checklist { margin: 6px 0; padding-left: 18px; font-family: Consolas, monospace; font-size: 12.5px; }
+#boot-help-copy { margin-top: 10px; border-top: 1px solid #ddd6c3; padding-top: 8px; font-size: 12.5px; color: #555555; }
+#boot-help-copy p { margin: 4px 0; }
+
+/* Tab bar */
+#tabbar { flex: none; display: flex; gap: 4px; padding: 8px 14px 0; border-bottom: 2px solid #3a3f4b; background: #f5f6f8; }
+.tab-btn { padding: 6px 14px; font-size: 13px; border: 1px solid #9aa3b2; border-bottom: none; border-radius: 6px 6px 0 0; background: #e8ecf3; color: #333333; cursor: pointer; }
+.tab-btn.active { background: #2e3440; border-color: #2e3440; color: #ffffff; }
+
+/* Tab panels (visibility is switched by the JS core; #tab-graph is the
+   static default so the unprocessed page still shows a sensible layout) */
+#tab-panels { flex: 1; min-height: 0; }
+.tab-panel { display: none; height: 100%; overflow: auto; }
+.tab-panel.active { display: block; }
+#tab-graph.active { display: flex; }
+
+/* Graph tab: SVG canvas mount + node-form sidebar (hidden until a node is
+   selected; the form layer shows it). The four sub-sections are FIXED mount
+   points -- later plans mount into them by id, never into each other's
+   files. */
+#graph-area { flex: 1; min-width: 0; background: #fbfcfe; }
+#node-form { width: 400px; flex: none; overflow-y: auto; padding: 8px 10px 16px; border-left: 2px solid #3a3f4b; background: #ffffff; }
+#node-form[hidden] { display: none; }
+#node-form > div { padding: 6px 0 10px; border-bottom: 1px solid #e0e0e0; }
+#node-form h3 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #888888; }
+
+/* Status bar (dirty / undo / state summary; filled by the boot layer) */
+#statusbar { flex: none; display: flex; gap: 18px; padding: 5px 14px; border-top: 2px solid #3a3f4b; background: #f5f6f8; font-family: Consolas, monospace; font-size: 12px; color: #444444; }
+
+/* Monospace JSON areas (raw data views, textareas, preformatted blocks) */
+.json-area { font-family: Consolas, monospace; font-size: 12.5px; }
+pre.json-area { margin: 6px 0; padding: 6px 8px; background: #f4f6f9; border: 1px solid #dde3ec; border-radius: 4px; overflow-x: auto; }
+textarea.json-area { width: 100%; min-height: 120px; resize: vertical; }
+</style>
+</head>
+<body>
+
+<header id="editor-header">
+  <h1>RPG: Tale of C — Story Node Editor</h1>
+  <span id="generated-at">generated 2026-09-04T04:12:20Z &middot; offline &amp; dependency-free</span>
+</header>
+
+<section id="boot-panel">
+  <h2>Load the story data</h2>
+  <p id="boot-probe-status">Probing this folder for the expected data files&hellip;</p>
+  <div id="boot-pick-mount"><!-- 10_load.js mounts the folder-pick input here --></div>
+  <ul id="boot-checklist"><!-- 10_load.js renders the found/missing checklist here --></ul>
+  <div id="boot-draft-mount"><!-- 10_load.js mounts the draft-reload file input here --></div>
+  <div id="boot-help-copy">
+    <p>This editor is a single offline HTML page with zero dependencies and no
+       server. It loads the live game data from sub-directories of the folder
+       that contains this HTML file. The expected layout is:</p>
+    <pre class="json-area">data/story_glucose/*.json   (manifest.json + the story files it lists)
+data/citations.json
+data/sources.json
+rpg/data/edits.json
+rpg/data/cast.json</pre>
+    <p>The folder-pick loader works from any location: select the repository
+       root (or any parent folder of it) and the editor matches these expected
+       paths itself. If you moved or copied this HTML file elsewhere, the data
+       sub-directories above must sit below that copy for the automatic probe;
+       otherwise use the folder pick.</p>
+  </div>
+</section>
+
+<nav id="tabbar" aria-label="Editor sections">
+  <button class="tab-btn active" data-tab="graph" type="button">Graph</button>
+  <button class="tab-btn" data-tab="trace" type="button">Trace</button>
+  <button class="tab-btn" data-tab="claims" type="button">Claims</button>
+  <button class="tab-btn" data-tab="data" type="button">Data</button>
+  <button class="tab-btn" data-tab="save" type="button">Save</button>
+  <button class="tab-btn" data-tab="diagnostics" type="button">Diagnostics</button>
+  <button class="tab-btn" data-tab="help" type="button">Help</button>
+</nav>
+
+<main id="tab-panels">
+  <section id="tab-graph" class="tab-panel active">
+    <div id="graph-area"><!-- 30_graph.js mounts the SVG graph here --></div>
+    <aside id="node-form" hidden>
+      <div id="node-form-identity">
+        <h3>Identity &amp; texts</h3>
+        <!-- 40_form.js: node id-as-title, dramatic/teaching texts, claims, tags -->
+      </div>
+      <div id="node-form-choices">
+        <h3>Choices</h3>
+        <!-- 42_choices.js: choice list with goto / weight / cond / effects / tags -->
+      </div>
+      <div id="node-form-onenter">
+        <h3>on_enter (scene)</h3>
+        <!-- 43_onenter.js: MolAction list editor + scene_capture paste-in -->
+      </div>
+      <div id="node-form-lifecycle">
+        <h3>Lifecycle</h3>
+        <!-- 45_lifecycle.js: add / delete / node-type transition recipes -->
+      </div>
+    </aside>
+  </section>
+  <section id="tab-trace" class="tab-panel"><!-- 60_trace.js: nested-list path tracer --></section>
+  <section id="tab-claims" class="tab-panel"><!-- 70_claims.js: claims + sources (read-only) --></section>
+  <section id="tab-data" class="tab-panel"><!-- raw bundle/file viewers (later plans) --></section>
+  <section id="tab-save" class="tab-panel"><!-- 80_save.js: draft + per-file save-edit --></section>
+  <section id="tab-diagnostics" class="tab-panel"><!-- 90_boot.js: validator diagnostics --></section>
+  <section id="tab-help" class="tab-panel"><!-- 90_boot.js: help incl. Firefox save settings --></section>
+</main>
+
+<footer id="statusbar">
+  <span id="statusbar-dirty">no data loaded</span>
+  <span id="statusbar-undo">undo 0 / redo 0</span>
+  <span id="statusbar-state">offline editor &mdash; data loads from sub-directories of this HTML's folder</span>
+</footer>
+
+<!-- ASSET SLOT: the generator replaces the single marker comment below with
+     one classic inline <script> block per tools/story_editor_assets/*.js
+     asset (sorted by filename). Do not add script tags by hand here. -->
+<!-- (no JS assets discovered in tools/story_editor_assets/ yet -- the shell is emitted alone) -->
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+  if (window.EDITOR && EDITOR.runInits) EDITOR.runInits();
+});
+</script>
+
+</body>
+</html>
