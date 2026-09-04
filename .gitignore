@@ -25,5 +25,6 @@ rpg/data/assets/downloaded/
 dist/
 
 # Interactive story-graph review viewer (built by tools/story_graph_viewer.py).
-# NOT committed -- regenerable on demand: python3.6 tools/story_graph_viewer.py
-dist/story_graph_viewer.html
+# -- regenerable on demand: python3.6 tools/story_graph_viewer.py
+# for dev, dont provide to player
+#dist/story_graph_viewer.html
