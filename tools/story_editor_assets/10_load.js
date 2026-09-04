@@ -15,7 +15,7 @@
  *   1. OPPORTUNISTIC FETCH PROBE. On boot the editor silently fetches
  *      data/story_glucose/manifest.json relative to the document. On
  *      success (only when the environment permits direct reads — e.g. a
- *      voluntarily-run `python -m http.server`) the full data set is
+ *      voluntarily-run python -m http.server) the full data set is
  *      auto-loaded via fetch and the green "Data auto-detected in
  *      sub-directories" banner is shown. On rejection — the DEFAULT on
  *      file:// — the folder-pick panel is revealed with a clear
@@ -38,7 +38,7 @@
  *   3. FOUND/MISSING CHECKLIST. One row per expected path with ✓/✗ and the
  *      friendly hint; the story-file rows are derived FROM the loaded
  *      manifest (manifest.files — never hard-listed before it loads).
- *      Required files missing => the editor blocks with the expected tree;
+ *      Required files missing: the editor blocks with the expected tree;
  *      citations/sources/cast degrade with warnings. The checklist stays
  *      available (collapsible) after load.
  *   4. DRAFT RELOAD. A single <input type="file" accept=".json,...">
@@ -129,9 +129,8 @@
     if (Object.prototype.hasOwnProperty.call(SEVERITY, path)) {
       return SEVERITY[path];
     }
-    // Manifest-listed story files (data/story_glucose/<fname>): the story
-    // itself — always required.
-    return "block";
+    // Manifest-listed story files (data/story_glucose/<fname>):
+    return "block"; // the story itself — always required, never degraded
   }
 
   // -------------------------------------------------------------------------
@@ -886,9 +885,10 @@
     if (why && why.indexOf("probe miss") !== 0) {
       note = " (probe said: " + why + ")";
     }
-    setProbeStatus("Direct file reads are not permitted here — this is " +
-                   "expected on file:// pages (every current browser " +
-                   "blocks them). Use the folder picker below." + note);
+    setProbeStatus("Direct file reads are not permitted here — " +
+                   "this is expected on file:// pages (every current " +
+                   "browser blocks them, Firefox >= 68 included). " +
+                   "Use the folder picker below." + note);
     revealPickPanel(null);
   }
 
