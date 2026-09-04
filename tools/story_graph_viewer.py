@@ -19,10 +19,10 @@ Usage::
 
     python3.6 tools/story_graph_viewer.py
     python3.6 tools/story_graph_viewer.py --story-dir data/story_glucose \\
-        --output-dir /tmp/opencode/test-dist --dump-data /tmp/opencode/data.json
+        --output-dir /tmp/opencode/test-dev --dump-data /tmp/opencode/data.json
 
-Defaults: --story-dir = <repo>/data/story_glucose, --output-dir = <repo>/dist
-(output file: dist/story_graph_viewer.html). On any integrity invariant
+Defaults: --story-dir = <repo>/data/story_glucose, --output-dir = <repo>/dev
+(output file: dev/story_graph_viewer.html). On any integrity invariant
 violation the generator prints ``VIEWER_FAIL: ...`` and exits 1 WITHOUT
 writing the HTML.
 """
@@ -40,7 +40,7 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(SCRIPT_DIR)
 DEFAULT_STORY_DIR = os.path.join(REPO_ROOT, "data", "story_glucose")
-DEFAULT_OUTPUT_DIR = os.path.join(REPO_ROOT, "dist")
+DEFAULT_OUTPUT_DIR = os.path.join(REPO_ROOT, "dev")
 OUTPUT_NAME = "story_graph_viewer.html"
 
 REGISTRY_PATH = os.path.join(REPO_ROOT, "data", "citations.json")
@@ -51,7 +51,7 @@ USAGE = (
     "Usage: python3.6 tools/story_graph_viewer.py "
     "[--story-dir DIR] [--output-dir DIR] [--dump-data PATH]\n"
     "  --story-dir   story bundle dir (default: data/story_glucose)\n"
-    "  --output-dir  output dir for the HTML (default: <repo>/dist)\n"
+    "  --output-dir  output dir for the HTML (default: <repo>/dev)\n"
     "  --dump-data   also write the derived payload JSON to PATH (debug)\n")
 
 # ---------------------------------------------------------------------------
