@@ -270,7 +270,7 @@ Plans:
 **Plans**: 19 plans in 6 waves (fine-grained per user directive — "split to more plan so each plan is focused, I accept more than 20"; asset-pipeline architecture: the generator auto-inlines per-concern JS asset files so same-wave plans never share files; Firefox + universal `<a download>`/Blob persistence per binding user directives — no File System Access API, no server; early Firefox checkpoint after load+render, final checkpoint on the full edit→draft→save→gates round trip)
 
 Plans:
-- [ ] 07.1-01-PLAN.md — Generator skeleton + asset pipeline + shell template + emitted-HTML test harness (Wave 1)
+- [x] 07.1-01-PLAN.md — Generator skeleton + asset pipeline + shell template + emitted-HTML test harness (Wave 1) ✓ COMPLETE (2026-09-04; commits 8ea8a49 feat + 20d6989 test; tools/story_editor.py + shell.html + committed repo-root story_editor.html + 8-test battery; suite 384 OK)
 - [ ] 07.1-02-PLAN.md — House-style JSON serializer (Python canonical, TDD; byte-identical no-op proof over all 12 data files) (Wave 1)
 - [ ] 07.1-03-PLAN.md — Python mirror lint CLI (pre-save validator spec; TDD; green on real data, red on seeded violations) (Wave 1)
 - [ ] 07.1-04-PLAN.md — JS core + state + undo/redo (00_core.js) (Wave 2)
