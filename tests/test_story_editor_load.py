@@ -1,9 +1,32 @@
 """Structural load-layer test battery for the Phase 7.1 editor boot asset
-(07.1-07 Task 2).
+(07.1-07 Task 2; re-pinned by the 07.1-11 fix-forward).
 
-Pins the BINDING user directive implementation ("Firefox + detect sub-dir
-in the same dir of the html") exactly as 07.1-RESEARCH-UI.md "Persistence"
-prescribes:
+The 07.1-11 human checkpoint verdict was REJECTED: opening the page in
+Firefox auto-loaded nothing (no clicks, no graph) and even the folder pick
+did nothing at all. Root causes fixed here:
+
+1. The boot probe used fetch(), which CANNOT read file:// URLs in Firefox
+   (>= 68) under any policy -- CVE-2019-11730/MFSA 2019-21 removed file:
+   URLs from the Fetch API ("The Fetch API can then be used to read the
+   contents of any files stored in these directories" was the vulnerability
+   being closed). Classic subresource reads are NOT banned:
+   security.fileuri.strict_origin_policy (default true) lets a file://
+   document read files in the SAME DIRECTORY OR BELOW -- the user's own
+   tmp/network_all.html proves a same-dir <iframe src> loads in their
+   Firefox. The direct load therefore runs over XMLHttpRequest, so opening
+   the page in Firefox auto-loads data/ + rpg/data/ with ZERO clicks.
+   (test_direct_probe_then_fallback)
+2. The folder-pick handler cleared input.value = "" while still holding the
+   LIVE input.files list; in Firefox the captured reference empties with
+   the clear, so the handler silently returned before doing anything ("even
+   upload not working at all"). The File objects are now snapshotted into a
+   plain array BEFORE the clear. (test_pick_snapshot_before_clear)
+3. The boot ceremony (long static explanation wall + probe-then-pick
+   choreography) is reduced to the simple model the user demanded:
+   open-and-go direct load, ONE button in the fallback, minimal copy.
+   (test_simplified_boot_copy)
+
+Still pinned from 07.1-07 (unchanged contract):
 
 - the fixed 5-path EXPECTED list appears verbatim, and the story files are
   resolved DYNAMICALLY from the loaded manifest (manifest.files) -- the
@@ -13,9 +36,6 @@ prescribes:
 - the three security guards (.." / drive letter / leading "/) are present
   and run BEFORE matching in the folder-pick handler; .git is filtered,
   never enumerated into reads (test_security_guards)
-- probe-then-fallback order: the opportunistic fetch probe is invoked
-  before any reference to the pick-panel reveal, and the probe comment
-  cites CVE-2019-11730 (test_probe_then_fallback)
 - the draft-reload input (accept=".json,application/json") parses the
   {version, saved_at, bundle, dirty, undo_meta, fingerprints} schema and
   exposes the EDITOR.load.onDraftLoaded hook point
@@ -140,7 +160,7 @@ class TestLoadAssetStructure(unittest.TestCase):
             "a story-paths builder from the parsed manifest must exist")
         self.assertIn(
             "storyPathsOf(mres.files)", self.src,
-            "the fetch auto-load must derive story paths from mres.files")
+            "the direct auto-load must derive story paths from mres.files")
         self.assertIn(
             "STORY_DIR_PREFIX + fname", self.src,
             "the pick path must build story paths as prefix + manifest name")
@@ -165,7 +185,7 @@ class TestLoadAssetStructure(unittest.TestCase):
             "function matchesSuffix(", self.src,
             "the generalized /-boundary suffix matcher missing")
         # The boundary comparison pattern: lastIndexOf + the length checks
-        # around a "/" boundary char (RESEARCH-UI Code Example 1).
+        # around a "/" boundary char.
         self.assertIn(
             "lastIndexOf(", self.src,
             "the suffix match must use lastIndexOf (boundary position)")
@@ -224,45 +244,124 @@ class TestLoadAssetStructure(unittest.TestCase):
             "the .git note must state it is never enumerated into reads")
 
     # ------------------------------------------------------------------
-    # 4. Probe-then-fallback order + CVE citation
+    # 4. Direct-read-first boot (the 07.1-11 corrected contract)
     # ------------------------------------------------------------------
 
-    def test_probe_then_fallback(self):
-        """The fetch probe is invoked before the pick panel becomes visible
-        in the boot flow: the probe call textually precedes EVERY reference
-        to the reveal function, the reveal is only wired into the rejection
-        path, and the probe comment cites CVE-2019-11730."""
+    def test_direct_probe_then_fallback(self):
+        """The direct load runs over XMLHttpRequest (NOT fetch), the probe
+        call textually precedes ANY reference to the pick-panel reveal, the
+        fallback is wired into the probe-miss path only, a watchdog guards
+        against a dead loading state, and the comment carries the
+        CORRECTED Firefox file:// policy claim."""
+        # Transport: XHR, never fetch (fetch cannot read file:// URLs).
         self.assertIn(
-            'fetch(MANIFEST_PATH, { cache: "no-store" })', self.src,
-            "the opportunistic manifest probe is missing")
-        self.assertIn(
-            "CVE-2019-11730", self.src,
-            "the probe must cite CVE-2019-11730 (Firefox 68 opaque origins)")
-        fetch_i = self.src.find('fetch(MANIFEST_PATH, { cache: "no-store" })')
+            "new XMLHttpRequest()", self.src,
+            "the direct read must use XMLHttpRequest (fetch() cannot read "
+            "file:// URLs)")
+        self.assertNotIn(
+            "fetch(", self.src,
+            "no fetch( call may remain in the load asset (the rejected "
+            "premise: fetch was read as 'file:// blocks reads' when it "
+            "only proved 'fetch cannot do file://')")
+        # Probe-then-fallback order: the probe call textually precedes every
+        # reference to the reveal function.
+        probe_i = self.src.find("xhrText(MANIFEST_PATH")
+        self.assertGreaterEqual(probe_i, 0, "the manifest probe is missing")
         reveal_first = self.src.find("showFolderPickPanel")
-        reveal_def = self.src.find("function showFolderPickPanel(")
-        self.assertGreaterEqual(reveal_def, 0, "reveal function missing")
+        self.assertGreaterEqual(reveal_first, 0, "reveal function missing")
         self.assertLess(
-            fetch_i, reveal_first,
-            "the probe must be invoked before ANY reference to the "
-            "pick-panel reveal (probe-then-fallback order)")
-        # The reveal call site sits in the probe's rejection path (.catch).
-        catch_i = self.src.find(".catch(function (err) {", fetch_i)
+            probe_i, reveal_first,
+            "the direct-read probe must be invoked before ANY reference to "
+            "the pick-panel reveal (probe-then-fallback order)")
+        # The fallback sits in the probe-miss callback.
+        miss_i = self.src.find("showFolderPickPanel(", probe_i)
         self.assertGreater(
-            catch_i, 0, "the probe must route rejections through .catch")
-        catch_body = self.src[catch_i:self.src.find("});", catch_i)]
-        self.assertIn(
-            "showFolderPickPanel(err)", catch_body,
-            "the rejection path must reveal the pick panel")
-        # Never a dead "loading…" state: a probe-hang watchdog reveals the
-        # picker too, and the rejection is explained in the panel itself.
+            miss_i, probe_i,
+            "the probe-miss path must reveal the pick panel")
+        # Never a dead "loading..." state: a probe watchdog reveals the
+        # picker if the direct read never settles.
         self.assertIn(
             "setTimeout", self.src,
             "a probe watchdog is required (never a dead loading state)")
+        # The corrected policy claim: strict_origin_policy permits
+        # same-directory-or-below reads (the user's iframe precedent), and
+        # the CVE is cited for what it actually removed (fetch on file://).
         self.assertIn(
-            "this is expected", self.src,
-            "the pick panel must explain that the block is expected "
-            "(never silent failure)")
+            "CVE-2019-11730", self.src,
+            "the transport correction must cite CVE-2019-11730")
+        self.assertIn(
+            "strict_origin_policy", self.src,
+            "the corrected claim must name security.fileuri."
+            "strict_origin_policy")
+        self.assertIn(
+            "same directory or below", self.src,
+            "the corrected claim must state the permitted scope: same "
+            "directory or below")
+        # The green auto-load banner survives (the zero-click success state).
+        self.assertIn(
+            "Data auto-detected in sub-directories", self.src,
+            "the zero-click success banner phrase must survive")
+
+    # ------------------------------------------------------------------
+    # 4b. The folder-pick live-FileList fix (07.1-11)
+    # ------------------------------------------------------------------
+
+    def test_pick_snapshot_before_clear(self):
+        """The pick handler snapshots the File objects into a plain array
+        BEFORE clearing input.value: setting input.value = "" empties a
+        LIVE input.files list, and the original code checked files.length
+        after the clear -- silently returning on Firefox (the 'even upload
+        not working at all' defect)."""
+        handler_start = self.src.find("function onFolderPicked(")
+        self.assertGreaterEqual(handler_start, 0, "pick handler missing")
+        snap_i = self.src.find("picked.push(files[j])", handler_start)
+        self.assertGreater(
+            snap_i, 0,
+            "the handler must snapshot files[j] into a plain array")
+        clear_i = self.src.find('input.value = ""', handler_start)
+        self.assertGreater(clear_i, 0, "the input re-pick clear is missing")
+        self.assertLess(
+            snap_i, clear_i,
+            "the snapshot must happen BEFORE input.value is cleared (a "
+            "live FileList empties with the clear)")
+        # The post-clear iteration must use the snapshot, not the live list.
+        loop_i = self.src.find("picked.length", clear_i)
+        self.assertGreater(
+            loop_i, clear_i,
+            "the path walk must iterate the snapshot (picked[...]), not "
+            "the possibly-emptied live list")
+
+    # ------------------------------------------------------------------
+    # 4c. Simplified boot copy (the 'too much ceremony' verdict)
+    # ------------------------------------------------------------------
+
+    def test_simplified_boot_copy(self):
+        """The over-engineered boot copy is gone: the long file://-blocked
+        explanation sentence is absent, the fallback note is short and
+        keeps the two load-bearing phrases (expected + repository root),
+        and the static expected-layout wall is hidden at init (the
+        checklist rows already state every expected path)."""
+        self.assertNotIn(
+            "Your browser blocks local file reads from file:// pages",
+            self.src,
+            "the rejected long file://-blocked explanation sentence must "
+            "be gone (the direct load is the primary path now)")
+        self.assertIn(
+            "expected", self.src,
+            "the fallback note must keep the 'expected' honesty clause")
+        self.assertIn(
+            "repository root", self.src,
+            "the fallback note must say to select the repository root")
+        # The static help wall is hidden at init (the panel's own subtree).
+        self.assertIn(
+            'document.getElementById("boot-help-copy")', self.src,
+            "the static expected-layout wall must be hidden by the load "
+            "layer (open-and-go: no copy wall)")
+        hide_i = self.src.find('document.getElementById("boot-help-copy")')
+        set_i = self.src.find('setAttribute("hidden", "hidden")', hide_i)
+        self.assertGreater(
+            set_i, hide_i,
+            "the help wall must be hidden via setAttribute('hidden')")
 
     # ------------------------------------------------------------------
     # 5. Draft reload input
@@ -400,7 +499,7 @@ class TestLoadAssetStructure(unittest.TestCase):
         block = _asset_block(self.html)
         for needle in ("webkitdirectory", "matchesExpected", "readAsText",
                        "Load draft", ".json,application/json",
-                       'cache: "no-store"'):
+                       "XMLHttpRequest"):
             self.assertIn(needle, block,
                           "emitted load block lacks %r" % needle)
         # The block must close before the shell's bootstrap (the LAST
@@ -435,6 +534,8 @@ class TestLoadAssetStructure(unittest.TestCase):
         # Header traceability: ownership + the binding mechanism set.
         self.assertIn("07.1-07", self.src,
                       "the header must cite its owner plan")
+        self.assertIn("07.1-11", self.src,
+                      "the fix-forward record must cite plan 07.1-11")
         self.assertIn("Persistence", self.src,
                       "the header must cite RESEARCH-UI Persistence")
 
