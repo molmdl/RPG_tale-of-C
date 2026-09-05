@@ -1,6 +1,9 @@
 /* ==========================================================================
- * 10_load.js — the boot/load layer: probe -> folder pick -> checklist ->
- * EDITOR.setBundle, plus the single-file draft reload (plan 07.1-07).
+ * 10_load.js — the boot/load layer: DIRECT read on boot (open-and-go) ->
+ * one-button folder-pick fallback -> checklist -> EDITOR.setBundle, plus
+ * the single-file draft reload. Owner plan 07.1-07; direct-load rework =
+ * the 07.1-11 fix-forward (rejected human checkpoint verdict: "not
+ * working, even upload not working at all ... try to make it simple").
  *
  * FILE OWNERSHIP: this asset belongs to plan 07.1-07. It owns #boot-panel.
  * Never edit another plan's asset (00_core.js = 07.1-04, 05_json.js =
@@ -8,48 +11,67 @@
  * the EDITOR namespace from your own file instead.
  *
  * THE BINDING USER DIRECTIVE (verbatim): Firefox + "detect sub-dir in the
- * same dir of the html". Implemented exactly as 07.1-RESEARCH-UI.md
- * "Persistence — universal no-API model" (THE binding mechanism set) +
- * its Code Example 1:
+ * same dir of the html ... try to make it simple and no need to request
+ * this much work". The simple model:
  *
- *   1. OPPORTUNISTIC FETCH PROBE. On boot the editor silently fetches
- *      data/story_glucose/manifest.json relative to the document. On
- *      success (only when the environment permits direct reads — e.g. a
- *      voluntarily-run python -m http.server) the full data set is
- *      auto-loaded via fetch and the green "Data auto-detected in
- *      sub-directories" banner is shown. On rejection — the DEFAULT on
- *      file:// — the folder-pick panel is revealed with a clear
- *      explanation. Rejection is expected and handled: NEVER a dead
- *      "loading…" state, never a console-only failure (RESEARCH-UI
- *      Pitfall 2).
- *   2. UNIVERSAL FOLDER PICK (the REAL path on file://). Firefox >= 68
- *      blocks file:// fetch outright — CVE-2019-11730 / MFSA 2019-21 made
- *      every local file a unique opaque origin precisely because
- *      same-directory fetch access was an attack vector ("The Fetch API
- *      can then be used to read the contents of any files stored in these
- *      directories"); the 68-era off-switch pref was removed in Firefox 95
- *      (Bugzilla 1732052). So the editor loads with USER-GRANTED file
- *      access: <input type="file" webkitdirectory multiple> whose
- *      File.webkitRelativePath (Baseline 2025) is matched against the
- *      fixed EXPECTED path list via a "/"-boundary suffix match. Picking
- *      a parent of the repo works; picking a child folder (e.g. data/)
- *      matches nothing by design — the checklist then says "select the
- *      repository root".
- *   3. FOUND/MISSING CHECKLIST. One row per expected path with ✓/✗ and the
+ *   1. DIRECT READ ON BOOT (primary, zero clicks). The editor reads
+ *      data/story_glucose/manifest.json and the rest of the expected set
+ *      straight off the disk and renders the graph immediately — the green
+ *      "Data auto-detected in sub-directories" banner. All expected paths
+ *      sit BELOW the HTML's own directory (data/... and rpg/data/... under
+ *      the repo root).
+ *   2. TRANSPORT CORRECTION (07.1-11). The original layer probed with
+ *      the Fetch API and treated its file:// rejection as "Firefox blocks local
+ *      reads" (CVE-2019-11730). That premise was WRONG, and the rejected
+ *      checkpoint proved it: the Fetch API cannot read file:// URLs in Firefox
+ *      at all — CVE-2019-11730 / MFSA 2019-21 ("Same-origin policy treats
+ *      all files in a directory as having the same-origin") named the
+ *      Fetch API as the exfiltration primitive ("The Fetch API can then
+ *      be used to read the contents of any files stored in these
+ *      directories"), and removing file: URLs from fetch was the fix.
+ *      Classic subresource reads are NOT banned: Firefox's
+ *      security.fileuri.strict_origin_policy (default TRUE) permits a
+ *      file:// document to read files in the same directory or below it
+ *      (i.e. the SAME DIRECTORY OR BELOW — the user's own living proof
+ *      is tmp/network_all.html, whose
+ *      same-directory <iframe src="network_ibp_mode_0.pdb_ali.html">
+ *      loads fine in their Firefox. The fetch rejection only ever proved
+ *      "fetch cannot do file://", never "reads are blocked" — so the
+ *      direct load now uses XMLHttpRequest (the same policy class as the
+ *      iframe), and on Firefox file:// the page is open-and-go with ZERO
+ *      clicks. Chrome (and any environment that truly blocks local
+ *      reads) takes the fallback.
+ *   3. ONE-BUTTON FOLDER PICK (fallback only). If the direct read actually
+ *      fails, the editor shows ONE control: <input type="file"
+ *      webkitdirectory multiple>. File.webkitRelativePath is matched
+ *      against the fixed EXPECTED path list via a "/"-boundary suffix
+ *      match. Picking a parent of the repo works; picking a child folder
+ *      (e.g. data/) matches nothing by design — the checklist then says
+ *      "select the repository root".
+ *   4. FOUND/MISSING CHECKLIST. One row per expected path with ✓/✗ and the
  *      friendly hint; the story-file rows are derived FROM the loaded
  *      manifest (manifest.files — never hard-listed before it loads).
- *      Required files missing: the editor blocks with the expected tree;
- *      citations/sources/cast degrade with warnings. The checklist stays
- *      available (collapsible) after load.
- *   4. DRAFT RELOAD. A single <input type="file" accept=".json,...">
+ *      Required files missing: the editor blocks; citations/sources/cast
+ *      degrade with warnings. The checklist stays available (collapsible)
+ *      after load.
+ *   5. DRAFT RELOAD. A single <input type="file" accept=".json,...">
  *      restores a downloaded draft bundle {version, saved_at, bundle,
  *      dirty, undo_meta, fingerprints} via EDITOR.setBundle —
  *      self-contained, no folder re-pick needed. When folder-picked raw
  *      texts are also available, the draft's stored per-file fingerprints
  *      are compared against them (32-bit FNV-1a — a drift DETECTOR, not
  *      security) and a mismatch warns "underlying files changed since
- *      this draft". The full stale-draft UX completes in 07.1-13; this
- *      plan provides the load + the EDITOR.load.onDraftLoaded hook point.
+ *      this draft". The full stale-draft UX lives in 07.1-13's save
+ *      layer; this asset provides the load + the
+ *      EDITOR.load.onDraftLoaded hook point.
+ *
+ * PICK-HANDLER FIX (07.1-11, the "even upload not working at all"
+ * defect): the original handler cleared input.value = "" while still
+ * holding the LIVE input.files list. Clearing the selection empties a
+ * live list, so the captured reference read length 0 and the handler
+ * silently returned before doing anything — the pick appeared completely
+ * dead on Firefox. The File objects are now snapshotted into a plain
+ * array BEFORE the clear (File objects themselves stay valid).
  *
  * SECURITY GUARDS (Pitfall 3c): the folder pick hands the editor the
  * ENTIRE picked tree including .git — paths are filtered against the
@@ -58,8 +80,8 @@
  * .git and sibling files are never enumerated into reads.
  *
  * STYLE: one classic script, one IIFE, ES5 only (module scripts fail
- * under file:// CORS). Zero dependencies: FileReader + fetch/Promise are
- * browser built-ins.
+ * under file:// CORS). Zero dependencies: FileReader + XMLHttpRequest
+ * are browser built-ins.
  * ========================================================================== */
 
 (function () {
@@ -138,7 +160,7 @@
   // -------------------------------------------------------------------------
   var bootState = {
     booted: false,        // boot() ran (idempotent)
-    probeSettled: false,  // the fetch probe resolved or rejected
+    probeSettled: false,  // the direct-read probe settled (ok or miss)
     watchdog: null,       // probe-hang timer (never a dead "loading…" state)
     pickRevealed: false,  // the folder-pick panel is visible
     pickNoteSet: false,
@@ -150,7 +172,7 @@
     draftActive: false,   // the session bundle came from a draft file
     loaded: false,        // a bundle reached EDITOR.setBundle
     collapsed: false,     // boot panel details collapsed (after load)
-    lastSource: null      // "fetch" | "pick" | "draft"
+    lastSource: null      // "direct" | "pick" | "draft"
   };
 
   var draftLoadedFns = [];
@@ -220,7 +242,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // Manifest parsing (shared by the fetch path and the pick path).
+  // Manifest parsing (shared by the direct-read path and the pick path).
   // -------------------------------------------------------------------------
 
   function parseManifest(text) {
@@ -407,33 +429,65 @@
   }
 
   // -------------------------------------------------------------------------
-  // fetch helpers (the probe + auto-load path). fetch is the OPPORTUNISTIC
-  // probe only — never the required path (RESEARCH-UI Pitfall 2).
+  // XHR transport — the DIRECT-READ path (07.1-11 correction).
+  //
+  // XMLHttpRequest is used instead of fetch because the Fetch API cannot read
+  // file:// URLs in Firefox at all (CVE-2019-11730 removed file: URLs from
+  // the Fetch API; see the header). XHR is a classic subresource read and
+  // follows security.fileuri.strict_origin_policy (default true): a
+  // file:// document may read files in the SAME DIRECTORY OR BELOW — which
+  // covers every expected path (data/... and rpg/data/... sit below the
+  // HTML's directory). On file:// a successful read reports status 0; over
+  // http(s) it reports 200. Both count as success when text came back.
   // -------------------------------------------------------------------------
 
-  // Resolves the response text, or null when the file is not reachable
-  // (a per-file miss must NOT abort the whole set — the checklist reports
-  // it, and the block/warn severities decide the outcome).
-  function fetchText(path) {
-    return fetch(path, { cache: "no-store" }).then(
-      function (resp) {
-        if (!resp || !resp.ok) return null;
-        return resp.text();
-      },
-      function () {
-        return null; // network/CORS rejection -> reported as missing
-      });
+  // Reads one file relative to the document. cb(text|null): null = not
+  // reachable (a per-file miss must NOT abort the whole set — the
+  // checklist reports it, and the block/warn severities decide the
+  // outcome). The settled guard keeps the callback single-shot: on file://
+  // failures both onerror and onreadystatechange(4) can fire.
+  function xhrText(path, cb) {
+    var settled = false;
+    function finish(text) {
+      if (settled) return;
+      settled = true;
+      cb(text);
+    }
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", path, true);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        var ok = (xhr.status === 0 ||
+                  (xhr.status >= 200 && xhr.status < 300)) &&
+                 typeof xhr.responseText === "string" &&
+                 xhr.responseText !== "";
+        finish(ok ? xhr.responseText : null);
+      };
+      xhr.onerror = function () { finish(null); };
+      xhr.send(null);
+    } catch (e) {
+      finish(null);
+    }
   }
 
-  function fetchTexts(paths) {
+  // Reads many paths in parallel; done({path: text|null}).
+  function xhrMany(paths, done) {
     var out = {};
-    var jobs = [];
+    var pending = paths.length;
+    if (!pending) {
+      done(out);
+      return;
+    }
     for (var i = 0; i < paths.length; i++) {
       (function (p) {
-        jobs.push(fetchText(p).then(function (t) { out[p] = t; }));
+        xhrText(p, function (t) {
+          out[p] = t;
+          pending--;
+          if (pending === 0) done(out);
+        });
       })(paths[i]);
     }
-    return Promise.all(jobs).then(function () { return out; });
   }
 
   // -------------------------------------------------------------------------
@@ -468,8 +522,11 @@
 
   function setCollapsed(collapsed) {
     bootState.collapsed = !!collapsed;
+    // The static expected-layout wall (boot-help-copy) is NOT in this list:
+    // it is hidden for good at mount (open-and-go — the checklist rows
+    // already state every expected path; the user rejected the copy wall).
     var ids = ["boot-checklist", "boot-pick-wrap", "boot-draft-wrap",
-               "boot-help-copy", "boot-probe-status"];
+               "boot-probe-status"];
     for (var i = 0; i < ids.length; i++) {
       // The pick wrap stays hidden until the probe rejection reveals it —
       // expanding must not pre-reveal it (probe-then-fallback discipline).
@@ -501,14 +558,15 @@
     var el = document.getElementById("boot-pick-note");
     if (!el) return;
     el.textContent = note || (
-      "Your browser blocks local file reads from file:// pages — this is " +
-      "expected; one click below grants access. Select the repository root " +
-      "(or any parent folder of it) and the editor matches the expected " +
-      "paths itself.");
+      "Direct reads are blocked in this browser — that is expected when " +
+      "a locally opened page is not allowed to read files here. Click " +
+      "below and select the repository root folder (or any parent of it); " +
+      "the editor matches the expected data paths itself.");
   }
 
-  // Reveals the folder-pick panel (idempotent). Called ONLY after the fetch
-  // probe has settled — the reveal is the fallback, never the first move.
+  // Reveals the folder-pick panel (idempotent). Called ONLY after the
+  // direct-read probe has settled — the reveal is the fallback, never the
+  // first move.
   function revealPickPanel(note) {
     bootState.pickRevealed = true;
     var wrap = document.getElementById("boot-pick-wrap");
@@ -516,7 +574,7 @@
     if (note) {
       setPickNote(note);
     } else if (!bootState.pickNoteSet) {
-      setPickNote(null); // the default file:// explanation
+      setPickNote(null); // the short fallback explanation
     }
   }
 
@@ -527,8 +585,8 @@
   // -------------------------------------------------------------------------
 
   function missingNote(source) {
-    if (source === "fetch") {
-      return "missing (not reachable over the current connection)";
+    if (source === "direct") {
+      return "missing (not reachable from this location)";
     }
     return "expected under the folder you picked; did you select the " +
            "repository root?";
@@ -700,11 +758,12 @@
       items.push({ text: warnings[i], kind: "warn" });
     }
     showBanners(items);
-    if (source === "fetch") {
+    if (source === "direct") {
       // Direct reads reach the folder but the data is broken/absent there —
       // the picker is the universal self-service fix, reveal it too.
-      revealPickPanel("Some data is missing over the current connection — " +
-                      "you can pick the repository folder instead.");
+      revealPickPanel("Some data files are missing or unreadable from " +
+                      "this location — you can pick the repository " +
+                      "folder instead.");
     }
   }
 
@@ -767,12 +826,12 @@
 
     ED.setBundle(bundle, rawByFname);
     bootState.loaded = true;
-    bootState.draftActive = false; // folder/fetch data replaces any draft
+    bootState.draftActive = false; // direct/pick data replaces any draft
     bootState.draft = null;
     bootState.lastSource = source;
 
     var msg;
-    if (source === "fetch") {
+    if (source === "direct") {
       msg = "Data auto-detected in sub-directories"; // the green banner
     } else {
       msg = "Data loaded from the picked folder";
@@ -787,7 +846,7 @@
     }
     showBanners(items);
     setSummary("Loaded " + order.length + " story file(s) from " +
-               (source === "fetch"
+               (source === "direct"
                  ? "direct reads (sub-directories detected)"
                  : "the picked folder") +
                (warnings.length
@@ -797,74 +856,64 @@
   }
 
   // -------------------------------------------------------------------------
-  // BOOT SEQUENCE (RESEARCH-UI Persistence step 1 + Code Example 1).
+  // BOOT SEQUENCE — direct read FIRST (open-and-go), pick only on a real
+  // miss (07.1-11 corrected contract).
   //
-  // CVE-2019-11730 / MFSA 2019-21: since Firefox 68 every local file is a
-  // unique opaque origin — same-directory fetch WAS the vulnerability the
-  // change removed — so on file:// this probe REJECTS by default in every
-  // current browser. Rejection routes to the folder pick (expected, never
-  // an error state); success auto-loads the full set via fetch.
+  // Why XMLHttpRequest and not fetch: the Fetch API cannot read file:// URLs in
+  // Firefox at all — CVE-2019-11730 / MFSA 2019-21 ("Same-origin policy
+  // treats all files in a directory as having the same-origin") closed the
+  // "Fetch API can read files in these directories" hole by removing file:
+  // URLs from fetch. Classic subresource reads were NOT removed:
+  // security.fileuri.strict_origin_policy (default TRUE) lets a file://
+  // document read files in the SAME DIRECTORY OR BELOW — the user's own
+  // tmp/network_all.html proves a same-dir iframe loads in their Firefox.
+  // Every expected path (data/story_glucose/..., data/..., rpg/data/...)
+  // sits below the HTML's directory, so the direct read is permitted on
+  // Firefox file:// and the page loads with ZERO clicks. Environments that
+  // genuinely block local reads (Chrome file://) fail the direct read and
+  // get the one-button folder pick — expected, never an error state,
+  // never silent.
   // -------------------------------------------------------------------------
   function boot() {
     if (bootState.booted) return; // idempotent (EDITOR.init runs once, but
                                   // EDITOR.load.boot stays re-run-safe)
     bootState.booted = true;
-    setProbeStatus(
-      "Probing this folder for the expected data files… " +
-      "(a direct-read probe — on file:// it is expected to be blocked; " +
-      "the folder picker below is the real path)");
-    if (typeof fetch !== "function" || typeof Promise !== "function") {
+    setProbeStatus("Looking for the data files in this folder…");
+    if (typeof XMLHttpRequest === "undefined") {
       fallbackToPickPanel(
-        "This browser exposes no fetch()/Promise — using the folder picker " +
+        "This browser exposes no XMLHttpRequest — using the folder picker " +
         "as the load path.");
       return;
     }
-    // Never a dead "loading…" state (Pitfall 2): if the probe has not
-    // settled within 4 s (a hanging server), reveal the picker anyway.
+    // Never a dead "loading…" state: if the direct read has not settled
+    // within 4 s (a hung handler), reveal the picker anyway.
     bootState.watchdog = window.setTimeout(function () {
       bootState.watchdog = null;
       if (!bootState.probeSettled) {
-        revealPickPanel("The automatic probe is taking unusually long — " +
-                        "you can use the folder picker below instead of " +
-                        "waiting.");
+        revealPickPanel("The automatic check is taking unusually long — " +
+                        "use the folder picker below instead of waiting.");
       }
     }, 4000);
 
-    fetch(MANIFEST_PATH, { cache: "no-store" })  // opportunistic probe ONLY
-      .then(function (resp) {
-        if (!resp || !resp.ok) {
-          throw new Error("probe miss (HTTP " +
-                          (resp ? resp.status : "no response") + ")");
-        }
-        return resp.text();
-      })
-      .then(function (manifestText) {
-        // Probe SUCCESS: the environment permits direct reads — auto-load
-        // the full set via fetch, then complete (shared completion path).
-        settleProbe();
-        setProbeStatus("Direct reads permitted here — auto-loading the " +
-                       "data set…");
-        var texts = {};
-        texts[MANIFEST_PATH] = manifestText;
-        return fetchTexts(EXPECTED.slice(1)).then(function (rest) {
-          mergeInto(texts, rest);
-          var mres = parseManifest(manifestText);
-          if (mres.error) {
-            return texts; // completed below — the manifest row reports it
-          }
-          return fetchTexts(storyPathsOf(mres.files))
-            .then(function (storyTexts) {
-              mergeInto(texts, storyTexts);
-              return texts;
-            });
-        });
-      })
-      .then(function (texts) {
-        completeFromTexts(texts, "fetch");
-      })
-      .catch(function (err) {
-        showFolderPickPanel(err); // the DEFAULT path on file:// — expected
+    xhrText(MANIFEST_PATH, function (manifestText) {
+      settleProbe();
+      if (manifestText == null) {
+        showFolderPickPanel(); // direct reads blocked here — expected in
+        return;                // environments without the same-dir policy
+      }
+      // Direct read SUCCESS: auto-load the full set and complete (the
+      // shared completion path — same as the pick path).
+      setProbeStatus("Data files found — auto-loading…");
+      var texts = {};
+      texts[MANIFEST_PATH] = manifestText;
+      var mres = parseManifest(manifestText);
+      var fixed = EXPECTED.slice(1);
+      var story = mres.error ? [] : storyPathsOf(mres.files);
+      xhrMany(fixed.concat(story), function (rest) {
+        mergeInto(texts, rest);
+        completeFromTexts(texts, "direct");
       });
+    });
   }
 
   function settleProbe() {
@@ -875,25 +924,18 @@
     }
   }
 
-  // The probe rejected (or fetch is unavailable): reveal the pick panel.
-  // Rejection is EXPECTED on file:// — this is the normal file:// flow,
-  // never an error state, never silent (Pitfall 2).
-  function showFolderPickPanel(err) {
-    settleProbe();
-    var why = describe(err);
-    var note = "";
-    if (why && why.indexOf("probe miss") !== 0) {
-      note = " (probe said: " + why + ")";
-    }
-    setProbeStatus("Direct file reads are not permitted here — " +
-                   "this is expected on file:// pages (every current " +
-                   "browser blocks them, Firefox >= 68 included). " +
-                   "Use the folder picker below." + note);
+  // The direct read missed: reveal the pick panel. Expected in
+  // environments that block local reads (Chrome file://); on Firefox
+  // file:// the same-dir-or-below policy normally makes this unreachable.
+  // Never an error state, never silent.
+  function showFolderPickPanel() {
+    setProbeStatus("Direct reads are blocked here — use the folder " +
+                   "picker below (one click).");
     revealPickPanel(null);
   }
 
-  // Guard-path wrapper (no fetch/Promise): defined after boot so the probe
-  // textually precedes every reference to the pick-panel reveal.
+  // Guard-path wrapper (no XMLHttpRequest): defined after boot so the
+  // probe textually precedes every reference to the pick-panel reveal.
   function fallbackToPickPanel(reason) {
     setProbeStatus(reason);
     revealPickPanel(null);
@@ -901,7 +943,9 @@
 
   // -------------------------------------------------------------------------
   // The folder pick: <input type="file" webkitdirectory multiple> — the
-  // universal no-API load path (the REAL path on file://, Firefox >= 68).
+  // one-button FALLBACK for environments that truly block local reads
+  // (e.g. Chrome file://). On Firefox file:// the direct read normally
+  // succeeds and this is never needed.
   // -------------------------------------------------------------------------
 
   function mountFolderPick() {
@@ -944,16 +988,28 @@
   function onFolderPicked(ev) {
     var input = ev.target;
     var files = (input && input.files) ? input.files : null;
+    // SNAPSHOT FIRST (07.1-11 fix — the "even upload not working at all"
+    // defect): clearing the input's value (to allow re-picking the same
+    // folder later) empties the selection, and in browsers where
+    // input.files is a LIVE list the captured reference empties with it.
+    // The original code cleared the input and THEN checked files.length —
+    // which silently returned on Firefox, so the picked folder appeared
+    // completely dead. Snapshot the File objects into a plain array
+    // BEFORE the clear; the File objects themselves stay valid afterwards.
+    var picked = [];
+    if (files) {
+      for (var j = 0; j < files.length; j++) picked.push(files[j]);
+    }
     if (input) input.value = ""; // allow re-picking the same folder later
-    if (!files || !files.length) return;
+    if (!picked.length) return;
     // SECURITY (Pitfall 3c): the FileList contains the ENTIRE picked tree
     // including .git. We compare PATHS against the fixed expected list and
     // read ONLY matched files with FileReader — .git and sibling files are
     // never enumerated into reads. Unsafe path shapes are rejected outright.
     var index = [];
     var matched = 0;
-    for (var i = 0; i < files.length; i++) {
-      var f = files[i];
+    for (var i = 0; i < picked.length; i++) {
+      var f = picked[i];
       var rel = (f && f.webkitRelativePath)
         ? f.webkitRelativePath
         : ((f && f.name) || "");
@@ -1201,6 +1257,14 @@
     if (!panel) return;
     var h2 = panel.getElementsByTagName("h2")[0] || null;
 
+    // The static expected-layout copy is the over-engineered wall the user
+    // rejected ("make it simple and no need to request this much work"):
+    // the checklist rows already state every expected path, and the
+    // fallback pick note says the one thing that matters. Hide it for
+    // good (open-and-go: the panel shows one status line, nothing else).
+    var help = document.getElementById("boot-help-copy");
+    if (help) help.setAttribute("hidden", "hidden");
+
     var head = document.createElement("div");
     head.id = "boot-head-row";
     head.className = "boot-head-row";
@@ -1240,7 +1304,7 @@
   // -------------------------------------------------------------------------
 
   ED.load = {
-    version: "0.1.0",
+    version: "0.2.0", // 0.2.0 = the 07.1-11 direct-load rework (XHR primary)
     MANIFEST_PATH: MANIFEST_PATH,
     STORY_DIR_PREFIX: STORY_DIR_PREFIX,
     EXPECTED: EXPECTED,                    // the fixed expected-path list
@@ -1250,7 +1314,7 @@
     severityFor: severityFor,              // "block" vs "warn" classification
     collectTopLevelKeys: collectTopLevelKeys,
     parseNoDupKeys: parseNoDupKeys,        // registry duplicate-key guard
-    boot: boot,                            // the probe (re-run-safe)
+    boot: boot,                            // the direct read (re-run-safe)
     // Draft-loaded hook point: fn({draft, sourceName, staleFiles,
     // recheckedAgainstFolder}) — 07.1-13 builds the full stale-draft UX on
     // this. Hooks fire defensively (one broken hook never breaks loading).
@@ -1261,8 +1325,8 @@
   };
 
   // -------------------------------------------------------------------------
-  // Init: mount the chrome + inputs, then run the probe (probe FIRST; the
-  // pick panel is revealed only by the rejection path).
+  // Init: mount the chrome + inputs, then run the direct read (probe FIRST;
+  // the pick panel is revealed only by the miss path).
   // -------------------------------------------------------------------------
 
   ED.init(function () {
