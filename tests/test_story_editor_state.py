@@ -38,6 +38,13 @@ GENERATOR = os.path.join(REPO_ROOT, "tools", "story_editor.py")
 CORE_ASSET = os.path.join(
     REPO_ROOT, "tools", "story_editor_assets", "00_core.js")
 
+# Make the sibling test helper importable (same sys.path pattern as
+# tests/test_story_editor_serializer_js.py's TOOLS_DIR import). The helper
+# replaces the old naive <script> extraction regex here (CodeQL
+# py/bad-tag-filter alerts #8, #9).
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import script_blocks  # noqa: E402  (side-effect-free stdlib helper)
+
 # The state-layer entry points later plans code against (07.1-04 plan).
 REQUIRED_SYMBOLS = [
     "EDITOR.apply", "EDITOR.undo", "EDITOR.redo", "EDITOR.setBundle",
@@ -146,19 +153,26 @@ class TestCoreAssetStateLayer(unittest.TestCase):
         functions (=>), no let/const declarations (var only), no ES-module
         scripts (type="module" fails under file:// CORS)."""
         self.assertNotIn('type="module"', self.html)
-        blocks = re.findall(r"<script>(.*?)</script>", self.html, re.S)
+        # Browser-faithful extraction (CodeQL py/bad-tag-filter): the old
+        # re.findall(r"<script>(.*?)</script>", ...) silently missed
+        # <SCRIPT foo="bar">-style blocks a browser WOULD execute.
+        blocks = script_blocks.extract_script_blocks(self.html)
         self.assertTrue(
             blocks, "expected at least one inline script block")
         for i, block in enumerate(blocks):
+            self.assertNotEqual(
+                (block.attrs.get("type") or "").lower(), "module",
+                "script block %d is an ES module (type=module); classic "
+                "scripts only (modules fail under file:// CORS)" % i)
             self.assertIsNone(
-                re.search(r"=>", block),
+                re.search(r"=>", block.text),
                 "script block %d contains an arrow function (=>); ES5 var-"
                 "style is the pinned emitted-JS convention" % i)
             self.assertIsNone(
-                re.search(r"\blet\s", block),
+                re.search(r"\blet\s", block.text),
                 "script block %d contains a let declaration" % i)
             self.assertIsNone(
-                re.search(r"\bconst\s", block),
+                re.search(r"\bconst\s", block.text),
                 "script block %d contains a const declaration" % i)
 
     def test_hooks_defensive(self):

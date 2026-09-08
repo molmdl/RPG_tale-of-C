@@ -42,6 +42,13 @@ GENERATOR = os.path.join(REPO_ROOT, "tools", "story_editor.py")
 ASSETS_DIR = os.path.join(REPO_ROOT, "tools", "story_editor_assets")
 DEFAULT_EMITTED = os.path.join(REPO_ROOT, "story_editor.html")
 
+# Make the sibling test helper importable (same sys.path pattern as
+# tests/test_story_editor_serializer_js.py's TOOLS_DIR import). The helper
+# replaces the old naive <script> extraction regex here (CodeQL
+# py/bad-tag-filter alerts #8, #9).
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import script_blocks  # noqa: E402  (side-effect-free stdlib helper)
+
 PROBE_NAME = "zz_probe.js"
 PROBE_MARKER = "/*PROBE_MARKER_71*/"
 
@@ -123,14 +130,21 @@ class TestEmittedShell(unittest.TestCase):
         # No top-level import statements in any classic script block
         # (import is module-only syntax; a bare occurrence would be a
         # SyntaxError at runtime anyway -- this pins the discipline).
-        blocks = re.findall(r"<script>(.*?)</script>", self.html, re.S)
+        # Browser-faithful extraction (CodeQL py/bad-tag-filter): the old
+        # re.findall(r"<script>(.*?)</script>", ...) silently missed
+        # <SCRIPT foo="bar">-style blocks a browser WOULD execute.
+        blocks = script_blocks.extract_script_blocks(self.html)
         self.assertTrue(
             blocks, "expected at least the DOMContentLoaded bootstrap block")
         for block in blocks:
+            self.assertNotEqual(
+                (block.attrs.get("type") or "").lower(), "module",
+                "ES-module script block found (module scripts fail under "
+                "file:// CORS): %r" % (block.text[:80],))
             self.assertIsNone(
-                re.search(r"(?m)^\s*import(?:\s|[\"('\)])", block),
+                re.search(r"(?m)^\s*import(?:\s|[\"('\)])", block.text),
                 "top-level import statement found in script block: %r"
-                % block[:80])
+                % block.text[:80])
 
     def test_shell_structure(self):
         """Boot panel, all 7 tab containers + data-tab buttons, node-form
