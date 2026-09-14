@@ -330,14 +330,24 @@ Planning pointers (recorded at insertion; resolve during planning):
   2. The reachability checker confirms all four ending tiers are reachable for each of the three characters (12 assertions, green) — the v1 success measure is met
   3. Fatty acid and alcohol pathway content (nodes, branch points, two-layer text, ending fates) passes the per-claim citation gate (no unapproved claims ship)
   4. A save/load round-trip works for fatty acid and alcohol playthroughs (RNG state + story position + scene restored) — human-verify at least one ending per character
-**Plans**: 4–6 plans — one per character × segment + its citations (see "Content Phase Plan Granularity" below). `/gsd-research-phase` for fatty acid / alcohol pathway branches + ending fates.
+**Plans**: 15 plans in 8 waves (post-research refinement of the 4–6 sketch; per-segment granularity per "Content Phase Plan Granularity" — character × segment + citations, mirroring Phase 7's pattern). Research landed: 08-RESEARCH-FA.md / 08-RESEARCH-ALC.md / 08-RESEARCH-MECHANICS.md.
 
 Plans:
-- [ ] 08-01: TBD — likely fatty acid entry + beta-oxidation path: nodes + citations + two-layer text
-- [ ] 08-02: TBD — likely fatty acid all 4 endings (True/Good/Normal/Bad) + reachability for FA
-- [ ] 08-03: TBD — likely alcohol entry + ADH/ALDH path: nodes + citations + two-layer text
-- [ ] 08-04: TBD — likely alcohol all 4 endings + reachability for alcohol
-- [ ] 08-05: TBD — likely cross-character reachability green (3 chars × 4 endings = 12 assertions) + citation gate green
+- [ ] 08-01-PLAN.md — Mechanics + structure decision checkpoint (merged bundle, stub→shell fate, select gating, cast/coverage strategy, restoration ids, ALC O2 node, shared claim ids) (Wave 1, checkpoint)
+- [ ] 08-02-PLAN.md — Approval batch FA: sources + ~20 claims + H1-H10 + Pitfall 9 flag (Wave 1, checkpoint)
+- [ ] 08-03-PLAN.md — Approval batch ALC: sources + ~16 claims + DC-1..DC-8 + O2-node ratification (Wave 1, checkpoint)
+- [ ] 08-04-PLAN.md — PDB acquisition (7 structures) + headless residue-identity probes (resi 304/487, chain ids, align_sele) (Wave 1)
+- [ ] 08-05-PLAN.md — Registry landing (sole writer): apply both batch verdicts, M1 keep-cand, gate re-run (Wave 2)
+- [ ] 08-06-PLAN.md — Atomic topology + re-pin: fa_path.json + alcohol_path.json skeletons + intro shells + edits/cast buckets + ALL count re-pins + editor artifacts (Wave 3)
+- [ ] 08-07-PLAN.md — FA content A: shell + entry + activation + CPT-1 fork + carnitine + shuttle (Wave 4)
+- [ ] 08-08-PLAN.md — ALC content A: shell + entry + ADH + acetaldehyde (Wave 4)
+- [ ] 08-09-PLAN.md — CHAR-01 code surface: StartDialog radios + achievements catalog (Wave 4)
+- [ ] 08-10-PLAN.md — FA content B: spiral + MCAD restoration (05.3 approach a) + handoff + shared-arc genericization (Wave 5)
+- [ ] 08-11-PLAN.md — ALC content B: NADH flood + fork + lipogenesis Good + O2 crisis (Wave 5)
+- [ ] 08-12-PLAN.md — FA content C: storage Good + O2-crisis Bad endings (Wave 6)
+- [ ] 08-13-PLAN.md — ALC content C: ALDH2 restoration (05.3 approach b) + acetate + ACSS2 (Wave 6)
+- [ ] 08-14-PLAN.md — STORY-02 test battery: 12-assertion matrix + per-char determinism + save/load + sweeps (Wave 7)
+- [ ] 08-15-PLAN.md — Final verification: gate battery + smoke re-alignment + headless replays + human-verify (SC1 + SC4) (Wave 8, checkpoint)
 
 ### Phase 9: Anaerobic Pathway + Full Cast + Documentation Completion
 **Goal**: The anaerobic pathway is represented per the chosen Phase 5 framing, the full ~20+ enzyme cast is populated with verified citations, and the dramatic cast list + slogan appear in both the README and in-game help — the content scope is complete.
