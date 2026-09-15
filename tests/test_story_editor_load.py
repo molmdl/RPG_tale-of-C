@@ -1,30 +1,45 @@
 """Structural load-layer test battery for the Phase 7.1 editor boot asset
-(07.1-07 Task 2; re-pinned by the 07.1-11 fix-forward).
+(07.1-07 Task 2; re-pinned by the 07.1-11 fix-forward; re-pinned again by
+the round-3 file:// policy correction -- debug session
+.planning/debug/story-editor-file-load.md).
 
-The 07.1-11 human checkpoint verdict was REJECTED: opening the page in
-Firefox auto-loaded nothing (no clicks, no graph) and even the folder pick
-did nothing at all. Root causes fixed here:
+Root causes fixed across the rounds:
 
-1. The boot probe used fetch(), which CANNOT read file:// URLs in Firefox
-   (>= 68) under any policy -- CVE-2019-11730/MFSA 2019-21 removed file:
-   URLs from the Fetch API ("The Fetch API can then be used to read the
-   contents of any files stored in these directories" was the vulnerability
-   being closed). Classic subresource reads are NOT banned:
-   security.fileuri.strict_origin_policy (default true) lets a file://
-   document read files in the SAME DIRECTORY OR BELOW -- the user's own
-   tmp/network_all.html proves a same-dir <iframe src> loads in their
-   Firefox. The direct load therefore runs over XMLHttpRequest, so opening
-   the page in Firefox auto-loads data/ + rpg/data/ with ZERO clicks.
+1. (07.1-11) The boot probe used fetch(), which CANNOT read file:// URLs
+   in Firefox at all -- CVE-2019-11730/MFSA 2019-21 removed file: URLs
+   from the Fetch API. The probe moved to XMLHttpRequest.
    (test_direct_probe_then_fallback)
-2. The folder-pick handler cleared input.value = "" while still holding the
-   LIVE input.files list; in Firefox the captured reference empties with
-   the clear, so the handler silently returned before doing anything ("even
-   upload not working at all"). The File objects are now snapshotted into a
-   plain array BEFORE the clear. (test_pick_snapshot_before_clear)
-3. The boot ceremony (long static explanation wall + probe-then-pick
-   choreography) is reduced to the simple model the user demanded:
-   open-and-go direct load, ONE button in the fallback, minimal copy.
-   (test_simplified_boot_copy)
+1b. (round 3) The 07.1-11 premise "classic reads stay permitted same
+   directory or below under security.fileuri.strict_origin_policy
+   (default true)" is DEAD in current Firefox. VERIFIED EMPIRICALLY on
+   the user's own Firefox 155.0.1 (fresh default profile, headless sync
+   XHR + iframe probes; the user's real profile carries no fileuri
+   override): with defaults, a file:// page permits NO programmatic file
+   reads at all (sync XHR throws NetworkError on EXISTING same-dir,
+   subdir and 2-level files; iframe documents DISPLAY -- the user's
+   network_all.html proof was display-only -- but
+   iframe.contentDocument is null). strict_origin_policy=false restores
+   classic reads (sync XHR status 200 + readable iframe DOMs);
+   privacy.file_unique_origin is irrelevant; Chrome needs
+   --allow-file-access-from-files (verified end-to-end auto-load on the
+   real page with that flag). Consequence: the XHR probe stays (it is
+   correct wherever reads are permitted -- http(s) serving, the Chrome
+   flag, a pref flip), and the DEFAULT path is the ONE-GESTURE fallback.
+   (test_direct_probe_then_fallback, test_dragdrop_folder_zone)
+2. The round-3 ONE-GESTURE fallback: a drag-and-drop folder zone
+   (DataTransferItem.webkitGetAsEntry recursive traversal -- readEntries
+   BATCHES discipline; File objects fetched ONLY for the WANTED paths;
+   .git enumerated by name only) alongside the one-click webkitdirectory
+   pick; a document-level dragover/drop canceler keeps stray drops from
+   navigating the page away. (test_dragdrop_folder_zone)
+3. The folder-pick handler cleared input.value = "" while still holding
+   the LIVE input.files list ("even upload not working at all"); File
+   objects are snapshotted BEFORE the clear.
+   (test_pick_snapshot_before_clear)
+4. The boot ceremony (long static explanation wall + probe-then-pick
+   choreography) is reduced to the simple model the user demanded; the
+   copy now tells the truth about the default (auto reads blocked,
+   one gesture loads everything). (test_simplified_boot_copy)
 
 Still pinned from 07.1-07 (unchanged contract):
 
@@ -283,9 +298,11 @@ class TestLoadAssetStructure(unittest.TestCase):
         self.assertIn(
             "setTimeout", self.src,
             "a probe watchdog is required (never a dead loading state)")
-        # The corrected policy claim: strict_origin_policy permits
-        # same-directory-or-below reads (the user's iframe precedent), and
-        # the CVE is cited for what it actually removed (fetch on file://).
+        # The corrected policy record: the CVE is cited for what it
+        # actually removed (fetch on file://), the controlling pref is
+        # named, the legacy read window is described (and marked CLOSED by
+        # default), and the round-3 empirical verdict is pinned: current
+        # default Firefox permits NO programmatic file reads from file://.
         self.assertIn(
             "CVE-2019-11730", self.src,
             "the transport correction must cite CVE-2019-11730")
@@ -295,12 +312,116 @@ class TestLoadAssetStructure(unittest.TestCase):
             "strict_origin_policy")
         self.assertIn(
             "same directory or below", self.src,
-            "the corrected claim must state the permitted scope: same "
-            "directory or below")
-        # The green auto-load banner survives (the zero-click success state).
+            "the record must describe the legacy read window (now closed "
+            "by default): same directory or below")
+        self.assertIn(
+            "NO programmatic file reads", self.src,
+            "the round-3 empirical verdict must be pinned: default "
+            "Firefox 155 permits NO programmatic file reads from file://")
+        self.assertIn(
+            'version: "0.3.0"', self.src,
+            "the round-3 rework must bump EDITOR.load to 0.3.0")
+        # The green auto-load banner survives (the zero-click success state
+        # where reads ARE permitted: http(s), the Chrome flag, a pref flip).
         self.assertIn(
             "Data auto-detected in sub-directories", self.src,
             "the zero-click success banner phrase must survive")
+
+    # ------------------------------------------------------------------
+    # 4d. The drag-and-drop ONE-GESTURE fallback (round 3)
+    # ------------------------------------------------------------------
+
+    def test_dragdrop_folder_zone(self):
+        """The drop path: a mounted #boot-drop-zone wired to onDrop; the
+        recursive webkitGetAsEntry traversal observes the readEntries
+        BATCHES discipline and applies the same pathIsUnsafe guards; File
+        objects are fetched ONLY for the WANTED paths (the whole tree is
+        enumerated by name only); the drop completes through the SAME
+        pickFlow with pickSource "drop" (dropped-folder wording); the
+        gesture halves are mounted at init; and a document-level
+        dragover/drop canceler keeps stray drops from navigating away."""
+        # The zone + its wiring, mounted at init with the pick panel.
+        self.assertIn(
+            "boot-drop-zone", self.src,
+            "the drag-and-drop zone element is missing")
+        self.assertIn(
+            "function mountDropZone(", self.src,
+            "the zone mount is missing")
+        self.assertIn(
+            "function onDrop(", self.src,
+            "the drop handler is missing")
+        self.assertIn(
+            "function installGlobalDropGuard(", self.src,
+            "the stray-drop navigation guard is missing")
+        init_i = self.src.find("ED.init(function () {")
+        self.assertGreaterEqual(init_i, 0, "the load init is missing")
+        mount_i = self.src.find("mountDropZone();", init_i)
+        guard_i = self.src.find("installGlobalDropGuard();", init_i)
+        self.assertGreater(
+            mount_i, init_i,
+            "the drop zone must be mounted at init")
+        self.assertGreater(
+            guard_i, mount_i,
+            "the global drop guard must be installed at init")
+        boot_i = self.src.find("boot();", init_i)
+        self.assertGreater(
+            boot_i, guard_i,
+            "the direct probe still runs after the mounts (probe-first)")
+        # Document-level stray-drop cancels (navigation would lose the page).
+        self.assertIn(
+            'addEventListener("dragover"', self.src,
+            "dragover cancel missing (a stray drop would navigate away)")
+        self.assertIn(
+            'addEventListener("drop"', self.src,
+            "drop cancel missing (a stray drop would navigate away)")
+        # The recursive entry traversal + batch discipline.
+        self.assertIn(
+            "webkitGetAsEntry", self.src,
+            "the drop must walk DataTransferItems via webkitGetAsEntry")
+        self.assertIn(
+            "function traverseEntry(", self.src,
+            "the recursive directory walker is missing")
+        self.assertIn(
+            "readEntries", self.src,
+            "the directory reader must use readEntries")
+        self.assertIn(
+            "BATCHES", self.src,
+            "the readEntries BATCHES discipline must be documented (a "
+            "single call silently truncates big folders)")
+        self.assertIn(
+            "empty batch", self.src,
+            "the walker must re-call readEntries until an empty batch")
+        trav_i = self.src.find("function traverseEntry(")
+        guard2_i = self.src.find("pathIsUnsafe(rel)", trav_i)
+        self.assertGreater(
+            guard2_i, trav_i,
+            "the drop walker must apply the same pathIsUnsafe guards")
+        # File objects are materialized ONLY for the WANTED paths (never
+        # the whole dropped tree).
+        self.assertIn(
+            "ONLY for the WANTED paths", self.src,
+            "the wanted-paths-only File discipline must be documented")
+        self.assertIn(
+            "function getFileAt(", self.src,
+            "the File/FileSystemEntry normalizer is missing")
+        self.assertIn(
+            "function materializeFiles(", self.src,
+            "the wanted-files materializer is missing")
+        # The drop completes through the same pickFlow (source "drop").
+        drop_i = self.src.find("function onDrop(")
+        flow_i = self.src.find("pickFlow();", drop_i)
+        self.assertGreater(
+            flow_i, drop_i,
+            "the drop must complete through the shared pickFlow")
+        self.assertIn(
+            'bootState.pickSource = "drop"', self.src,
+            "the drop must mark pickSource (dropped-folder wording)")
+        self.assertIn(
+            "Data loaded from the dropped folder", self.src,
+            "the dropped-folder success banner phrase is required")
+        self.assertIn(
+            '"dropped"', self.src,
+            "the checklist/blocked copy must name the dropped gesture")
 
     # ------------------------------------------------------------------
     # 4b. The folder-pick live-FileList fix (07.1-11)
@@ -499,7 +620,7 @@ class TestLoadAssetStructure(unittest.TestCase):
         block = _asset_block(self.html)
         for needle in ("webkitdirectory", "matchesExpected", "readAsText",
                        "Load draft", ".json,application/json",
-                       "XMLHttpRequest"):
+                       "XMLHttpRequest", "webkitGetAsEntry"):
             self.assertIn(needle, block,
                           "emitted load block lacks %r" % needle)
         # The block must close before the shell's bootstrap (the LAST
