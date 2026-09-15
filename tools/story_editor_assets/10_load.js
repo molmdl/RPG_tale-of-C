@@ -1,9 +1,11 @@
 /* ==========================================================================
- * 10_load.js — the boot/load layer: DIRECT read on boot (open-and-go) ->
- * one-button folder-pick fallback -> checklist -> EDITOR.setBundle, plus
- * the single-file draft reload. Owner plan 07.1-07; direct-load rework =
- * the 07.1-11 fix-forward (rejected human checkpoint verdict: "not
- * working, even upload not working at all ... try to make it simple").
+ * 10_load.js — the boot/load layer: DIRECT read on boot (open-and-go where
+ * the environment permits) -> ONE-GESTURE fallback (drag the repo folder
+ * onto the panel, or one-click folder pick) -> checklist ->
+ * EDITOR.setBundle, plus the single-file draft reload. Owner plan 07.1-07;
+ * direct-load rework = the 07.1-11 fix-forward; transport-policy
+ * correction + drag-and-drop fallback = the 07.1-11 round-3 fix-forward
+ * (debug session .planning/debug/story-editor-file-load.md).
  *
  * FILE OWNERSHIP: this asset belongs to plan 07.1-07. It owns #boot-panel.
  * Never edit another plan's asset (00_core.js = 07.1-04, 05_json.js =
@@ -12,42 +14,70 @@
  *
  * THE BINDING USER DIRECTIVE (verbatim): Firefox + "detect sub-dir in the
  * same dir of the html ... try to make it simple and no need to request
- * this much work". The simple model:
+ * this much work". The policy-verified model (v0.3.0):
  *
- *   1. DIRECT READ ON BOOT (primary, zero clicks). The editor reads
- *      data/story_glucose/manifest.json and the rest of the expected set
- *      straight off the disk and renders the graph immediately — the green
- *      "Data auto-detected in sub-directories" banner. All expected paths
- *      sit BELOW the HTML's own directory (data/... and rpg/data/... under
- *      the repo root).
- *   2. TRANSPORT CORRECTION (07.1-11). The original layer probed with
- *      the Fetch API and treated its file:// rejection as "Firefox blocks local
- *      reads" (CVE-2019-11730). That premise was WRONG, and the rejected
- *      checkpoint proved it: the Fetch API cannot read file:// URLs in Firefox
- *      at all — CVE-2019-11730 / MFSA 2019-21 ("Same-origin policy treats
- *      all files in a directory as having the same-origin") named the
- *      Fetch API as the exfiltration primitive ("The Fetch API can then
- *      be used to read the contents of any files stored in these
- *      directories"), and removing file: URLs from fetch was the fix.
- *      Classic subresource reads are NOT banned: Firefox's
- *      security.fileuri.strict_origin_policy (default TRUE) permits a
- *      file:// document to read files in the same directory or below it
- *      (i.e. the SAME DIRECTORY OR BELOW — the user's own living proof
- *      is tmp/network_all.html, whose
- *      same-directory <iframe src="network_ibp_mode_0.pdb_ali.html">
- *      loads fine in their Firefox. The fetch rejection only ever proved
- *      "fetch cannot do file://", never "reads are blocked" — so the
- *      direct load now uses XMLHttpRequest (the same policy class as the
- *      iframe), and on Firefox file:// the page is open-and-go with ZERO
- *      clicks. Chrome (and any environment that truly blocks local
- *      reads) takes the fallback.
- *   3. ONE-BUTTON FOLDER PICK (fallback only). If the direct read actually
- *      fails, the editor shows ONE control: <input type="file"
- *      webkitdirectory multiple>. File.webkitRelativePath is matched
- *      against the fixed EXPECTED path list via a "/"-boundary suffix
- *      match. Picking a parent of the repo works; picking a child folder
- *      (e.g. data/) matches nothing by design — the checklist then says
- *      "select the repository root".
+ *   1. DIRECT READ ON BOOT (zero clicks WHERE PERMITTED). The editor
+ *      probes data/story_glucose/manifest.json and the rest of the
+ *      expected set off the disk and renders the graph immediately — the
+ *      green "Data auto-detected in sub-directories" banner. All expected
+ *      paths sit BELOW the HTML's own directory (data/... and
+ *      rpg/data/... under the repo root).
+ *   2. TRANSPORT + POLICY RECORD (07.1-11, CORRECTED round 3). The
+ *      original layer probed with the Fetch API; the Fetch API cannot
+ *      read file:// URLs in Firefox at all (CVE-2019-11730 / MFSA 2019-21
+ *      removed file: URLs from fetch — "The Fetch API can then be used
+ *      to read the contents of any files stored in these directories"
+ *      named the closed hole). 07.1-11 then moved the probe to
+ *      XMLHttpRequest on the premise that
+ *      security.fileuri.strict_origin_policy (default true) still lets a
+ *      file:// document read files in the same directory or below.
+ *      ROUND-3 EMPIRICAL CORRECTION (verified 2026-09-15 ON THE USER'S
+ *      OWN Firefox 155.0.1, fresh default profile AND their real profile
+ *      — their prefs carry no fileuri override — via headless sync-XHR
+ *      and iframe probes, see the debug session):
+ *        - With strict_origin_policy at its DEFAULT (true), a file://
+ *          page permits NO programmatic file reads at all: sync XHR
+ *          throws NetworkError on EXISTING same-dir, subdir and 2-level
+ *          files exactly as on missing files; iframe documents still
+ *          DISPLAY (the user's tmp/network_all.html same-dir iframe
+ *          "proof" was display-only — it never read content) but
+ *          iframe.contentDocument is null even same-dir; fetch remains
+ *          unusable (the CVE fix). The old "same directory or below"
+ *          permission window for READS is closed in current Firefox.
+ *        - strict_origin_policy = false DOES restore the classic
+ *          behavior (verified: sync XHR status 200 with content,
+ *          subdir/2-level iframe DOMs readable) — but flipping a global
+ *          security pref is NOT a load path we ask of users.
+ *        - privacy.file_unique_origin is irrelevant here (verified).
+ *        - Chrome blocks file:// XHR by design; only
+ *          --allow-file-access-from-files relaxes it (verified: the
+ *          whole auto-load flow then works end-to-end on the real page).
+ *      CONSEQUENCE: zero-click auto-load exists only where reads are
+ *      permitted — serving the repo over http(s), Chrome with
+ *      --allow-file-access-from-files, or a pref flip. On stock
+ *      Firefox/Chrome double-click, the probe misses in milliseconds and
+ *      the ONE-GESTURE panel below is the path. The XHR transport stays:
+ *      it is exactly right wherever reads ARE permitted, costs nothing
+ *      where they are not, and the watchdog still guards hangs.
+ *   3. ONE GESTURE FALLBACK (the default on stock browsers). On a probe
+ *      miss the editor reveals ONE panel with TWO equally-simple
+ *      gestures, both landing in the same matching + checklist flow:
+ *        a. DRAG-AND-DROP: drag the repository folder (or any parent of
+ *           it) onto the drop zone. DataTransferItem.webkitGetAsEntry()
+ *           recursion builds the relative-path index (readEntries returns
+ *           BATCHES — it is re-called until an empty batch). File objects
+ *           are fetched ONLY for the WANTED paths via entry.file() — the
+ *           whole dropped tree (.git included) is enumerated by NAME
+ *           only, never materialized or read. The "/"-boundary suffix
+ *           matcher treats entry.fullPath exactly like the pick's
+ *           File.webkitRelativePath (a dropped parent of the repo works;
+ *           a child folder matches nothing by design — the checklist then
+ *           says "select the repository root"). A document-level
+ *           dragover/drop canceler keeps a stray drop from navigating
+ *           the page away.
+ *        b. ONE-CLICK FOLDER PICK: <input type="file" webkitdirectory
+ *           multiple> — unchanged from 07.1-11 (snapshot-before-clear
+ *           fix preserved).
  *   4. FOUND/MISSING CHECKLIST. One row per expected path with ✓/✗ and the
  *      friendly hint; the story-file rows are derived FROM the loaded
  *      manifest (manifest.files — never hard-listed before it loads).
@@ -164,7 +194,8 @@
     watchdog: null,       // probe-hang timer (never a dead "loading…" state)
     pickRevealed: false,  // the folder-pick panel is visible
     pickNoteSet: false,
-    pickedIndex: null,    // last folder pick: [{rel, file}] (safe paths only)
+    pickedIndex: null,    // last pick/drop: [{rel, file}] or [{rel, entry}]
+    pickSource: null,     // "pick" | "drop" — which gesture built the index
     lastPickMatched: 0,   // how many of the 5 expected paths the pick matched
     folderRawByFname: null, // last PICK-completed {fname: rawText} — the
                             // fingerprint baseline for draft staleness
@@ -558,10 +589,11 @@
     var el = document.getElementById("boot-pick-note");
     if (!el) return;
     el.textContent = note || (
-      "Direct reads are blocked in this browser — that is expected when " +
-      "a locally opened page is not allowed to read files here. Click " +
-      "below and select the repository root folder (or any parent of it); " +
-      "the editor matches the expected data paths itself.");
+      "Automatic folder reads are blocked by default in current Firefox " +
+      "and Chrome — that is expected for a locally opened page. One " +
+      "gesture loads everything: drag the repository root folder (or any " +
+      "parent of it) onto the zone below, or click to pick it; the " +
+      "editor matches the expected data paths itself.");
   }
 
   // Reveals the folder-pick panel (idempotent). Called ONLY after the
@@ -588,8 +620,9 @@
     if (source === "direct") {
       return "missing (not reachable from this location)";
     }
-    return "expected under the folder you picked; did you select the " +
-           "repository root?";
+    var gesture = (source === "drop") ? "dropped" : "picked";
+    return "expected under the folder you " + gesture + "; did you " +
+           "select the repository root?";
   }
 
   function renderChecklist(rows) {
@@ -743,10 +776,12 @@
     renderChecklist(rows);
     bootState.loaded = false;
     var extra = "";
-    if (source === "pick" && bootState.lastPickMatched === 0) {
-      extra = " No expected file matched the picked folder — a sub-folder " +
-              "pick (like data/) matches nothing by design: select the " +
-              "repository root.";
+    if ((source === "pick" || source === "drop") &&
+        bootState.lastPickMatched === 0) {
+      extra = " No expected file matched the " +
+              (source === "drop" ? "dropped" : "picked") +
+              " folder — a sub-folder (like data/) matches nothing by " +
+              "design: select the repository root.";
     }
     var items = [{
       text: "Editor cannot start — " + blockers.length +
@@ -783,13 +818,13 @@
       cast: parsed.cast,            // null on degrade (viewer convention)
       order: order
     };
-    if (source === "pick") {
+    if (source === "pick" || source === "drop") {
       // The fresh folder texts become the fingerprint baseline for the
       // draft staleness comparison (both pick orders are supported).
       bootState.folderRawByFname = rawByFname;
     }
 
-    if (bootState.draftActive && source === "pick") {
+    if (bootState.draftActive && (source === "pick" || source === "drop")) {
       // A draft session is active: the re-pick must NOT silently discard it
       // (RESEARCH-UI step 4 — "if the folder is also re-picked, fingerprint
       // comparison warns"). Refresh the baseline, compare, warn; reload the
@@ -833,6 +868,8 @@
     var msg;
     if (source === "direct") {
       msg = "Data auto-detected in sub-directories"; // the green banner
+    } else if (source === "drop") {
+      msg = "Data loaded from the dropped folder";
     } else {
       msg = "Data loaded from the picked folder";
     }
@@ -848,7 +885,9 @@
     setSummary("Loaded " + order.length + " story file(s) from " +
                (source === "direct"
                  ? "direct reads (sub-directories detected)"
-                 : "the picked folder") +
+                 : (source === "drop"
+                    ? "the dropped folder"
+                    : "the picked folder")) +
                (warnings.length
                  ? " — " + warnings.length + " warning(s)"
                  : "") + ".");
@@ -856,23 +895,25 @@
   }
 
   // -------------------------------------------------------------------------
-  // BOOT SEQUENCE — direct read FIRST (open-and-go), pick only on a real
-  // miss (07.1-11 corrected contract).
+  // BOOT SEQUENCE — direct read FIRST (open-and-go where permitted), the
+  // one-gesture panel only on a real miss.
   //
-  // Why XMLHttpRequest and not fetch: the Fetch API cannot read file:// URLs in
-  // Firefox at all — CVE-2019-11730 / MFSA 2019-21 ("Same-origin policy
+  // Why XMLHttpRequest and not fetch: the Fetch API cannot read file:// URLs
+  // in Firefox at all — CVE-2019-11730 / MFSA 2019-21 ("Same-origin policy
   // treats all files in a directory as having the same-origin") closed the
   // "Fetch API can read files in these directories" hole by removing file:
-  // URLs from fetch. Classic subresource reads were NOT removed:
-  // security.fileuri.strict_origin_policy (default TRUE) lets a file://
-  // document read files in the SAME DIRECTORY OR BELOW — the user's own
-  // tmp/network_all.html proves a same-dir iframe loads in their Firefox.
-  // Every expected path (data/story_glucose/..., data/..., rpg/data/...)
-  // sits below the HTML's directory, so the direct read is permitted on
-  // Firefox file:// and the page loads with ZERO clicks. Environments that
-  // genuinely block local reads (Chrome file://) fail the direct read and
-  // get the one-button folder pick — expected, never an error state,
-  // never silent.
+  // URLs from fetch. XHR is the remaining classic transport; whether it
+  // actually READS a file:// subresource depends on the policy era:
+  // ROUND-3 verification on the user's own Firefox 155.0.1 (defaults) shows
+  // the legacy same-directory-or-below read window is CLOSED by default
+  // (security.fileuri.strict_origin_policy=true now denies EVERY file://
+  // XHR — sync probes thrown NetworkError on existing files — and hides
+  // iframe DOMs). So on stock Firefox/Chrome double-click the probe misses
+  // in milliseconds and the drag-and-drop / folder-pick panel takes over —
+  // expected, never an error state, never silent. Where reads ARE
+  // permitted (http(s) serving, Chrome --allow-file-access-from-files —
+  // verified end-to-end — or a strict_origin_policy=false flip), the
+  // direct read succeeds with ZERO clicks and the green banner.
   // -------------------------------------------------------------------------
   function boot() {
     if (bootState.booted) return; // idempotent (EDITOR.init runs once, but
@@ -924,13 +965,13 @@
     }
   }
 
-  // The direct read missed: reveal the pick panel. Expected in
-  // environments that block local reads (Chrome file://); on Firefox
-  // file:// the same-dir-or-below policy normally makes this unreachable.
-  // Never an error state, never silent.
+  // The direct read missed: reveal the one-gesture panel (drag-and-drop
+  // zone + folder pick). THE expected path on stock Firefox/Chrome
+  // double-click (file:// reads are blocked by default in both — see the
+  // header record). Never an error state, never silent.
   function showFolderPickPanel() {
-    setProbeStatus("Direct reads are blocked here — use the folder " +
-                   "picker below (one click).");
+    setProbeStatus("Direct reads are blocked here — drag the repository " +
+                   "folder onto the zone below, or pick it (one click).");
     revealPickPanel(null);
   }
 
@@ -942,10 +983,10 @@
   }
 
   // -------------------------------------------------------------------------
-  // The folder pick: <input type="file" webkitdirectory multiple> — the
-  // one-button FALLBACK for environments that truly block local reads
-  // (e.g. Chrome file://). On Firefox file:// the direct read normally
-  // succeeds and this is never needed.
+  // The folder pick: <input type="file" webkitdirectory multiple> — half of
+  // the ONE-GESTURE fallback (the other half is the drag-and-drop zone
+  // below it). THE expected path on stock Firefox AND Chrome file:// —
+  // both block programmatic reads by default (see the header record).
   // -------------------------------------------------------------------------
 
   function mountFolderPick() {
@@ -977,12 +1018,54 @@
     mount.appendChild(wrap);
   }
 
-  function findByPath(path) {
+  function findItem(path) {
     var index = bootState.pickedIndex || [];
     for (var i = 0; i < index.length; i++) {
-      if (matchesSuffix(index[i].rel, path)) return index[i].file;
+      if (matchesSuffix(index[i].rel, path)) return index[i];
     }
     return null;
+  }
+
+  // An index item carries EITHER file (a File from the picker / a flat
+  // drop) OR entry (a FileSystemFileEntry from a folder drop). getFileAt
+  // normalizes both to a File via cb — entry.file() is async and is the
+  // ONLY place File objects are fetched for dropped entries (File objects
+  // are fetched ONLY for the WANTED paths, never for the whole tree).
+  function getFileAt(item, cb) {
+    if (!item) {
+      cb(null);
+      return;
+    }
+    if (item.file) {
+      cb(item.file);
+      return;
+    }
+    try {
+      item.entry.file(function (f) { cb(f); }, function () { cb(null); });
+    } catch (e) {
+      cb(null);
+    }
+  }
+
+  // Resolves wanted index items to {expectedPath: File} (null-tolerant:
+  // an unresolvable entry simply lands in the map as null-derived and the
+  // checklist reports the miss).
+  function materializeFiles(items, cb) {
+    var out = {};
+    var pending = items.length;
+    if (!pending) {
+      cb(out);
+      return;
+    }
+    for (var i = 0; i < items.length; i++) {
+      (function (it) {
+        getFileAt(it.item, function (f) {
+          if (f) out[it.path] = f;
+          pending--;
+          if (pending === 0) cb(out);
+        });
+      })(items[i]);
+    }
   }
 
   function onFolderPicked(ev) {
@@ -1018,47 +1101,223 @@
       if (matchesExpected(rel)) matched++;
     }
     bootState.pickedIndex = index;
+    bootState.pickSource = "pick";
     bootState.lastPickMatched = matched;
     pickFlow();
   }
 
+  // The shared completion flow for BOTH gestures (the folder pick and the
+  // drag-and-drop): resolve the manifest, derive the story paths from it,
+  // materialize File objects for the WANTED paths only, read them, and
+  // hand the texts to completeFromTexts. bootState.pickSource
+  // ("pick" | "drop") drives the user-facing wording.
   function pickFlow() {
-    var manifestFile = findByPath(MANIFEST_PATH);
-    if (!manifestFile) {
-      // No manifest in the pick: the story files are unknown without it —
-      // complete with everything missing (the checklist + blocker explain).
-      completeFromTexts({}, "pick");
+    var source = bootState.pickSource || "pick";
+    var manifestItem = findItem(MANIFEST_PATH);
+    if (!manifestItem) {
+      // No manifest in the gesture: the story files are unknown without
+      // it — complete with everything missing (the checklist + blocker
+      // explain).
+      completeFromTexts({}, source);
       return;
     }
-    readText(manifestFile, function (manifestText) {
-      var texts = {};
-      texts[MANIFEST_PATH] = manifestText;
-      var mres = parseManifest(manifestText);
-      var fileMap = {};
-      var wanted = [];
-      var fixed = EXPECTED.slice(1);
-      var fnames = mres.error ? [] : mres.files;
-      var i;
-      for (i = 0; i < fixed.length; i++) {
-        var f = findByPath(fixed[i]);
-        if (f) {
-          fileMap[fixed[i]] = f;
-          wanted.push(fixed[i]);
-        }
+    getFileAt(manifestItem, function (manifestFile) {
+      if (!manifestFile) {
+        completeFromTexts({}, source);
+        return;
       }
-      for (var s = 0; s < fnames.length; s++) {
-        var p = storyPathOf(fnames[s]);
-        var sf = findByPath(p);
-        if (sf) {
-          fileMap[p] = sf;
-          wanted.push(p);
+      readText(manifestFile, function (manifestText) {
+        var texts = {};
+        texts[MANIFEST_PATH] = manifestText;
+        var mres = parseManifest(manifestText);
+        var wanted = [];        // expected paths in the map
+        var wantedItems = [];   // [{path, item}]
+        var fixed = EXPECTED.slice(1);
+        var fnames = mres.error ? [] : mres.files;
+        var i;
+        for (i = 0; i < fixed.length; i++) {
+          var f = findItem(fixed[i]);
+          if (f) {
+            wanted.push(fixed[i]);
+            wantedItems.push({ path: fixed[i], item: f });
+          }
         }
-      }
-      readMany(fileMap, wanted, function (readTexts) {
-        mergeInto(texts, readTexts);
-        completeFromTexts(texts, "pick");
+        for (var s = 0; s < fnames.length; s++) {
+          var p = storyPathOf(fnames[s]);
+          var sf = findItem(p);
+          if (sf) {
+            wanted.push(p);
+            wantedItems.push({ path: p, item: sf });
+          }
+        }
+        materializeFiles(wantedItems, function (fileMap) {
+          readMany(fileMap, wanted, function (readTexts) {
+            mergeInto(texts, readTexts);
+            completeFromTexts(texts, source);
+          });
+        });
       });
     });
+  }
+
+  // -------------------------------------------------------------------------
+  // DRAG-AND-DROP folder load (the ONE-GESTURE fallback, works on file://
+  // in BOTH current Firefox and Chrome — the gesture grants the access, no
+  // policy involved). The drop hands us DataTransferItems; each folder
+  // item's webkitGetAsEntry() yields a FileSystemDirectoryEntry that is
+  // walked recursively. readEntries returns BATCHES (typically <= 100) and
+  // MUST be re-called until an empty batch before the directory counts as
+  // drained. Only the NAMES travel the tree; File objects are fetched
+  // ONLY for the WANTED paths later (getFileAt) — .git and every
+  // unrelated file are enumerated by name only, never materialized or
+  // read (the same Pitfall 3c discipline as the pick).
+  // -------------------------------------------------------------------------
+
+  function mountDropZone() {
+    var wrap = document.getElementById("boot-pick-wrap");
+    if (!wrap) return;
+    var zone = document.createElement("div");
+    zone.id = "boot-drop-zone";
+    zone.className = "boot-drop-zone";
+    zone.textContent = "Drag your repository folder here";
+    zone.addEventListener("dragover", function (ev) {
+      ev.preventDefault(); // mark the zone as a drop target
+      zone.classList.add("boot-drop-hot");
+    });
+    zone.addEventListener("dragleave", function () {
+      zone.classList.remove("boot-drop-hot");
+    });
+    zone.addEventListener("drop", onDrop);
+    wrap.insertBefore(zone, wrap.firstChild.nextSibling); // after the note
+  }
+
+  // rel path for a dropped entry: entry.fullPath begins with "/" and
+  // carries the dropped folder's own name as its first segment
+  // ("/RPG_tale-of-C/data/..."). Stripping the leading "/" yields exactly
+  // the same shape as File.webkitRelativePath, so matchesSuffix treats a
+  // dropped parent-of-repo just like a picked one.
+  function relOfEntry(entry) {
+    var p = String(entry.fullPath || entry.name || "");
+    return p.charAt(0) === "/" ? p.slice(1) : p;
+  }
+
+  // Recursive walker. pending counts undrained directories; done fires
+  // when every directory has been fully read. The batch rule is the
+  // load-bearing detail: readEntries returns BATCHES — re-call until an
+  // empty batch (a single call silently truncates big folders).
+  function traverseEntry(entry, index, pending, done) {
+    if (entry.isFile) {
+      var rel = relOfEntry(entry);
+      if (pathIsUnsafe(rel)) return; // same guards as the pick path
+      index.push({ rel: rel, entry: entry });
+      return;
+    }
+    if (!entry.isDirectory) return;
+    pending.count++;
+    var reader = entry.createReader();
+    var readBatch = function () {
+      reader.readEntries(function (batch) {
+        if (!batch || !batch.length) {
+          pending.count--;
+          if (pending.count === 0) done();
+          return;
+        }
+        for (var i = 0; i < batch.length; i++) {
+          traverseEntry(batch[i], index, pending, done);
+        }
+        readBatch(); // drain the NEXT batch (BATCHES rule above)
+      }, function () {
+        // An unreadable directory behaves like an empty one — never hang.
+        pending.count--;
+        if (pending.count === 0) done();
+      });
+    };
+    readBatch();
+  }
+
+  function onDrop(ev) {
+    ev.preventDefault();
+    var zone = document.getElementById("boot-drop-zone");
+    if (zone) zone.classList.remove("boot-drop-hot");
+    var dt = ev.dataTransfer;
+    var items = (dt && dt.items) ? dt.items : null;
+    var entries = [];
+    if (items) {
+      for (var i = 0; i < items.length; i++) {
+        var ent = null;
+        try {
+          ent = items[i].webkitGetAsEntry
+            ? items[i].webkitGetAsEntry() : null;
+        } catch (e) {
+          ent = null;
+        }
+        if (ent) entries.push(ent);
+      }
+    }
+    if (entries.length) {
+      // Entry path: recursive NAME-ONLY traversal; File objects come
+      // later, for wanted paths only. pending is a GLOBAL counter: every
+      // directory +1 once and -1 once (on its empty/error batch); done
+      // fires exactly once when the count returns to 0 — i.e. when EVERY
+      // dropped directory has drained. readEntries callbacks are always
+      // deferred, so the synchronous top-level loop finishes counting #
+      // dirs before any drain can decrement.
+      var index = [];
+      var pending = { count: 0 };
+      var done = function () {
+        var matched = 0;
+        for (var k = 0; k < index.length; k++) {
+          if (matchesExpected(index[k].rel)) matched++;
+        }
+        bootState.pickedIndex = index;
+        bootState.pickSource = "drop";
+        bootState.lastPickMatched = matched;
+        pickFlow();
+      };
+      var anyDir = false;
+      for (var t = 0; t < entries.length; t++) {
+        if (entries[t].isDirectory) anyDir = true;
+        traverseEntry(entries[t], index, pending, done);
+      }
+      // All top-level entries were plain files (nothing async pending):
+      // finalize synchronously — done only ever fires from a dir drain.
+      if (!anyDir) done();
+      return;
+    }
+    // No entry API (rare): flat fallback — treat dt.files exactly like a
+    // pick (root-level files only; a folder drop will match nothing and
+    // the checklist says to select the repository root).
+    var picked = [];
+    var flat = (dt && dt.files) ? dt.files : null;
+    if (flat) {
+      for (var j = 0; j < flat.length; j++) picked.push(flat[j]);
+    }
+    if (!picked.length) return;
+    var index2 = [];
+    var matched2 = 0;
+    for (var m = 0; m < picked.length; m++) {
+      var fl = picked[m];
+      var rel2 = (fl && fl.webkitRelativePath)
+        ? fl.webkitRelativePath
+        : ((fl && fl.name) || "");
+      if (pathIsUnsafe(rel2)) continue;
+      index2.push({ rel: rel2, file: fl });
+      if (matchesExpected(rel2)) matched2++;
+    }
+    bootState.pickedIndex = index2;
+    bootState.pickSource = "drop";
+    bootState.lastPickMatched = matched2;
+    pickFlow();
+  }
+
+  // A stray drop anywhere OUTSIDE the zone must NOT navigate the page
+  // away (browsers open dropped files by default — losing the editor).
+  function installGlobalDropGuard() {
+    function cancel(ev) {
+      ev.preventDefault();
+    }
+    document.addEventListener("dragover", cancel, false);
+    document.addEventListener("drop", cancel, false);
   }
 
   // -------------------------------------------------------------------------
@@ -1239,6 +1498,12 @@
       "#boot-panel .boot-row.boot-block { color: #8a2f1d; }\n" +
       "#boot-panel .boot-pick-note { font-size: 12.5px; color: #555555; " +
       "margin: 4px 0; }\n" +
+      "#boot-panel .boot-drop-zone { margin: 8px 0 10px; padding: 18px " +
+      "14px; border: 2px dashed #6b7690; border-radius: 6px; " +
+      "background: #f4f7fd; color: #31405e; font-size: 14px; " +
+      "text-align: center; }\n" +
+      "#boot-panel .boot-drop-zone.boot-drop-hot { border-color: " +
+      "#2e6b2e; background: #e7f4e7; color: #1e5c1e; }\n" +
       "#boot-panel .boot-pick-label, #boot-panel .boot-draft-label " +
       "{ font-size: 13px; margin-right: 8px; }\n" +
       "#boot-panel .boot-draft-hint { font-size: 12px; color: #666666; " +
@@ -1304,7 +1569,7 @@
   // -------------------------------------------------------------------------
 
   ED.load = {
-    version: "0.2.0", // 0.2.0 = the 07.1-11 direct-load rework (XHR primary)
+    version: "0.3.0", // 0.3.0 = round-3: corrected file:// policy record + drag-and-drop one-gesture fallback
     MANIFEST_PATH: MANIFEST_PATH,
     STORY_DIR_PREFIX: STORY_DIR_PREFIX,
     EXPECTED: EXPECTED,                    // the fixed expected-path list
@@ -1333,6 +1598,8 @@
     mountChrome();
     injectLoadCss();
     mountFolderPick();
+    mountDropZone();
+    installGlobalDropGuard();
     mountDraftInput();
     boot();
   });

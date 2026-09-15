@@ -78,18 +78,21 @@ textarea.json-area { width: 100%; min-height: 120px; resize: vertical; }
   <div id="boot-draft-mount"><!-- 10_load.js mounts the draft-reload file input here --></div>
   <div id="boot-help-copy">
     <p>This editor is a single offline HTML page with zero dependencies and no
-       server. It loads the live game data from sub-directories of the folder
-       that contains this HTML file. The expected layout is:</p>
+       server. When the page is served over http(s) it loads the live game
+       data from sub-directories of its own folder automatically. Opened as a
+       local file, current Firefox and Chrome block automatic reads, so one
+       gesture loads everything: drag the repository folder onto the boot
+       panel, or pick it once. The expected layout is:</p>
     <pre class="json-area">data/story_glucose/*.json   (manifest.json + the story files it lists)
 data/citations.json
 data/sources.json
 rpg/data/edits.json
 rpg/data/cast.json</pre>
-    <p>The folder-pick loader works from any location: select the repository
-       root (or any parent folder of it) and the editor matches these expected
-       paths itself. If you moved or copied this HTML file elsewhere, the data
-       sub-directories above must sit below that copy for the automatic probe;
-       otherwise use the folder pick.</p>
+    <p>The drag-and-drop and folder-pick loaders work from any location:
+       select the repository root (or any parent folder of it) and the editor
+       matches these expected paths itself. If you moved or copied this HTML
+       file elsewhere, the data sub-directories above must sit below that
+       copy for the automatic probe; otherwise drag or pick the folder.</p>
   </div>
 </section>
 
@@ -136,7 +139,7 @@ rpg/data/cast.json</pre>
 <footer id="statusbar">
   <span id="statusbar-dirty">no data loaded</span>
   <span id="statusbar-undo">undo 0 / redo 0</span>
-  <span id="statusbar-state">offline editor &mdash; data loads from sub-directories of this HTML's folder</span>
+  <span id="statusbar-state">offline editor &mdash; auto-loads when served; on a local file, drag the repository folder onto the boot panel</span>
 </footer>
 
 <!-- ASSET SLOT: the generator replaces the single marker comment below with
