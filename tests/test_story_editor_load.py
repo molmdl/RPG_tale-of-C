@@ -1,7 +1,10 @@
 """Structural load-layer test battery for the Phase 7.1 editor boot asset
 (07.1-07 Task 2; re-pinned by the 07.1-11 fix-forward; re-pinned again by
 the round-3 file:// policy correction -- debug session
-.planning/debug/story-editor-file-load.md).
+.planning/debug/story-editor-file-load.md -- and once more by the round-4
+fix-forward: the one-click folder PICK removed per the user verdict
+"drag-and-drop working, upload button not working ... maybe better remove
+the upload button").
 
 Root causes fixed across the rounds:
 
@@ -29,14 +32,15 @@ Root causes fixed across the rounds:
 2. The round-3 ONE-GESTURE fallback: a drag-and-drop folder zone
    (DataTransferItem.webkitGetAsEntry recursive traversal -- readEntries
    BATCHES discipline; File objects fetched ONLY for the WANTED paths;
-   .git enumerated by name only) alongside the one-click webkitdirectory
-   pick; a document-level dragover/drop canceler keeps stray drops from
-   navigating the page away. (test_dragdrop_folder_zone)
-3. The folder-pick handler cleared input.value = "" while still holding
-   the LIVE input.files list ("even upload not working at all"); File
-   objects are snapshotted BEFORE the clear.
-   (test_pick_snapshot_before_clear)
-4. The boot ceremony (long static explanation wall + probe-then-pick
+   .git enumerated by name only); a document-level dragover/drop
+   canceler keeps stray drops from navigating the page away.
+   (test_dragdrop_folder_zone)
+3. (round 4) The one-click folder pick (the round-2 snapshot-before-clear
+   repair included) was user-verified DEAD in the real browser across
+   three repair rounds while drag-and-drop loaded the same tree in both
+   Firefox and Chrome -- REMOVED per the user directive ("maybe better
+   remove the upload button"). (test_pick_path_removed)
+4. The boot ceremony (long static explanation wall + probe-then-fallback
    choreography) is reduced to the simple model the user demanded; the
    copy now tells the truth about the default (auto reads blocked,
    one gesture loads everything). (test_simplified_boot_copy)
@@ -238,12 +242,13 @@ class TestLoadAssetStructure(unittest.TestCase):
         self.assertIn(
             "function pathIsUnsafe(", self.src,
             "the guards must live in one pathIsUnsafe helper")
-        # Guard-then-match order inside the pick handler: unsafe paths are
-        # rejected BEFORE any matching/reading decision.
-        handler_start = self.src.find("function onFolderPicked(")
-        self.assertGreaterEqual(handler_start, 0, "pick handler missing")
-        guard_i = self.src.find("pathIsUnsafe(rel)", handler_start)
-        match_i = self.src.find("matchesExpected(rel)", handler_start)
+        # Guard-then-match order inside the drop handler (the flat-fallback
+        # branch): unsafe paths are rejected BEFORE any matching/reading
+        # decision.
+        handler_start = self.src.find("function onDrop(")
+        self.assertGreaterEqual(handler_start, 0, "drop handler missing")
+        guard_i = self.src.find("pathIsUnsafe(rel2)", handler_start)
+        match_i = self.src.find("matchesExpected(rel2)", handler_start)
         self.assertGreater(guard_i, 0, "the guard must run in the handler")
         self.assertGreater(match_i, 0, "the match must run in the handler")
         self.assertLess(
@@ -319,8 +324,8 @@ class TestLoadAssetStructure(unittest.TestCase):
             "the round-3 empirical verdict must be pinned: default "
             "Firefox 155 permits NO programmatic file reads from file://")
         self.assertIn(
-            'version: "0.3.0"', self.src,
-            "the round-3 rework must bump EDITOR.load to 0.3.0")
+            'version: "0.4.0"', self.src,
+            "the round-4 pick-removal rework must bump EDITOR.load to 0.4.0")
         # The green auto-load banner survives (the zero-click success state
         # where reads ARE permitted: http(s), the Chrome flag, a pref flip).
         self.assertIn(
@@ -338,9 +343,9 @@ class TestLoadAssetStructure(unittest.TestCase):
         objects are fetched ONLY for the WANTED paths (the whole tree is
         enumerated by name only); the drop completes through the SAME
         pickFlow with pickSource "drop" (dropped-folder wording); the
-        gesture halves are mounted at init; and a document-level
-        dragover/drop canceler keeps stray drops from navigating away."""
-        # The zone + its wiring, mounted at init with the pick panel.
+        fallback is mounted at init; and a document-level dragover/drop
+        canceler keeps stray drops from navigating away."""
+        # The zone + its wiring, mounted at init with the fallback panel.
         self.assertIn(
             "boot-drop-zone", self.src,
             "the drag-and-drop zone element is missing")
@@ -355,6 +360,9 @@ class TestLoadAssetStructure(unittest.TestCase):
             "the stray-drop navigation guard is missing")
         init_i = self.src.find("ED.init(function () {")
         self.assertGreaterEqual(init_i, 0, "the load init is missing")
+        self.assertGreater(
+            self.src.find("mountFolderPick();", init_i), init_i,
+            "the fallback panel wrap must still be mounted at init")
         mount_i = self.src.find("mountDropZone();", init_i)
         guard_i = self.src.find("installGlobalDropGuard();", init_i)
         self.assertGreater(
@@ -420,37 +428,46 @@ class TestLoadAssetStructure(unittest.TestCase):
             "Data loaded from the dropped folder", self.src,
             "the dropped-folder success banner phrase is required")
         self.assertIn(
-            '"dropped"', self.src,
-            "the checklist/blocked copy must name the dropped gesture")
+            "you dropped", self.src,
+            "the checklist blocked-copy must name the dropped gesture "
+            "('expected under the folder you dropped...')")
 
     # ------------------------------------------------------------------
-    # 4b. The folder-pick live-FileList fix (07.1-11)
+    # 4b. The one-click folder pick is GONE (round-4 fix-forward)
     # ------------------------------------------------------------------
 
-    def test_pick_snapshot_before_clear(self):
-        """The pick handler snapshots the File objects into a plain array
-        BEFORE clearing input.value: setting input.value = "" empties a
-        LIVE input.files list, and the original code checked files.length
-        after the clear -- silently returning on Firefox (the 'even upload
-        not working at all' defect)."""
-        handler_start = self.src.find("function onFolderPicked(")
-        self.assertGreaterEqual(handler_start, 0, "pick handler missing")
-        snap_i = self.src.find("picked.push(files[j])", handler_start)
-        self.assertGreater(
-            snap_i, 0,
-            "the handler must snapshot files[j] into a plain array")
-        clear_i = self.src.find('input.value = ""', handler_start)
-        self.assertGreater(clear_i, 0, "the input re-pick clear is missing")
-        self.assertLess(
-            snap_i, clear_i,
-            "the snapshot must happen BEFORE input.value is cleared (a "
-            "live FileList empties with the clear)")
-        # The post-clear iteration must use the snapshot, not the live list.
-        loop_i = self.src.find("picked.length", clear_i)
-        self.assertGreater(
-            loop_i, clear_i,
-            "the path walk must iterate the snapshot (picked[...]), not "
-            "the possibly-emptied live list")
+    def test_pick_path_removed(self):
+        """The one-click folder pick (including its round-2 snapshot fix)
+        was removed per the user verdict -- 'drag-and-drop working, upload
+        button not working ... maybe better remove the upload button'.
+        The pick path is unrecoverable by accident: no directory-select
+        file input, no pick handler, no pick-side machinery tokens, and
+        the drop path is the ONLY gesture beside the direct probe."""
+        self.assertNotIn(
+            "webkitdirectory", self.src,
+            "no directory-select file input may remain (the pick is gone)")
+        self.assertNotIn(
+            "onFolderPicked", self.src,
+            "the pick change handler must be gone")
+        self.assertNotIn(
+            "boot-folder-input", self.src,
+            "the pick input element id must be gone")
+        self.assertNotIn(
+            "Select your repository folder", self.src,
+            "the pick label copy must be gone")
+        self.assertNotIn(
+            "Data loaded from the picked folder", self.src,
+            "the picked-folder banner phrase must be gone")
+        self.assertNotIn(
+            'bootState.pickSource = "pick"', self.src,
+            "no code path may mark the source 'pick'")
+        # The drop path is intact as the one gesture.
+        self.assertIn(
+            "Drag your repository folder here", self.src,
+            "the drop zone affordance must survive the pick removal")
+        self.assertIn(
+            "Data loaded from the dropped folder", self.src,
+            "the dropped-folder banner phrase must survive")
 
     # ------------------------------------------------------------------
     # 4c. Simplified boot copy (the 'too much ceremony' verdict)
@@ -618,11 +635,14 @@ class TestLoadAssetStructure(unittest.TestCase):
             markers.index("00_core.js"), markers.index("10_load.js"),
             "the load asset must come after the core asset (EDITOR contract)")
         block = _asset_block(self.html)
-        for needle in ("webkitdirectory", "matchesExpected", "readAsText",
+        for needle in ("boot-drop-zone", "matchesExpected", "readAsText",
                        "Load draft", ".json,application/json",
                        "XMLHttpRequest", "webkitGetAsEntry"):
             self.assertIn(needle, block,
                           "emitted load block lacks %r" % needle)
+        self.assertNotIn("webkitdirectory", block,
+                         "the pick input must be gone from the emitted "
+                         "load block too")
         # The block must close before the shell's bootstrap (the LAST
         # classic script block).
         block_close = self.html.find("</script>",

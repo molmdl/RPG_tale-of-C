@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RPG: Tale of C — Story Node Editor</title>
-<!-- inlined assets (sorted): 00_core.js (29315 bytes) | 05_json.js (22337 bytes) | 10_load.js (65055 bytes) | 20_validate.js (58503 bytes) | 30_graph.js (43583 bytes) | 40_form.js (45617 bytes) | 42_choices.js (54020 bytes) | 43_onenter.js (57278 bytes) | 45_lifecycle.js (102079 bytes) | 50_editscast.js (91751 bytes) | 60_trace.js (25956 bytes) | 70_claims.js (42276 bytes) | 80_save.js (46723 bytes) | 90_boot.js (36419 bytes) -->
+<!-- inlined assets (sorted): 00_core.js (29315 bytes) | 05_json.js (22337 bytes) | 10_load.js (62555 bytes) | 20_validate.js (58503 bytes) | 30_graph.js (43583 bytes) | 40_form.js (45617 bytes) | 42_choices.js (54020 bytes) | 43_onenter.js (57278 bytes) | 45_lifecycle.js (102079 bytes) | 50_editscast.js (91751 bytes) | 60_trace.js (25956 bytes) | 70_claims.js (42276 bytes) | 80_save.js (46723 bytes) | 90_boot.js (36419 bytes) -->
 <style>
 /* ==========================================================================
    Structural layout ONLY (flex/grid skeleton, tab bar, monospace JSON
@@ -67,7 +67,7 @@ textarea.json-area { width: 100%; min-height: 120px; resize: vertical; }
 
 <header id="editor-header">
   <h1>RPG: Tale of C — Story Node Editor</h1>
-  <span id="generated-at">generated 2026-09-15T04:04:27Z &middot; offline &amp; dependency-free</span>
+  <span id="generated-at">generated 2026-09-17T18:33:33Z &middot; offline &amp; dependency-free</span>
 </header>
 
 <section id="boot-panel">
@@ -1531,15 +1531,18 @@ rpg/data/cast.json</pre>
 
 </script>
 <script>
-/* asset: 10_load.js (65055 bytes) */
+/* asset: 10_load.js (62555 bytes) */
 /* ==========================================================================
  * 10_load.js — the boot/load layer: DIRECT read on boot (open-and-go where
  * the environment permits) -> ONE-GESTURE fallback (drag the repo folder
- * onto the panel, or one-click folder pick) -> checklist ->
- * EDITOR.setBundle, plus the single-file draft reload. Owner plan 07.1-07;
- * direct-load rework = the 07.1-11 fix-forward; transport-policy
- * correction + drag-and-drop fallback = the 07.1-11 round-3 fix-forward
- * (debug session .planning/debug/story-editor-file-load.md).
+ * onto the panel) -> checklist -> EDITOR.setBundle, plus the single-file
+ * draft reload. Owner plan 07.1-07; direct-load rework = the 07.1-11
+ * fix-forward; transport-policy correction + drag-and-drop fallback = the
+ * 07.1-11 round-3 fix-forward (debug session
+ * .planning/debug/story-editor-file-load.md); the one-click folder PICK
+ * was REMOVED in the round-4 fix-forward (user verdict: drag-and-drop
+ * works, "upload button not working ... maybe better remove the upload
+ * button" — drag-and-drop covers BOTH Firefox and Chrome).
  *
  * FILE OWNERSHIP: this asset belongs to plan 07.1-07. It owns #boot-panel.
  * Never edit another plan's asset (00_core.js = 07.1-04, 05_json.js =
@@ -1594,24 +1597,25 @@ rpg/data/cast.json</pre>
  *      it is exactly right wherever reads ARE permitted, costs nothing
  *      where they are not, and the watchdog still guards hangs.
  *   3. ONE GESTURE FALLBACK (the default on stock browsers). On a probe
- *      miss the editor reveals ONE panel with TWO equally-simple
- *      gestures, both landing in the same matching + checklist flow:
- *        a. DRAG-AND-DROP: drag the repository folder (or any parent of
- *           it) onto the drop zone. DataTransferItem.webkitGetAsEntry()
- *           recursion builds the relative-path index (readEntries returns
- *           BATCHES — it is re-called until an empty batch). File objects
- *           are fetched ONLY for the WANTED paths via entry.file() — the
- *           whole dropped tree (.git included) is enumerated by NAME
- *           only, never materialized or read. The "/"-boundary suffix
- *           matcher treats entry.fullPath exactly like the pick's
- *           File.webkitRelativePath (a dropped parent of the repo works;
- *           a child folder matches nothing by design — the checklist then
- *           says "select the repository root"). A document-level
- *           dragover/drop canceler keeps a stray drop from navigating
- *           the page away.
- *        b. ONE-CLICK FOLDER PICK: <input type="file" webkitdirectory
- *           multiple> — unchanged from 07.1-11 (snapshot-before-clear
- *           fix preserved).
+ *      miss the editor reveals ONE panel with ONE gesture:
+ *        DRAG-AND-DROP: drag the repository folder (or any parent of it)
+ *        onto the drop zone. DataTransferItem.webkitGetAsEntry()
+ *        recursion builds the relative-path index (readEntries returns
+ *        BATCHES — it is re-called until an empty batch). File objects
+ *        are fetched ONLY for the WANTED paths via entry.file() — the
+ *        whole dropped tree (.git included) is enumerated by NAME only,
+ *        never materialized or read. The "/"-boundary suffix matcher
+ *        treats entry.fullPath exactly like a pick's
+ *        File.webkitRelativePath (a dropped parent of the repo works; a
+ *        child folder matches nothing by design — the checklist then
+ *        says "select the repository root"). A document-level
+ *        dragover/drop canceler keeps a stray drop from navigating the
+ *        page away. (The one-click directory-select file INPUT — the
+ *        OTHER half of this fallback in v0.3.0 — was REMOVED
+ *        in the round-4 fix-forward: user-verified dead in their real
+ *        browser after three repair rounds, and drag-and-drop covers the
+ *        same ground in both Firefox and Chrome; the round-2
+ *        snapshot-before-clear fix rides with it.)
  *   4. FOUND/MISSING CHECKLIST. One row per expected path with ✓/✗ and the
  *      friendly hint; the story-file rows are derived FROM the loaded
  *      manifest (manifest.files — never hard-listed before it loads).
@@ -1621,7 +1625,7 @@ rpg/data/cast.json</pre>
  *   5. DRAFT RELOAD. A single <input type="file" accept=".json,...">
  *      restores a downloaded draft bundle {version, saved_at, bundle,
  *      dirty, undo_meta, fingerprints} via EDITOR.setBundle —
- *      self-contained, no folder re-pick needed. When folder-picked raw
+ *      self-contained, no folder re-pick needed. When dropped-folder raw
  *      texts are also available, the draft's stored per-file fingerprints
  *      are compared against them (32-bit FNV-1a — a drift DETECTOR, not
  *      security) and a mismatch warns "underlying files changed since
@@ -1629,19 +1633,11 @@ rpg/data/cast.json</pre>
  *      layer; this asset provides the load + the
  *      EDITOR.load.onDraftLoaded hook point.
  *
- * PICK-HANDLER FIX (07.1-11, the "even upload not working at all"
- * defect): the original handler cleared input.value = "" while still
- * holding the LIVE input.files list. Clearing the selection empties a
- * live list, so the captured reference read length 0 and the handler
- * silently returned before doing anything — the pick appeared completely
- * dead on Firefox. The File objects are now snapshotted into a plain
- * array BEFORE the clear (File objects themselves stay valid).
- *
- * SECURITY GUARDS (Pitfall 3c): the folder pick hands the editor the
- * ENTIRE picked tree including .git — paths are filtered against the
- * fixed expected list and only matched files are read; any path that
- * contains "..", a drive letter, or a leading "/" is rejected outright.
- * .git and sibling files are never enumerated into reads.
+ * SECURITY GUARDS (Pitfall 3c): a dropped/picked folder hands the editor
+ * the ENTIRE tree including .git — paths are filtered against the fixed
+ * expected list and only matched files are read; any path that contains
+ * "..", a drive letter, or a leading "/" is rejected outright. .git and
+ * sibling files are never enumerated into reads.
  *
  * STYLE: one classic script, one IIFE, ES5 only (module scripts fail
  * under file:// CORS). Zero dependencies: FileReader + XMLHttpRequest
@@ -1728,16 +1724,17 @@ rpg/data/cast.json</pre>
     watchdog: null,       // probe-hang timer (never a dead "loading…" state)
     pickRevealed: false,  // the folder-pick panel is visible
     pickNoteSet: false,
-    pickedIndex: null,    // last pick/drop: [{rel, file}] or [{rel, entry}]
-    pickSource: null,     // "pick" | "drop" — which gesture built the index
-    lastPickMatched: 0,   // how many of the 5 expected paths the pick matched
-    folderRawByFname: null, // last PICK-completed {fname: rawText} — the
+    pickedIndex: null,    // last drop: [{rel, file}] or [{rel, entry}]
+    pickSource: null,     // "drop" — the gesture that built the index
+                          // (the one-click "pick" was REMOVED round 4)
+    lastPickMatched: 0,   // how many of the 5 expected paths the drop matched
+    folderRawByFname: null, // last DROP-completed {fname: rawText} — the
                             // fingerprint baseline for draft staleness
     draft: null,          // the active draft object (if any)
     draftActive: false,   // the session bundle came from a draft file
     loaded: false,        // a bundle reached EDITOR.setBundle
     collapsed: false,     // boot panel details collapsed (after load)
-    lastSource: null      // "direct" | "pick" | "draft"
+    lastSource: null      // "direct" | "drop" | "draft"
   };
 
   var draftLoadedFns = [];
@@ -1807,7 +1804,7 @@ rpg/data/cast.json</pre>
   }
 
   // -------------------------------------------------------------------------
-  // Manifest parsing (shared by the direct-read path and the pick path).
+  // Manifest parsing (shared by the direct-read path and the drop path).
   // -------------------------------------------------------------------------
 
   function parseManifest(text) {
@@ -1937,7 +1934,7 @@ rpg/data/cast.json</pre>
   }
 
   // -------------------------------------------------------------------------
-  // FileReader helpers (the pick path) — ES5 callbacks, no async/await.
+  // FileReader helpers (the drop path) — ES5 callbacks, no async/await.
   // -------------------------------------------------------------------------
 
   function readText(file, cb) {
@@ -2126,11 +2123,11 @@ rpg/data/cast.json</pre>
       "Automatic folder reads are blocked by default in current Firefox " +
       "and Chrome — that is expected for a locally opened page. One " +
       "gesture loads everything: drag the repository root folder (or any " +
-      "parent of it) onto the zone below, or click to pick it; the " +
-      "editor matches the expected data paths itself.");
+      "parent of it) onto the zone below; the editor matches the " +
+      "expected data paths itself.");
   }
 
-  // Reveals the folder-pick panel (idempotent). Called ONLY after the
+  // Reveals the fallback panel (idempotent). Called ONLY after the
   // direct-read probe has settled — the reveal is the fallback, never the
   // first move.
   function revealPickPanel(note) {
@@ -2154,8 +2151,7 @@ rpg/data/cast.json</pre>
     if (source === "direct") {
       return "missing (not reachable from this location)";
     }
-    var gesture = (source === "drop") ? "dropped" : "picked";
-    return "expected under the folder you " + gesture + "; did you " +
+    return "expected under the folder you dropped; did you " +
            "select the repository root?";
   }
 
@@ -2310,12 +2306,10 @@ rpg/data/cast.json</pre>
     renderChecklist(rows);
     bootState.loaded = false;
     var extra = "";
-    if ((source === "pick" || source === "drop") &&
-        bootState.lastPickMatched === 0) {
-      extra = " No expected file matched the " +
-              (source === "drop" ? "dropped" : "picked") +
-              " folder — a sub-folder (like data/) matches nothing by " +
-              "design: select the repository root.";
+    if (source === "drop" && bootState.lastPickMatched === 0) {
+      extra = " No expected file matched the dropped folder — a " +
+              "sub-folder (like data/) matches nothing by design: " +
+              "select the repository root.";
     }
     var items = [{
       text: "Editor cannot start — " + blockers.length +
@@ -2329,10 +2323,10 @@ rpg/data/cast.json</pre>
     showBanners(items);
     if (source === "direct") {
       // Direct reads reach the folder but the data is broken/absent there —
-      // the picker is the universal self-service fix, reveal it too.
+      // the drop zone is the universal self-service fix, reveal it too.
       revealPickPanel("Some data files are missing or unreadable from " +
-                      "this location — you can pick the repository " +
-                      "folder instead.");
+                      "this location — drag the repository folder onto " +
+                      "the zone below instead.");
     }
   }
 
@@ -2352,21 +2346,21 @@ rpg/data/cast.json</pre>
       cast: parsed.cast,            // null on degrade (viewer convention)
       order: order
     };
-    if (source === "pick" || source === "drop") {
+    if (source === "drop") {
       // The fresh folder texts become the fingerprint baseline for the
-      // draft staleness comparison (both pick orders are supported).
+      // draft staleness comparison.
       bootState.folderRawByFname = rawByFname;
     }
 
-    if (bootState.draftActive && (source === "pick" || source === "drop")) {
-      // A draft session is active: the re-pick must NOT silently discard it
+    if (bootState.draftActive && source === "drop") {
+      // A draft session is active: the re-drop must NOT silently discard it
       // (RESEARCH-UI step 4 — "if the folder is also re-picked, fingerprint
       // comparison warns"). Refresh the baseline, compare, warn; reload the
-      // page to start over from the picked folder instead.
+      // page to start over from the dropped folder instead.
       var stale = compareDraftToFolderRaw();
       var items = [{
-        text: "Folder picked — still showing the loaded draft. Reload the " +
-              "page to start from the picked folder instead.",
+        text: "Folder dropped — still showing the loaded draft. Reload " +
+              "the page to start from the dropped folder instead.",
         kind: "ok"
       }];
       if (stale.length) {
@@ -2402,10 +2396,8 @@ rpg/data/cast.json</pre>
     var msg;
     if (source === "direct") {
       msg = "Data auto-detected in sub-directories"; // the green banner
-    } else if (source === "drop") {
-      msg = "Data loaded from the dropped folder";
     } else {
-      msg = "Data loaded from the picked folder";
+      msg = "Data loaded from the dropped folder";
     }
     msg += " — " + order.length + " story file(s) + manifest + edits" +
       (parsed.citations ? " + citations" : "") +
@@ -2419,12 +2411,10 @@ rpg/data/cast.json</pre>
     setSummary("Loaded " + order.length + " story file(s) from " +
                (source === "direct"
                  ? "direct reads (sub-directories detected)"
-                 : (source === "drop"
-                    ? "the dropped folder"
-                    : "the picked folder")) +
+                 : "the dropped folder") +
                (warnings.length
-                 ? " — " + warnings.length + " warning(s)"
-                 : "") + ".");
+                  ? " — " + warnings.length + " warning(s)"
+                  : "") + ".");
     collapseBootPanel();
   }
 
@@ -2443,8 +2433,8 @@ rpg/data/cast.json</pre>
   // (security.fileuri.strict_origin_policy=true now denies EVERY file://
   // XHR — sync probes thrown NetworkError on existing files — and hides
   // iframe DOMs). So on stock Firefox/Chrome double-click the probe misses
-  // in milliseconds and the drag-and-drop / folder-pick panel takes over —
-  // expected, never an error state, never silent. Where reads ARE
+  // in milliseconds and the drag-and-drop panel takes over — expected,
+  // never an error state, never silent. Where reads ARE
   // permitted (http(s) serving, Chrome --allow-file-access-from-files —
   // verified end-to-end — or a strict_origin_policy=false flip), the
   // direct read succeeds with ZERO clicks and the green banner.
@@ -2456,28 +2446,29 @@ rpg/data/cast.json</pre>
     setProbeStatus("Looking for the data files in this folder…");
     if (typeof XMLHttpRequest === "undefined") {
       fallbackToPickPanel(
-        "This browser exposes no XMLHttpRequest — using the folder picker " +
-        "as the load path.");
+        "This browser exposes no XMLHttpRequest — using the drag-and-drop " +
+        "zone as the load path.");
       return;
     }
     // Never a dead "loading…" state: if the direct read has not settled
-    // within 4 s (a hung handler), reveal the picker anyway.
+    // within 4 s (a hung handler), reveal the fallback anyway.
     bootState.watchdog = window.setTimeout(function () {
       bootState.watchdog = null;
       if (!bootState.probeSettled) {
         revealPickPanel("The automatic check is taking unusually long — " +
-                        "use the folder picker below instead of waiting.");
+                        "drag the repository folder onto the zone below " +
+                        "instead of waiting.");
       }
     }, 4000);
 
     xhrText(MANIFEST_PATH, function (manifestText) {
       settleProbe();
       if (manifestText == null) {
-        showFolderPickPanel(); // direct reads blocked here — expected in
-        return;                // environments without the same-dir policy
+        showFolderPickPanel(); // direct reads blocked here — the expected
+        return;                // path on stock browsers
       }
       // Direct read SUCCESS: auto-load the full set and complete (the
-      // shared completion path — same as the pick path).
+      // shared completion path — same as the drop path).
       setProbeStatus("Data files found — auto-loading…");
       var texts = {};
       texts[MANIFEST_PATH] = manifestText;
@@ -2499,28 +2490,33 @@ rpg/data/cast.json</pre>
     }
   }
 
-  // The direct read missed: reveal the one-gesture panel (drag-and-drop
-  // zone + folder pick). THE expected path on stock Firefox/Chrome
+  // The direct read missed: reveal the one-gesture panel (the
+  // drag-and-drop zone). THE expected path on stock Firefox/Chrome
   // double-click (file:// reads are blocked by default in both — see the
   // header record). Never an error state, never silent.
   function showFolderPickPanel() {
     setProbeStatus("Direct reads are blocked here — drag the repository " +
-                   "folder onto the zone below, or pick it (one click).");
+                   "folder onto the zone below (one gesture).");
     revealPickPanel(null);
   }
 
   // Guard-path wrapper (no XMLHttpRequest): defined after boot so the
-  // probe textually precedes every reference to the pick-panel reveal.
+  // probe textually precedes every reference to the panel reveal.
   function fallbackToPickPanel(reason) {
     setProbeStatus(reason);
     revealPickPanel(null);
   }
 
   // -------------------------------------------------------------------------
-  // The folder pick: <input type="file" webkitdirectory multiple> — half of
-  // the ONE-GESTURE fallback (the other half is the drag-and-drop zone
-  // below it). THE expected path on stock Firefox AND Chrome file:// —
-  // both block programmatic reads by default (see the header record).
+  // The fallback panel wrap (#boot-pick-wrap): the note + the drag-and-drop
+  // zone (mounted into it by mountDropZone below). THE expected path on
+  // stock Firefox AND Chrome file:// — both block programmatic reads by
+  // default (see the header record). The one-click folder PICK input
+  // (a directory-select file input) used to live here — REMOVED in
+  // the round-4 fix-forward per the user verdict ("upload button not
+  // working... maybe better remove the upload button"): user-verified dead
+  // in their real browser across three repair rounds while drag-and-drop
+  // loads the same tree in both Firefox and Chrome.
   // -------------------------------------------------------------------------
 
   function mountFolderPick() {
@@ -2534,21 +2530,7 @@ rpg/data/cast.json</pre>
     note.id = "boot-pick-note";
     note.className = "boot-pick-note";
 
-    var label = document.createElement("label");
-    label.className = "boot-pick-label";
-    label.setAttribute("for", "boot-folder-input");
-    label.textContent = "Select your repository folder:";
-
-    var input = document.createElement("input");
-    input.type = "file";
-    input.id = "boot-folder-input";
-    input.setAttribute("webkitdirectory", "webkitdirectory");
-    input.setAttribute("multiple", "multiple");
-    input.addEventListener("change", onFolderPicked);
-
     wrap.appendChild(note);
-    wrap.appendChild(label);
-    wrap.appendChild(input);
     mount.appendChild(wrap);
   }
 
@@ -2602,51 +2584,12 @@ rpg/data/cast.json</pre>
     }
   }
 
-  function onFolderPicked(ev) {
-    var input = ev.target;
-    var files = (input && input.files) ? input.files : null;
-    // SNAPSHOT FIRST (07.1-11 fix — the "even upload not working at all"
-    // defect): clearing the input's value (to allow re-picking the same
-    // folder later) empties the selection, and in browsers where
-    // input.files is a LIVE list the captured reference empties with it.
-    // The original code cleared the input and THEN checked files.length —
-    // which silently returned on Firefox, so the picked folder appeared
-    // completely dead. Snapshot the File objects into a plain array
-    // BEFORE the clear; the File objects themselves stay valid afterwards.
-    var picked = [];
-    if (files) {
-      for (var j = 0; j < files.length; j++) picked.push(files[j]);
-    }
-    if (input) input.value = ""; // allow re-picking the same folder later
-    if (!picked.length) return;
-    // SECURITY (Pitfall 3c): the FileList contains the ENTIRE picked tree
-    // including .git. We compare PATHS against the fixed expected list and
-    // read ONLY matched files with FileReader — .git and sibling files are
-    // never enumerated into reads. Unsafe path shapes are rejected outright.
-    var index = [];
-    var matched = 0;
-    for (var i = 0; i < picked.length; i++) {
-      var f = picked[i];
-      var rel = (f && f.webkitRelativePath)
-        ? f.webkitRelativePath
-        : ((f && f.name) || "");
-      if (pathIsUnsafe(rel)) continue;
-      index.push({ rel: rel, file: f });
-      if (matchesExpected(rel)) matched++;
-    }
-    bootState.pickedIndex = index;
-    bootState.pickSource = "pick";
-    bootState.lastPickMatched = matched;
-    pickFlow();
-  }
-
-  // The shared completion flow for BOTH gestures (the folder pick and the
-  // drag-and-drop): resolve the manifest, derive the story paths from it,
-  // materialize File objects for the WANTED paths only, read them, and
-  // hand the texts to completeFromTexts. bootState.pickSource
-  // ("pick" | "drop") drives the user-facing wording.
+  // The shared completion flow: resolve the manifest, derive the story
+  // paths from it, materialize File objects for the WANTED paths only,
+  // read them, and hand the texts to completeFromTexts.
+  // bootState.pickSource ("drop") drives the user-facing wording.
   function pickFlow() {
-    var source = bootState.pickSource || "pick";
+    var source = bootState.pickSource || "drop";
     var manifestItem = findItem(MANIFEST_PATH);
     if (!manifestItem) {
       // No manifest in the gesture: the story files are unknown without
@@ -3038,8 +2981,8 @@ rpg/data/cast.json</pre>
       "text-align: center; }\n" +
       "#boot-panel .boot-drop-zone.boot-drop-hot { border-color: " +
       "#2e6b2e; background: #e7f4e7; color: #1e5c1e; }\n" +
-      "#boot-panel .boot-pick-label, #boot-panel .boot-draft-label " +
-      "{ font-size: 13px; margin-right: 8px; }\n" +
+      "#boot-panel .boot-draft-label { font-size: 13px; " +
+      "margin-right: 8px; }\n" +
       "#boot-panel .boot-draft-hint { font-size: 12px; color: #666666; " +
       "margin-left: 8px; }\n" +
       "#boot-panel.boot-loaded { background: #f7fbf7; }\n");
@@ -3103,7 +3046,7 @@ rpg/data/cast.json</pre>
   // -------------------------------------------------------------------------
 
   ED.load = {
-    version: "0.3.0", // 0.3.0 = round-3: corrected file:// policy record + drag-and-drop one-gesture fallback
+    version: "0.4.0", // 0.4.0 = round-4: the one-click folder PICK removed per the user verdict (drag-and-drop is the one gesture); probe + drop unchanged
     MANIFEST_PATH: MANIFEST_PATH,
     STORY_DIR_PREFIX: STORY_DIR_PREFIX,
     EXPECTED: EXPECTED,                    // the fixed expected-path list
@@ -3125,7 +3068,7 @@ rpg/data/cast.json</pre>
 
   // -------------------------------------------------------------------------
   // Init: mount the chrome + inputs, then run the direct read (probe FIRST;
-  // the pick panel is revealed only by the miss path).
+  // the fallback panel is revealed only by the miss path).
   // -------------------------------------------------------------------------
 
   ED.init(function () {
