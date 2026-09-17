@@ -10,7 +10,9 @@ verdict: RESOLVED — root cause CONFIRMED empirically on the user's own Firefox
 
 ## Current Focus
 
-COMPLETE. Root cause confirmed → fix landed (10_load.js v0.3.0 + shell copy + battery re-pin + regenerated HTML) → all gates green (suite 600 OK, lint 0, headless Chrome r3-plain/r3-allow/r3-drop, Firefox-155 real-page screenshot) → committed. Remaining: the user's ONE-GESTURE re-verification (double-click → drag RPG_tale-of-C folder onto the drop zone).
+COMPLETE. Root cause confirmed → fix landed (10_load.js v0.3.0 + shell copy + battery re-pin + regenerated HTML) → all gates green → committed.
+
+ROUND-3 USER VERDICT (2026-09-18, real browser): "drag-and-drop working, upload button not working. maybe better remove the upload button." — the drop path is user-verified WORKING (closing the loop on the r3-drop synthetic evidence); the one-click pick failed AGAIN (third real-world strike against a synthetic-harness green). FOLLOW-UP (10_load.js v0.4.0, commit e184e5e): the entire pick path REMOVED per the user's explicit directive — drag-and-drop is the ONE gesture; probe + drop + checklist + draft reload intact; battery re-pinned (pick-absence asserted); suite 600 OK; lint exit 0; story_editor.html regenerated (14 assets, 728,006 bytes). Post-mortem: the pick's third failure was NOT root-caused — the synthetic pick harness reproduced the fixed handler faithfully, so the real-world cause remains an unidentified browser-side pick semantic; removal per directive supersedes further diagnosis.
 
 ## Symptoms
 
